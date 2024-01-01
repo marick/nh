@@ -4,7 +4,7 @@ Exploring programming in a style inspired by ecological and embodied cognitive s
 A summary of the project can be found in the About page of the [project-specific blog](https://nh.oddly-influenced.dev/).
 
 The rationale for the project is laid out in a series of podcast episodes (all have transcripts):
-* [Excerpt: Concepts without Categories](https://podcast.oddly-influenced.dev/episodes/excerpt-concepts-without-categories)
+* [Excerpt: concepts without categories](https://podcast.oddly-influenced.dev/episodes/excerpt-concepts-without-categories)
 * [The offloaded brain, part 1: behavior](https://podcast.oddly-influenced.dev/episodes/e41-the-offloaded-brain-part-1-behavior)
 * [The offloaded brain, part 2: applications](https://podcast.oddly-influenced.dev/episodes/e42-the-offloaded-brain-part-2-applications)
 * [The offloaded brain, part 3: dynamical systems](https://podcast.oddly-influenced.dev/episodes/e43-the-offloaded-brain-part-3-dynamical-systems)
