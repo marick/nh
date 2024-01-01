@@ -1,5 +1,5 @@
 # nh
-Exploring programming in a style inspired by ecological and embodied cognitive science
+Exploring programming in a style inspired by ecological and embodied cognitive science.
 
 A summary of the project can be found in the About page of the [project-specific blog](https://nh.oddly-influenced.dev/).
 
