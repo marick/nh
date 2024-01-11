@@ -16,9 +16,9 @@ defmodule AppAnimal do
   def handle_call({:focus_on_paragraph, text, cursor}, _from, state) do
     paragraph_state = %{text: text, cursor: cursor}
     {:ok, paragraph} =
-      GenServer.start_link(Paragraph, paragraph_state, name: :current_paragraph)
+      GenServer.start(Paragraph, paragraph_state, name: :current_paragraph)
     {:ok, focus} =
-      GenServer.start_link(ParagraphFocus, paragraph)
+      GenServer.start(ParagraphFocus, paragraph)
     GenServer.call(:current_paragraph, {:observer, focus})
     {:reply, self(), state}
   end

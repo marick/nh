@@ -17,7 +17,7 @@ defmodule Paragraph do
 
   @impl true
   def handle_call({:add, grapheme}, _from, state) do
-    "is adding #{grapheme}" |> Logger.info
+    "is adding #{inspect grapheme}" |> Logger.info
     
     {prefix, suffix} = String.split_at(state.text, state.cursor)
     next_text = prefix <> grapheme <> suffix
@@ -25,12 +25,16 @@ defmodule Paragraph do
     next_state = %{state | text: next_text, cursor: next_cursor}
     GenServer.call(state.observer, {:added, grapheme})
 
-    Logger.info(visible_cursor(next_state))
+    Logger.info("has been modified into #{visible_cursor(next_state)}")
     {:reply, :ok, next_state}
   end
 
   def visible_cursor(%{text: text, cursor: cursor}) do
     {prefix, suffix} = String.split_at(text, cursor)
-    "'#{prefix}\u2609\u2609#{suffix}'"
+    ~s/"#{single_line(prefix)}\u2609\u2609#{single_line(suffix)}"/
+  end
+
+  def single_line(string) do
+    String.replace(string, "\n", "\\n")
   end
 end

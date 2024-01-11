@@ -5,15 +5,16 @@ defmodule ParagraphFocus do
 
   @impl true
   def init(paragraph) do
+    Logger.info("is watching now")
     {:ok, %{paragraph: paragraph, last_grapheme: ""}}
   end
 
   @impl true
   def handle_call({:added, grapheme}, _from, state) do
-    Logger.info("notices #{grapheme}")
+    Logger.info("is alerted to the new grapheme #{inspect grapheme}")
     if state.last_grapheme == "\n" && grapheme == "\n" do
       {:ok, focus} =
-        GenServer.start_link(ParagraphReworkFocus, state.paragraph)
+        GenServer.start(ParagraphReworkFocus, state.paragraph)
       GenServer.call(state.paragraph, {:observer, focus})
       {:stop, :normal, :ok, state}
     end

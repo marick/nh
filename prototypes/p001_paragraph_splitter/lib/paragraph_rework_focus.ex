@@ -5,12 +5,12 @@ defmodule ParagraphReworkFocus do
 
   @impl true
   def init(paragraph) do
-    Logger.info(inspect paragraph)
+    Logger.info("is watching now")
     {:ok, %{paragraph: paragraph}}
   end
 
   @impl true
-  def handle_call({:added, _grapheme}, _from, state) do
+  def handle_call({:added,_grapheme}, _from, state) do
     {:reply, :ok, state}
   end
 end
