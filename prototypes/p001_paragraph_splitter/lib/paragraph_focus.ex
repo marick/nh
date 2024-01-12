@@ -18,7 +18,7 @@ defmodule ParagraphFocus do
       GenServer.call(state.paragraph, {:observer, focus})
       {:stop, :normal, :ok, state}
     end
-    {:reply, :ok, %{state | last_grapheme: grapheme}}
+    {:noreply, %{state | last_grapheme: grapheme}}
   end
 
 end

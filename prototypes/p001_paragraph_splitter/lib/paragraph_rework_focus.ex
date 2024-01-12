@@ -10,7 +10,8 @@ defmodule ParagraphReworkFocus do
   end
 
   @impl true
-  def handle_cast({:added,_grapheme}, state) do
+  def handle_cast({:added,grapheme}, state) do
+    Logger.info("sees #{inspect grapheme}")
     {:reply, :ok, state}
   end
 end
