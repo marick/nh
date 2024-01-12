@@ -10,7 +10,7 @@ defmodule ParagraphReworkFocus do
   end
 
   @impl true
-  def handle_call({:added,_grapheme}, _from, state) do
+  def handle_cast({:added,_grapheme}, state) do
     {:reply, :ok, state}
   end
 end
