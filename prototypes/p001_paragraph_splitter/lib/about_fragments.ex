@@ -1,4 +1,4 @@
-defmodule ParagraphReworkFocus do
+defmodule AboutFragments do
   use GenServer
   require Logger
 

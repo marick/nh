@@ -18,7 +18,7 @@ defmodule Paragraph.Focus do
     {:ok, paragraph} =
       GenServer.start(Paragraph, paragraph_state, name: :current_paragraph)
     {:ok, focus} =
-      GenServer.start(ParagraphFocus, paragraph)
+      GenServer.start(AboutBigEdit, paragraph)
     GenServer.call(:current_paragraph, {:observer, focus})
     {:reply, self(), state}
   end
