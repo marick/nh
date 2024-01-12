@@ -2,7 +2,7 @@ defmodule MyFormat do
   def format(_level, message, _timestamp, metadata) do
     {module, _function, _arity} = Keyword.get(metadata, :mfa)
     module_name = inspect(module) |> Macro.underscore
-    [spacing_before(module_name), module_name, "|", message, "\n"]
+    [spacing_before(module_name), module_name, "  ", message, "\n"]
   end
 
   def spacing_before(module_name) do
