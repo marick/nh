@@ -1,4 +1,4 @@
-defmodule AboutBigEdit do
+defmodule About.BigEdit do
   use GenServer
   require Logger
 
@@ -14,7 +14,7 @@ defmodule AboutBigEdit do
     Logger.info("is alerted to the new grapheme #{inspect grapheme}")
     if state.last_grapheme == "\n" && grapheme == "\n" do
       {:ok, focus} =
-        GenServer.start(AboutFragments, state.paragraph)
+        GenServer.start(About.Fragments, state.paragraph)
       GenServer.call(state.paragraph, {:observer, focus})
       {:stop, :normal, :ok, state}
     end

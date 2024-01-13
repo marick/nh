@@ -4,9 +4,8 @@ defmodule Paragraph.Focus do
 
   @impl true
   def init(paragraph) do
-    Logger.info("is watching paragraph")
     {:ok, focus} =
-      GenServer.start(AboutBigEdit, paragraph)
+      GenServer.start(About.BigEdit, paragraph)
     GenServer.call(paragraph, {:observer, focus})
     {:ok, paragraph}
   end

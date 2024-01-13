@@ -17,7 +17,14 @@ defmodule Paragraph do
   end
 
   @impl true
-  def handle_call({:add, grapheme}, _from, state) do
+  def handle_call({:add, grapheme}, _from, state), 
+    do: {:reply, :ok, add(grapheme, state)}
+
+  @impl true
+  def handle_cast({:add, grapheme}, state),
+    do: {:noreply, add(grapheme, state)}
+
+  defp add(grapheme, state) do
     "is adding #{inspect grapheme}" |> Logger.info
     
     {prefix, suffix} = String.split_at(state.text, state.cursor)
@@ -27,6 +34,7 @@ defmodule Paragraph do
     GenServer.cast(state.observer, {:added, grapheme})
 
     Logger.info("has been modified into #{Cursor.pretty(next_state)}")
-    {:reply, :ok, next_state}
+    next_state
   end
+
 end

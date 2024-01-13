@@ -1,4 +1,4 @@
-defmodule AboutFragments do
+defmodule About.Fragments do
   use GenServer
   require Logger
 
