@@ -16,6 +16,7 @@ defmodule About.BigEdit do
       {:ok, focus} =
         GenServer.start(About.Fragments, state.paragraph)
       GenServer.call(state.paragraph, {:observer, focus})
+      Logger.info("is ready to stop")
       {:stop, :normal, :ok, state}
     end
     {:noreply, %{state | last_grapheme: grapheme}}
