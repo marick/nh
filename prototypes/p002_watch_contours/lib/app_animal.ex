@@ -1,22 +1,24 @@
 defmodule AppAnimal do
-  use GenServer
+  use Application
   require Logger
 
-  def start_link(opts) do
-    GenServer.start_link(__MODULE__, :ok, opts)
-  end
 
   @impl true
-  def init(:ok) do
-    state = %{text: "", cursor: 0}
-    {:ok, state}
+  def start(_type, _args) do
+    paragraph_state = %{text: "___", cursor: 1}
+    {:ok, paragraph} =
+      GenServer.start(Paragraph, paragraph_state)
+    
+    {:ok, _focus} = GenServer.start_link(Paragraph.Focus, paragraph)
+
+    # add(paragraph, "Q")
+    # add(paragraph, "\n")
+    # add(paragraph, "\n")
+    # add(paragraph, "A")
+    {:ok, self()}
   end
 
-  @impl true
-  def handle_call({:focus_on_paragraph, text, cursor}, _from, state) do
-    paragraph_state = %{text: text, cursor: cursor}
-    {:ok, _paragraph} =
-      GenServer.start_link(Paragraph, paragraph_state, name: :current_paragraph)
-    {:reply, self(), state}
-  end
+  def add(paragraph, grapheme),
+      do: GenServer.cast(paragraph, {:add, grapheme})
+
 end
