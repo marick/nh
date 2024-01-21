@@ -46,10 +46,11 @@ defmodule FeatureDetectionTest do
       input = "abc\n\n\ndef\n"
       [text1, gap, text2] = [0..2, 3..5, 6..9] = F.decompose(input) |> F.ranges
 
-
-      assert String.slice(input, text1) == "abc"
-      assert String.slice(input, gap) == "\n\n\n"
-      assert String.slice(input, text2) == "def\n"
+      # Confirm that the ranges cover the characters I expected
+      selects = run_and_assert(&(String.slice(input, &1)))
+      text1 |> selects.("abc")
+      gap   |> selects.("\n\n\n")
+      text2 |> selects.("def\n")
     end
   end
 
@@ -60,3 +61,4 @@ defmodule FeatureDetectionTest do
     |> assert_equals([text: 0..3, gap: 4..5, text: 6..13, gap: 14..16, text: 17..20])
   end
 end
+
