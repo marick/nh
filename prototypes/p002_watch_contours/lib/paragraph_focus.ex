@@ -1,22 +1,37 @@
-defmodule Paragraph.Focus do
+defmodule AppAnimal.ParagraphFocus do
   use GenServer
   require Logger
 
-  @impl true
-  def init(paragraph) do
-    will_watch_for_edges()
-    {:ok, paragraph}
-  end
+   alias AppAnimal.ParagraphFocus.{Environment, Perceptual} #, Control, Motor}
+   alias AppAnimal.TimedTaskStarter
+   alias Perceptual.EdgeDetection
+   # alias Control.{AttendToEditing, AttendToFragment}
+   # alias Motor.{MarkAsEditing, MoveFragment}
+   require Logger
+
+
+
+
+   # Client
+
+   def start_link(paragraph_state) do
+     GenServer.start_link(__MODULE__, paragraph_state)
+   end
+
+
+   # Server
 
   @impl true
-  def handle_info(:check_edges, state) do
-    Logger.info("tick")
-    will_watch_for_edges()
-    {:noreply, state}
-  end
-
-
-  def will_watch_for_edges() do
-    Process.send_after(self(), :check_edges, 2_000)
+  def init(paragraph_state) do
+    Logger.info("paragraph_state started")
+    {:ok, environment} =
+      Environment.start_link(paragraph_state)
+    Logger.info("Environment is at #{inspect environment}")
+    
+    {:ok, _task_starter} =
+      TimedTaskStarter.start_link(checks: environment,
+                                  with: EdgeDetection,
+                                  every: 5_000)
+    {:ok, :ok}
   end
 end
