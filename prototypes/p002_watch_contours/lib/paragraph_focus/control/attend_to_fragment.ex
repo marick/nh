@@ -4,7 +4,7 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToFragment do
   require Logger
 
   def activate(earlier_results) do
-    Logger.info("#{__MODULE__} activated on #{inspect earlier_results}")
+    Logger.info("looking for fragments in #{inspect earlier_results}")
   end
                 
   def editing?(edges) do

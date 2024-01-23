@@ -22,6 +22,7 @@ defmodule AppAnimal.TimedTaskStarter do
 
   @impl true
   def handle_info(:tick, state) do
+    Logger.info("tick!\n")
     WithoutReply.activate(state.task)
     tick_after(state.delay)
     {:noreply, state}

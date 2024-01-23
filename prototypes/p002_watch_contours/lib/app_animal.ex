@@ -7,8 +7,7 @@ defmodule AppAnimal do
   @impl true
   def start(_type, _args) do
     paragraph_state = %{text: "___", cursor: 1}
-    {:ok, pid} = ParagraphFocus.start_link(paragraph_state)
-    Logger.info("paragraph focus is #{inspect pid}")
+    {:ok, _pid} = ParagraphFocus.start_link(paragraph_state)
     
     # {:ok, _focus} = GenServer.start_link(Paragraph.Focus, paragraph)
 

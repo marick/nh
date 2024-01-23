@@ -1,7 +1,9 @@
 defmodule MyFormat do
+  alias AppAnimal.Pretty
+  
   def format(_level, message, _timestamp, metadata) do
     {module, _function, _arity} = Keyword.get(metadata, :mfa)
-    module_name = inspect(module) |> Macro.underscore
+    module_name = Pretty.terse(module) |> Macro.underscore
     [spacing_before(module_name), module_name, "  ", message, "\n"]
   end
 

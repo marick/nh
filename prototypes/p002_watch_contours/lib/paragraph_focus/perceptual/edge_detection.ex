@@ -14,8 +14,8 @@ defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeDetection do
   end
 
   def activate() do
-    Logger.info("going to check #{inspect @upstream}")
     result = GenServer.call(@upstream, {:run_for_result, &edge_structure/1})
+    Logger.info("edge structure: #{inspect result}")
     Enum.map(@downstream, fn receiver ->
       WithoutReply.activate(receiver, on: result)
     end)
