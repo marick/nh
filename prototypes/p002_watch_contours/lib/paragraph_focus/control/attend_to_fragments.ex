@@ -16,7 +16,7 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToFragments do
   def activate(earlier_results) do
     Logger.info("looking for fragments in #{inspect earlier_results}")
     if has_fragments?(earlier_results) do
-      WithoutReply.activate(@downstream, on: earlier_results)
+      WithoutReply.activate(@downstream, on_one: earlier_results)
     else
       Logger.info("nope")
     end
