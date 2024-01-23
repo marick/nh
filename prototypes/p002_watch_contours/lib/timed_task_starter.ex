@@ -1,35 +1,29 @@
 defmodule AppAnimal.TimedTaskStarter do
+  alias AppAnimal.WithoutReply
   use GenServer
   require Logger
+  
 
-   # Client
+   # Interface to other processes
 
   def poke(module, every: millis) do
-    {:ok, _pid} = GenServer.start_link(__MODULE__, %{task: module, millis: millis})
+    {:ok, _pid} = GenServer.start_link(__MODULE__, %{task: module, delay: millis})
    end
 
-
-   # Server
+   # Code that runs within this process
 
   @impl true
-  def init(%{task: task, millis: millis}) do
-    Logger.info("timed_task_server")
-
-    runner = fn ->
-      apply(task, :activate, [])
-    end
-
-    tick_after(millis)
-    {:ok, %{runner: runner, time: millis}}
+  def init(state) do
+    tick_after(state.delay)
+    {:ok, state}
   end
 
   def tick_after(millis), do: Process.send_after(self(), :tick, millis)
 
   @impl true
   def handle_info(:tick, state) do
-    Logger.info("tick")
-    Task.async(state.runner)
-    tick_after(state.time)
+    WithoutReply.activate(state.task)
+    tick_after(state.delay)
     {:noreply, state}
   end
 
@@ -44,5 +38,4 @@ defmodule AppAnimal.TimedTaskStarter do
   def handle_info({:DOWN, _ref, :process, _pid, _reason}, state) do
     {:noreply, state}
   end
-
 end

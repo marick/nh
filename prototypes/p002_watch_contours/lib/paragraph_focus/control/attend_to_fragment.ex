@@ -3,7 +3,7 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToFragment do
   import Control.Util
   require Logger
 
-  def activate_on(earlier_results) do
+  def activate(earlier_results) do
     Logger.info("#{__MODULE__} activated on #{inspect earlier_results}")
   end
                 
