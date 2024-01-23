@@ -4,19 +4,19 @@ defmodule AppAnimal.TimedTaskStarter do
 
    # Client
 
-   def start_link(task_info) do
-     GenServer.start_link(__MODULE__, task_info)
+  def poke(module, every: millis) do
+    {:ok, _pid} = GenServer.start_link(__MODULE__, %{task: module, millis: millis})
    end
 
 
    # Server
 
   @impl true
-  def init(with: task, every: millis) do
+  def init(%{task: task, millis: millis}) do
     Logger.info("timed_task_server")
 
     runner = fn ->
-      apply(task, :activate, []) |> IO.inspect
+      apply(task, :activate, [])
     end
 
     tick_after(millis)
@@ -28,7 +28,7 @@ defmodule AppAnimal.TimedTaskStarter do
   def handle_info(:tick, state) do
     IO.inspect state
     Logger.info("tick")
-    Task.async(state.runner)
+    Task.async(state.runner) |> IO.inspect
     tick_after(state.time)
     {:noreply, state}
   end

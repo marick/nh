@@ -12,7 +12,6 @@ defmodule AppAnimal.ParagraphFocus.Environment do
 
   # Server
 
-
   @impl true
   def init(initial_state) do
     log_text(initial_state)

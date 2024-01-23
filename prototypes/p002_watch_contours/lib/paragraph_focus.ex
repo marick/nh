@@ -9,9 +9,6 @@ defmodule AppAnimal.ParagraphFocus do
    # alias Motor.{MarkAsEditing, MoveFragment}
    require Logger
 
-
-
-
    # Client
 
    def start_link(paragraph_state) do
@@ -27,8 +24,7 @@ defmodule AppAnimal.ParagraphFocus do
     Environment.activate(paragraph_state)
     
     {:ok, _task_starter} =
-      TimedTaskStarter.start_link(with: EdgeDetection,
-                                  every: 5_000)
+      TimedTaskStarter.poke(EdgeDetection, every: 5_000)
     {:ok, :ok}
   end
 end
