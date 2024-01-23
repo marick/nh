@@ -4,7 +4,7 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToEditing do
   require Logger
 
   def activate(earlier_results) do
-    Logger.info("looking to see if #{inspect earlier_results} indicates editing")
+    Logger.info("*not yet* looking to see if #{inspect earlier_results} indicates editing")
   end
                 
   def editing?(edges) do
