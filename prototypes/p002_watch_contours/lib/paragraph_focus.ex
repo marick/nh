@@ -5,8 +5,6 @@ defmodule AppAnimal.ParagraphFocus do
    alias AppAnimal.ParagraphFocus.{Environment, Perceptual} #, Control, Motor}
    alias AppAnimal.TimedTaskStarter
    alias Perceptual.EdgeDetection
-   # alias Control.{AttendToEditing, AttendToFragment}
-   # alias Motor.{MarkAsEditing, MoveFragment}
    require Logger
 
    # Client

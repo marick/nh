@@ -1,21 +1,23 @@
 defmodule AppAnimal.ParagraphFocus.AttendToEditing do
   use ExUnit.Case
-  # import AppAnimal.ParagraphFocus.Control.AttendToEditing
-  # import FlowAssertions.TabularA
-  # import FlowAssertions.MiscA
+  alias AppAnimal.ParagraphFocus.Perceptual.EdgeDetection
+  alias AppAnimal.ParagraphFocus.Control.AttendToEditing, as: UT
+  import FlowAssertions.TabularA
 
+  test "determining if editing" do
+    returns = run_and_assert(
+        	&(EdgeDetection.edge_structure(&1) |> UT.editing?))
 
-  # test "determining if editing" do
-  #   becomes = run_and_assert(
-  #       	&(FeatureDetection.edge_structure(&1) |> C.editing?))
+    "abc\n"         |> returns.(false)
+    "abc\n\ndef"    |> returns.(true)
 
-  #   "abc\n"         |> becomes.(false)
-  #   "abc\n\ndef"    |> becomes.(true)
+    # A fragment doesn't is part of continued editing
+    "abc\n\nfragment\n\ndef" |> returns.(true)
 
-  #   # I'm not sure if it's possible for there to be leading or trailing blanks, but
-  #   # it doesn't make a difference.
-  #   "\n\nabc\n\ndef\n\n"    |> becomes.(true)
-  # end
+    # I'm not sure if it's possible for there to be leading or trailing blanks, but
+    # it doesn't make a difference.
+    "\n\nabc\n\ndef\n\n"    |> returns.(true)
+  end
     
 end
 

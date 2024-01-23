@@ -1,4 +1,4 @@
-defmodule AppAnimal.ParagraphFocus.Control.AttendToFragment do
+defmodule AppAnimal.ParagraphFocus.Control.AttendToFragments do
   alias AppAnimal.ParagraphFocus.Control
   import Control.Util
   require Logger
@@ -7,8 +7,8 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToFragment do
     Logger.info("looking for fragments in #{inspect earlier_results}")
   end
                 
-  def editing?(edges) do
-    text_count(edges) > 1
+  def has_fragments?(edges) do
+    text_count(edges) > 2
   end
   
 end

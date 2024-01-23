@@ -6,7 +6,7 @@ defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeDetection do
       
   @mechanism :flow_emulator
   @upstream  Environment
-  @downstream [Control.AttendToEditing, Control.AttendToFragment]
+  @downstream [Control.AttendToEditing, Control.AttendToFragments]
 
   def describe() do
     "#{inspect @mechanism} #{__MODULE__} queries #{inspect @upstream}, " <>
