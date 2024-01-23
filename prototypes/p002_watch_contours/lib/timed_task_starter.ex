@@ -23,30 +23,26 @@ defmodule AppAnimal.TimedTaskStarter do
     {:ok, %{runner: runner, time: millis}}
   end
 
+  def tick_after(millis), do: Process.send_after(self(), :tick, millis)
 
   @impl true
   def handle_info(:tick, state) do
-    IO.inspect state
     Logger.info("tick")
-    Task.async(state.runner) |> IO.inspect
+    Task.async(state.runner)
     tick_after(state.time)
     {:noreply, state}
   end
 
+  # These will catch ***all*** returns from un-awaited subtasks, including
+  # those started within by subtasks.
   @impl true
-  def handle_info({ref, result}, state) do
-    Logger.info("received #{inspect ref}, #{inspect result}")
+  def handle_info({_ref, _result}, state) do
     {:noreply, state}
   end
   
   @impl true
-  def handle_info({:DOWN, ref, :process, _pid, reason}, state) do
-    Logger.info("received #{inspect ref}, #{inspect reason}")
+  def handle_info({:DOWN, _ref, :process, _pid, _reason}, state) do
     {:noreply, state}
   end
-  
-
-
-  def tick_after(millis), do: Process.send_after(self(), :tick, millis)
 
 end
