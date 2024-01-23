@@ -24,13 +24,10 @@ defmodule AppAnimal.ParagraphFocus do
   @impl true
   def init(paragraph_state) do
     Logger.info("paragraph_state started")
-    {:ok, environment} =
-      Environment.start_link(paragraph_state)
-    Logger.info("Environment is at #{inspect environment}")
+    Environment.activate(paragraph_state)
     
     {:ok, _task_starter} =
-      TimedTaskStarter.start_link(checks: environment,
-                                  with: EdgeDetection,
+      TimedTaskStarter.start_link(with: EdgeDetection,
                                   every: 5_000)
     {:ok, :ok}
   end

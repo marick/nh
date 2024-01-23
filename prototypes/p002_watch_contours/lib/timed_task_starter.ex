@@ -12,11 +12,11 @@ defmodule AppAnimal.TimedTaskStarter do
    # Server
 
   @impl true
-  def init(checks: target, with: checker, every: millis) do
+  def init(with: task, every: millis) do
     Logger.info("timed_task_server")
 
     runner = fn ->
-      apply(checker, :check, [target]) |> IO.inspect
+      apply(task, :activate, []) |> IO.inspect
     end
 
     tick_after(millis)

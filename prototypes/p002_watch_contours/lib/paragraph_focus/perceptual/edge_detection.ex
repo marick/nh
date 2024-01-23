@@ -1,9 +1,22 @@
 defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeDetection do
   use Private
   require Logger
+  alias AppAnimal.ParagraphFocus.{Environment, Control}
+      
+  @mechanism :flow_emulator
+  @upstream  Environment
+  @downstream [Control.AttendToEditing, Control.AttendToFragment]
 
-  @gap_definition ~r/\n\n+/
+  def describe() do
+    "#{inspect @mechanism} #{__MODULE__} queries #{inspect @upstream}, " <>
+      "sends to #{inspect @downstream}"
+  end
 
+  def activate() do
+    Logger.info("going to check #{inspect @upstream}")
+    GenServer.call(@upstream, {:run_for_result, &edge_structure/1}) |> IO.inspect
+  end
+  
   def edge_structure(string) do
     # I could do this with streams if I cared about efficiency
     parts = decompose(string)
@@ -13,14 +26,9 @@ defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeDetection do
     List.zip([labels, ranges])
   end
 
-  def check(environment) do
-    Logger.info("going to check #{inspect environment}")
-    GenServer.call(environment, {:run_for_result, &edge_structure/1})
-  end
-  
-  
-
   private do
+    @gap_definition ~r/\n\n+/
+
     def decompose(string) do
       string
       |> String.split(@gap_definition, include_captures: true)
