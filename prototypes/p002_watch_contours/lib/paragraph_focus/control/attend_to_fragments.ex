@@ -3,16 +3,13 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToFragments do
   import Perceptual.EdgeDetection, only: [edge_string: 1]
   import Control.Util
   require Logger
-  alias AppAnimal.WithoutReply
 
   @mechanism :gate
   @upstream  Perceptual.EdgeDetection
   @downstream Motor.MoveFragment
+  use AppAnimal.NeuralCluster
+  alias AppAnimal.WithoutReply
 
-  def describe() do
-    "#{inspect @mechanism} #{__MODULE__} decides on #{inspect @upstream} results, " <>
-      "may send to #{inspect @downstream}"
-  end
 
   def activate(earlier_results) do
     Logger.info("looking for fragments in #{edge_string earlier_results}")

@@ -7,11 +7,7 @@ defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeDetection do
   @mechanism :flow_emulator
   @upstream  Environment
   @downstream [Control.AttendToEditing, Control.AttendToFragments]
-
-  def describe() do
-    "#{inspect @mechanism} #{__MODULE__} queries #{inspect @upstream}, " <>
-      "sends to #{inspect @downstream}"
-  end
+  use AppAnimal.NeuralCluster
 
   def activate() do
     result = GenServer.call(@upstream, {:run_for_result, &edge_structure/1})

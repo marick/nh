@@ -1,11 +1,17 @@
 defmodule AppAnimal.ParagraphFocus.Control.AttendToEditing do
   alias AppAnimal.ParagraphFocus.{Perceptual, Control}
-  import Perceptual.EdgeDetection, only: [edge_string: 1]
+  alias Perceptual.EdgeDetection
   import Control.Util
   require Logger
 
+  @mechanism :gate
+  @upstream EdgeDetection
+  @downstream []
+  use AppAnimal.NeuralCluster
+
   def activate(earlier_results) do
-    Logger.info("*not yet* looking to see if #{edge_string earlier_results} indicates editing")
+    string = EdgeDetection.edge_string(earlier_results)
+    Logger.info("*not yet* looking to see if #{string} indicates editing")
   end
                 
   def editing?(edges) do

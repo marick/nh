@@ -24,4 +24,9 @@ defmodule AppAnimal.PrettyModuleTest do
     # Not all atoms are module names.
     :a     |> becomes.(":a")
   end
+
+  test "terse and minimal work for lists" do
+    assert PrettyModule.terse(  [A.B.C]) == "[B.C]"
+    assert PrettyModule.minimal([A.B.C]) ==   "[C]"
+  end
 end
