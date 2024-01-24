@@ -6,15 +6,15 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToFragments do
   require Logger
 
 
-  @role %{mechanism: :gate,
-          upstream: Perceptual.EdgeDetection,
-          downstream: Motor.MoveFragment
+  @summary %{mechanism: :gate,
+             upstream: Perceptual.EdgeDetection,
+             downstream: Motor.MoveFragment
    }
 
   def activate(earlier_results) do
     Logger.info("looking for fragments in #{edge_string earlier_results}")
     if has_fragments?(earlier_results) do
-      WithoutReply.activate(@role.downstream, transmitting: earlier_results)
+      WithoutReply.activate(@summary.downstream, transmitting: earlier_results)
     else
       Logger.info("nope")
     end

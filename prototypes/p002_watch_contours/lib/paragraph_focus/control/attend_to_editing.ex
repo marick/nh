@@ -4,10 +4,11 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToEditing do
   import Control.Util
   require Logger
 
-  @mechanism :gate
-  @upstream EdgeDetection
-  @downstream []
-  use AppAnimal.NeuralCluster
+  # @summary %{mechanism: :gate,
+  #            upstream: EdgeDetection,
+  #            downstream: []
+  #  }
+
 
   def activate(earlier_results) do
     string = EdgeDetection.edge_string(earlier_results)

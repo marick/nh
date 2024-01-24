@@ -3,18 +3,17 @@ defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeDetection do
   require Logger
   alias AppAnimal.WithoutReply
   alias AppAnimal.ParagraphFocus.{Environment, Control}
-      
-  @mechanism :flow_emulator
-  @upstream  Environment
-  @downstream [Control.AttendToEditing, Control.AttendToFragments]
-  use AppAnimal.NeuralCluster
 
+
+  @summary %{mechanism: :flow_emulator,
+             upstream: Environment,
+             downstream: [Control.AttendToEditing, Control.AttendToFragments]
+   }
+  
   def activate() do
-    result = GenServer.call(@upstream, {:run_for_result, &edge_structure/1})
+    result = GenServer.call(@summary.upstream, {:run_for_result, &edge_structure/1})
     Logger.info("edge structure: #{inspect result}")
-    Enum.map(@downstream, fn receiver ->
-      WithoutReply.activate(receiver, transmitting: result)
-    end)
+    WithoutReply.activate(@summary.downstream, transmitting: result)
   end
   
   def edge_structure(string) do
