@@ -30,6 +30,17 @@ defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeDetection do
     List.zip([labels, ranges])
   end
 
+  def edge_string(structure) do
+    classifier = fn
+      {:text, _} -> "\u25A0"
+      {:gap,  _} -> "_"
+    end
+
+    structure
+    |> Enum.map(classifier)
+    |> Enum.join
+  end
+
   private do
     @gap_definition ~r/\n\n+/
 

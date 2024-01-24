@@ -16,7 +16,7 @@ defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeDetectionTest do
 
       # Newlines at start or end.
       "abc\n\ndef\n"	|> becomes.(["abc", "\n\n", "def\n"])
-      "\nabc"           |> becomes.(["\nabc"])
+      "\nab"           |> becomes.(["\nab"])
       "\n\nabc"         |> becomes.(["\n\n", "abc"])
       "abc\n\n"         |> becomes.(["abc", "\n\n"])
 
@@ -59,6 +59,19 @@ defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeDetectionTest do
     "part\n\nfragment\n\n\ngap\n"
     |> UT.edge_structure
     |> assert_equals([text: 0..3, gap: 4..5, text: 6..13, gap: 14..16, text: 17..20])
+  end
+
+  test "printing edge structure" do
+    returns = fn input, expected ->
+      actual = UT.edge_string(input)   # I should really modify flow-assertions to know arity
+      assert actual == expected
+    end
+
+    meh = "irrelevant"
+
+    [text: meh]                      |> returns.("\u25A0")
+    [text: meh, text: meh]           |> returns.("\u25A0\u25A0")
+    [text: meh, gap: meh, text: meh] |> returns.("\u25A0_\u25A0")
   end
 end
 
