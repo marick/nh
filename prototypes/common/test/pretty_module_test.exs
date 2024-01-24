@@ -1,10 +1,10 @@
-defmodule AppAnimal.PrettyTest do
+defmodule AppAnimal.PrettyModuleTest do
   use ExUnit.Case
-  alias AppAnimal.Pretty
+  alias AppAnimal.PrettyModule
   import FlowAssertions.TabularA
 
   test "terse display for modules" do
-    becomes = run_and_assert(&Pretty.terse/1)
+    becomes = run_and_assert(&PrettyModule.terse/1)
 
     A.B.C  |> becomes.("B.C")
     A.B    |> becomes.("A.B")
@@ -15,7 +15,7 @@ defmodule AppAnimal.PrettyTest do
   end
 
   test "minimal display for modules" do
-    becomes = run_and_assert(&Pretty.minimal/1)
+    becomes = run_and_assert(&PrettyModule.minimal/1)
 
     A.B.C  |> becomes.("C")
     A.B    |> becomes.("B")

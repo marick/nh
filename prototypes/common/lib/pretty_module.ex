@@ -1,4 +1,4 @@
-defmodule AppAnimal.Pretty do
+defmodule AppAnimal.PrettyModule do
   def terse(arg) when is_atom(arg) do
     inspect(arg)
     |> String.split(".")
