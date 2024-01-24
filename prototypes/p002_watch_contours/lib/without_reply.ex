@@ -1,7 +1,7 @@
 defmodule AppAnimal.WithoutReply do
   def activate(task_module),
       do: activate_with_args(task_module, [])
-  def activate(task_module, on_one: arg),
+  def activate(task_module, transmitting: arg),
       do: activate_with_args(task_module, [arg])
 
   defp activate_with_args(module, parameter_list) do
