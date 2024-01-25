@@ -1,7 +1,9 @@
 defmodule MyFormat do
   alias AppAnimal.PrettyModule
+  use Private
   
   def format(_level, message, _timestamp, metadata) do
+    message = format(message, metadata)
     {module, _function, _arity} = Keyword.get(metadata, :mfa)
     module_name = PrettyModule.terse(module) |> Macro.underscore
     [spacing_before(module_name), module_name, "  ", message, "\n"]
@@ -13,5 +15,21 @@ defmodule MyFormat do
     current_value = max(known_value, name_length)
     Application.put_env(:logger, :longest_prefix_so_far, current_value)
     String.duplicate(" ", current_value - name_length)
+  end
+
+  private do
+
+    def format(message, metadata) do
+      message
+      |> handle_newlines(metadata)
+    end
+
+    def handle_newlines(message, metadata) do
+      if Keyword.get(metadata, :newlines) == :visible do
+        String.replace(message, "\n", "\\n")  
+      else
+        message
+      end
+    end
   end
 end
