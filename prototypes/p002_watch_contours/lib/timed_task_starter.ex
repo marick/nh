@@ -30,7 +30,7 @@ defmodule AppAnimal.TimedTaskStarter do
   end
 
   # These will catch ***all*** returns from un-awaited subtasks, including
-  # those started within by subtasks.
+  # those started within subtasks.
   @impl true
   def handle_info({_ref, _result}, state) do
     {:noreply, state}

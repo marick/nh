@@ -5,7 +5,6 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToFragments do
   alias AppAnimal.WithoutReply
   require Logger
 
-
   @summary %{mechanism: :gate,
              upstream: Perceptual.EdgeDetection,
              downstream: Motor.MoveFragment
