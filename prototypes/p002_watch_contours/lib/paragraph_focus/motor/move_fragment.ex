@@ -1,19 +1,15 @@
 defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
-  alias AppAnimal.ParagraphFocus.{Control, Environment}
-  # import Control.Util
+  alias AppAnimal.ParagraphFocus.{Environment, Control}
+  alias AppAnimal.WithoutReply
   require Logger
-  # alias AppAnimal.WithoutReply
 
-  @mechanism :environment_changer
-  @upstream Control.AttendToFragments
-  @downstream Environment
+  @summary %{mechanism: :mover,
+             upstream: Control.AttendToFragments,
+             downstream: Environment
+   }
 
-  def describe() do
-    "#{inspect @mechanism} #{__MODULE__} decides on #{inspect @upstream} results, " <>
-      "may send to #{inspect @downstream}"
-  end
-
-  def activate(_expectation) do
-    Logger.info("will move the fragment")
+  def activate({:text, fragment_range}) do
+    Logger.info("will remove fragment in range #{inspect fragment_range}")
+    [@summary, WithoutReply] # go keep from warning about unused aliases.
   end
 end

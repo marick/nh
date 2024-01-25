@@ -4,7 +4,7 @@ defmodule AppAnimal.ParagraphFocus.AttendToFragmentsTest do
   alias AppAnimal.ParagraphFocus.Control.AttendToFragments, as: UT
   import FlowAssertions.TabularA
 
-  test "determining if editing" do
+  test "checking for fragments" do
     returns = run_and_assert(
         	&(EdgeDetection.edge_structure(&1) |> UT.has_fragments?))
 
@@ -16,6 +16,19 @@ defmodule AppAnimal.ParagraphFocus.AttendToFragmentsTest do
     # it doesn't make a difference.
     "\n\nabc\n\nfragment\n\ndef\n\n" |> returns.(true)
   end
+
+  test "returning the first fragment indicator" do
+    returns = run_and_assert(
+                &(EdgeDetection.edge_structure(&1) |> UT.first_fragment_range))
+
+    "text\n\nfragment\n\ntext\n\n" |> returns.({:text, 6..13})
+    #        ^6     ^13
     
+    # Check that a leading gap fools no one
+    "\n\ntext\n\nfragment\n\ntext\n\n" |> returns.({:text, 8..15})
+    #            ^8     ^15
+
+    # Note that an invalid list is the caller's problem.
+  end
 end
 

@@ -24,7 +24,9 @@ defmodule AppAnimal.ParagraphFocus.Environment do
     {:reply, result, paragraph_state}
   end
 
-  def log_text(state), do: ["has ", visible_cursor(state)] |> Logger.info
+  def log_text(state) do
+    Logger.info("has #{visible_cursor(state)}", newlines: :visible)
+  end
 
   def visible_cursor(%{text: text, cursor: cursor}) do
     {prefix, suffix} = String.split_at(text, cursor)
