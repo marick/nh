@@ -2,15 +2,8 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
   use ExUnit.Case
   alias AppAnimal.ParagraphFocus.Motor.MoveFragment, as: UT
   import FlowAssertions.TabularA
+  import FlowAssertions.MiscA
 
-
-  # test "determine fragment bounds" do
-  #   originally_perceived = %{text: "123\n\n678\n\nbcd", cursor: 1}
-  #   current = originally_perceived
-  #   actual = UT.grab_fragment(current, at_roughly: 6..8)
-  #   expected = {:ok, ["123\n", "\n678\n", "\nbcd"]}
-  #   assert actual == expected
-  # end
 
   test "possibly shifted" do
     returns = run_and_assert(&UT.accounting_for_edits/2)
@@ -43,8 +36,59 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
     #            ^^
 
   end
-    
-  
 
+  describe "grab fragment" do
+    test "there's been no change in the paragraph" do 
+      %{text: "123\n\n678\n\nbcd", cursor: 1} 
+      |> UT.grab_fragment(at_roughly: 6..8)   # this is the range originally seen.
+      |> assert_equal({:ok, ["123\n", "\n678\n", "\nbcd"]})
+    end
+
+    test "there's been an insertion before the range" do
+      %{text: "___123\n\n678\n\nbcd", cursor: 3}
+      |> UT.grab_fragment(at_roughly: 6..8)
+      |> assert_equal({:ok, ["___123\n", "\n678\n", "\nbcd"]})
+    end
+
+    test "too much change" do
+      %{text: "__________123\n\n678\n\nbcd", cursor: 10}
+      |> UT.grab_fragment(at_roughly: 6..8)
+      |> assert_equal(:error)
+    end
+
+    @tag :skip
+    test "punt if cursor is in the range" do
+      %{text: "123\n\n678\n\nbcd", cursor: 7} 
+      |> UT.grab_fragment(at_roughly: 6..8)   # this is the range originally seen.
+      |> assert_equal(:error)
+    end
+
+    @tag :skip
+    test "note that a cursor between the two boundary newlines is also rejected"
+
+    @tag :skip
+    test "it is the *shifted* range" do
+      # Just to explain what's going on:
+      # Suppose we have a normal shifted paragraph (with cursor out of the way:
+      "___123\n\n678\n\nbcd"
+      |> UT.accounting_for_edits(6..8)
+      |> ok_content
+      |> assert_equals(9..11)
+
+      # Now put the paragraph on the second preceeding newline (between the two)
+      # "___123\n\n678\n\nbcd"
+      # 
+      # |> UT.accounting_for_edits(6..8)
+      # |> assert_equal({:ok, ["___123\n", "\n678\n", "\nbcd"]})
+      
+    end
+
+    @tag :skip
+    test "specifically, if it's within the newline-delimiters (starting)" do
+    end
+
+    @tag :skip
+    test "... and ending"
+  end
 end
 

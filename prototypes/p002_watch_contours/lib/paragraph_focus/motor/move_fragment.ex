@@ -25,7 +25,7 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
       end
     end
     
-    @max_tries 4   # tries includes the initial try with no shift
+    @max_tries 4   # tries includes the initial try with no shift.
     def accounting_for_edits(paragraph, range) do
       perhaps_shift(paragraph, range, @max_tries)
     end
