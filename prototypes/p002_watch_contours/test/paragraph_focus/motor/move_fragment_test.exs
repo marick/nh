@@ -34,7 +34,24 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
     #    ^^
     ["123\n\n678\nbcd", 6..8] |> returns.(:error)
     #            ^^
+  end
 
+  test "cursor_not_in_way" do
+    reference = "0\n\n34\n\n7"  #
+    #             ^1 is safely distant because the character will appear before the \n
+    #               ^2 is too close: it will split the gap
+    #                     ^ 6 is too close: ditto
+    #                       ^7 is safely distant
+    #
+    is_judged = run_and_assert(fn cursor_at ->
+      paragraph = %{text: reference, cursor: cursor_at}
+      UT.cursor_relationship(paragraph, 3..4)
+    end)
+
+    is_judged.(1, :safely_distant)
+    2 |> is_judged.(:too_close)
+    6 |> is_judged.(:too_close)
+    7 |> is_judged.(:safely_distant)
   end
 
   describe "grab fragment" do
@@ -56,7 +73,6 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
       |> assert_equal(:error)
     end
 
-    @tag :skip
     test "punt if cursor is in the range" do
       %{text: "123\n\n678\n\nbcd", cursor: 7} 
       |> UT.grab_fragment(at_roughly: 6..8)   # this is the range originally seen.
@@ -64,7 +80,11 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
     end
 
     @tag :skip
-    test "note that a cursor between the two boundary newlines is also rejected"
+    test "note that a cursor between the two boundary newlines is also rejected" do
+      %{text: "123\n\n678\n\nbcd", cursor: 7} 
+      |> UT.grab_fragment(at_roughly: 6..8)   # this is the range originally seen.
+      |> assert_equal(:error)
+    end
 
     @tag :skip
     test "it is the *shifted* range" do

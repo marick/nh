@@ -18,7 +18,8 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
 
     def grab_fragment(paragraph, at_roughly: range) do
       with(
-        {:ok, first_text..last_text} <- accounting_for_edits(paragraph.text, range)
+        {:ok, first_text..last_text} <- accounting_for_edits(paragraph.text, range),
+        :safely_distant <- cursor_relationship(paragraph, first_text..last_text)
       ) do 
         {:ok, split_text(paragraph.text, at_exactly: {first_text-1, last_text+1})}
       else
@@ -26,6 +27,15 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
       end
     end
     
+    def cursor_relationship(paragraph, lower_fragment_bound..upper_fragment_bound) do
+      if paragraph.cursor < lower_fragment_bound - 1
+         || paragraph.cursor > upper_fragment_bound + 2 do
+        :safely_distant
+      else
+        :too_close
+      end
+    end
+
     @max_tries 4   # tries includes the initial try with no shift.
     def accounting_for_edits(paragraph, range) do
       perhaps_shift(paragraph, range, @max_tries)
