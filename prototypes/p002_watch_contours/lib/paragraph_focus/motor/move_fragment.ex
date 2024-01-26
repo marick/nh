@@ -17,11 +17,12 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
   private do 
 
     def grab_fragment(paragraph, at_roughly: range) do
-      case accounting_for_edits(paragraph.text, range) do
-        {:ok, first_text..last_text} ->
-          {:ok, split_text(paragraph.text, at_exactly: {first_text-1, last_text+1})}
-        :error ->
-          :error
+      with(
+        {:ok, first_text..last_text} <- accounting_for_edits(paragraph.text, range)
+      ) do 
+        {:ok, split_text(paragraph.text, at_exactly: {first_text-1, last_text+1})}
+      else
+        _ -> :error
       end
     end
     
