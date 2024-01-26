@@ -23,14 +23,24 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
     
     #"123\n\n678\n\nbcd"
     ["_123_\n\n678\n\nbcd", 6..8] |> returns.({:ok, 8..10}) # ... and two.
+    #     ^
     
     #"123\n\n678\n\nbcd"
     ["_12_3_\n\n678\n\nbcd", 6..8] |> returns.({:ok, 9..11}) # ... and three
-
+    #    ^
 
     # But four is too much of a change: the app_animal should wait.
     #"123\n\n678\n\nbcd"
     ["__12_3_\n\n678\n\nbcd", 6..8] |> returns.(:error)
+
+    # Changes past the end are fine: they don't affect the snippet.
+    ["123\n\n678\n\nbcd________________", 6..8] |> returns.({:ok, 6..8})
+
+    # Note that destruction of one of the adjoining newlines is also an error.
+    ["123\n678\n\nbcd", 6..8] |> returns.(:error)
+    #    ^^
+    ["123\n\n678\nbcd", 6..8] |> returns.(:error)
+    #            ^^
 
   end
     
