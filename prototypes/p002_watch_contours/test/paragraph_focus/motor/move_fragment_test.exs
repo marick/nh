@@ -54,7 +54,7 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
     7 |> is_judged.(:safely_distant)
   end
 
-  describe "grab fragment" do
+  describe "grab fragment: changes in the paragraph" do
     test "there's been no change in the paragraph" do 
       %{text: "123\n\n678\n\nbcd", cursor: 1} 
       |> UT.grab_fragment(at_roughly: 6..8)   # this is the range originally seen.
@@ -72,43 +72,62 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
       |> UT.grab_fragment(at_roughly: 6..8)
       |> assert_equal(:error)
     end
+  end
 
-    test "punt if cursor is in the range" do
-      %{text: "123\n\n678\n\nbcd", cursor: 7} 
+  test "grab_fragment respond to cursor position, without text addition" do
+    text = "123\n\n678\n\nbcd"
+    successful_split = ["123\n", "\n678\n", "\nbcd"]
+    
+    returns = run_and_assert(fn cursor_at ->
+      %{text: text, cursor: cursor_at}
       |> UT.grab_fragment(at_roughly: 6..8)   # this is the range originally seen.
-      |> assert_equal(:error)
-    end
+    end)
 
-    @tag :skip
-    test "note that a cursor between the two boundary newlines is also rejected" do
-      %{text: "123\n\n678\n\nbcd", cursor: 7} 
-      |> UT.grab_fragment(at_roughly: 6..8)   # this is the range originally seen.
-      |> assert_equal(:error)
-    end
+    # within that range
+    7 |> returns.(:error)
 
-    @tag :skip
-    test "it is the *shifted* range" do
-      # Just to explain what's going on:
-      # Suppose we have a normal shifted paragraph (with cursor out of the way:
-      "___123\n\n678\n\nbcd"
-      |> UT.accounting_for_edits(6..8)
-      |> ok_content
-      |> assert_equals(9..11)
+    # boundary newlines
+    4  |> returns.({:ok, successful_split})
+    5  |> returns.(:error)
+    10 |> returns.(:error)
+    11 |> returns.({:ok, successful_split})
+  end
 
-      # Now put the paragraph on the second preceeding newline (between the two)
-      # "___123\n\n678\n\nbcd"
-      # 
-      # |> UT.accounting_for_edits(6..8)
-      # |> assert_equal({:ok, ["___123\n", "\n678\n", "\nbcd"]})
-      
-    end
 
-    @tag :skip
-    test "specifically, if it's within the newline-delimiters (starting)" do
-    end
+  test "it is the *shifted* range that matters" do
+    # Just to explain what's going on:
+    # Suppose we start with this:
+    # "1234\n\n7\n\na"
+    # It would have text range 7..7, and it would reject a cursor within 6..9
+    
+    # However, we make this shift by 3:
+    right3 = "___1234\n\n7\n\na"
+    # The forbidden zone is now 9-12
+    # A successful split is
+    right_success = ["___1234\n", "\n7\n", "\na"]
+    
+    returns = run_and_assert(fn text, cursor ->
+      %{text: text, cursor: cursor}
+      |> UT.grab_fragment(at_roughly: 7..7)
+    end)
 
-    @tag :skip
-    test "... and ending"
+    [right3, 8 ] |> returns.({:ok, right_success})
+    [right3, 9 ] |> returns.(:error)
+    [right3, 12] |> returns.(:error)
+    [right3, 13] |> returns.({:ok, right_success})
+
+
+    # Again, we choose this to start with:
+    # "1234\n\n7\n\na"
+    # However, we make this shift by deleting three characters:
+    left3 = "4\n\n7\n\na"
+    # The forbidden zone is now 1..5
+    # A successful split is
+    left_success = ["4\n", "\n7\n", "\na"]
+
+    IO.puts "HI"
+    [left3, 3] |> returns.({:ok, left_success})
+    
   end
 end
 
