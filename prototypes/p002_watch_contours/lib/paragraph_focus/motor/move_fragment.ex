@@ -28,31 +28,54 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
       left..right
     end
 
-    
-
     def surrounding_gaps(text, bounds) do
       substring = String.slice(text, bounds)
-      [[first_gap], [second_gap]] = (Regex.scan(~r/\n\n+/, substring, return: :index))
-
-      tuple_to_range = fn {start, length} -> start..(start+length-1) end
-      translate = fn in_substring_coordinates ->
-        translation = Enum.at(bounds, 0)
-        Range.shift(in_substring_coordinates, translation)
+      case Regex.scan(~r/\n\n+/, substring, return: :index) do
+        [[first_gap], [second_gap]] -> 
+          tuple_to_range = fn {start, length} -> start..(start+length-1) end
+          translate = fn in_substring_coordinates ->
+            translation = Enum.at(bounds, 0)
+            Range.shift(in_substring_coordinates, translation)
+          end
+          
+          {:ok,
+           tuple_to_range.(first_gap) |> translate.(),
+           tuple_to_range.(second_gap) |> translate.()
+          }
+      _ ->
+        :error
       end
-
-      {:ok,
-       tuple_to_range.(first_gap) |> translate.(),
-       tuple_to_range.(second_gap) |> translate.()
-      }
     end
 
-    def grip_fragment(%{text: text}, at_roughly: original_range) do
+    def no_obvious_edits(paragraph, original_range, discovered_range) do
+      spread_range_to_include_newlines = fn first..last ->
+        first-2..last+2
+      end
+      wider = spread_range_to_include_newlines.(discovered_range)
+
+      cond do
+        Range.size(original_range) != Range.size(discovered_range) ->
+          :error
+        Enum.member?(wider, paragraph.cursor) ->
+          :error
+        true ->
+          :ok
+      end
+    end
+
+    def grip_fragment(%{text: text} = paragraph, at_roughly: original_range) do
       bounds = allowed_range(original_range, String.length(text))
 
-      {:ok, _..end_of_gap1, start_of_gap_2.._} = surrounding_gaps(text, bounds)
-
-      fragment_range = (end_of_gap1+1)..(start_of_gap_2-1)
-      {:ok, fragment_range}
+      with(
+        {:ok, _..end_of_gap1, start_of_gap_2.._} <- surrounding_gaps(text, bounds),
+        discovered_range = (end_of_gap1+1)..(start_of_gap_2-1),
+        :ok <- no_obvious_edits(paragraph, original_range, discovered_range)
+      ) do 
+        {:ok, discovered_range}
+      else
+        :error ->
+          :error
+      end
     end
 
     # def fragment_range_within_bounds(text, bounds) do
