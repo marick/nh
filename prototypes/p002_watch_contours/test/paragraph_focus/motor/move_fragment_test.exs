@@ -77,7 +77,7 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
   describe "some grip-fragment utilities" do 
 
     # the search bounds are twice the original fragment (half the fragment on both sides)
-    # with enouggh room for two gap characters on either end.
+    # with enough room for two gap characters on either end.
     test "the fragment is allowed to move but not so much" do 
       returns = run_and_assert(&(UT.allowed_range(&1, 100)))
       
@@ -92,4 +92,31 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
       1..4  |> returns.(0..8)
     end
   end
+
+  describe "extracting the fragment" do 
+    test "the cursor is before the fragment" do
+      paragraph = para("\n\n2345\n\n89a\n\ndef\n", 5) # 6 or 7 is too close to the fragment.
+      {new_paragraph, fragment} = UT.extract_fragment(paragraph, at: 8..10)
+      assert new_paragraph == para("\n\n2345\n\ndef\n", 5)
+      assert fragment == "\n89a\n"
+    end
+
+    test "the cursor is after the fragment" do
+      paragraph = para("012\n\n\n6789\n\nc", 12) # 10 and 11 are too close
+      {new_paragraph, fragment} = UT.extract_fragment(paragraph, at: 6..9)
+      assert new_paragraph == para("012\n\n\nc", 6)
+      assert fragment == "\n6789\n"
+    end
+  end
+
+  describe "moving the fragment" do
+    test "the cursor is safely before the fragment" do 
+      # paragraph = %{text: "\n\n2345\n\n8\n\nbc", cursor: 1}
+      # disassembled = UT.prepare_to_move(paragraph.text, 8..8)
+  
+      # moved = UT.move(paragraph, 
+    end    
+    
+  end
+  
 end

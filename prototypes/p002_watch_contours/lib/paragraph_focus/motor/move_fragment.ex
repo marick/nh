@@ -60,8 +60,26 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
       end
     end
 
-  end
+    def extract_fragment(paragraph, at: fragment_first..fragment_last) do
+      first_split_point = fragment_first-1
+      second_split_point = fragment_last+2
+      
+      {shorter, suffix} = String.split_at(paragraph.text, second_split_point)
+      {prefix, fragment} = String.split_at(shorter, first_split_point)
+      new_text = prefix <> suffix
 
+      cursor = paragraph.cursor
+      new_cursor = if cursor <= first_split_point,
+                      do: cursor,
+                      else: cursor - String.length(fragment)
+
+      {
+        %{paragraph | text: new_text, cursor: new_cursor},
+        fragment
+      }
+    end
+  end
+  
   private do
     # Helpers
 
