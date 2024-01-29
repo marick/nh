@@ -18,7 +18,7 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
   def make_paragraph_transformer(original_fragment_range) do
     fn paragraph ->
       with(
-        {:ok, range_to_lift} <-
+        {:ok, _range_to_lift} <-
           grip_fragment(paragraph, at_roughly: original_fragment_range)
         
       ) do
@@ -30,7 +30,7 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
     end
   end
 
-  private do   # gripping fragments
+  private do   # the key functions
 
     # A fragment is gripped if
     # 1. it has not moved too far due to editing in the text before it.
@@ -44,7 +44,7 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
     #    to the larger containing text. So a `Regex.scan` might locate a gap
     #    at position 5 in the substring, which might correspond to position 55 in the
     #    whole paragraph's text.
-    
+
     def grip_fragment(%{text: text} = paragraph, at_roughly: original_range) do
       bounds = allowed_range(original_range, String.length(text))
 
@@ -60,6 +60,9 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
       end
     end
 
+  end
+
+  private do
     # Helpers
 
     def two_gaps_within(text, obeying: bounds) do
@@ -108,5 +111,4 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
       left..right
     end
   end
-
 end

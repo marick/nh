@@ -6,9 +6,9 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
   
   def para(text, cursor \\ 1), do: %{text: text, cursor: cursor}
 
-  describe "locating a moving fragment" do
+  describe "locating an old fragment is a possibly-edited paragraph" do
     
-    test "the fragment is not edited" do 
+    test "the fragment itself is unchanged; it might have moved" do 
       template = "0123456\n\n9abcd\n\ngh\n"
       original_range = 9..13
       
@@ -31,7 +31,7 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
       move_left.(3) |> returns.(:error)
     end
 
-    test "changes to the fragment: all errors" do
+    test "changes to the fragment length will cause the fragment to be rejected" do
       original_range =             5..13
       template =           "___\n\n123456789\n\n___"
       char_deleted =       "___\n\n12345678\n\n___"
@@ -48,15 +48,15 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
         assert UT.grip_fragment(para(text), at_roughly: original_range) == :error
       end
       
-      # Just confirm the template works when unchanged
-      assert UT.grip_fragment(para(template), at_roughly: original_range) == {:ok, 5..13}
       expect_error.(char_deleted)
       expect_error.(fragment_split)
       expect_error.(front_broken)
       expect_error.(back_broken)
       expect_error.(no_fragment_at_all)
-    end
 
+      # Just confirm the template works when unchanged
+      assert UT.grip_fragment(para(template), at_roughly: original_range) == {:ok, original_range}
+    end
 
     test "finally, it is suspicious if the cursor is in - or near - the fragment." do
       template =           "_\n\n345\n\n_"
@@ -74,20 +74,22 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
     end
   end
 
-  # the search bounds are twice the original fragment (half the fragment on both sides)
-  # with enouggh room for two gap characters on either end.
-  test "the fragment is allowed to move but not so much" do 
-    returns = run_and_assert(&(UT.allowed_range(&1, 100)))
+  describe "some grip-fragment utilities" do 
 
-    6..7  |> returns.(3..10)
-    6..8  |> returns.(3..11)  # rounds toward zero
-    5..8  |> returns.(1..12)
-
-    6..6  |> returns.(4..8)  # silly
-
-    # Don't exceed boundaries
-    96..99  |> returns.(92..100)
-    1..4  |> returns.(0..8)
+    # the search bounds are twice the original fragment (half the fragment on both sides)
+    # with enouggh room for two gap characters on either end.
+    test "the fragment is allowed to move but not so much" do 
+      returns = run_and_assert(&(UT.allowed_range(&1, 100)))
+      
+      6..7  |> returns.(3..10)
+      6..8  |> returns.(3..11)  # rounds toward zero
+      5..8  |> returns.(1..12)
+      
+      6..6  |> returns.(4..8)  # silly
+      
+      # Don't exceed boundaries
+      96..99  |> returns.(92..100)
+      1..4  |> returns.(0..8)
+    end
   end
 end
-
