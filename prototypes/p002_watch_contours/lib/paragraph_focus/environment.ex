@@ -24,6 +24,11 @@ defmodule AppAnimal.ParagraphFocus.Environment do
     {:reply, result, paragraph_state}
   end
 
+  @impl true
+  def handle_cast({:apply_to_self, f}, paragraph_state) do
+    {:noreply, f.(paragraph_state)}
+  end
+
   def log_text(state) do
     Logger.info("has #{visible_cursor(state)}", newlines: :visible)
   end

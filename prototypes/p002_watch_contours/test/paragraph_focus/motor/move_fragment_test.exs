@@ -2,9 +2,33 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
   use ExUnit.Case
   alias AppAnimal.ParagraphFocus.Motor.MoveFragment, as: UT
   import FlowAssertions.TabularA
-  # import FlowAssertions.MiscA
+  import FlowAssertions.MapA
   
   def para(text, cursor \\ 1), do: %{text: text, cursor: cursor}
+
+
+  describe "a paragraph transformer" do
+    
+    test "a typical success case" do
+      # Imagine the process was triggered with this text: "012\n\n5678\n\nbcd\n"
+      # Therefore:
+      original_range = 5..8
+
+      # Some editing may have happened:
+      changed_paragraph = para("__012\n\n5678\n\nbcd\n", 13)
+
+
+      transformer = UT.make_paragraph_transformer(original_range)
+      changed_paragraph
+      |> transformer.()
+      |> assert_fields(text: "__012\n\nbcd\n",
+                       fragments: ["\n5678\n"],
+                       cursor: 7)
+    end
+    
+  end
+
+  
 
   describe "locating an old fragment is a possibly-edited paragraph" do
     
@@ -109,14 +133,15 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
     end
   end
 
-  describe "moving the fragment" do
-    test "the cursor is safely before the fragment" do 
-      # paragraph = %{text: "\n\n2345\n\n8\n\nbc", cursor: 1}
-      # disassembled = UT.prepare_to_move(paragraph.text, 8..8)
-  
-      # moved = UT.move(paragraph, 
-    end    
-    
-  end
-  
+  test "stashing fragments" do
+    paragraph = para("paragraph text irrelevant")
+    refute Map.has_key?(paragraph, :fragments)
+
+    paragraph
+    |> UT.stash_fragment("\nfragment 1\n")
+    |> assert_field(fragments: ["\nfragment 1\n"])
+
+    |> UT.stash_fragment("\n2\n")
+    |> assert_field(fragments: ["\n2\n", "\nfragment 1\n"])
+  end    
 end

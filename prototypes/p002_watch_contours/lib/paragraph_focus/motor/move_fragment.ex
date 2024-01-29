@@ -1,6 +1,5 @@
 defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
   alias AppAnimal.ParagraphFocus.{Environment, Control}
-  alias AppAnimal.WithoutReply
   require Logger
   use Private
 
@@ -11,21 +10,25 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
 
   def activate({:text, original_fragment_range}) do
     Logger.info("will remove fragment originally at #{inspect original_fragment_range}")
-
-    [@summary, WithoutReply] # go keep from warning about unused aliases.
+    GenServer.cast(@summary.downstream, {:apply_to_self, make_paragraph_transformer(original_fragment_range)})
   end
 
   def make_paragraph_transformer(original_fragment_range) do
-    fn paragraph ->
+    fn original_paragraph ->
       with(
-        {:ok, _range_to_lift} <-
-          grip_fragment(paragraph, at_roughly: original_fragment_range)
-        
+        {:ok, range_to_extract} <-
+          grip_fragment(original_paragraph, at_roughly: original_fragment_range),
+        {shortened_paragraph, fragment} =
+          extract_fragment(original_paragraph, at: range_to_extract),
+        next_paragraph =
+          stash_fragment(shortened_paragraph, fragment)
       ) do
-        paragraph
+        Logger.info("stashed fragment #{inspect fragment} off to the side of #{inspect next_paragraph.text}")
+        next_paragraph
       else
         :error ->
-          paragraph
+          Logger.info("something complicated about the fragment")
+          original_paragraph
       end
     end
   end
@@ -77,6 +80,10 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
         %{paragraph | text: new_text, cursor: new_cursor},
         fragment
       }
+    end
+
+    def stash_fragment(paragraph, fragment) do
+      Map.update(paragraph, :fragments, [fragment], &([fragment | &1]))
     end
   end
   
