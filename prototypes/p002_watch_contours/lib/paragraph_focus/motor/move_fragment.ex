@@ -23,7 +23,8 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
         next_paragraph =
           stash_fragment(shortened_paragraph, fragment)
       ) do
-        Logger.info("stashed fragment #{inspect fragment} off to the side of #{inspect next_paragraph.text}")
+        Logger.info("paragraph is now #{inspect next_paragraph.text}")
+        Logger.info("stashed fragment #{inspect fragment} off to the side")
         next_paragraph
       else
         :error ->
