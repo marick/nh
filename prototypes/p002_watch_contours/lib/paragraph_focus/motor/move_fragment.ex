@@ -19,7 +19,7 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
         {:ok, range_to_extract} <-
           grip_fragment(original_paragraph, at_roughly: original_fragment_range),
         {shortened_paragraph, fragment} =
-          extract_fragment(original_paragraph, at: range_to_extract),
+          lift_fragment(original_paragraph, at: range_to_extract),
         next_paragraph =
           stash_fragment(shortened_paragraph, fragment)
       ) do
@@ -63,7 +63,7 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
       end
     end
 
-    def extract_fragment(paragraph, at: fragment_first..fragment_last) do
+    def lift_fragment(paragraph, at: fragment_first..fragment_last) do
       first_split_point = fragment_first-1
       second_split_point = fragment_last+2
       

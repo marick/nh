@@ -120,14 +120,14 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
   describe "extracting the fragment" do 
     test "the cursor is before the fragment" do
       paragraph = para("\n\n2345\n\n89a\n\ndef\n", 5) # 6 or 7 is too close to the fragment.
-      {new_paragraph, fragment} = UT.extract_fragment(paragraph, at: 8..10)
+      {new_paragraph, fragment} = UT.lift_fragment(paragraph, at: 8..10)
       assert new_paragraph == para("\n\n2345\n\ndef\n", 5)
       assert fragment == "\n89a\n"
     end
 
     test "the cursor is after the fragment" do
       paragraph = para("012\n\n\n6789\n\nc", 12) # 10 and 11 are too close
-      {new_paragraph, fragment} = UT.extract_fragment(paragraph, at: 6..9)
+      {new_paragraph, fragment} = UT.lift_fragment(paragraph, at: 6..9)
       assert new_paragraph == para("012\n\n\nc", 6)
       assert fragment == "\n6789\n"
     end
