@@ -1,6 +1,6 @@
 defmodule AppAnimal.ParagraphFocus.Motor.MarkBigEdit do
   alias AppAnimal.ParagraphFocus.{Environment, Control}
-  alias AppAnimal.WithoutReply
+  alias AppAnimal.Neural.WithoutReply
   require Logger
 
   @summary %{mechanism: :mover,

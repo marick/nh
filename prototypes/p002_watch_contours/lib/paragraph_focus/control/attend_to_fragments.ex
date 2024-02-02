@@ -2,7 +2,7 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToFragments do
   alias AppAnimal.ParagraphFocus.{Control, Perceptual, Motor}
   import Perceptual.EdgeDetection, only: [edge_string: 1]
   import Control.Util
-  alias AppAnimal.WithoutReply
+  alias AppAnimal.Neural.WithoutReply
   use Private
   require Logger
 

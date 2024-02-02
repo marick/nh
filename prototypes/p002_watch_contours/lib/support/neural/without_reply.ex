@@ -1,4 +1,4 @@
-defmodule AppAnimal.WithoutReply do
+defmodule AppAnimal.Neural.WithoutReply do
   def activate(task_module),
       do: activate_with_args(task_module, [])
   def activate(task_module, transmitting: arg),

@@ -1,7 +1,7 @@
 defmodule AppAnimal.ParagraphFocus.Control.AttendToEditing do
   alias AppAnimal.ParagraphFocus.{Control, Perceptual, Motor}
   import Control.Util
-  alias AppAnimal.WithoutReply
+  alias AppAnimal.Neural.WithoutReply
   require Logger
 
   @summary %{mechanism: :gate,

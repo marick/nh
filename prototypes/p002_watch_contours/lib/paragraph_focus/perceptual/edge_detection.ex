@@ -1,7 +1,7 @@
 defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeDetection do
   use Private
   require Logger
-  alias AppAnimal.WithoutReply
+  alias AppAnimal.Neural.WithoutReply
   alias AppAnimal.ParagraphFocus.{Environment, Control}
 
 

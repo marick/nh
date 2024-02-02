@@ -2,8 +2,8 @@ defmodule AppAnimal.ParagraphFocus do
   use GenServer
   require Logger
 
-   alias AppAnimal.ParagraphFocus.{Environment, Perceptual} #, Control, Motor}
-   alias AppAnimal.TimedTaskStarter
+   alias AppAnimal.ParagraphFocus.{Environment, Perceptual}
+   alias AppAnimal.Neural.Oscillator
    alias Perceptual.EdgeDetection
    require Logger
 
@@ -22,7 +22,7 @@ defmodule AppAnimal.ParagraphFocus do
     Environment.activate(paragraph_state)
     
     {:ok, _task_starter} =
-      TimedTaskStarter.poke(EdgeDetection, every: 5_000)
+      Oscillator.poke(EdgeDetection, every: 5_000)
     {:ok, :ok}
   end
 end

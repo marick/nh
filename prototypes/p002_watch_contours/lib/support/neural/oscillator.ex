@@ -1,5 +1,5 @@
-defmodule AppAnimal.TimedTaskStarter do
-  alias AppAnimal.WithoutReply
+defmodule AppAnimal.Neural.Oscillator do
+  alias AppAnimal.Neural.WithoutReply
   use GenServer
   require Logger
   
@@ -30,7 +30,7 @@ defmodule AppAnimal.TimedTaskStarter do
   end
 
   # These will catch ***all*** returns from un-awaited subtasks, including
-  # those started within subtasks.
+  # those started, recursively, within subtasks.
   @impl true
   def handle_info({_ref, _result}, state) do
     {:noreply, state}
