@@ -13,6 +13,12 @@ defmodule P001ParagraphSplitter.MixProject do
 
   # Run "mix help compile.app" to learn about applications.
   def application do
+    IO.puts("===================")
+    IO.puts("===================")
+    IO.puts("LATER CHANGES MEAN THIS WON'T WORK.")
+    IO.puts("You want the 'v1.0' tag")
+    IO.puts("===================")
+    IO.puts("===================")
     [
       extra_applications: [:logger],
       mod: {AppAnimal, []},
@@ -22,7 +28,7 @@ defmodule P001ParagraphSplitter.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:common, path: "../common"}
+      ###### {:common, path: "../common"}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]

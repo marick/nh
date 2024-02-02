@@ -1,11 +1,13 @@
+## Used to configure Logger. See root/config/config.exs
+
 defmodule MyFormat do
-  alias AppAnimal.PrettyModule
+  alias AppAnimal.Pretty
   use Private
   
   def format(_level, message, _timestamp, metadata) do
     message = format(message, metadata)
     {module, _function, _arity} = Keyword.get(metadata, :mfa)
-    module_name = PrettyModule.terse(module) |> Macro.underscore
+    module_name = Pretty.Module.terse(module) |> Macro.underscore
     [spacing_before(module_name), module_name, "  ", message, "\n"]
   end
 

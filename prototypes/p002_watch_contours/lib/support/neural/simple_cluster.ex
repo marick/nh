@@ -1,6 +1,7 @@
-defmodule AppAnimal.NeuralCluster do
+defmodule AppAnimal.Neural.SimpleCluster do
   alias AppAnimal.PrettyModule
 
+  ### This is just a placeholder for some potential future work.
   
   defmacro __using__(_args) do
     quote do

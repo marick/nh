@@ -1,10 +1,10 @@
-defmodule AppAnimal.PrettyModuleTest do
+defmodule AppAnimal.Pretty.ModuleTest do
   use ExUnit.Case
-  alias AppAnimal.PrettyModule
+  alias AppAnimal.Pretty
   import FlowAssertions.TabularA
 
   test "terse display for modules" do
-    becomes = run_and_assert(&PrettyModule.terse/1)
+    becomes = run_and_assert(&Pretty.Module.terse/1)
 
     A.B.C  |> becomes.("B.C")
     A.B    |> becomes.("A.B")
@@ -15,7 +15,7 @@ defmodule AppAnimal.PrettyModuleTest do
   end
 
   test "minimal display for modules" do
-    becomes = run_and_assert(&PrettyModule.minimal/1)
+    becomes = run_and_assert(&Pretty.Module.minimal/1)
 
     A.B.C  |> becomes.("C")
     A.B    |> becomes.("B")
@@ -26,7 +26,7 @@ defmodule AppAnimal.PrettyModuleTest do
   end
 
   test "terse and minimal work for lists" do
-    assert PrettyModule.terse(  [A.B.C]) == "[B.C]"
-    assert PrettyModule.minimal([A.B.C]) ==   "[C]"
+    assert Pretty.Module.terse(  [A.B.C]) == "[B.C]"
+    assert Pretty.Module.minimal([A.B.C]) ==   "[C]"
   end
 end

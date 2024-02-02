@@ -1,4 +1,4 @@
-defmodule AppAnimal.ParagraphFocus.AttendToFragmentsTest do
+defmodule AppAnimal.Pretty.FormatterTest do
   use ExUnit.Case
   alias MyFormat, as: UT
   import FlowAssertions.TabularA

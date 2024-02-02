@@ -1,4 +1,4 @@
-defmodule AppAnimal.PrettyModule do
+defmodule AppAnimal.Pretty.Module do
   use Private
   
   def terse(arg) when is_atom(arg),
