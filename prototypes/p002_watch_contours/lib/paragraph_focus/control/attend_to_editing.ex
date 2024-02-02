@@ -6,7 +6,7 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToEditing do
 
   @summary %{mechanism: :gate,
              upstream: Perceptual.EdgeDetection,
-             downstream: [Motor.MarkAsEditing]
+             downstream: [Motor.MarkBigEdit]
    }
 
   def activate(earlier_results) do

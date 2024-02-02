@@ -1,4 +1,4 @@
-defmodule AppAnimal.ParagraphFocus.Motor.MarkAsEditing do
+defmodule AppAnimal.ParagraphFocus.Motor.MarkBigEdit do
   alias AppAnimal.ParagraphFocus.{Environment, Control}
   alias AppAnimal.WithoutReply
   require Logger
