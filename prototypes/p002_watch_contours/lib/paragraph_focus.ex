@@ -14,7 +14,8 @@ defmodule AppAnimal.ParagraphFocus do
    end
 
 
-   # Server
+  # Server
+  
 
   @impl true
   def init(paragraph_state) do

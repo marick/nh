@@ -17,23 +17,12 @@ defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeDetection do
   end
   
   def edge_structure(string) do
-    # I could do this with streams if I cared about efficiency
+    # Three passes over the string, whee!
     parts = decompose(string)
     labels = classify(parts)
     ranges = ranges(parts)
 
     List.zip([labels, ranges])
-  end
-
-  def edge_string(structure) do
-    classifier = fn
-      {:text, _} -> "\u25A0"
-      {:gap,  _} -> "_"
-    end
-
-    structure
-    |> Enum.map(classifier)
-    |> Enum.join
   end
 
   private do
@@ -68,6 +57,18 @@ defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeDetection do
       |> elem(1)
       |> Enum.reverse
     end
+  end
+
+
+  def edge_string(structure) do
+    classifier = fn
+      {:text, _} -> "\u25A0"
+      {:gap,  _} -> "_"
+    end
+    
+    structure
+    |> Enum.map(classifier)
+    |> Enum.join
   end
 end
 
