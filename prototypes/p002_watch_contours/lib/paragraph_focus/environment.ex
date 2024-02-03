@@ -1,6 +1,7 @@
 defmodule AppAnimal.ParagraphFocus.Environment do 
   use GenServer
   require Logger
+  alias AppAnimal.Pretty
 
   def activate(paragraph_state) do
     {:ok, _pid} = start_link(paragraph_state)
@@ -30,11 +31,6 @@ defmodule AppAnimal.ParagraphFocus.Environment do
   end
 
   def log_text(state) do
-    Logger.info("has #{visible_cursor(state)}", newlines: :visible)
-  end
-
-  def visible_cursor(%{text: text, cursor: cursor}) do
-    {prefix, suffix} = String.split_at(text, cursor)
-    "'#{prefix}\u2609\u2609#{suffix}'"
+    Logger.info("has #{Pretty.Paragraph.lines(state)}", newlines: :visible)
   end
 end

@@ -1,5 +1,6 @@
 defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
   alias AppAnimal.ParagraphFocus.{Environment, Control}
+  alias AppAnimal.Pretty
   require Logger
   use Private
 
@@ -23,7 +24,7 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
         next_paragraph =
           stash_fragment(shortened_paragraph, fragment)
       ) do
-        Logger.info("paragraph is now #{inspect next_paragraph.text}")
+        Logger.info("paragraph is now #{Pretty.Paragraph.lines(next_paragraph)}")
         Logger.info("stashed fragment #{inspect fragment} off to the side")
         next_paragraph
       else
