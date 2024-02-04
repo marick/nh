@@ -8,8 +8,8 @@ defmodule AppAnimal.Neural.WithoutReply do
     Enum.map(modules, &(activate_with_args &1, parameter_list))
   end
 
-  defp activate_with_args(module, task) do
-    runner = fn -> apply(module, :activate, task) end
+  defp activate_with_args(module, arglist) do
+    runner = fn -> apply(module, :activate, arglist) end
     Task.async(runner)
   end
 end

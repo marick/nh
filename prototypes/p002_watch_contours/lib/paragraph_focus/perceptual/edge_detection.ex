@@ -11,9 +11,9 @@ defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeDetection do
    }
   
   def activate() do
-    result = GenServer.call(@summary.upstream, {:run_for_result, &edge_structure/1})
-    Logger.info("edge structure: #{edge_string result}")
-    WithoutReply.activate(@summary.downstream, transmitting: result)
+    paragraph_shape = GenServer.call(@summary.upstream, {:run_for_result, &edge_structure/1})
+    Logger.info("edge structure: #{edge_string paragraph_shape}")
+    WithoutReply.activate(@summary.downstream, transmitting: paragraph_shape)
   end
   
   def edge_structure(string) do
