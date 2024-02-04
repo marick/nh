@@ -28,16 +28,4 @@ defmodule AppAnimal.Neural.Oscillator do
     tick_after(state.delay)
     {:noreply, state}
   end
-
-  # These will catch ***all*** returns from un-awaited subtasks, including
-  # those started, recursively, within subtasks.
-  @impl true
-  def handle_info({_ref, _result}, state) do
-    {:noreply, state}
-  end
-  
-  @impl true
-  def handle_info({:DOWN, _ref, :process, _pid, _reason}, state) do
-    {:noreply, state}
-  end
 end

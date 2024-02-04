@@ -10,7 +10,7 @@ defmodule AppAnimal.Neural.WithoutReply do
 
   defp activate_with_args(module, arglist) do
     runner = fn -> apply(module, :activate, arglist) end
-    Task.async(runner)
+    Task.start(runner)
   end
 end
   
