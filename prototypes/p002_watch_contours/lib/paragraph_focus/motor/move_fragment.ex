@@ -12,7 +12,7 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
   def activate({:text, original_fragment_range}) do
     Logger.info("will remove fragment originally at #{inspect original_fragment_range}")
     updater =  make_paragraph_updater(original_fragment_range)
-    GenServer.cast(@summary.downstream, [update_with: updater])
+    GenServer.cast(@summary.downstream, update_with: updater)
   end
 
   def make_paragraph_updater(original_fragment_range) do
