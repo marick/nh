@@ -1,4 +1,4 @@
-defmodule AppAnimal.Neural.SimpleCluster do
+defmodule AppAnimal.Neural.LinearCluster do
   alias AppAnimal.PrettyModule
 
   ### This is just a placeholder for some potential future work.
