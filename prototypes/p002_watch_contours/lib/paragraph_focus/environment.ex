@@ -20,13 +20,13 @@ defmodule AppAnimal.ParagraphFocus.Environment do
   end
 
   @impl true
-  def handle_call({:run_for_result, f}, _from, paragraph_state) do
+  def handle_call([summarize_with: f], _from, paragraph_state) do
     result = f.(paragraph_state.text)
     {:reply, result, paragraph_state}
   end
 
   @impl true
-  def handle_cast({:apply_to_self, f}, paragraph_state) do
+  def handle_cast([update_with: f], paragraph_state) do
     {:noreply, f.(paragraph_state)}
   end
 

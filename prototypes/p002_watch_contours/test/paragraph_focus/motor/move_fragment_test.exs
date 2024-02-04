@@ -18,9 +18,9 @@ defmodule AppAnimal.ParagraphFocus.MoveFragmentTest do
       changed_paragraph = para("__012\n\n5678\n\nbcd\n", 13)
 
 
-      transformer = UT.make_paragraph_transformer(original_range)
+      updater = UT.make_paragraph_updater(original_range)
       changed_paragraph
-      |> transformer.()
+      |> updater.()
       |> assert_fields(text: "__012\n\nbcd\n",
                        fragments: ["\n5678\n"],
                        cursor: 7)
