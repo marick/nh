@@ -1,11 +1,10 @@
 defmodule AppAnimal.ParagraphFocus.Control.AttendToFragments do
-  alias AppAnimal.ParagraphFocus.{Control, Perceptual, Motor}
+  use AppAnimal.ParagraphFocus
   import Perceptual.EdgeDetection, only: [edge_string: 1]
   import Control.Util
   alias AppAnimal.Neural.WithoutReply
   use Private
-  require Logger
-
+  
   @summary %{mechanism: :gate,
              upstream: Perceptual.EdgeDetection,
              downstream: [Motor.MoveFragment]

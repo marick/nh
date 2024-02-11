@@ -25,4 +25,13 @@ defmodule AppAnimal.ParagraphFocus do
       Oscillator.poke(EdgeDetection, every: 5_000)
     {:ok, :ok}
   end
+
+
+  defmacro __using__(_) do
+    quote do
+      alias AppAnimal.ParagraphFocus.{Control, Perceptual, Motor, Switchboard}
+      require Logger
+    end
+  end
 end
+

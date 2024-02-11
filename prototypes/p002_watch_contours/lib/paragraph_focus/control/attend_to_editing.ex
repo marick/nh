@@ -1,21 +1,15 @@
 defmodule AppAnimal.ParagraphFocus.Control.AttendToEditing do
-  alias AppAnimal.ParagraphFocus.{Control, Perceptual, Motor}
+  use AppAnimal.ParagraphFocus
+  use AppAnimal.Neural.LinearCluster, switchboard: Switchboard
   import Control.Util
-  alias AppAnimal.Neural.WithoutReply
-  require Logger
-
-  @summary %{mechanism: :gate,
-             upstream: Perceptual.EdgeDetection,
-             downstream: [Motor.MarkBigEdit]
-   }
-
-  def activate(earlier_results) do
-    if editing?(earlier_results) do
-      WithoutReply.activate(@summary.downstream)
+  
+  def activate(upstream_results) do
+    if editing?(upstream_results) do
+      activate_downstream()
     else
       Logger.info("nope")
     end
-    string = Perceptual.EdgeDetection.edge_string(earlier_results)
+    string = Perceptual.EdgeDetection.edge_string(upstream_results)
     Logger.info("looking to see if #{string} indicates editing")
   end
                 
