@@ -31,6 +31,7 @@ defmodule AppAnimal.ParagraphFocus do
     quote do
       alias AppAnimal.ParagraphFocus.{Control, Perceptual, Motor, Switchboard}
       require Logger
+      use Private
     end
   end
 end
