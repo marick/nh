@@ -3,11 +3,23 @@ defmodule AppAnimal.ParagraphFocus.Switchboard do
   alias AppAnimal.ParagraphFocus.{Control, Motor}
   alias AppAnimal.Neural.WithoutReply
 
-  def activate_downstream(Control.AttendToEditing) do
-    WithoutReply.activate(Motor.MarkBigEdit)
+
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
-  def activate_downstream(Control.AttendToFragments, transmitting: small_data) do
+
+  def init(:ok) do
+
+  end
+
+  
+
+  def activate_downstream(Control.AttendToEditing, :ok) do
+    WithoutReply.activate(Motor.MarkBigEdit, transmitting: :ok)
+  end
+  
+  def activate_downstream(Control.AttendToFragments, small_data) do
     WithoutReply.activate(Motor.MoveFragment, transmitting: small_data)
   end
 end

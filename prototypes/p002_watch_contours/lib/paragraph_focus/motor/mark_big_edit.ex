@@ -8,7 +8,7 @@ defmodule AppAnimal.ParagraphFocus.Motor.MarkBigEdit do
              downstream: Environment
    }
 
-  def activate() do
+  def activate(:ok) do
     Logger.info("unimplemented")
     [@summary, WithoutReply] # go keep from warning about unused aliases.
   end

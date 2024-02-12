@@ -6,7 +6,7 @@ defmodule AppAnimal.ParagraphFocus.AttendToEditing do
 
   test "determining if editing" do
     returns = run_and_assert(
-        	&(EdgeDetection.edge_structure(&1) |> UT.editing?))
+        	&(EdgeDetection.edge_structure(&1) |> UT.activate_downstream?))
 
     "abc\n"         |> returns.(false)
     "abc\n\ndef"    |> returns.(true)

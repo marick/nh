@@ -1,18 +1,20 @@
 defmodule AppAnimal.ParagraphFocus.Control.AttendToFragments do
   use AppAnimal.ParagraphFocus
-  use AppAnimal.Neural.LinearCluster, switchboard: Switchboard
+  use Neural.Gate, switchboard: Switchboard
+
   import Perceptual.EdgeDetection, only: [edge_string: 1]
   import Control.Util
-  
-  def activate(edges) do
-    Logger.info("looking for fragments in #{edge_string edges}")
-    if has_fragments?(edges) do
-      activate_downstream(transmitting: first_fragment_range(edges))
-    else
-      Logger.info("nope")
-    end
+
+  @impl true
+  def description_of_check(edges) do
+    "are there fragments in #{edge_string edges}?"
   end
-                
+
+  @impl true
+  def activate_downstream?(edges), do: has_fragments?(edges)
+  @impl true
+  def downstream_data(edges), do: first_fragment_range(edges)
+
   private do 
     def has_fragments?(edges) do
       text_count(edges) > 2
@@ -25,3 +27,8 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToFragments do
     end
   end
 end
+  
+
+
+
+

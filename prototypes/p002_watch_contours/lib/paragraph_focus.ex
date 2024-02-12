@@ -30,6 +30,7 @@ defmodule AppAnimal.ParagraphFocus do
   defmacro __using__(_) do
     quote do
       alias AppAnimal.ParagraphFocus.{Control, Perceptual, Motor, Switchboard}
+      alias AppAnimal.Neural
       require Logger
       use Private
     end
