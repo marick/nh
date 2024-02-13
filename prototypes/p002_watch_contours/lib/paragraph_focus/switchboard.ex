@@ -1,25 +1,31 @@
 defmodule AppAnimal.ParagraphFocus.Switchboard do
   require Logger
   alias AppAnimal.ParagraphFocus.{Control, Motor}
-  alias AppAnimal.Neural.WithoutReply
+  
 
-
-  def start_link(_) do
+  def start_link(:ok) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
+  # gate(Control.AttendToEditing)
+  # |> mover(Motor.MarkBigEdit)
 
   def init(:ok) do
-
+    state = 
+      %{}
+      |> Map.put(Control.AttendToEditing, %{})
+      |> put_in([Control.AttendToEditing, :downstream], [Motor.MarkBigEdit])
+      
+      |> Map.put(Control.AttendToFragments, %{})
+      |> put_in([Control.AttendToFragments, :downstream], [Motor.MoveFragment])
+    {:ok, state}
   end
 
-  
-
-  def activate_downstream(Control.AttendToEditing, :ok) do
-    WithoutReply.activate(Motor.MarkBigEdit, transmitting: :ok)
-  end
-  
-  def activate_downstream(Control.AttendToFragments, small_data) do
-    WithoutReply.activate(Motor.MoveFragment, transmitting: small_data)
+  def handle_cast([transmit: small_data, to_downstream_of: module], state) do
+    for receiver <- state[module].downstream do
+      runner = fn -> apply(receiver, :activate, [small_data]) end
+      Task.start(runner)
+    end
+    {:noreply, state}
   end
 end

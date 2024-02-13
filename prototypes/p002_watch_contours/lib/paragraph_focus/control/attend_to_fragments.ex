@@ -3,17 +3,7 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToFragments do
   use Neural.Gate, switchboard: Switchboard
 
   import Perceptual.EdgeDetection, only: [edge_string: 1]
-  import Control.Util
-
-  @impl true
-  def description_of_check(edges) do
-    "are there fragments in #{edge_string edges}?"
-  end
-
-  @impl true
-  def activate_downstream?(edges), do: has_fragments?(edges)
-  @impl true
-  def downstream_data(edges), do: first_fragment_range(edges)
+  import Control.Util, only: [text_count: 1]
 
   private do 
     def has_fragments?(edges) do
@@ -26,6 +16,20 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToFragments do
       |> Enum.at(1)
     end
   end
+
+  # boilerplate
+
+  @impl true
+  def description_of_check(edges) do
+    "are there fragments in #{edge_string edges}?"
+  end
+
+  @impl true
+  def activate_downstream?(edges), do: has_fragments?(edges)
+  @impl true
+  def downstream_data(edges), do: first_fragment_range(edges)
+
+  
 end
   
 

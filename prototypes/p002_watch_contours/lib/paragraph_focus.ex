@@ -2,7 +2,7 @@ defmodule AppAnimal.ParagraphFocus do
   use GenServer
   require Logger
 
-  alias AppAnimal.ParagraphFocus.{Environment, Perceptual}
+  alias AppAnimal.ParagraphFocus.{Environment, Perceptual, Switchboard}
   alias AppAnimal.Neural.Oscillator
   alias Perceptual.EdgeDetection
   require Logger
@@ -20,6 +20,8 @@ defmodule AppAnimal.ParagraphFocus do
   def init(paragraph_state) do
     Logger.info("focus on a new paragraph")
     Environment.activate(paragraph_state)
+
+    {:ok, _pid} = Switchboard.start_link(:ok)
     
     {:ok, _task_starter} =
       Oscillator.poke(EdgeDetection, every: 5_000)
