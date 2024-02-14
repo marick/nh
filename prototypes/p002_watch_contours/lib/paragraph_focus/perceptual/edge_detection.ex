@@ -1,20 +1,10 @@
 defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeDetection do
   use Private
   require Logger
-  alias AppAnimal.Neural.WithoutReply
-  alias AppAnimal.ParagraphFocus.{Environment, Control}
-
-
-  @summary %{mechanism: :flow_emulator,
-             upstream: Environment,
-             downstream: [Control.AttendToEditing, Control.AttendToFragments]
-   }
-  
-  def activate() do
-    paragraph_shape = GenServer.call(@summary.upstream, summarize_with: &edge_structure/1)
-    Logger.info("edge structure: #{edge_string paragraph_shape}")
-    WithoutReply.activate(@summary.downstream, transmitting: paragraph_shape)
-  end
+  alias AppAnimal.ParagraphFocus.{Environment}
+  use AppAnimal.Neural.AdjacentSummarizer,
+      environment: Environment,
+      switchboard: AppAnimal.ParagraphFocus.Switchboard
   
   def edge_structure(string) do
     # Three passes over the string, whee!

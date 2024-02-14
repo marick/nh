@@ -1,5 +1,6 @@
 defmodule AppAnimal.ParagraphFocus.Switchboard do
   require Logger
+  alias AppAnimal.ParagraphFocus.Perceptual
   alias AppAnimal.ParagraphFocus.{Control, Motor}
   
 
@@ -18,6 +19,13 @@ defmodule AppAnimal.ParagraphFocus.Switchboard do
       
       |> Map.put(Control.AttendToFragments, %{})
       |> put_in([Control.AttendToFragments, :downstream], [Motor.MoveFragment])
+
+      |> Map.put(Perceptual.EdgeDetection, %{})
+      |> put_in([Perceptual.EdgeDetection, :downstream], [Control.AttendToEditing, Control.AttendToFragments])
+
+      |> Map.put(Environment, %{})
+      |> put_in([Environment, :downstream], [Perceptual.EdgeDetection]) 
+
     {:ok, state}
   end
 
