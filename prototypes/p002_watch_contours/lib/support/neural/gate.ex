@@ -8,6 +8,11 @@ defmodule AppAnimal.Neural.Gate do
     quote do
       use AppAnimal.Neural.LinearCluster, switchboard: unquote(switchboard)
       @behaviour AppAnimal.Neural.Gate
+
+      def do_the_start_thing(small_data) do
+        runner = fn -> apply(__MODULE__, :activate, [small_data]) end
+        Task.start(runner)
+      end
       
       def description_of_check(_upstream_data) do
         :none
