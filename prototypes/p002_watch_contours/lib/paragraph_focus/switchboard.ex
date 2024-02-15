@@ -5,15 +5,12 @@ defmodule AppAnimal.ParagraphFocus.Switchboard do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
-  # gate(Control.AttendToEditing)
-  # |> mover(Motor.MarkBigEdit)
-
   def init(:ok) do
     state = 
       %{}
       |> cluster(Environment, downstream: Perceptual.EdgeDetection)
       
-      |> cluster(Control.AttendToEditing, downstream: Motor.MarkBigEdit)
+      |> cluster(Control.AttendToEditing, downstream: Motor.MakeEditTypeExplicit)
       |> cluster(Control.AttendToFragments, downstream: Motor.MoveFragment)
       |> cluster(Perceptual.EdgeDetection,
                  downstream: [Control.AttendToEditing, Control.AttendToFragments])

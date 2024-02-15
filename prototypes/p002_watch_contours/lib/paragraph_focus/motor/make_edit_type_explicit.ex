@@ -1,4 +1,4 @@
-defmodule AppAnimal.ParagraphFocus.Motor.MarkBigEdit do
+defmodule AppAnimal.ParagraphFocus.Motor.MakeEditTypeExplicit do
   use AppAnimal.ParagraphFocus
   use GenServer
 
