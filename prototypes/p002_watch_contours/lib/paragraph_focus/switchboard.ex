@@ -8,7 +8,8 @@ defmodule AppAnimal.ParagraphFocus.Switchboard do
   def init(:ok) do
     state = 
       %{}
-      |> cluster(Environment, downstream: Perceptual.EdgeSummarizer)
+      # not actually needed
+      # |> cluster(Environment, downstream: Perceptual.EdgeSummarizer)
       
       |> cluster(Control.AttendToEditing, downstream: Motor.MakeEditTypeExplicit)
       |> cluster(Control.AttendToFragments, downstream: Motor.MoveFragment)
