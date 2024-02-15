@@ -1,17 +1,16 @@
 defmodule AppAnimal.ParagraphFocus.Motor.MarkBigEdit do
-  alias AppAnimal.ParagraphFocus.{Environment, Control}
-  alias AppAnimal.Neural.WithoutReply
-  require Logger
-
-  @summary %{mechanism: :mover,
-             upstream: Control.AttendToEditing,
-             downstream: Environment
-   }
+  use AppAnimal.ParagraphFocus
+  use GenServer
 
   def do_the_start_thing(_small_data), do: activate(:ok)
 
   def activate(:ok) do
+    GenServer.start_link(__MODULE__, :ok)
+  end
+
+
+  def init(:ok) do 
     Logger.info("unimplemented")
-    [@summary, WithoutReply] # go keep from warning about unused aliases.
+    {:ok, :ok}
   end
 end
