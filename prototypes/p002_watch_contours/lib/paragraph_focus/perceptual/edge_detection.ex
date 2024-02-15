@@ -1,10 +1,14 @@
 defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeDetection do
   use Private
-  require Logger
   alias AppAnimal.ParagraphFocus.{Environment}
   use AppAnimal.Neural.AdjacentSummarizer,
       environment: Environment,
       switchboard: AppAnimal.ParagraphFocus.Switchboard
+
+  def describe_summary(summary),
+      do: Logger.info("edge structure: #{edge_string summary}")        
+  
+  def summarize(text), do: edge_structure(text)
   
   def edge_structure(string) do
     # Three passes over the string, whee!

@@ -1,6 +1,7 @@
 defmodule AppAnimal.Neural.AdjacentSummarizer do
   @callback activate() :: none()
-  @callback downstream_data() :: any()
+  @callback summarize() :: any()
+  @callback describe_summary(any()) :: none()
   
   defmacro __using__(environment: environment, switchboard: switchboard) do
     quote do
@@ -8,15 +9,18 @@ defmodule AppAnimal.Neural.AdjacentSummarizer do
       @behaviour AppAnimal.Neural.AdjacentSummarizer
       
       def activate() do
-        paragraph_shape = downstream_data()
-        Logger.info("edge structure: #{edge_string paragraph_shape}")
+        paragraph_shape = GenServer.call(unquote(environment), summarize_with: &summarize/1)
+        describe_summary(paragraph_shape)
         activate_downstream(paragraph_shape)
       end
 
-      def downstream_data() do
-        GenServer.call(unquote(environment), summarize_with: &edge_structure/1)
+      def summarize() do
+        GenServer.call(unquote(environment), summarize_with: &summarize/1)
       end
-      defoverridable activate: 0, downstream_data: 0
+
+      def describe_summary(summary) do end
+
+      defoverridable activate: 0, summarize: 0, describe_summary: 1
     end
     
   end
