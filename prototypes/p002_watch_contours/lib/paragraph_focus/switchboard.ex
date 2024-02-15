@@ -1,5 +1,6 @@
 defmodule AppAnimal.ParagraphFocus.Switchboard do
   require Logger
+  alias AppAnimal.ParagraphFocus.Perceptual.EdgeDetection
   alias AppAnimal.ParagraphFocus.Perceptual
   alias AppAnimal.ParagraphFocus.{Control, Motor}
   
@@ -14,21 +15,26 @@ defmodule AppAnimal.ParagraphFocus.Switchboard do
   def init(:ok) do
     state = 
       %{}
-      |> Map.put(Control.AttendToEditing, %{})
-      |> put_in([Control.AttendToEditing, :downstream], [Motor.MarkBigEdit])
+      |> cluster(Environment, downstream: EdgeDetection)
       
-      |> Map.put(Control.AttendToFragments, %{})
-      |> put_in([Control.AttendToFragments, :downstream], [Motor.MoveFragment])
-
-      |> Map.put(Perceptual.EdgeDetection, %{})
-      |> put_in([Perceptual.EdgeDetection, :downstream], [Control.AttendToEditing, Control.AttendToFragments])
-
-      |> Map.put(Environment, %{})
-      |> put_in([Environment, :downstream], [Perceptual.EdgeDetection]) 
-
+      |> cluster(Control.AttendToEditing, downstream: Motor.MarkBigEdit)
+      |> cluster(Control.AttendToFragments, downstream: Motor.MoveFragment)
+      |> cluster(Perceptual.EdgeDetection,
+                 downstream: [Control.AttendToEditing, Control.AttendToFragments])
+      
     {:ok, state}
   end
 
+  def cluster(so_far, module, downstream: atom) when is_atom(atom) do
+    cluster(so_far, module, downstream: [atom])
+  end
+
+  def cluster(so_far, module, downstream: list) do
+    so_far
+    |> Map.put(module, %{})
+    |> put_in([module, :downstream], list)
+  end
+  
   def handle_cast([transmit: small_data, to_downstream_of: module], state) do
     for receiver <- state[module].downstream do
       runner = fn -> apply(receiver, :activate, [small_data]) end
