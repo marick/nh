@@ -1,10 +1,6 @@
 defmodule AppAnimal.ParagraphFocus.Switchboard do
-  require Logger
-  alias AppAnimal.ParagraphFocus.Perceptual.EdgeDetection
-  alias AppAnimal.ParagraphFocus.Perceptual
-  alias AppAnimal.ParagraphFocus.{Control, Motor}
+  use AppAnimal.ParagraphFocus
   
-
   def start_link(:ok) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
@@ -15,7 +11,7 @@ defmodule AppAnimal.ParagraphFocus.Switchboard do
   def init(:ok) do
     state = 
       %{}
-      |> cluster(Environment, downstream: EdgeDetection)
+      |> cluster(Environment, downstream: Perceptual.EdgeDetection)
       
       |> cluster(Control.AttendToEditing, downstream: Motor.MarkBigEdit)
       |> cluster(Control.AttendToFragments, downstream: Motor.MoveFragment)
