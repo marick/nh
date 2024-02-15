@@ -1,4 +1,4 @@
-defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeDetection do
+defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeSummarizer do
   use Private
   alias AppAnimal.ParagraphFocus.{Environment}
   use AppAnimal.Neural.AdjacentSummarizer,

@@ -1,12 +1,12 @@
 defmodule AppAnimal.ParagraphFocus.AttendToEditing do
   use ExUnit.Case
-  alias AppAnimal.ParagraphFocus.Perceptual.EdgeDetection
+  alias AppAnimal.ParagraphFocus.Perceptual.EdgeSummarizer
   alias AppAnimal.ParagraphFocus.Control.AttendToEditing, as: UT
   import FlowAssertions.TabularA
 
   test "determining if editing" do
     returns = run_and_assert(
-        	&(EdgeDetection.edge_structure(&1) |> UT.activate_downstream?))
+        	&(EdgeSummarizer.edge_structure(&1) |> UT.activate_downstream?))
 
     "abc\n"         |> returns.(false)
     "abc\n\ndef"    |> returns.(true)

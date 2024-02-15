@@ -10,7 +10,7 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToEditing do
   
   @impl true
   def description_of_check(upstream_data) do
-    string = Perceptual.EdgeDetection.edge_string(upstream_data)
+    string = Perceptual.EdgeSummarizer.edge_string(upstream_data)
     "does #{string} indicate? editing?"
   end
 end
