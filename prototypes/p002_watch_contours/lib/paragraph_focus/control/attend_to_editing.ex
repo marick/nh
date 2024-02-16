@@ -1,17 +1,17 @@
 defmodule AppAnimal.ParagraphFocus.Control.AttendToEditing do
   use AppAnimal.ParagraphFocus
-  use Neural.Gate, switchboard: Switchboard
-    import Control.Util, only: [text_count: 1]
+  use Neural.Summarizer, switchboard: Switchboard
+  import Control.Util, only: [text_count: 1]
 
   @impl true
-  def activate_downstream?(edges) do
-    text_count(edges) > 1
+  def summarize(edges) do
+    if text_count(edges) > 1, do: :big_edit, else: :plain_edit
   end
   
   @impl true
-  def description_of_check(upstream_data) do
+  def describe_transformation(upstream_data, summary) do
     string = Perceptual.EdgeSummarizer.edge_string(upstream_data)
-    "does #{string} indicate? editing?"
+    Logger.info("#{string} produces `#{inspect summary}`")
   end
 end
 

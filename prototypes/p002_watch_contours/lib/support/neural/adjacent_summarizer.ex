@@ -9,9 +9,9 @@ defmodule AppAnimal.Neural.AdjacentSummarizer do
       @behaviour AppAnimal.Neural.AdjacentSummarizer
       
       def activate() do
-        paragraph_shape = GenServer.call(unquote(environment), summarize_with: &summarize/1)
-        describe_summary(paragraph_shape)
-        activate_downstream(paragraph_shape)
+        summary = GenServer.call(unquote(environment), summarize_with: &summarize/1)
+        describe_summary(summary)
+        activate_downstream(summary)
       end
 
       def summarize() do

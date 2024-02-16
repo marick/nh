@@ -5,6 +5,11 @@ defmodule AppAnimal.Neural.LinearCluster do
       require Logger
       alias unquote(switchboard)
       
+      def do_the_start_thing(small_data) do
+        runner = fn -> apply(__MODULE__, :activate, [small_data]) end
+        Task.start(runner)
+      end
+      
       def activate_downstream(small_data) do
         message = [transmit: small_data, to_downstream_of: __MODULE__]
         GenServer.cast(unquote(switchboard), message)
