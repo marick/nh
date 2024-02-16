@@ -5,7 +5,7 @@ defmodule AppAnimal.Neural.LinearCluster do
       require Logger
       alias unquote(switchboard)
       
-      def do_the_start_thing(small_data) do
+      def start_appropriately(small_data) do
         runner = fn -> apply(__MODULE__, :activate, [small_data]) end
         Task.start(runner)
       end

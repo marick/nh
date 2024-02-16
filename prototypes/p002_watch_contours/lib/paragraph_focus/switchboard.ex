@@ -31,7 +31,7 @@ defmodule AppAnimal.ParagraphFocus.Switchboard do
   
   def handle_cast([transmit: small_data, to_downstream_of: module], state) do
     for receiver <- state[module].downstream do
-      receiver.do_the_start_thing(small_data)
+      receiver.start_appropriately(small_data)
     end
     {:noreply, state}
   end

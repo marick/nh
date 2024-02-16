@@ -9,7 +9,7 @@ defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
              downstream: Environment
    }
 
-  def do_the_start_thing(small_data), do: activate(small_data)
+  def start_appropriately(small_data), do: activate(small_data)
 
   def activate({:text, original_fragment_range}) do
     Logger.info("will remove fragment originally at #{inspect original_fragment_range}")

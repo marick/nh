@@ -2,7 +2,7 @@ defmodule AppAnimal.ParagraphFocus.Motor.MakeEditTypeExplicit do
   use AppAnimal.ParagraphFocus
   use GenServer
 
-  def do_the_start_thing(_small_data), do: activate(:ok)
+  def start_appropriately(_small_data), do: activate(:ok)
 
   def activate(:ok) do
     GenServer.start_link(__MODULE__, :ok)
