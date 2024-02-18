@@ -5,7 +5,9 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToEditing do
 
   @impl true
   def summarize(edges) do
-    if text_count(edges) > 1, do: :big_edit, else: :plain_edit
+    if text_count(edges) > 1,
+       do: :big_edit,
+       else: :plain_edit
   end
   
   @impl true
