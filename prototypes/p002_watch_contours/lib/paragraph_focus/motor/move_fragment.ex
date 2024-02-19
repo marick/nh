@@ -1,20 +1,12 @@
 defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
-  alias AppAnimal.ParagraphFocus.{Environment, Control}
+  use AppAnimal.ParagraphFocus
+  use Neural.LinearCluster, switchboard: Switchboard
   alias AppAnimal.Pretty
-  require Logger
-  use Private
-
-  @summary %{mechanism: :mover,
-             upstream: Control.AttendToFragments,
-             downstream: Environment
-   }
-
-  def start_appropriately(small_data), do: activate(small_data)
 
   def activate({:text, original_fragment_range}) do
     Logger.info("will remove fragment originally at #{inspect original_fragment_range}")
     updater =  make_paragraph_updater(original_fragment_range)
-    GenServer.cast(@summary.downstream, update_with: updater)
+    GenServer.cast(Environment, update_with: updater)
   end
 
   def make_paragraph_updater(original_fragment_range) do

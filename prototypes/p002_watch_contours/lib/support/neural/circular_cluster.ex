@@ -6,8 +6,7 @@ defmodule AppAnimal.Neural.CircularCluster do
       alias unquote(switchboard)
       
       def start_appropriately(small_data) do
-        runner = fn -> apply(__MODULE__, :activate, [small_data]) end
-        Task.start(runner)
+        GenServer.start_link(__MODULE__, small_data)
       end
       
       def activate_downstream(small_data) do

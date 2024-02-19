@@ -1,18 +1,11 @@
 defmodule AppAnimal.ParagraphFocus.Motor.MakeEditTypeExplicit do
   use AppAnimal.ParagraphFocus
-  use GenServer
-
-  def start_appropriately(small_data), do: activate(small_data)
-
-  def activate(signal) do
-    GenServer.start_link(__MODULE__, signal)
-  end
+  use AppAnimal.Neural.CircularCluster, switchboard: Switchboard
 
   # def tick_after(millis), do: Process.send_after(self(), :tick, millis)
 
   def init(signal) do 
     Logger.info("unimplemented for #{inspect signal}")
-    # tick_after(1_000)
     {:ok, signal}
   end
 
