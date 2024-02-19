@@ -16,6 +16,9 @@ defmodule AppAnimal.ParagraphFocus.Switchboard do
       |> cluster(Perceptual.EdgeSummarizer,
                  downstream: [Control.AttendToEditing, Control.AttendToFragments])
       
+      |> cluster(Motor.MoveFragment, downstream: [Environment])
+      |> cluster(Motor.MakeEditTypeExplicit, downstream: [Environment])
+      
     {:ok, state}
   end
 
