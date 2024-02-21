@@ -1,6 +1,7 @@
 defmodule AppAnimal.ParagraphFocus.Motor.MoveFragment do
   use AppAnimal.ParagraphFocus
-  use Neural.AdjacentMotor, environment: Environment, switchboard: Switchboard
+  use Neural.LinearCluster, switchboard: Switchboard
+  use Neural.AdjacentMotor, environment: Environment
   alias AppAnimal.Pretty
 
   def describe_action({:text, original_fragment_range}) do 

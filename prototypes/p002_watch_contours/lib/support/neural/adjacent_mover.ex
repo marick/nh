@@ -3,9 +3,8 @@ defmodule AppAnimal.Neural.AdjacentMotor do
   @callback describe_action(any()) :: none()
   @callback make_action(any()) :: (any() -> none())
   
-  defmacro __using__(environment: environment, switchboard: switchboard) do
+  defmacro __using__(environment: environment) do
     quote do
-      use AppAnimal.Neural.LinearCluster, switchboard: unquote(switchboard)
       @behaviour AppAnimal.Neural.AdjacentMotor
       
       def activate(data) do

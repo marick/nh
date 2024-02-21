@@ -3,9 +3,8 @@ defmodule AppAnimal.Neural.Summarizer do
   @callback summarize(any()) :: any()
   @callback describe_transformation(any(), any()) :: none()
   
-  defmacro __using__(switchboard: switchboard) do
+  defmacro __using__(_) do
     quote do
-      use AppAnimal.Neural.LinearCluster, switchboard: unquote(switchboard)
       @behaviour AppAnimal.Neural.Summarizer
       
       def activate(input) do

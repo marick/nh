@@ -1,6 +1,7 @@
 defmodule AppAnimal.ParagraphFocus.Control.AttendToFragments do
   use AppAnimal.ParagraphFocus
-  use Neural.Gate, switchboard: Switchboard
+  use Neural.LinearCluster, switchboard: Switchboard
+  use Neural.Gate
 
   import Perceptual.EdgeSummarizer, only: [edge_string: 1]
   import Control.Util, only: [text_count: 1]

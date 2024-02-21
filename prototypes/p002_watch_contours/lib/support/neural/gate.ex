@@ -4,9 +4,8 @@ defmodule AppAnimal.Neural.Gate do
   @callback activate(any()) :: none()
   @callback downstream_data(any()) :: any()
   
-  defmacro __using__(switchboard: switchboard) do
+  defmacro __using__(_) do
     quote do
-      use AppAnimal.Neural.LinearCluster, switchboard: unquote(switchboard)
       @behaviour AppAnimal.Neural.Gate
 
       def description_of_check(_upstream_data) do

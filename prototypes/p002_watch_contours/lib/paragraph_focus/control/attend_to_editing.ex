@@ -1,6 +1,7 @@
 defmodule AppAnimal.ParagraphFocus.Control.AttendToEditing do
   use AppAnimal.ParagraphFocus
-  use Neural.Summarizer, switchboard: Switchboard
+  use Neural.LinearCluster, switchboard: Switchboard
+  use Neural.Summarizer
   import Control.Util, only: [text_count: 1]
 
   @impl true

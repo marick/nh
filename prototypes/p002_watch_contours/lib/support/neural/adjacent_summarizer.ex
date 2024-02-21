@@ -3,9 +3,8 @@ defmodule AppAnimal.Neural.AdjacentSummarizer do
   @callback summarize() :: any()
   @callback describe_summary(any()) :: none()
   
-  defmacro __using__(environment: environment, switchboard: switchboard) do
+  defmacro __using__(environment: environment) do
     quote do
-      use AppAnimal.Neural.LinearCluster, switchboard: unquote(switchboard)
       @behaviour AppAnimal.Neural.AdjacentSummarizer
       
       def activate() do
