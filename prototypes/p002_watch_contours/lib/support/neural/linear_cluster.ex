@@ -2,9 +2,6 @@ defmodule AppAnimal.Neural.LinearCluster do
   
   defmacro __using__(switchboard: switchboard) do
     quote do
-      require Logger
-      alias unquote(switchboard)
-      
       def start_appropriately(small_data) do
         runner = fn -> apply(__MODULE__, :activate, [small_data]) end
         Task.start(runner)

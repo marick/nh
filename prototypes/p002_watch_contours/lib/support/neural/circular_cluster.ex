@@ -2,9 +2,6 @@ defmodule AppAnimal.Neural.CircularCluster do
   
   defmacro __using__(switchboard: switchboard) do
     quote do
-      require Logger
-      alias unquote(switchboard)
-      
       def start_appropriately(small_data) do
         GenServer.start_link(__MODULE__, small_data)
       end
