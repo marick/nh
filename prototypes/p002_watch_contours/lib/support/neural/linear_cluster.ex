@@ -10,6 +10,7 @@ defmodule AppAnimal.Neural.LinearCluster do
       def activate_downstream(small_data) do
         message = [transmit: small_data, to_downstream_of: __MODULE__]
         GenServer.cast(unquote(switchboard), message)
+        :receives_no_more_messages
       end
     end
   end

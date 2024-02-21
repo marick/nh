@@ -3,7 +3,8 @@ defmodule AppAnimal.Neural.CircularCluster do
   defmacro __using__(switchboard: switchboard) do
     quote do
       def start_appropriately(small_data) do
-        GenServer.start_link(__MODULE__, small_data)
+        {:ok, pid} = GenServer.start_link(__MODULE__, small_data)
+        [monitor: pid]
       end
       
       def activate_downstream(small_data) do

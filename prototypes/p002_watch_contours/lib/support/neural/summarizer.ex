@@ -11,6 +11,7 @@ defmodule AppAnimal.Neural.Summarizer do
         summary = summarize(input)
         describe_transformation(input, summary)
         activate_downstream(summary)
+        summary
       end
 
       def describe_transformation(input, summary) do end
