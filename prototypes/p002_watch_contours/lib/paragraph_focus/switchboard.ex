@@ -30,33 +30,33 @@ defmodule AppAnimal.ParagraphFocus.Switchboard do
       |> cluster(Motor.MoveFragment, downstream: [Environment])
       |> cluster(Motor.MakeEditTypeExplicit, downstream: [Environment])
       
-    {:ok, {network, MapSet.new}}
+    {:ok, {network, %{}}}
   end
 
-  def handle_cast([transmit: small_data, to_downstream_of: module], {network, pids}) do
-    reducer = fn receiver, pids ->
+  def handle_cast([transmit: small_data, to_downstream_of: module], {network, live_clusters}) do
+    reducer = fn receiver, live_clusters ->
       small_data
       |> receiver.start_appropriately
-      |> possibly_monitor(pids)
+      |> possibly_monitor(live_clusters, receiver)
     end
     
-    new_pids = Enum.reduce(network[module].downstream, pids, reducer)
-    {:noreply, {network, new_pids}}
+    new_live_clusters = Enum.reduce(network[module].downstream, live_clusters, reducer)
+    {:noreply, {network, new_live_clusters}}
   end
 
-  def possibly_monitor([monitor: pid], pids) do
+  def possibly_monitor([monitor: pid], live_clusters, receiver) do
     Process.monitor(pid)
-    MapSet.put(pids, pid)
+    Map.put(live_clusters, receiver, pid)
   end
 
-  def possibly_monitor(_, pids), do: pids
+  def possibly_monitor(_, live_clusters, _receiver), do: live_clusters
 
 
-  def handle_info({:DOWN, _, :process, pid, _reason}, {network, pids}) do
+  def handle_info({:DOWN, _, :process, pid, _reason}, {network, live_clusters}) do
     # IO.inspect "noticed #{inspect pid} is down for #{inspect reason}"
-    newpids = MapSet.delete(pids, pid)
-    # IO.inspect newpids
-    {:noreply, {network, newpids}}
+    newlive_clusters = Map.reject(live_clusters, fn {_key, value} ->
+      value == pid
+    end)
+    {:noreply, {network, newlive_clusters}}
   end
-  
 end
