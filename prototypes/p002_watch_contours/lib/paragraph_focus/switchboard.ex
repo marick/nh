@@ -21,10 +21,8 @@ defmodule AppAnimal.ParagraphFocus.Switchboard do
   def init(:ok) do
     network = 
       %{}
-      # not actually needed
-      # |> cluster(Environment, downstream: Perceptual.EdgeSummarizer)
-      
-      |> cluster(Control.AttendToEditing, downstream: Motor.MakeEditTypeExplicit)
+      |> cluster(Control.AttendToEditing, downstream: Control.RejectSameness)
+      |> cluster(Control.RejectSameness, downstream: Motor.MakeEditTypeExplicit)
       |> cluster(Control.AttendToFragments, downstream: Motor.MoveFragment)
       |> cluster(Perceptual.EdgeSummarizer,
                  downstream: [Control.AttendToEditing, Control.AttendToFragments])
@@ -37,7 +35,8 @@ defmodule AppAnimal.ParagraphFocus.Switchboard do
 
   def handle_cast([transmit: small_data, to_downstream_of: module], {network, pids}) do
     reducer = fn receiver, pids ->
-      receiver.start_appropriately(small_data)
+      small_data
+      |> receiver.start_appropriately
       |> possibly_monitor(pids)
     end
     
@@ -51,4 +50,13 @@ defmodule AppAnimal.ParagraphFocus.Switchboard do
   end
 
   def possibly_monitor(_, pids), do: pids
+
+
+  def handle_info({:DOWN, _, :process, pid, _reason}, {network, pids}) do
+    # IO.inspect "noticed #{inspect pid} is down for #{inspect reason}"
+    newpids = MapSet.delete(pids, pid)
+    # IO.inspect newpids
+    {:noreply, {network, newpids}}
+  end
+  
 end
