@@ -10,11 +10,6 @@ defmodule AppAnimal.ParagraphFocus.Motor.MakeEditTypeExplicit do
   end
 
 
-  # def handle_info(:tick, state) do
-  #   Logger.info("\n")
-  #   Logger.info("tick!")
-  #   {:stop, :normal, state}
-  # end  
 end
 
 # defmodule Caller do
@@ -28,9 +23,4 @@ end
 #     {:ok, pid}
 #   end
 
-#   def handle_info(arg, pid) do
-#     IO.inspect arg
-#     IO.inspect pid
-#     {:stop, :normal, pid}
-#   end
 # end
