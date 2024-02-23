@@ -13,7 +13,7 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToEditing do
   
   @impl true
   def describe_transformation(upstream_data, summary) do
-    string = Perceptual.EdgeSummarizer.edge_string(upstream_data)
+    string = Perceptual.SummarizeEdges.edge_string(upstream_data)
     Logger.info("#{string} produces `#{inspect summary}`")
   end
 end

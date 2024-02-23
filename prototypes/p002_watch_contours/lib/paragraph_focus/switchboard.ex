@@ -24,7 +24,7 @@ defmodule AppAnimal.ParagraphFocus.Switchboard do
       |> cluster(Control.AttendToEditing, downstream: Control.RejectSameness)
       |> cluster(Control.RejectSameness, downstream: Motor.MakeEditTypeExplicit)
       |> cluster(Control.AttendToFragments, downstream: Motor.MoveFragment)
-      |> cluster(Perceptual.EdgeSummarizer,
+      |> cluster(Perceptual.SummarizeEdges,
                  downstream: [Control.AttendToEditing, Control.AttendToFragments])
       
       |> cluster(Motor.MoveFragment, downstream: [Environment])

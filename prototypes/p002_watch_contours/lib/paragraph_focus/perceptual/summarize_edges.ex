@@ -1,7 +1,7 @@
-defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeSummarizer do
+defmodule AppAnimal.ParagraphFocus.Perceptual.SummarizeEdges do
   use AppAnimal.ParagraphFocus
   use Neural.LinearCluster, switchboard: Switchboard
-  use Neural.AdjacentSummarizer, environment: Environment
+  use Neural.PerceiveEnvironment, environment: Environment
       
   def describe_summary(summary),
       do: Logger.info("edge structure: #{edge_string summary}")        

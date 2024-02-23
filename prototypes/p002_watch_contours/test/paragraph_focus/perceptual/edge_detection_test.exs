@@ -1,6 +1,6 @@
-defmodule AppAnimal.ParagraphFocus.Perceptual.EdgeSummarizerTest do
+defmodule AppAnimal.ParagraphFocus.Perceptual.SummarizeEdgesTest do
   use ExUnit.Case
-  alias AppAnimal.ParagraphFocus.Perceptual.EdgeSummarizer, as: UT
+  alias AppAnimal.ParagraphFocus.Perceptual.SummarizeEdges, as: UT
   import FlowAssertions.TabularA
   import FlowAssertions.MiscA
 

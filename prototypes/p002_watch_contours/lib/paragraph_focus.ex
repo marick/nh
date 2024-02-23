@@ -4,7 +4,7 @@ defmodule AppAnimal.ParagraphFocus do
 
   alias AppAnimal.ParagraphFocus.{Environment, Perceptual, Switchboard}
   alias AppAnimal.Neural.Oscillator
-  alias Perceptual.EdgeSummarizer
+  alias Perceptual.SummarizeEdges
   require Logger
   
   # Client
@@ -24,7 +24,7 @@ defmodule AppAnimal.ParagraphFocus do
     {:ok, _pid} = Switchboard.start_link(:ok)
     
     {:ok, _task_starter} =
-      Oscillator.poke(EdgeSummarizer, every: 5_000)
+      Oscillator.poke(SummarizeEdges, every: 5_000)
     {:ok, :ok}
   end
 
