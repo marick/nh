@@ -1,11 +1,11 @@
-defmodule AppAnimal.Neural.PerceiveEnvironment do
+defmodule AppAnimal.Neural.SummarizeEnvironment do
   @callback receive_pulse() :: none()
   @callback summarize() :: any()
   @callback describe_summary(any()) :: none()
   
   defmacro __using__(environment: environment) do
     quote do
-      @behaviour AppAnimal.Neural.PerceiveEnvironment
+      @behaviour AppAnimal.Neural.SummarizeEnvironment
       
       def receive_pulse() do
         summary = GenServer.call(unquote(environment), summarize_with: &summarize/1)
