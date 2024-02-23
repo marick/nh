@@ -3,10 +3,6 @@ defmodule AppAnimal.ParagraphFocus.Environment do
   require Logger
   alias AppAnimal.Pretty
 
-  def activate(paragraph_state) do
-    {:ok, _pid} = start_link(paragraph_state)
-  end
-
   def start_link(paragraph_state) do
     GenServer.start_link(__MODULE__, paragraph_state, name: __MODULE__)
   end

@@ -26,11 +26,9 @@ defmodule AppAnimal.ParagraphFocus.Control.AttendToFragments do
   end
 
   @impl true
-  def activate_downstream?(edges), do: has_fragments?(edges)
+  def should_send_pulse?(edges), do: has_fragments?(edges)
   @impl true
-  def downstream_data(edges), do: first_fragment_range(edges)
-
-  
+  def outgoing_data(edges), do: first_fragment_range(edges)
 end
   
 

@@ -1,5 +1,5 @@
 defmodule AppAnimal.Neural.Summarizer do
-  @callback activate(any()) :: none()
+  @callback receive_pulse(any()) :: none()
   @callback summarize(any()) :: any()
   @callback describe_transformation(any(), any()) :: none()
   
@@ -7,16 +7,16 @@ defmodule AppAnimal.Neural.Summarizer do
     quote do
       @behaviour AppAnimal.Neural.Summarizer
       
-      def activate(input) do
+      def receive_pulse(input) do
         summary = summarize(input)
         describe_transformation(input, summary)
-        activate_downstream(summary)
+        send_pulse(summary)
         summary
       end
 
       def describe_transformation(input, summary) do end
 
-      defoverridable activate: 1, describe_transformation: 2
+      defoverridable receive_pulse: 1, describe_transformation: 2
     end
   end
 end

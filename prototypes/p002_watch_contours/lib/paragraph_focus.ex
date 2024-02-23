@@ -19,8 +19,8 @@ defmodule AppAnimal.ParagraphFocus do
   @impl true
   def init(paragraph_state) do
     Logger.info("focus on a new paragraph")
-    Environment.activate(paragraph_state)
-
+    Environment.start_link(paragraph_state)
+    
     {:ok, _pid} = Switchboard.start_link(:ok)
     
     {:ok, _task_starter} =

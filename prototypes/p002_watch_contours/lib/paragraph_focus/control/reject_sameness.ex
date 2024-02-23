@@ -3,7 +3,7 @@ defmodule AppAnimal.ParagraphFocus.Control.RejectSameness do
   use Neural.CircularCluster, switchboard: Switchboard
   
   def init(small_data) do
-    activate_downstream(small_data)
+    send_pulse(small_data)
     Process.send_after(self(), :tick, 400)
     {:ok, small_data}
   end

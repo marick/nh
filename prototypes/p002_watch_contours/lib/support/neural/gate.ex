@@ -1,8 +1,8 @@
 defmodule AppAnimal.Neural.Gate do
-  @callback activate_downstream?(any()) :: boolean()
+  @callback should_send_pulse?(any()) :: boolean()
   @callback description_of_check(any()) :: String.t
-  @callback activate(any()) :: none()
-  @callback downstream_data(any()) :: any()
+  @callback receive_pulse(any()) :: none()
+  @callback outgoing_data(any()) :: any()
   
   defmacro __using__(_) do
     quote do
@@ -12,8 +12,8 @@ defmodule AppAnimal.Neural.Gate do
         :none
       end
       
-      def activate(upstream_data) do
-        passes? = activate_downstream?(upstream_data)
+      def receive_pulse(upstream_data) do
+        passes? = should_send_pulse?(upstream_data)
         
         case {description_of_check(upstream_data), passes?} do
           {:none, _} ->
@@ -25,15 +25,15 @@ defmodule AppAnimal.Neural.Gate do
         end
         
         if passes? do
-          payload = downstream_data(upstream_data)
-          activate_downstream(payload)
+          payload = outgoing_data(upstream_data)
+          send_pulse(payload)
         end
       end
 
-      def downstream_data(_upstream_data) do
+      def outgoing_data(_upstream_data) do
         :ok
       end
-      defoverridable activate: 1, description_of_check: 1, downstream_data: 1
+      defoverridable receive_pulse: 1, description_of_check: 1, outgoing_data: 1
     end
     
   end

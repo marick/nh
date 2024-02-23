@@ -1,5 +1,5 @@
 defmodule AppAnimal.Neural.AdjacentSummarizer do
-  @callback activate() :: none()
+  @callback receive_pulse() :: none()
   @callback summarize() :: any()
   @callback describe_summary(any()) :: none()
   
@@ -7,10 +7,10 @@ defmodule AppAnimal.Neural.AdjacentSummarizer do
     quote do
       @behaviour AppAnimal.Neural.AdjacentSummarizer
       
-      def activate() do
+      def receive_pulse() do
         summary = GenServer.call(unquote(environment), summarize_with: &summarize/1)
         describe_summary(summary)
-        activate_downstream(summary)
+        send_pulse(summary)
       end
 
       def summarize() do
@@ -19,7 +19,7 @@ defmodule AppAnimal.Neural.AdjacentSummarizer do
 
       def describe_summary(summary) do end
 
-      defoverridable activate: 0, summarize: 0, describe_summary: 1
+      defoverridable receive_pulse: 0, summarize: 0, describe_summary: 1
     end
     
   end

@@ -1,5 +1,4 @@
 defmodule AppAnimal.Neural.Oscillator do
-  alias AppAnimal.Neural.WithoutReply
   use GenServer
   require Logger
   
@@ -24,7 +23,9 @@ defmodule AppAnimal.Neural.Oscillator do
   def handle_info(:tick, state) do
     Logger.info("\n")
     Logger.info("tick!")
-    WithoutReply.activate(state.task)
+    runner = fn -> apply(state.task, :receive_pulse, []) end
+    Task.start(runner)
+
     tick_after(state.delay)
     {:noreply, state}
   end

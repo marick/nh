@@ -7,7 +7,7 @@ defmodule AppAnimal.Neural.CircularCluster do
         [monitor: pid]
       end
       
-      def activate_downstream(small_data) do
+      def send_pulse(small_data) do
         message = [transmit: small_data, to_downstream_of: __MODULE__]
         GenServer.cast(unquote(switchboard), message)
       end

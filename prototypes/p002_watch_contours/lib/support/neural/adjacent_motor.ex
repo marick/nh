@@ -1,5 +1,5 @@
 defmodule AppAnimal.Neural.AdjacentMotor do
-  @callback activate(any()) :: none()
+  @callback receive_pulse(any()) :: none()
   @callback describe_action(any()) :: none()
   @callback make_action(any()) :: (any() -> none())
   
@@ -7,7 +7,7 @@ defmodule AppAnimal.Neural.AdjacentMotor do
     quote do
       @behaviour AppAnimal.Neural.AdjacentMotor
       
-      def activate(data) do
+      def receive_pulse(data) do
         describe_action(data)
         action = make_action(data)
         GenServer.cast(unquote(environment), update_with: action)
@@ -15,7 +15,7 @@ defmodule AppAnimal.Neural.AdjacentMotor do
 
       def describe_action(data) do end
 
-      defoverridable activate: 1, describe_action: 1
+      defoverridable receive_pulse: 1, describe_action: 1
     end
     
   end

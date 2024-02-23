@@ -6,7 +6,7 @@ defmodule AppAnimal.ParagraphFocus.AttendToFragmentsTest do
 
   test "checking for fragments" do
     returns = run_and_assert(
-        	&(EdgeSummarizer.edge_structure(&1) |> UT.activate_downstream?))
+        	&(EdgeSummarizer.edge_structure(&1) |> UT.should_send_pulse?))
 
     "abc\n"                  |> returns.(false)
     "abc\n\ndef"             |> returns.(false)  # editing, but no fragment
@@ -19,7 +19,7 @@ defmodule AppAnimal.ParagraphFocus.AttendToFragmentsTest do
 
   test "returning the first fragment indicator" do
     returns = run_and_assert(
-                &(EdgeSummarizer.edge_structure(&1) |> UT.downstream_data))
+                &(EdgeSummarizer.edge_structure(&1) |> UT.outgoing_data))
 
     "text\n\nfragment\n\ntext\n\n" |> returns.({:text, 6..13})
     #        ^6     ^13
