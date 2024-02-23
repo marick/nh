@@ -9,7 +9,6 @@ defmodule AppAnimal.ParagraphFocus.Control.RejectSameness do
   end
 
   def handle_info(:tick, state) do
-    Logger.info("\ntime to die\n")
     {:stop, :normal, state}
   end  
 end
