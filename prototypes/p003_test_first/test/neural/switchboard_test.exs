@@ -38,19 +38,24 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     UT.send_pulse(switchboard, carrying: 1, to: :first)
     assert_receive(2)
   end
-  
-  # test "newly-created circular clusters get succeeding pulses" do
-  #   first = N.circular_cluster(:cluster, fn switchboard, pulse_data, state ->
-  #     UT.send_pulse(switchboard, carrying: self(), from: :cluster)
-  #     self()
-  #   end)
 
-  #   second = N.circular_cluster(:second, pulse_to_test())
-
-  #   switchboard = switchboard_from([first, second])
+  test "succeeding pulses go to the same process" do
+    first = N.circular_cluster(:first,
+                               fn _configuration -> [] end, 
+                               fn switchboard, :nothing, state ->
+                                 UT.send_pulse(switchboard, carrying: self(), from: :first)
+                                 state
+                               end)
+    second = N.circular_cluster(:second, pulse_to_test())
+    switchboard = switchboard_from([first, second])
     
-  #   UT.send_pulse(switchboard, carrying: 1, to: :first)
-  #   assert_receive(2)
-  # end
 
+    UT.send_pulse(switchboard, carrying: :nothing, to: :first)
+    first_pid = assert_receive(x when is_pid(x))
+
+    UT.send_pulse(switchboard, carrying: :nothing, to: :first)
+    second_pid = assert_receive(x when is_pid(x))
+
+    assert first_pid == second_pid
+  end
 end
