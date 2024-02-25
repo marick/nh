@@ -43,19 +43,18 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     first = N.circular_cluster(:first,
                                fn _configuration -> [] end, 
                                fn switchboard, :nothing, state ->
-                                 UT.send_pulse(switchboard, carrying: self(), from: :first)
-                                 state
+                                 new_state = [self() | state]
+                                 UT.send_pulse(switchboard, carrying: new_state, from: :first)
+                                 new_state
                                end)
     second = N.circular_cluster(:second, pulse_to_test())
     switchboard = switchboard_from([first, second])
     
 
     UT.send_pulse(switchboard, carrying: :nothing, to: :first)
-    first_pid = assert_receive(x when is_pid(x))
+    [first_pid] = assert_receive(_)
 
     UT.send_pulse(switchboard, carrying: :nothing, to: :first)
-    second_pid = assert_receive(x when is_pid(x))
-
-    assert first_pid == second_pid
+    assert_receive([^first_pid, ^first_pid])
   end
 end
