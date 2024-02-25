@@ -1,5 +1,5 @@
 defmodule AppAnimal.Pretty.LogFormatTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   alias AppAnimal.Pretty.LogFormat, as: UT
   import FlowAssertions.TabularA
 

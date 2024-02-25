@@ -1,5 +1,5 @@
 defmodule AppAnimal.Pretty.ModuleTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   alias AppAnimal.Pretty.Module, as: UT
   import FlowAssertions.TabularA
 
