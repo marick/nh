@@ -7,8 +7,9 @@ defmodule AppAnimal.Neural.SwitchboardTest do
 
   def pulse_to_test do
     test_pid = self()
-    fn _switchboard, pulse_data ->
+    fn _switchboard, pulse_data, state ->
       send(test_pid, pulse_data)
+      state
     end
   end
 
@@ -25,8 +26,9 @@ defmodule AppAnimal.Neural.SwitchboardTest do
   end
 
   test "a transmission of pulses" do
-    first = N.circular_cluster(:first, fn switchboard, pulse_data ->
+    first = N.circular_cluster(:first, fn switchboard, pulse_data, state ->
       UT.send_pulse(switchboard, carrying: pulse_data + 1, from: :first)
+      state
     end)
 
     second = N.circular_cluster(:second, pulse_to_test())
@@ -37,4 +39,18 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     assert_receive(2)
   end
   
+  # test "newly-created circular clusters get succeeding pulses" do
+  #   first = N.circular_cluster(:cluster, fn switchboard, pulse_data, state ->
+  #     UT.send_pulse(switchboard, carrying: self(), from: :cluster)
+  #     self()
+  #   end)
+
+  #   second = N.circular_cluster(:second, pulse_to_test())
+
+  #   switchboard = switchboard_from([first, second])
+    
+  #   UT.send_pulse(switchboard, carrying: 1, to: :first)
+  #   assert_receive(2)
+  # end
+
 end

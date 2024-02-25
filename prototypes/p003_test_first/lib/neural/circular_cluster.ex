@@ -1,19 +1,16 @@
 defmodule AppAnimal.Neural.CircularCluster do
-  defstruct [:name, :handle_pulse, downstream: []]
-
-  def new(name, handle_pulse),
-      do: %__MODULE__{name: name,
-                      handle_pulse: handle_pulse}
-
+  defstruct [:name, :handlers, downstream: []]
 
   use GenServer
 
   def init(configuration) do
-    {:ok, configuration}
+    {:ok, {configuration, configuration.handlers.initialize.(configuration)}}
   end
 
-  def handle_cast([switchboard: switchboard, handle_pulse: small_data], configuration) do
-    apply(configuration.handle_pulse, [switchboard, small_data])
-    {:noreply, configuration}
+  def handle_cast([switchboard: switchboard, handle_pulse: small_data],
+                  {configuration, state}) do
+    new_state =
+      apply(configuration.handlers.pulse, [switchboard, small_data, state])
+    {:noreply, {configuration, new_state}}
   end
 end

@@ -43,8 +43,4 @@ defmodule AppAnimal.Neural.Switchboard do
     GenServer.cast(pid, [switchboard: self(), handle_pulse: pulse_data])
     state
   end
-
-
-  
-  
 end

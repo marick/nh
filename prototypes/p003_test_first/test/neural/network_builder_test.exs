@@ -1,16 +1,9 @@
 defmodule AppAnimal.Neural.NetworkBuilderTest do
   use ExUnit.Case, async: true
   alias AppAnimal.Neural.NetworkBuilder, as: UT
-  alias AppAnimal.Neural.{CircularCluster}
   use FlowAssertions
 
   def handle_pulse, do: fn _switchboard, _pulse_data -> :irrelevant end
-
-  test "a circular cluster" do
-    actual = UT.circular_cluster(:fred, handle_pulse())
-    expected = %CircularCluster{name: :fred, handle_pulse: handle_pulse()}
-    assert actual == expected
-  end
 
   def some_cluster(name), do: UT.circular_cluster(name, handle_pulse())
   def clusters(names), do: Enum.map(names, &some_cluster/1)
