@@ -8,12 +8,8 @@ defmodule AppAnimal.Neural.Switchboard do
     GenServer.start_link(__MODULE__, state)
   end
 
-  def send_pulse(keys) do
-    switchboard = Keyword.fetch!(keys, :via)
-    small_data = Keyword.fetch!(keys, :carrying)
-    destination_name = Keyword.fetch!(keys, :to)
-
-    GenServer.call(switchboard, {:send_pulse, destination_name, small_data})
+  def send_pulse(switchboard, keys) do
+    GenServer.cast(switchboard, {:send_pulse, keys})
   end
 
   @impl GenServer
@@ -22,11 +18,29 @@ defmodule AppAnimal.Neural.Switchboard do
   end
 
   @impl GenServer
-  def handle_call({:send_pulse, destination_name, small_data}, _from, state) do
+  def handle_cast({:send_pulse, keys}, state) do
+    decoded_keys = {Keyword.fetch!(keys, :carrying),
+                    Keyword.get(keys, :to, :no_destination),
+                    Keyword.get(keys, :from, :no_source)}
+    new_state = interior_send_pulse(decoded_keys, state)
+    
+
+    {:noreply, new_state}
+  end
+
+  def interior_send_pulse({_pulse_data, :no_destination, _source}, state) do
+    state
+  end
+
+  def interior_send_pulse({pulse_data, destination_name, :no_source}, state) do
     destination = state.network[destination_name]
     {:ok, pid} = GenServer.start(destination.__struct__, destination)
 
-    GenServer.call(pid, [handle_pulse: small_data])
-    {:reply, 5, state}
+    GenServer.call(pid, [handle_pulse: pulse_data])
+    state
   end
+
+
+  
+  
 end
