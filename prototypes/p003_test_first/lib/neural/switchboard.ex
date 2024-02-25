@@ -1,6 +1,7 @@
 defmodule AppAnimal.Neural.Switchboard do
   use GenServer
   require Logger
+  use Private
 
   defstruct [:environment, :network, started_circular_clusters: %{}]
 
@@ -26,24 +27,26 @@ defmodule AppAnimal.Neural.Switchboard do
     {:noreply, new_state}
   end
 
-  def receive_pulse({pulse_data, :no_destination, source_name}, state) do
-    destinations = state.network[source_name].downstream
-    for destination <- destinations do
-      receive_pulse({pulse_data, destination, :no_source}, state)
+  private do 
+    def receive_pulse({pulse_data, :no_destination, source_name}, state) do
+      destinations = state.network[source_name].downstream
+      for destination <- destinations do
+        receive_pulse({pulse_data, destination, :no_source}, state)
+      end
+      state
     end
-    state
+    
+    def receive_pulse({pulse_data, destination_name, :no_source} = args, state) do
+      destination = state.network[destination_name]
+      case get_in(state, [Access.key!(:started_circular_clusters), destination_name]) do
+        nil ->
+          {:ok, pid} = GenServer.start(destination.__struct__, destination)
+          new_state = put_in(state.started_circular_clusters[destination_name], pid)
+          receive_pulse(args, new_state)
+        pid -> 
+          GenServer.cast(pid, [switchboard: self(), handle_pulse: pulse_data])
+          state
+      end
+    end    
   end
-
-  def receive_pulse({pulse_data, destination_name, :no_source} = args, state) do
-    destination = state.network[destination_name]
-    case get_in(state, [Access.key!(:started_circular_clusters), destination_name]) do
-      nil ->
-        {:ok, pid} = GenServer.start(destination.__struct__, destination)
-        new_state = put_in(state.started_circular_clusters[destination_name], pid)
-        receive_pulse(args, new_state)
-      pid -> 
-        GenServer.cast(pid, [switchboard: self(), handle_pulse: pulse_data])
-        state
-    end
-  end    
 end
