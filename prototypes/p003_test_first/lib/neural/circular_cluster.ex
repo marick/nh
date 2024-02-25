@@ -1,5 +1,5 @@
 defmodule AppAnimal.Neural.CircularCluster do
-  defstruct [:name, :handle_pulse]
+  defstruct [:name, :handle_pulse, downstream: []]
 
   def new(name, handle_pulse),
       do: %__MODULE__{name: name,
