@@ -12,8 +12,8 @@ defmodule AppAnimal.Neural.CircularCluster do
     {:ok, configuration}
   end
 
-  def handle_call([handle_pulse: small_data], _from, configuration) do
-    apply(configuration.handle_pulse, [:switchboard_not_relevant_yet, small_data])
+  def handle_call([switchboard: switchboard, handle_pulse: small_data], _from, configuration) do
+    apply(configuration.handle_pulse, [switchboard, small_data])
     {:reply, 55, configuration}
   end
 end

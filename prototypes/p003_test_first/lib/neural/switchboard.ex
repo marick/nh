@@ -28,15 +28,19 @@ defmodule AppAnimal.Neural.Switchboard do
     {:noreply, new_state}
   end
 
-  def interior_send_pulse({_pulse_data, :no_destination, _source}, state) do
+  def interior_send_pulse({pulse_data, :no_destination, source_name}, state) do
+    destinations = state.network[source_name].downstream
+    for destination <- destinations do
+      
+      interior_send_pulse({pulse_data, destination, :no_source}, state)
+    end
     state
   end
 
   def interior_send_pulse({pulse_data, destination_name, :no_source}, state) do
     destination = state.network[destination_name]
     {:ok, pid} = GenServer.start(destination.__struct__, destination)
-
-    GenServer.call(pid, [handle_pulse: pulse_data])
+    GenServer.call(pid, [switchboard: self(), handle_pulse: pulse_data])
     state
   end
 
