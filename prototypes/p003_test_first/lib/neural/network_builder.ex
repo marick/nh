@@ -7,7 +7,9 @@ defmodule AppAnimal.Neural.NetworkBuilder do
                                           
 
   def circular_cluster(name, handle_pulse) when is_function(handle_pulse) do
-    circular_cluster(name, fn _configuration -> :no_state end, handle_pulse)
+    circular_cluster(name,
+                     fn configured_by: _configuration -> :no_state end,
+                     handle_pulse)
   end
 
   def circular_cluster(name, initialize, handle_pulse) do

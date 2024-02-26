@@ -7,7 +7,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
 
   def pulse_to_test do
     test_pid = self()
-    fn _switchboard, pulse_data, state ->
+    fn switchboard: _switchboard, carrying: pulse_data, mutable: state ->
       send(test_pid, pulse_data)
       state
     end
@@ -26,13 +26,13 @@ defmodule AppAnimal.Neural.SwitchboardTest do
   end
 
   test "a transmission of pulses" do
-    first = N.circular_cluster(:first, fn switchboard, pulse_data, state ->
+    handle_pulse = fn switchboard: switchboard, carrying: pulse_data, mutable: state ->
       UT.send_pulse(switchboard, carrying: pulse_data + 1, from: :first)
       state
-    end)
+    end
 
+    first = N.circular_cluster(:first, handle_pulse)
     second = N.circular_cluster(:second, pulse_to_test())
-
     switchboard = switchboard_from([first, second])
     
     UT.send_pulse(switchboard, carrying: 1, to: :first)
@@ -40,21 +40,23 @@ defmodule AppAnimal.Neural.SwitchboardTest do
   end
 
   test "succeeding pulses go to the same process" do
-    first = N.circular_cluster(:first,
-                               fn _configuration -> [] end, 
-                               fn switchboard, :nothing, state ->
-                                 new_state = [self() | state]
-                                 UT.send_pulse(switchboard, carrying: new_state, from: :first)
-                                 new_state
-                               end)
+    initializer = fn configured_by: _configuration -> [] end
+    handle_pulse = fn switchboard: switchboard, carrying: :nothing, mutable: state ->
+      new_state = [self() | state]
+      UT.send_pulse(switchboard, carrying: new_state, from: :first)
+      new_state
+    end
+    first = N.circular_cluster(:first, initializer, handle_pulse)
     second = N.circular_cluster(:second, pulse_to_test())
     switchboard = switchboard_from([first, second])
     
-
     UT.send_pulse(switchboard, carrying: :nothing, to: :first)
     [first_pid] = assert_receive(_)
 
     UT.send_pulse(switchboard, carrying: :nothing, to: :first)
     assert_receive([^first_pid, ^first_pid])
+  end
+
+  test "... however, processes 'age out'" do
   end
 end
