@@ -4,7 +4,6 @@ defmodule AppAnimal.Neural.NetworkBuilder do
   def cluster(name, module, handle_pulse) do
     module.new(name, handle_pulse)
   end
-                                          
 
   def circular_cluster(name, handle_pulse) when is_function(handle_pulse) do
     circular_cluster(name,

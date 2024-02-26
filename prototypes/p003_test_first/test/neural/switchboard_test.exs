@@ -21,13 +21,13 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     
   test "a single-cluster chain" do
     switchboard = switchboard_from([N.circular_cluster(:some_cluster, pulse_to_test())])
-    UT.send_pulse(switchboard, carrying: "pulse data", to: :some_cluster)
+    UT.initial_pulse(to: :some_cluster, carrying: "pulse data", via: switchboard)
     assert_receive("pulse data")
   end
 
   test "a transmission of pulses" do
     handle_pulse = fn switchboard: switchboard, carrying: pulse_data, mutable: state ->
-      UT.send_pulse(switchboard, carrying: pulse_data + 1, from: :first)
+      UT.send_pulse_downstream(from: :first, carrying: pulse_data + 1, via: switchboard)
       state
     end
 
@@ -35,7 +35,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     second = N.circular_cluster(:second, pulse_to_test())
     switchboard = switchboard_from([first, second])
     
-    UT.send_pulse(switchboard, carrying: 1, to: :first)
+    UT.initial_pulse(to: :first, carrying: 1, via: switchboard)
     assert_receive(2)
   end
 
@@ -43,20 +43,21 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     initializer = fn configured_by: _configuration -> [] end
     handle_pulse = fn switchboard: switchboard, carrying: :nothing, mutable: state ->
       new_state = [self() | state]
-      UT.send_pulse(switchboard, carrying: new_state, from: :first)
+      UT.send_pulse_downstream(from: :first, carrying: new_state, via: switchboard)
       new_state
     end
     first = N.circular_cluster(:first, initializer, handle_pulse)
     second = N.circular_cluster(:second, pulse_to_test())
     switchboard = switchboard_from([first, second])
     
-    UT.send_pulse(switchboard, carrying: :nothing, to: :first)
+    UT.initial_pulse(to: :first, carrying: :nothing, via: switchboard)
     [first_pid] = assert_receive(_)
 
-    UT.send_pulse(switchboard, carrying: :nothing, to: :first)
+    UT.initial_pulse(to: :first, carrying: :nothing, via: switchboard)
     assert_receive([^first_pid, ^first_pid])
   end
 
+  @tag :skip
   test "... however, processes 'age out'" do
   end
 end
