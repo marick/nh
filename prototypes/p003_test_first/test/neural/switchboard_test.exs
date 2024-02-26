@@ -42,15 +42,22 @@ defmodule AppAnimal.Neural.SwitchboardTest do
       assert_receive(2)
     end
 
-    test "succeeding pulses go to the same process" do
-      initializer = fn _configuration -> %{pids: []} end
-      handle_pulse = fn :nothing, configuration, mutable ->
+    def initialize_with_empty_pids do
+      fn _configuration -> %{pids: []} end
+    end
+
+    def pulse_accumulated_pids() do
+      fn :nothing, configuration, mutable ->
         mutated = update_in(mutable.pids, &([self() | &1]))
         configuration.send_pulse_downstream.(carrying: mutated.pids)
         mutated
       end
-    
-      first = circular_cluster(:first, handle_pulse, initialize_mutable: initializer)
+    end
+
+    test "succeeding pulses go to the same process" do
+      first = circular_cluster(:first,
+                               pulse_accumulated_pids(),
+                               initialize_mutable: initialize_with_empty_pids())
       second = circular_cluster(:second, pulse_to_test())
       switchboard = switchboard_from([first, second])
     
