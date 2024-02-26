@@ -24,10 +24,11 @@ defmodule AppAnimal.Neural.Switchboard do
                    {:distribute_pulse, carrying: pulse_data, to: [destination_name]})
   end
 
-  def mkfn__individualized_pulse_downstream(%{name: cluster_name}) do
+  def mkfn__individualized_pulse_downstream(%{name: source_name}) do
     my_pid = self()
-    fn carrying: pulse_data -> 
-      __MODULE__.send_pulse(my_pid, carrying: pulse_data, from: cluster_name)
+    fn carrying: pulse_data ->
+      payload = {:distribute_downstream, from: source_name, carrying: pulse_data, via: my_pid}
+      GenServer.cast(my_pid, payload)
     end
   end
 
@@ -35,8 +36,8 @@ defmodule AppAnimal.Neural.Switchboard do
   def init(me) do
     augmented_network =
       for {name, structure} <- me.network do
-        pulse_downstream = mkfn__individualized_pulse_downstream(structure)
-        {name, %{structure | pulse_downstream: pulse_downstream}}
+        sender = mkfn__individualized_pulse_downstream(structure)
+        {name, %{structure | send_pulse_downstream: sender}}
       end |> Enum.into(%{})
     {:ok, %{me | network: augmented_network}}
   end

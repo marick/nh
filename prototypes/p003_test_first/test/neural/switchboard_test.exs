@@ -40,7 +40,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
   end
 
   test "succeeding pulses go to the same process" do
-    initializer = fn configured_by: _configuration -> [] end
+    initializer = fn _configuration -> [] end
     handle_pulse = fn switchboard: switchboard, carrying: :nothing, mutable: state ->
       new_state = [self() | state]
       UT.send_pulse_downstream(from: :first, carrying: new_state, via: switchboard)
