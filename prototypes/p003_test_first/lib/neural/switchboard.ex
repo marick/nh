@@ -27,7 +27,7 @@ defmodule AppAnimal.Neural.Switchboard do
   def mkfn__individualized_pulse_downstream(%{name: source_name}) do
     my_pid = self()
     fn carrying: pulse_data ->
-      payload = {:distribute_downstream, from: source_name, carrying: pulse_data, via: my_pid}
+      payload = {:distribute_downstream, from: source_name, carrying: pulse_data}
       GenServer.cast(my_pid, payload)
     end
   end
@@ -48,7 +48,7 @@ defmodule AppAnimal.Neural.Switchboard do
 
     for destination_name <- destination_names do
       destination_pid = new_me.started_circular_clusters[destination_name]
-      GenServer.cast(destination_pid, [switchboard: self(), handle_pulse: pulse_data])
+      GenServer.cast(destination_pid, [handle_pulse: pulse_data])
     end
     {:noreply, new_me}
   end

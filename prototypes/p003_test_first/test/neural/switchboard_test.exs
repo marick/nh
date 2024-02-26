@@ -7,9 +7,9 @@ defmodule AppAnimal.Neural.SwitchboardTest do
 
   def pulse_to_test do
     test_pid = self()
-    fn switchboard: _switchboard, carrying: pulse_data, mutable: state ->
+    fn pulse_data, _configuration, mutable ->
       send(test_pid, pulse_data)
-      state
+      mutable
     end
   end
 
@@ -26,9 +26,9 @@ defmodule AppAnimal.Neural.SwitchboardTest do
   end
 
   test "a transmission of pulses" do
-    handle_pulse = fn switchboard: switchboard, carrying: pulse_data, mutable: state ->
-      UT.send_pulse_downstream(from: :first, carrying: pulse_data + 1, via: switchboard)
-      state
+    handle_pulse = fn pulse_data, configuration, mutable ->
+      configuration.send_pulse_downstream.(carrying: pulse_data + 1)
+      mutable
     end
 
     first = N.circular_cluster(:first, handle_pulse)
@@ -41,11 +41,12 @@ defmodule AppAnimal.Neural.SwitchboardTest do
 
   test "succeeding pulses go to the same process" do
     initializer = fn _configuration -> [] end
-    handle_pulse = fn switchboard: switchboard, carrying: :nothing, mutable: state ->
-      new_state = [self() | state]
-      UT.send_pulse_downstream(from: :first, carrying: new_state, via: switchboard)
-      new_state
+    handle_pulse = fn :nothing, configuration, mutable ->
+      mutated = [self() | mutable]
+      configuration.send_pulse_downstream.(carrying: mutated)
+      mutated
     end
+    
     first = N.circular_cluster(:first, initializer, handle_pulse)
     second = N.circular_cluster(:second, pulse_to_test())
     switchboard = switchboard_from([first, second])
