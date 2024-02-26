@@ -1,11 +1,13 @@
 defmodule AppAnimal.Neural.NetworkBuilderTest do
   use ExUnit.Case, async: true
-  alias AppAnimal.Neural.NetworkBuilder, as: UT
+  alias AppAnimal.Neural
+  alias Neural.NetworkBuilder, as: UT
+  import Neural.ClusterMakers
   use FlowAssertions
 
   def handle_pulse, do: fn _switchboard, _pulse_data -> :irrelevant end
 
-  def some_cluster(name), do: UT.circular_cluster(name, handle_pulse())
+  def some_cluster(name), do: circular_cluster(name, handle_pulse())
   def clusters(names), do: Enum.map(names, &some_cluster/1)
   def downstreams(cluster_map) do
     Enum.reduce(cluster_map, %{}, fn {name, cluster}, acc ->

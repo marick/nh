@@ -4,6 +4,8 @@ defmodule AppAnimal.Neural.SwitchboardTest do
   alias Neural.Switchboard, as: UT
   # import FlowAssertions.TabularA
   alias Neural.NetworkBuilder, as: N
+  import Neural.ClusterMakers
+  
 
   def pulse_to_test do
     test_pid = self()
@@ -20,7 +22,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
   end    
     
   test "a single-cluster chain" do
-    switchboard = switchboard_from([N.circular_cluster(:some_cluster, pulse_to_test())])
+    switchboard = switchboard_from([circular_cluster(:some_cluster, pulse_to_test())])
     UT.initial_pulse(to: :some_cluster, carrying: "pulse data", via: switchboard)
     assert_receive("pulse data")
   end
@@ -31,8 +33,8 @@ defmodule AppAnimal.Neural.SwitchboardTest do
       mutable
     end
 
-    first = N.circular_cluster(:first, handle_pulse)
-    second = N.circular_cluster(:second, pulse_to_test())
+    first = circular_cluster(:first, handle_pulse)
+    second = circular_cluster(:second, pulse_to_test())
     switchboard = switchboard_from([first, second])
     
     UT.initial_pulse(to: :first, carrying: 1, via: switchboard)
@@ -47,8 +49,8 @@ defmodule AppAnimal.Neural.SwitchboardTest do
       mutated
     end
     
-    first = N.circular_cluster(:first, initializer, handle_pulse)
-    second = N.circular_cluster(:second, pulse_to_test())
+    first = circular_cluster(:first, initializer, handle_pulse)
+    second = circular_cluster(:second, pulse_to_test())
     switchboard = switchboard_from([first, second])
     
     UT.initial_pulse(to: :first, carrying: :nothing, via: switchboard)
