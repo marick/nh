@@ -24,7 +24,7 @@ defmodule AppAnimal.Neural.Switchboard do
                    {:distribute_pulse, carrying: pulse_data, to: [destination_name]})
   end
 
-  def mkfn__individualized_pulse_downstream(%{name: source_name}) do
+  def mkfn__individualized_pulse_downstream(source_name) do
     my_pid = self()
     fn carrying: pulse_data ->
       payload = {:distribute_downstream, from: source_name, carrying: pulse_data}
@@ -36,7 +36,7 @@ defmodule AppAnimal.Neural.Switchboard do
   def init(me) do
     augmented_network =
       for {name, structure} <- me.network, into: %{} do
-        sender = mkfn__individualized_pulse_downstream(structure)
+        sender = mkfn__individualized_pulse_downstream(structure.name)
         {name, %{structure | send_pulse_downstream: sender}}
       end
     Process.send_after(self(), :tick, 100)
