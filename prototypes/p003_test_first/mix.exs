@@ -23,7 +23,9 @@ defmodule AppAnimal.MixProject do
   defp deps do
     [
       {:private, "> 0.0.0"},
-      {:flow_assertions, "~> 0.6", only: :test}
+      {:flow_assertions, "~> 0.6", only: :test},
+      {:shorter_maps, "~> 2.2"},
+      {:iteraptor, "~> 1.14"},
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]

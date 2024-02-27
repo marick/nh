@@ -1,4 +1,6 @@
 %{
   "flow_assertions": {:hex, :flow_assertions, "0.7.1", "b175bffdc551b5ce3d0586aa4580f1708a2d98665e1d8b1f13f5dd9521f6d828", [:mix], [], "hexpm", "c83622f227bb6bf2b5c11f5515af1121884194023dbda424035c4dbbb0982b7c"},
+  "iteraptor": {:hex, :iteraptor, "1.14.0", "a6a23ec9ac1c25f3065138fd87f7f739f9b5a7e08fe915cfefcd155105445167", [:mix], [], "hexpm", "88d7a8bb7829a0faa8f99e15b12a8082403f07236d0911e55ad9245b306fd558"},
   "private": {:hex, :private, "0.1.2", "da4add9f36c3818a9f849840ca43016c8ae7f76d7a46c3b2510f42dcc5632932", [:mix], [], "hexpm", "22ee01c3f450cf8d135da61e10ec59dde006238fab1ea039014791fc8f3ff075"},
+  "shorter_maps": {:hex, :shorter_maps, "2.2.5", "77b2e3632a49c72ca8aea2a47687767b3ad2623b9ade529ffe31f41865a32886", [:mix], [], "hexpm", "fbef59a9f13369f819111f500f0253678526ea8c717d794a224df41223bc88ab"},
 }
