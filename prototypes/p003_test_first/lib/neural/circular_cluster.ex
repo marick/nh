@@ -1,7 +1,7 @@
 defmodule AppAnimal.Neural.CircularCluster do
-  defstruct [:name, :handlers, downstream: [], send_pulse_downstream: :installed_by_switchboard]
-
   use GenServer
+
+  defstruct [:name, :handlers, downstream: [], send_pulse_downstream: :installed_by_switchboard]
 
   def init(configuration) do
     specialized_state = configuration.handlers.initialize.(configuration)
@@ -13,5 +13,18 @@ defmodule AppAnimal.Neural.CircularCluster do
     mutated =
       apply(configuration.handlers.pulse, [small_data, configuration, mutable])
     {:noreply, {configuration, mutated}}
+  end
+
+  def handle_cast([weaken: n], {configuration, mutable}) do
+    new_lifespan = mutable.lifespan - n
+    mutated = Map.put(mutable, :lifespan, new_lifespan)
+    
+    new_state = {configuration, mutated}
+    
+    if new_lifespan <= 0 do
+      {:stop, :normal, new_state}
+    else
+      {:noreply, new_state}
+    end
   end
 end

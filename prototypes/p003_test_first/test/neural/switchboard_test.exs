@@ -60,7 +60,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
                                initialize_mutable: initialize_with_empty_pids())
       second = circular_cluster(:second, pulse_to_test())
       switchboard = switchboard_from([first, second])
-    
+
       UT.initial_pulse(to: :first, carrying: :nothing, via: switchboard)
       [first_pid] = assert_receive(_)
 
@@ -68,8 +68,20 @@ defmodule AppAnimal.Neural.SwitchboardTest do
       assert_receive([^first_pid, ^first_pid])
     end
 
-    @tag :skip
     test "... however, processes 'age out'" do
+      first = circular_cluster(:first,
+                               pulse_accumulated_pids(),
+                               initialize_mutable: initialize_with_empty_pids())
+      second = circular_cluster(:second, pulse_to_test())
+      switchboard = switchboard_from([first, second])
+
+      UT.initial_pulse(to: :first, carrying: :nothing, via: switchboard)
+      [first_pid] = assert_receive(_)
+
+      Process.sleep(3000)
+      UT.initial_pulse(to: :first, carrying: :nothing, via: switchboard)
+      assert_receive([second_pid])
+      refute second_pid == first_pid
     end
   end
 end

@@ -35,10 +35,11 @@ defmodule AppAnimal.Neural.Switchboard do
   @impl GenServer
   def init(me) do
     augmented_network =
-      for {name, structure} <- me.network do
+      for {name, structure} <- me.network, into: %{} do
         sender = mkfn__individualized_pulse_downstream(structure)
         {name, %{structure | send_pulse_downstream: sender}}
-      end |> Enum.into(%{})
+      end
+    Process.send_after(self(), :tick, 100)
     {:ok, %{me | network: augmented_network}}
   end
 
@@ -59,6 +60,25 @@ defmodule AppAnimal.Neural.Switchboard do
     handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me)
   end
 
+  @impl GenServer
+  def handle_info(:tick, me) do
+    for {_name, pid} <- me.started_circular_clusters do
+      GenServer.cast(pid, [weaken: 1])
+    end
+    Process.send_after(self(), :tick, 100)
+    {:noreply, me}
+  end
+
+  def handle_info({:DOWN, _, :process, pid, _reason}, me) do
+    removed = for {name, p} <- me.started_circular_clusters,
+                  p != pid,
+                  into: %{},
+                  do: {name, p}
+    {:noreply, 
+     %{me | started_circular_clusters: removed}
+    }
+  end
+    
   private do
     def ensure_circular_clusters_are_ready(names, me) do
       already_started = me.started_circular_clusters
@@ -69,6 +89,7 @@ defmodule AppAnimal.Neural.Switchboard do
         |> Enum.reduce(already_started, fn name, acc ->
           configuration = me.network[name]
           {:ok, pid} = GenServer.start(configuration.__struct__, configuration)
+          Process.monitor(pid)
           Map.put(acc, name, pid)
         end)
 
