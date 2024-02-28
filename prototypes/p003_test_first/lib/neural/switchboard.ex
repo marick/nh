@@ -34,13 +34,23 @@ defmodule AppAnimal.Neural.Switchboard do
 
   @impl GenServer
   def init(me) do
-    augmented_network =
-      for {name, structure} <- me.network, into: %{} do
-        sender = mkfn__individualized_pulse_downstream(structure.name)
-        {name, %{structure | send_pulse_downstream: sender}}
-      end
     Process.send_after(self(), :tick, 100)
-    {:ok, %{me | network: augmented_network}}
+
+    new_me = 
+      map_over_values_within(me, :network, fn structure ->
+        sender = mkfn__individualized_pulse_downstream(structure.name)
+        %{structure | send_pulse_downstream: sender}
+      end)
+    {:ok, new_me}
+  end
+
+  def map_over_values_within(outer_map, key, f) do
+    inner_map = Map.get(outer_map, key)
+    changed_map =
+      for {k, v} <- inner_map, into: %{} do
+        {k, f.(v)}
+      end
+    Map.put(outer_map, key, changed_map)
   end
 
   @impl GenServer
