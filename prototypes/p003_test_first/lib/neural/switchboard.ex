@@ -33,9 +33,13 @@ defmodule AppAnimal.Neural.Switchboard do
     end
   end
 
+  def schedule_weakening() do
+    Process.send_after(self(), :weaken_all_active, 100)
+  end
+
   @impl GenServer
   def init(me) do
-    Process.send_after(self(), :tick, 100)
+    schedule_weakening()
 
     new_me =
       Map2.map_within(me, :network, fn structure ->
@@ -58,19 +62,19 @@ defmodule AppAnimal.Neural.Switchboard do
 
   def handle_cast({:distribute_downstream, from: source_name, carrying: pulse_data}, me) do
     destination_names = me.network[source_name].downstream
-
     handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me)
   end
 
-  @impl GenServer
-  def handle_info(:tick, me) do
+
+  def handle_info(:weaken_all_active, me) do
     for {_name, pid} <- me.started_circular_clusters do
       GenServer.cast(pid, [weaken: 1])
     end
-    Process.send_after(self(), :tick, 100)
+    Process.send_after(self(), :weaken_all_active, 100)
     {:noreply, me}
   end
 
+  @impl GenServer
   def handle_info({:DOWN, _, :process, pid, _reason}, me) do
     {:noreply, Map2.reject_value_within(me, :started_circular_clusters, pid)}
   end

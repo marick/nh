@@ -1,11 +1,14 @@
 defmodule AppAnimal.Neural.CircularCluster do
   use GenServer
 
-  defstruct [:name, :handlers, downstream: [], send_pulse_downstream: :installed_by_switchboard]
+  defstruct [:name, :handlers,
+             downstream: [],
+             default_lifespan_in_seconds: 2,
+             send_pulse_downstream: :installed_by_switchboard]
 
   def init(configuration) do
     specialized_state = configuration.handlers.initialize.(configuration)
-    full_state = %{lifespan: 20} |> Map.merge(specialized_state)
+    full_state = %{reinforcement_strength: configuration.default_lifespan_in_seconds * 10} |> Map.merge(specialized_state)
     {:ok, {configuration, full_state}}
   end
 
@@ -16,8 +19,8 @@ defmodule AppAnimal.Neural.CircularCluster do
   end
 
   def handle_cast([weaken: n], {configuration, mutable}) do
-    new_lifespan = mutable.lifespan - n
-    mutated = Map.put(mutable, :lifespan, new_lifespan)
+    new_lifespan = mutable.reinforcement_strength - n
+    mutated = Map.put(mutable, :reinforcement_strength, new_lifespan)
     
     new_state = {configuration, mutated}
     

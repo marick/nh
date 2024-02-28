@@ -80,7 +80,8 @@ defmodule AppAnimal.Neural.SwitchboardTest do
 
       Process.sleep(3000)
       UT.initial_pulse(to: :first, carrying: :nothing, via: switchboard)
-      assert_receive([second_pid])
+
+      [second_pid] = assert_receive(_)
       refute second_pid == first_pid
     end
   end
