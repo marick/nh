@@ -2,6 +2,7 @@ defmodule AppAnimal.Neural.Switchboard do
   use GenServer
   require Logger
   use Private
+  alias AppAnimal.Map2
 
   defstruct [:environment, :network, started_circular_clusters: %{}]
 
@@ -36,21 +37,12 @@ defmodule AppAnimal.Neural.Switchboard do
   def init(me) do
     Process.send_after(self(), :tick, 100)
 
-    new_me = 
-      map_over_values_within(me, :network, fn structure ->
+    new_me =
+      Map2.map_within(me, :network, fn structure ->
         sender = mkfn__individualized_pulse_downstream(structure.name)
         %{structure | send_pulse_downstream: sender}
       end)
     {:ok, new_me}
-  end
-
-  def map_over_values_within(outer_map, key, f) do
-    inner_map = Map.get(outer_map, key)
-    changed_map =
-      for {k, v} <- inner_map, into: %{} do
-        {k, f.(v)}
-      end
-    Map.put(outer_map, key, changed_map)
   end
 
   @impl GenServer
@@ -80,18 +72,7 @@ defmodule AppAnimal.Neural.Switchboard do
   end
 
   def handle_info({:DOWN, _, :process, pid, _reason}, me) do
-    {:noreply, reject_value_within(me, :started_circular_clusters, pid)}
-  end
-
-  # TODO: pull this into a helper module
-  def reject_value_within(outer_map, key, rejected_value) do
-    inner_map = Map.get(outer_map, key)
-    transformed = 
-      for {k, v} <- inner_map,
-          v != rejected_value,
-          into: %{},
-          do: {k, v}
-    Map.put(outer_map, key, transformed)
+    {:noreply, Map2.reject_value_within(me, :started_circular_clusters, pid)}
   end
     
   private do
