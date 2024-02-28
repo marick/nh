@@ -70,13 +70,18 @@ defmodule AppAnimal.Neural.Switchboard do
   end
 
   def handle_info({:DOWN, _, :process, pid, _reason}, me) do
-    removed = for {name, p} <- me.started_circular_clusters,
-                  p != pid,
-                  into: %{},
-                  do: {name, p}
-    {:noreply, 
-     %{me | started_circular_clusters: removed}
-    }
+    {:noreply, reject_value_within(me, :started_circular_clusters, pid)}
+  end
+
+  # TODO: pull this into a helper module
+  def reject_value_within(outer_map, key, rejected_value) do
+    inner_map = Map.get(outer_map, key)
+    transformed = 
+      for {k, v} <- inner_map,
+          v != rejected_value,
+          into: %{},
+          do: {k, v}
+    Map.put(outer_map, key, transformed)
   end
     
   private do
