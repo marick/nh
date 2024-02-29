@@ -44,7 +44,7 @@ defmodule AppAnimal.Neural.CircularCluster do
   def handle_cast([handle_pulse: small_data], state) do
     mutating(state, fn mutable, configuration ->
       configuration.handlers.pulse()
-      |> apply([small_data, configuration, mutable])
+      |> apply([small_data, mutable, configuration])
       |> continue()
     end)
     

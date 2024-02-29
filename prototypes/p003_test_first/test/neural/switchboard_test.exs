@@ -15,7 +15,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     end
 
     test "a transmission of pulses" do
-      handle_pulse = fn pulse_data, configuration, mutable ->
+      handle_pulse = fn pulse_data, mutable, configuration ->
         configuration.send_pulse_downstream.(carrying: pulse_data + 1)
         mutable
       end
@@ -35,7 +35,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     end
     
     def pulse_accumulated_pids() do
-      fn :nothing, configuration, mutable ->
+      fn :nothing, mutable, configuration ->
         mutated = update_in(mutable.pids, &([self() | &1]))
         configuration.send_pulse_downstream.(carrying: mutated.pids)
         mutated
@@ -95,7 +95,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
   private do
     def forward_pulse_to_test do
       test_pid = self()
-      fn pulse_data, _configuration, mutable ->
+      fn pulse_data, mutable, _configuration ->
         send(test_pid, pulse_data)
         mutable
       end
