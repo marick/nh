@@ -16,4 +16,9 @@ defmodule AppAnimal.Neural.ClusterMakers do
 
     struct(Neural.CircularCluster, Keyword.put_new(structure_template, :handlers, handlers))
   end
+
+
+  def linear_cluster(name, handle_pulse) when is_function(handle_pulse) do
+    %Neural.CircularCluster{name: name, handlers: %{handle_pulse: handle_pulse}}
+  end
 end
