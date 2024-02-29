@@ -24,7 +24,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
   describe "circular cluster handling" do 
     test "a single-cluster chain" do
       switchboard = switchboard_from([circular_cluster(:some_cluster, pulse_to_test())])
-      UT.initial_pulse(to: :some_cluster, carrying: "pulse data", via: switchboard)
+      UT.external_pulse(switchboard, to: :some_cluster, carrying: "pulse data")
       assert_receive("pulse data")
     end
 
@@ -38,7 +38,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
       second = circular_cluster(:second, pulse_to_test())
       switchboard = switchboard_from([first, second])
     
-      UT.initial_pulse(to: :first, carrying: 1, via: switchboard)
+      UT.external_pulse(switchboard, to: :first, carrying: 1)
       assert_receive(2)
     end
 
@@ -61,10 +61,10 @@ defmodule AppAnimal.Neural.SwitchboardTest do
       second = circular_cluster(:second, pulse_to_test())
       switchboard = switchboard_from([first, second])
 
-      UT.initial_pulse(to: :first, carrying: :nothing, via: switchboard)
+      UT.external_pulse(switchboard, to: :first, carrying: :nothing)
       [first_pid] = assert_receive(_)
 
-      UT.initial_pulse(to: :first, carrying: :nothing, via: switchboard)
+      UT.external_pulse(switchboard, to: :first, carrying: :nothing)
       assert_receive([^first_pid, ^first_pid])
     end
 
@@ -76,11 +76,11 @@ defmodule AppAnimal.Neural.SwitchboardTest do
       second = circular_cluster(:second, pulse_to_test())
       switchboard = switchboard_from([first, second], pulse_rate: 1)
 
-      UT.initial_pulse(to: :first, carrying: :nothing, via: switchboard)
+      UT.external_pulse(switchboard, to: :first, carrying: :nothing)
       [first_pid] = assert_receive(_)
 
       Process.sleep(30)
-      UT.initial_pulse(to: :first, carrying: :nothing, via: switchboard)
+      UT.external_pulse(switchboard, to: :first, carrying: :nothing)
 
       [second_pid] = assert_receive(_)
       refute second_pid == first_pid
@@ -99,7 +99,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     @tag :rskip
     test "a single-cluster chain" do
       # switchboard = switchboard_from([circular_cluster(:some_cluster, ModuleVersion)])
-      # UT.initial_pulse(to: :some_cluster, carrying: "pulse data", via: switchboard)
+      # UT.external_pulse(to: :some_cluster, carrying: "pulse data", via: switchboard)
       # assert_receive("pulse data")
     end
   end

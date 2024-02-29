@@ -1,18 +1,9 @@
 defmodule AppAnimal do
-  @moduledoc """
-  Documentation for `AppAnimal`.
-  """
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> AppAnimal.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  defmacro __using__(_) do
+    quote do
+      require Logger
+      use Private
+      alias AppAnimal.Map2
+    end
   end
 end
