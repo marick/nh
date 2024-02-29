@@ -85,4 +85,21 @@ defmodule AppAnimal.Neural.SwitchboardTest do
       refute second_pid == first_pid
     end
   end
+
+  defmodule ModuleVersion do
+    def initialize do
+    end
+    
+    def handle_pulse do
+    end
+  end
+
+  describe "a circular cluster as a module" do
+    @tag :rskip
+    test "a single-cluster chain" do
+      # switchboard = switchboard_from([circular_cluster(:some_cluster, ModuleVersion)])
+      # UT.initial_pulse(to: :some_cluster, carrying: "pulse data", via: switchboard)
+      # assert_receive("pulse data")
+    end
+  end
 end
