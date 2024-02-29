@@ -3,7 +3,7 @@ defmodule AppAnimal.Extras.SplitState do
     {configuration, mutable}
   end
 
-  def creating_mutable(configuration, f) when is_function(f, 0),
+  def creating_mutable(configuration, f)    when is_function(f, 0),
       do: f.()                       |> add_to_mutable(configuration)
   def mutating({configuration, mutable}, f) when is_function(f, 1),
       do: f.(mutable)                |> add_to_mutable(configuration)

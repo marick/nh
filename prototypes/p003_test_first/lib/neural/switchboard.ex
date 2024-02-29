@@ -56,6 +56,8 @@ defmodule AppAnimal.Neural.Switchboard do
       handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me)
     end
 
+    
+    @impl GenServer
     def handle_info(:weaken_all_active, me) do
       for {_name, pid} <- me.started_circular_clusters do
         GenServer.cast(pid, [weaken: 1])
@@ -64,12 +66,12 @@ defmodule AppAnimal.Neural.Switchboard do
       continue(me)
     end
 
-    @impl GenServer
-    def handle_info({:DOWN, _, :process, pid, _reason}, me) do
+    def handle_info({:DOWN, _, :process, pid, :normal}, me) do
       me
       |> Map2.reject_value_within(:started_circular_clusters, pid)
       |> continue()
     end
+
     
     private do
       def mkfn__individualized_pulse_downstream(source_name) do
