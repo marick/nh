@@ -82,6 +82,10 @@ defmodule AppAnimal.Neural.Switchboard do
         end
       end
 
+      def separate(names, given: network) do
+        Enum.group_by(names, &(network[&1].__struct__))
+      end
+
       def ensure_circular_clusters_are_ready(names, me) do
         already_started = me.started_circular_clusters
 

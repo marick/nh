@@ -5,6 +5,7 @@ defmodule AppAnimal.GenServer do
       use GenServer
       require AppAnimal.GenServer
       import AppAnimal.GenServer
+      alias AppAnimal.Neural
     end
   end
 

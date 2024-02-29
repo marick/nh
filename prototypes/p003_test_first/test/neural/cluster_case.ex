@@ -5,14 +5,6 @@ defmodule ClusterCase do
   alias Neural.NetworkBuilder, as: Builder
   import ExUnit.Callbacks, only: [start_link_supervised!: 1]
   
-  def forward_pulse_to_test do
-    test_pid = self()
-    fn pulse_data, mutable, _configuration ->
-      send(test_pid, pulse_data)
-      mutable
-    end
-  end
-
   def switchboard_from(clusters, keys \\ []) when is_list(clusters) do
     network = Builder.start(clusters)
     state = struct(Switchboard,
@@ -28,6 +20,7 @@ defmodule ClusterCase do
       alias Neural.Switchboard
       import Neural.ClusterMakers
       import ClusterCase
+      use FlowAssertions
     end
   end
 end

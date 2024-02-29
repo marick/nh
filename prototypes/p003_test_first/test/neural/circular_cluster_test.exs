@@ -86,4 +86,16 @@ defmodule AppAnimal.Neural.CircularClusterTest do
     end
   end
 
+  private do
+    def forward_pulse_to_test do
+      test_pid = self()
+      fn pulse_data, mutable, _configuration ->
+        send(test_pid, pulse_data)
+        mutable
+      end
+    end
+    
+  end
+  
+
 end
