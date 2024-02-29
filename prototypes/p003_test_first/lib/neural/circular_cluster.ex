@@ -1,7 +1,8 @@
 defmodule AppAnimal.Neural.CircularCluster do
   use GenServer
 
-  defstruct [:name, :handlers,
+  defstruct [:name,
+             :handlers,
              downstream: [],
              default_lifespan_in_seconds: 2,
              send_pulse_downstream: :installed_by_switchboard]
