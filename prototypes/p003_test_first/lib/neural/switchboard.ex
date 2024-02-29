@@ -4,7 +4,7 @@ defmodule AppAnimal.Neural.Switchboard do
   use Private
   alias AppAnimal.Map2
 
-  defstruct [:environment, :network, started_circular_clusters: %{}]
+  defstruct [:environment, :network, started_circular_clusters: %{}, pulse_rate: 100]
 
   def start_link(%__MODULE__{} = state) do
     GenServer.start_link(__MODULE__, state)
@@ -33,13 +33,13 @@ defmodule AppAnimal.Neural.Switchboard do
     end
   end
 
-  def schedule_weakening() do
-    Process.send_after(self(), :weaken_all_active, 100)
+  def schedule_weakening(pulse_delay) do
+    Process.send_after(self(), :weaken_all_active, pulse_delay)
   end
 
   @impl GenServer
   def init(me) do
-    schedule_weakening()
+    schedule_weakening(me.pulse_rate)
 
     new_me =
       Map2.map_within(me, :network, fn structure ->
@@ -70,7 +70,7 @@ defmodule AppAnimal.Neural.Switchboard do
     for {_name, pid} <- me.started_circular_clusters do
       GenServer.cast(pid, [weaken: 1])
     end
-    Process.send_after(self(), :weaken_all_active, 100)
+    schedule_weakening(me.pulse_rate)
     {:noreply, me}
   end
 

@@ -4,12 +4,12 @@ defmodule AppAnimal.Neural.CircularCluster do
   defstruct [:name,
              :handlers,
              downstream: [],
-             default_lifespan_in_seconds: 2,
+             starting_pulses: 20,
              send_pulse_downstream: :installed_by_switchboard]
 
   def init(configuration) do
     specialized_state = configuration.handlers.initialize.(configuration)
-    full_state = %{reinforcement_strength: configuration.default_lifespan_in_seconds * 10} |> Map.merge(specialized_state)
+    full_state = %{reinforcement_strength: configuration.starting_pulses} |> Map.merge(specialized_state)
     {:ok, {configuration, full_state}}
   end
 
@@ -20,12 +20,12 @@ defmodule AppAnimal.Neural.CircularCluster do
   end
 
   def handle_cast([weaken: n], {configuration, mutable}) do
-    new_lifespan = mutable.reinforcement_strength - n
-    mutated = Map.put(mutable, :reinforcement_strength, new_lifespan)
+    mutated =
+      Map.update!(mutable, :reinforcement_strength, &(&1 - n))
     
     new_state = {configuration, mutated}
     
-    if new_lifespan <= 0 do
+    if mutated.reinforcement_strength <= 0 do
       {:stop, :normal, new_state}
     else
       {:noreply, new_state}

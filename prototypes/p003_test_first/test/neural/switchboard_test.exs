@@ -15,9 +15,9 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     end
   end
 
-  def switchboard_from(clusters) when is_list(clusters) do
+  def switchboard_from(clusters, keys \\ []) when is_list(clusters) do
     network = N.start(clusters)
-    state = %UT{environment: "irrelevant", network: network}
+    state = struct(UT, Keyword.merge([environment: "irrelevant", network: network], keys))
     start_link_supervised!({UT, state})
   end
 
@@ -71,14 +71,15 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     test "... however, processes 'age out'" do
       first = circular_cluster(:first,
                                pulse_accumulated_pids(),
-                               initialize_mutable: initialize_with_empty_pids())
+                               initialize_mutable: initialize_with_empty_pids(),
+                               starting_pulses: 2)
       second = circular_cluster(:second, pulse_to_test())
-      switchboard = switchboard_from([first, second])
+      switchboard = switchboard_from([first, second], pulse_rate: 1)
 
       UT.initial_pulse(to: :first, carrying: :nothing, via: switchboard)
       [first_pid] = assert_receive(_)
 
-      Process.sleep(3000)
+      Process.sleep(30)
       UT.initial_pulse(to: :first, carrying: :nothing, via: switchboard)
 
       [second_pid] = assert_receive(_)
