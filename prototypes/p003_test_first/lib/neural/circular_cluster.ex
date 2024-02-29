@@ -17,9 +17,6 @@ defmodule AppAnimal.Extras.SplitState do
     |> Tuple.delete_at(last_index)
     |> Tuple.insert_at(last_index, new_state(mutable, configuration))
   end
-
-  def continue(arg), do: {:noreply, arg}
-  def stop(arg), do: {:stop, :normal, arg}
 end
 
 defmodule AppAnimal.Neural.CircularCluster do

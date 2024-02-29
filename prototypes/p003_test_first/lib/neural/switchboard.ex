@@ -1,7 +1,6 @@
 defmodule AppAnimal.Neural.Switchboard do
   use AppAnimal
   use AppAnimal.GenServer
-  import AppAnimal.GenServer.Tuples
 
   defstruct [:environment, :network, started_circular_clusters: %{}, pulse_rate: 100]
 
@@ -49,7 +48,7 @@ defmodule AppAnimal.Neural.Switchboard do
         destination_pid = new_me.started_circular_clusters[destination_name]
         GenServer.cast(destination_pid, [handle_pulse: pulse_data])
       end
-      noreply(new_me)
+      continue(new_me)
     end
 
     def handle_cast({:distribute_downstream, from: source_name, carrying: pulse_data}, me) do
@@ -62,14 +61,14 @@ defmodule AppAnimal.Neural.Switchboard do
         GenServer.cast(pid, [weaken: 1])
       end
       schedule_weakening(me.pulse_rate)
-      noreply(me)
+      continue(me)
     end
 
     @impl GenServer
     def handle_info({:DOWN, _, :process, pid, _reason}, me) do
       me
       |> Map2.reject_value_within(:started_circular_clusters, pid)
-      |> noreply()
+      |> continue()
     end
     
     private do

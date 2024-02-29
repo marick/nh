@@ -20,8 +20,9 @@ defmodule AppAnimal.GenServer do
     end
   end
 
-  defmodule Tuples do
-    def noreply(mutable), do: {:noreply, mutable}
-  end
+
+  # special names for my style of genserver. Allows pipelines.
+  def continue(arg), do: {:noreply, arg}
+  def stop(arg), do: {:stop, :normal, arg}
 end
 
