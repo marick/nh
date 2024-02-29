@@ -1,5 +1,31 @@
+defmodule AppAnimal.Extras.SplitState do
+  def new_state(mutable, configuration) do
+    {configuration, mutable}
+  end
+
+  def creating_mutable(configuration, f) when is_function(f, 0),
+      do: f.()                       |> add_to_mutable(configuration)
+  def mutating({configuration, mutable}, f) when is_function(f, 1),
+      do: f.(mutable)                |> add_to_mutable(configuration)
+  def mutating({configuration, mutable}, f) when is_function(f, 2),
+      do: f.(mutable, configuration) |> add_to_mutable(configuration)
+
+  def add_to_mutable(tuple_with_final_mutable, configuration) do
+    last_index = tuple_size(tuple_with_final_mutable) - 1
+    mutable = elem(tuple_with_final_mutable, last_index)
+    tuple_with_final_mutable
+    |> Tuple.delete_at(last_index)
+    |> Tuple.insert_at(last_index, new_state(mutable, configuration))
+  end
+
+  def continue(arg), do: {:noreply, arg}
+  def stop(arg), do: {:stop, :normal, arg}
+end
+
 defmodule AppAnimal.Neural.CircularCluster do
-  use GenServer
+  use AppAnimal
+  use AppAnimal.GenServer
+  import AppAnimal.Extras.SplitState
 
   defstruct [:name,
              :handlers,
@@ -8,27 +34,31 @@ defmodule AppAnimal.Neural.CircularCluster do
              send_pulse_downstream: :installed_by_switchboard]
 
   def init(configuration) do
-    specialized_state = configuration.handlers.initialize.(configuration)
-    full_state = %{reinforcement_strength: configuration.starting_pulses} |> Map.merge(specialized_state)
-    {:ok, {configuration, full_state}}
+    creating_mutable(configuration, fn ->
+      %{reinforcement_strength: configuration.starting_pulses}
+      |> Map.merge(configuration.handlers.initialize.(configuration))
+      |> ok()
+    end)
   end
 
-  def handle_cast([handle_pulse: small_data], {configuration, mutable}) do
-    mutated =
-      apply(configuration.handlers.pulse, [small_data, configuration, mutable])
-    {:noreply, {configuration, mutated}}
+  def handle_cast([handle_pulse: small_data], state) do
+    mutating(state, fn mutable, configuration ->
+      configuration.handlers.pulse()
+      |> apply([small_data, configuration, mutable])
+      |> continue()
+    end)
+    
   end
 
-  def handle_cast([weaken: n], {configuration, mutable}) do
-    mutated =
-      Map.update!(mutable, :reinforcement_strength, &(&1 - n))
-    
-    new_state = {configuration, mutated}
-    
-    if mutated.reinforcement_strength <= 0 do
-      {:stop, :normal, new_state}
-    else
-      {:noreply, new_state}
-    end
+  def handle_cast([weaken: n], state) do
+    mutating(state, fn mutable ->
+      mutated =
+        Map.update!(mutable, :reinforcement_strength, &(&1 - n))
+      if mutated.reinforcement_strength <= 0 do
+        stop(mutated)
+      else
+        continue(mutated)
+      end
+    end)
   end
 end
