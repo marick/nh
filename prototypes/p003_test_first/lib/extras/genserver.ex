@@ -20,6 +20,8 @@ defmodule AppAnimal.GenServer do
     end
   end
 
-  def ok(mutable), do: {:ok, mutable}
-  def noreply(mutable), do: {:noreply, mutable}
+  defmodule Tuples do
+    def noreply(mutable), do: {:noreply, mutable}
+  end
 end
+

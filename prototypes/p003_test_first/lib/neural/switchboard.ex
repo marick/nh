@@ -1,6 +1,7 @@
 defmodule AppAnimal.Neural.Switchboard do
   use AppAnimal
   use AppAnimal.GenServer
+  import AppAnimal.GenServer.Tuples
 
   defstruct [:environment, :network, started_circular_clusters: %{}, pulse_rate: 100]
 
