@@ -30,12 +30,14 @@ defmodule AppAnimal.Neural.Switchboard do
     def init(me) do
       schedule_weakening(me.pulse_rate)
 
-      new_me =
-        Map2.map_within(me, :network, fn cluster ->
-          sending_function = mkfn__individualized_pulse_downstream(cluster.name)
-          %{cluster | send_pulse_downstream: sending_function}
-        end)
-      {:ok, new_me}
+      add_individualized_pulses = fn cluster ->
+        sending_function = mkfn__individualized_pulse_downstream(cluster.name)
+        %{cluster | send_pulse_downstream: sending_function}
+      end
+
+      me
+      |> Map2.map_within(:network, add_individualized_pulses)
+      |> ok()
     end
 
     @impl GenServer
@@ -46,7 +48,7 @@ defmodule AppAnimal.Neural.Switchboard do
         destination_pid = new_me.started_circular_clusters[destination_name]
         GenServer.cast(destination_pid, [handle_pulse: pulse_data])
       end
-      {:noreply, new_me}
+      noreply(new_me)
     end
 
     def handle_cast({:distribute_downstream, from: source_name, carrying: pulse_data}, me) do
@@ -59,12 +61,14 @@ defmodule AppAnimal.Neural.Switchboard do
         GenServer.cast(pid, [weaken: 1])
       end
       schedule_weakening(me.pulse_rate)
-      {:noreply, me}
+      noreply(me)
     end
 
     @impl GenServer
     def handle_info({:DOWN, _, :process, pid, _reason}, me) do
-      {:noreply, Map2.reject_value_within(me, :started_circular_clusters, pid)}
+      me
+      |> Map2.reject_value_within(:started_circular_clusters, pid)
+      |> noreply()
     end
     
     private do

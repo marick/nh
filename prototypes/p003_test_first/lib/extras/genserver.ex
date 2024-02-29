@@ -4,7 +4,7 @@ defmodule AppAnimal.GenServer do
     quote do
       use GenServer
       require AppAnimal.GenServer
-      import AppAnimal.GenServer, only: [runs_in_sender: 1, runs_in_receiver: 1 ]
+      import AppAnimal.GenServer
     end
   end
 
@@ -19,5 +19,7 @@ defmodule AppAnimal.GenServer do
       unquote(block)
     end
   end
-  
+
+  def ok(mutable), do: {:ok, mutable}
+  def noreply(mutable), do: {:noreply, mutable}
 end
