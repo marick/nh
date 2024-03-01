@@ -5,10 +5,20 @@ defmodule ClusterCase do
   alias Neural.NetworkBuilder, as: Builder
   import ExUnit.Callbacks, only: [start_link_supervised!: 1]
   
-  def switchboard_from(clusters, keys \\ []) when is_list(clusters) do
+  def switchboard_from_cluster_trace(clusters, keys \\ []) when is_list(clusters) do
     network = Builder.start(clusters)
-    state = struct(Switchboard,
-                   Keyword.merge([environment: "irrelevant", network: network], keys))
+    keys
+    |> Keyword.put_new(:network, network)
+    |> switchboard()
+  end
+
+  def switchboard(keys) do
+    with_defaults =
+      keys 
+      |> Keyword.put_new(:affordances, "test doesn't use affordances")
+      |> Keyword.put_new(:network, "test doesn't use a network")
+    
+    state = struct(Switchboard, with_defaults)
     start_link_supervised!({Switchboard, state})
   end
 

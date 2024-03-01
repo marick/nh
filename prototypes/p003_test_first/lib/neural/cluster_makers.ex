@@ -21,4 +21,8 @@ defmodule AppAnimal.Neural.ClusterMakers do
   def linear_cluster(name, handle_pulse) when is_function(handle_pulse) do
     %Neural.LinearCluster{name: name, handlers: %{handle_pulse: handle_pulse}}
   end
+
+  def affordance(name) do
+    %Neural.Affordance{name: name}
+  end
 end

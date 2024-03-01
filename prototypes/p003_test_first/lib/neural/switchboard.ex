@@ -2,9 +2,9 @@ defmodule AppAnimal.Neural.Switchboard do
   use AppAnimal
   use AppAnimal.GenServer
 
-  defstruct [:environment, :network, started_circular_clusters: %{}, pulse_rate: 100]
+  defstruct [:affordances, :network, started_circular_clusters: %{}, pulse_rate: 100]
 
-  runs_in_sender do 
+  runs_in_sender do
     def start_link(%__MODULE__{} = state) do
       GenServer.start_link(__MODULE__, state)
     end

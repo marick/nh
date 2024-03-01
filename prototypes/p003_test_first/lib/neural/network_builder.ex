@@ -1,4 +1,6 @@
 defmodule AppAnimal.Neural.NetworkBuilder do
+  use AppAnimal
+  
   def start(clusters) do
     add_trace(%{}, clusters)
   end
@@ -13,17 +15,20 @@ defmodule AppAnimal.Neural.NetworkBuilder do
     add_trace(network, [cluster | clusters])
   end
 
-  def put_new(network, clusters) when is_list clusters do
-    Enum.reduce(clusters, network, fn cluster, acc ->
-      Map.put_new(acc, cluster.name, cluster)
-    end)
-  end
+  private do 
 
-  def add_downstream(network, []), do: network
+    def put_new(network, clusters) when is_list clusters do
+      Enum.reduce(clusters, network, fn cluster, acc ->
+        Map.put_new(acc, cluster.name, cluster)
+      end)
+    end
 
-  def add_downstream(network, [[upstream, downstream] | rest]) do
-    network 
-    |> update_in([upstream.name, Access.key(:downstream)], &([downstream.name | &1]))
-    |> add_downstream(rest)
+    def add_downstream(network, []), do: network
+
+    def add_downstream(network, [[upstream, downstream] | rest]) do
+      network 
+      |> update_in([upstream.name, Access.key(:downstream)], &([downstream.name | &1]))
+      |> add_downstream(rest)
+    end
   end
 end
