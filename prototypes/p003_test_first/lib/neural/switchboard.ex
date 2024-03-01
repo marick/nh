@@ -19,6 +19,10 @@ defmodule AppAnimal.Neural.Switchboard do
       GenServer.cast(switchboard_pid,
                      {:distribute_downstream, from: source_name, carrying: pulse_data})
     end
+
+    def forward_affordance(switchboard_pid, named: name, conveying: perception) do
+      send_pulse_downstream(switchboard_pid, from: name, carrying: perception)
+    end
   end
 
   runs_in_receiver do 
@@ -53,7 +57,6 @@ defmodule AppAnimal.Neural.Switchboard do
       handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me)
     end
 
-    
     @impl GenServer
     def handle_info(:weaken_all_active, me) do
       for {_name, pid} <- me.started_circular_clusters do

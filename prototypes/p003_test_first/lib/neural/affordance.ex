@@ -3,5 +3,6 @@ defmodule AppAnimal.Neural.Affordance do
 
   defstruct [:name,
              downstream: [],
-             send_pulse_downstream: :installed_by_switchboard]
+             send_pulse_downstream: :installed_by_switchboard
+  ]
 end

@@ -94,8 +94,5 @@ defmodule AppAnimal.Neural.CircularClusterTest do
         mutable
       end
     end
-    
   end
-  
-
 end
