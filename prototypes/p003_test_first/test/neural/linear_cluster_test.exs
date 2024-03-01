@@ -8,8 +8,17 @@ defmodule AppAnimal.Neural.LinearClusterTest do
       assert_receive({:final_cluster, "pulse data"})
     end
 
-    @tag :skip
     test "a transmission of pulses" do
+      handle_pulse = fn pulse_data, configuration ->
+        configuration.send_pulse_downstream.(carrying: pulse_data + 1)
+      end
+
+      first = linear_cluster(:first, handle_pulse)
+      second = linear_cluster(:second, forward_pulse_to_test())
+      switchboard = switchboard_from([first, second])
+    
+      Switchboard.external_pulse(switchboard, to: :first, carrying: 1)
+      assert_receive({:second, 2})
     end
   end
 

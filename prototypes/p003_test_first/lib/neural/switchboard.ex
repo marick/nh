@@ -9,19 +9,15 @@ defmodule AppAnimal.Neural.Switchboard do
       GenServer.start_link(__MODULE__, state)
     end
     
-    def send_pulse(switchboard_pid, keys) do
-      GenServer.cast(switchboard_pid, {:receive_pulse, keys})
-    end
-    
-    def send_pulse_downstream(switchboard_pid, from: source_name, carrying: pulse_data) do
-      GenServer.cast(switchboard_pid,
-                     {:distribute_downstream, from: source_name, carrying: pulse_data})
-    end
-    
     # An entry point, called to initiate or reinitiate a network.
     def external_pulse(switchboard_pid, to: destination_name, carrying: pulse_data) do
       GenServer.cast(switchboard_pid,
                      {:distribute_pulse, carrying: pulse_data, to: [destination_name]})
+    end
+
+    def send_pulse_downstream(switchboard_pid, from: source_name, carrying: pulse_data) do
+      GenServer.cast(switchboard_pid,
+                     {:distribute_downstream, from: source_name, carrying: pulse_data})
     end
   end
 
@@ -43,7 +39,7 @@ defmodule AppAnimal.Neural.Switchboard do
     @impl GenServer
     def handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me) do
       %{linear: linear_names, circular: circular_names} =
-        separate(destination_names, given: me.network)
+        separate_by_cluster_type(destination_names, given: me.network)
       
       new_me = ensure_circular_clusters_are_ready(circular_names, me)
       pulse_to_circular(pulse_data, circular_names, new_me)
@@ -83,7 +79,7 @@ defmodule AppAnimal.Neural.Switchboard do
         end
       end
 
-      def separate(names, given: network) do
+      def separate_by_cluster_type(names, given: network) do
         {linears, circulars} =
           names
           |> Enum.split_with(fn name ->

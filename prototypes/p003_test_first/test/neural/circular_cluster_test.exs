@@ -9,9 +9,9 @@ defmodule AppAnimal.Neural.CircularClusterTest do
     end
 
     test "a transmission of pulses" do
-      handle_pulse = fn pulse_data, mutable, configuration ->
+      handle_pulse = fn pulse_data, _mutable, configuration ->
         configuration.send_pulse_downstream.(carrying: pulse_data + 1)
-        mutable
+        :there_is_no_mutable_state_to_affect
       end
 
       first = circular_cluster(:first, handle_pulse)

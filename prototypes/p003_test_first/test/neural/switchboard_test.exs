@@ -12,7 +12,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
                                     circular_cluster(:circular, irrelevant_forwarder)])
 
     [:linear, :circular]
-    |> Switchboard.separate(given: network)
+    |> Switchboard.separate_by_cluster_type(given: network)
     |> assert_fields(linear: [:linear],
                      circular: [:circular])
   end
