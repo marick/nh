@@ -13,7 +13,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
 
     [:linear, :circular]
     |> Switchboard.separate(given: network)
-    |> assert_equal(%{Neural.LinearCluster => [:linear],
-                      Neural.CircularCluster => [:circular]})
+    |> assert_fields(linear: [:linear],
+                     circular: [:circular])
   end
 end

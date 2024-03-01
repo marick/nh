@@ -42,12 +42,13 @@ defmodule AppAnimal.Neural.Switchboard do
 
     @impl GenServer
     def handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me) do
-      new_me = ensure_circular_clusters_are_ready(destination_names, me)
-
-      for destination_name <- destination_names do
-        destination_pid = new_me.started_circular_clusters[destination_name]
-        GenServer.cast(destination_pid, [handle_pulse: pulse_data])
-      end
+      %{linear: linear_names, circular: circular_names} =
+        separate(destination_names, given: me.network)
+      
+      new_me = ensure_circular_clusters_are_ready(circular_names, me)
+      pulse_to_circular(pulse_data, circular_names, new_me)
+      pulse_to_linear(pulse_data, linear_names, new_me)
+      
       continue(new_me)
     end
 
@@ -83,7 +84,13 @@ defmodule AppAnimal.Neural.Switchboard do
       end
 
       def separate(names, given: network) do
-        Enum.group_by(names, &(network[&1].__struct__))
+        {linears, circulars} =
+          names
+          |> Enum.split_with(fn name ->
+            is_struct(Map.fetch!(network, name), Neural.LinearCluster)
+          end)
+
+        %{linear: linears, circular: circulars}
       end
 
       def ensure_circular_clusters_are_ready(names, me) do
@@ -100,6 +107,23 @@ defmodule AppAnimal.Neural.Switchboard do
           end)
 
         %{me | started_circular_clusters: next_started}
+      end
+
+      def pulse_to_circular(pulse_data, circular_names, me) do
+        for name <- circular_names do
+          destination_pid = me.started_circular_clusters[name]
+          GenServer.cast(destination_pid, [handle_pulse: pulse_data])
+        end
+        :ok
+      end
+
+      def pulse_to_linear(pulse_data, linear_names, me) do
+        for name <- linear_names do
+          config = me.network[name]
+          Task.start(fn ->
+            config.handlers.handle_pulse.(pulse_data, config)
+          end)
+        end
       end
 
       def schedule_weakening(pulse_delay) do
