@@ -3,7 +3,7 @@ defmodule AppAnimal.Neural.LinearClusterTest do
   
   describe "linear cluster handling: function version: basics" do 
     test "a single-cluster chain" do
-      switchboard = switchboard_from_cluster_trace([linear_cluster(:final_cluster, forward_pulse_to_test())])
+      switchboard = from_trace([linear_cluster(:final_cluster, forward_pulse_to_test())])
       Switchboard.external_pulse(switchboard, to: :final_cluster, carrying: "pulse data")
       assert_receive({:final_cluster, "pulse data"})
     end
@@ -15,7 +15,7 @@ defmodule AppAnimal.Neural.LinearClusterTest do
 
       first = linear_cluster(:first, handle_pulse)
       second = linear_cluster(:second, forward_pulse_to_test())
-      switchboard = switchboard_from_cluster_trace([first, second])
+      switchboard = from_trace([first, second])
     
       Switchboard.external_pulse(switchboard, to: :first, carrying: 1)
       assert_receive({:second, 2})

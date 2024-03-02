@@ -3,7 +3,7 @@ defmodule AppAnimal.Neural.CircularClusterTest do
   
   describe "circular cluster handling: function version: basics" do 
     test "a single-cluster chain" do
-      switchboard = switchboard_from_cluster_trace([circular_cluster(:some_cluster, forward_pulse_to_test())])
+      switchboard = from_trace([circular_cluster(:some_cluster, forward_pulse_to_test())])
       Switchboard.external_pulse(switchboard, to: :some_cluster, carrying: "pulse data")
       assert_receive("pulse data")
     end
@@ -16,7 +16,7 @@ defmodule AppAnimal.Neural.CircularClusterTest do
 
       first = circular_cluster(:first, handle_pulse)
       second = circular_cluster(:second, forward_pulse_to_test())
-      switchboard = switchboard_from_cluster_trace([first, second])
+      switchboard = from_trace([first, second])
     
       Switchboard.external_pulse(switchboard, to: :first, carrying: 1)
       assert_receive(2)
@@ -41,7 +41,7 @@ defmodule AppAnimal.Neural.CircularClusterTest do
                                pulse_accumulated_pids(),
                                initialize_mutable: initialize_with_empty_pids())
       second = circular_cluster(:second, forward_pulse_to_test())
-      switchboard = switchboard_from_cluster_trace([first, second])
+      switchboard = from_trace([first, second])
       
       Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
       [first_pid] = assert_receive(_)
@@ -56,7 +56,7 @@ defmodule AppAnimal.Neural.CircularClusterTest do
                                initialize_mutable: initialize_with_empty_pids(),
                                starting_pulses: 2)
       second = circular_cluster(:second, forward_pulse_to_test())
-      switchboard = switchboard_from_cluster_trace([first, second], pulse_rate: 1)
+      switchboard = from_trace([first, second], pulse_rate: 1)
       
       Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
       [first_pid] = assert_receive(_)
@@ -80,7 +80,7 @@ defmodule AppAnimal.Neural.CircularClusterTest do
   describe "a circular cluster as a module" do
     @tag :skip
     test "a single-cluster chain" do
-      # switchboard = switchboard_from_cluster_trace([circular_cluster(:some_cluster, ModuleVersion)])
+      # switchboard = from_trace([circular_cluster(:some_cluster, ModuleVersion)])
       # Switchboard.external_pulse(to: :some_cluster, carrying: "pulse data", via: switchboard)
       # assert_receive("pulse data")
     end
