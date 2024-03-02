@@ -1,24 +1,20 @@
 defmodule AppAnimal.Neural.NetworkBuilder do
   use AppAnimal
   
-  def start(clusters) do
-    add_trace(%{}, clusters)
+  def independent(network \\ %{},  trace) do
+    put_new(network, trace)
+    |> add_downstream(Enum.chunk_every(trace, 2, 1, :discard))
   end
 
-  def add_trace(network, clusters) do
-    put_new(network, clusters)
-    |> add_downstream(Enum.chunk_every(clusters, 2, 1, :discard))
-  end
-
-  def add_branch(network, clusters, at: name) do
-    cluster = network[name]
-    add_trace(network, [cluster | clusters])
+  def extend(network, at: name, with: trace) do
+    existing = network[name]
+    independent(network, [existing | trace])
   end
 
   private do 
 
-    def put_new(network, clusters) when is_list clusters do
-      Enum.reduce(clusters, network, fn cluster, acc ->
+    def put_new(network, trace) when is_list trace do
+      Enum.reduce(trace, network, fn cluster, acc ->
         Map.put_new(acc, cluster.name, cluster)
       end)
     end

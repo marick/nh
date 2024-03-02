@@ -6,7 +6,7 @@ defmodule ClusterCase do
   import ExUnit.Callbacks, only: [start_link_supervised!: 1]
   
   def switchboard_from_cluster_trace(clusters, keys \\ []) when is_list(clusters) do
-    network = Builder.start(clusters)
+    network = Builder.independent(clusters)
     keys
     |> Keyword.put_new(:network, network)
     |> switchboard()
