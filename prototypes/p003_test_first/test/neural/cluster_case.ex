@@ -5,6 +5,7 @@ defmodule ClusterCase do
   alias Neural.NetworkBuilder, as: Builder
   alias Neural.Cluster
   import ExUnit.Callbacks, only: [start_link_supervised!: 1]
+  require ExUnit.Assertions
   
   def from_trace(clusters, keys \\ []) when is_list(clusters) do
     network = Builder.independent(clusters)
@@ -37,6 +38,12 @@ defmodule ClusterCase do
     fn data, %{name: name} ->
       send(test_pid, [data, from: name])
       :ok
+    end
+  end
+
+  defmacro assert_test_receives(value, keys \\ [from: :endpoint]) do
+    quote do 
+      ExUnit.Assertions.assert_receive([unquote(value) | unquote(keys)])
     end
   end
 

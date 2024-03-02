@@ -22,7 +22,11 @@ defmodule AppAnimal.Neural.Cluster do
     %Neural.LinearCluster{name: name, handlers: %{handle_pulse: handle_pulse}}
   end
 
+  def linear(name, calc: f) do
+    linear(name, Neural.LinearCluster.send_downstream(after: f))
+  end
+
   def affordance(name) do
     %Neural.Affordance{name: name}
   end
-end
+ end

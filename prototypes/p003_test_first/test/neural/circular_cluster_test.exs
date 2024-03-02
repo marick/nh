@@ -1,25 +1,20 @@
 defmodule AppAnimal.Neural.CircularClusterTest do
   use ClusterCase, async: true
+
+  def send_unchanged(after: calc) when is_function(calc, 1) do
+    fn pulse_data, mutable, configuration ->
+      configuration.send_pulse_downstream.(carrying: calc.(pulse_data))
+      mutable
+    end    
+  end
   
   describe "circular cluster handling: function version: basics" do 
-    test "a single-cluster chain" do
-      switchboard = from_trace([Cluster.circular(:some_cluster, forward_pulse_to_test())])
-      Switchboard.external_pulse(switchboard, to: :some_cluster, carrying: "pulse data")
-      assert_receive("pulse data")
-    end
-
     test "a transmission of pulses" do
-      handle_pulse = fn pulse_data, _mutable, configuration ->
-        configuration.send_pulse_downstream.(carrying: pulse_data + 1)
-        :there_is_no_mutable_state_to_affect
-      end
-
-      first = Cluster.circular(:first, handle_pulse)
-      second = Cluster.circular(:second, forward_pulse_to_test())
-      switchboard = from_trace([first, second])
+      first = Cluster.circular(:first, send_unchanged(after: & &1 + 1))
+      switchboard = from_trace([first, endpoint()])
     
       Switchboard.external_pulse(switchboard, to: :first, carrying: 1)
-      assert_receive(2)
+      assert_test_receives(2)
     end
   end
 
