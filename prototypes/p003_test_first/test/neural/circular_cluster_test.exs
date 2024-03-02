@@ -3,7 +3,7 @@ defmodule AppAnimal.Neural.CircularClusterTest do
   
   describe "circular cluster handling: function version: basics" do 
     test "a single-cluster chain" do
-      switchboard = from_trace([circular_cluster(:some_cluster, forward_pulse_to_test())])
+      switchboard = from_trace([Cluster.circular(:some_cluster, forward_pulse_to_test())])
       Switchboard.external_pulse(switchboard, to: :some_cluster, carrying: "pulse data")
       assert_receive("pulse data")
     end
@@ -14,8 +14,8 @@ defmodule AppAnimal.Neural.CircularClusterTest do
         :there_is_no_mutable_state_to_affect
       end
 
-      first = circular_cluster(:first, handle_pulse)
-      second = circular_cluster(:second, forward_pulse_to_test())
+      first = Cluster.circular(:first, handle_pulse)
+      second = Cluster.circular(:second, forward_pulse_to_test())
       switchboard = from_trace([first, second])
     
       Switchboard.external_pulse(switchboard, to: :first, carrying: 1)
@@ -37,10 +37,10 @@ defmodule AppAnimal.Neural.CircularClusterTest do
     end
     
     test "succeeding pulses go to the same process" do
-      first = circular_cluster(:first,
+      first = Cluster.circular(:first,
                                pulse_accumulated_pids(),
                                initialize_mutable: initialize_with_empty_pids())
-      second = circular_cluster(:second, forward_pulse_to_test())
+      second = Cluster.circular(:second, forward_pulse_to_test())
       switchboard = from_trace([first, second])
       
       Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
@@ -51,11 +51,11 @@ defmodule AppAnimal.Neural.CircularClusterTest do
     end
     
     test "... however, processes 'age out'" do
-      first = circular_cluster(:first,
+      first = Cluster.circular(:first,
                                pulse_accumulated_pids(),
                                initialize_mutable: initialize_with_empty_pids(),
                                starting_pulses: 2)
-      second = circular_cluster(:second, forward_pulse_to_test())
+      second = Cluster.circular(:second, forward_pulse_to_test())
       switchboard = from_trace([first, second], pulse_rate: 1)
       
       Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
@@ -80,7 +80,7 @@ defmodule AppAnimal.Neural.CircularClusterTest do
   describe "a circular cluster as a module" do
     @tag :skip
     test "a single-cluster chain" do
-      # switchboard = from_trace([circular_cluster(:some_cluster, ModuleVersion)])
+      # switchboard = from_trace([Cluster.circular(:some_cluster, ModuleVersion)])
       # Switchboard.external_pulse(to: :some_cluster, carrying: "pulse data", via: switchboard)
       # assert_receive("pulse data")
     end

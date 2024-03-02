@@ -1,8 +1,8 @@
-defmodule AppAnimal.Neural.ClusterMakers do
+defmodule AppAnimal.Neural.Cluster do
   alias AppAnimal.Neural
 
   # Surely this could be less ugly
-  def circular_cluster(name, handle_pulse, keys \\ []) when is_function(handle_pulse) do
+  def circular(name, handle_pulse, keys \\ []) when is_function(handle_pulse) do
     {handler_instructions, structure_template} =
       keys
       |> Keyword.merge(name: name, handle_pulse: handle_pulse)
@@ -18,7 +18,7 @@ defmodule AppAnimal.Neural.ClusterMakers do
   end
 
 
-  def linear_cluster(name, handle_pulse) when is_function(handle_pulse) do
+  def linear(name, handle_pulse) when is_function(handle_pulse) do
     %Neural.LinearCluster{name: name, handlers: %{handle_pulse: handle_pulse}}
   end
 

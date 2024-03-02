@@ -3,7 +3,7 @@ defmodule AppAnimal.Neural.LinearClusterTest do
   
   describe "linear cluster handling: function version: basics" do 
     test "a transmission of pulses" do
-      first = linear_cluster(:first, fn pulse_data, configuration ->
+      first = Cluster.linear(:first, fn pulse_data, configuration ->
         configuration.send_pulse_downstream.(carrying: pulse_data + 1)
       end)
 

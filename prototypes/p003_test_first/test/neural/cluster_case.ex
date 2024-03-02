@@ -3,7 +3,7 @@ defmodule ClusterCase do
   alias AppAnimal.Neural
   alias Neural.Switchboard
   alias Neural.NetworkBuilder, as: Builder
-  alias Neural.ClusterMakers, as: Cluster
+  alias Neural.Cluster
   import ExUnit.Callbacks, only: [start_link_supervised!: 1]
   
   def from_trace(clusters, keys \\ []) when is_list(clusters) do
@@ -41,7 +41,7 @@ defmodule ClusterCase do
   end
 
   def endpoint(name \\ :endpoint) do
-    Cluster.linear_cluster(name, mkfn__exit_to_test())
+    Cluster.linear(name, mkfn__exit_to_test())
   end
 
   defmacro __using__(keys) do
@@ -50,7 +50,7 @@ defmodule ClusterCase do
       use AppAnimal
       alias AppAnimal.Neural
       alias Neural.Switchboard
-      import Neural.ClusterMakers
+      alias Neural.Cluster
       import ClusterCase
       use FlowAssertions
     end
