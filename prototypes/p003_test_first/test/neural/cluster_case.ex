@@ -13,6 +13,15 @@ defmodule ClusterCase do
     |> switchboard()
   end
 
+  def world_connected_to(switchboard) do
+    start_link_supervised!({Neural.AffordanceLand, switchboard: switchboard})
+  end
+
+  def affordance_from!(affordance_source, [{name, data}]) do
+    Neural.AffordanceLand.provide_affordance(affordance_source,
+                                             named: name, conveying: data)
+  end
+
   def switchboard(keys) when is_list(keys) do
     with_defaults =
       keys 
