@@ -13,4 +13,5 @@ defmodule AppAnimal.Neural.LinearCluster do
       :there_is_never_a_meaningful_return_value
     end
   end
+   
 end

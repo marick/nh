@@ -1,67 +1,108 @@
 defmodule AppAnimal.Neural.CircularClusterTest do
   use ClusterCase, async: true
 
-  def send_unchanged(after: calc) when is_function(calc, 1) do
+
+
+
+  # This can be useful if the cluster's state is set at initialization and
+  # thereafter not changed.
+  def send_downstream(after: calc) when is_function(calc, 1) do
     fn pulse_data, mutable, configuration ->
       configuration.send_pulse_downstream.(carrying: calc.(pulse_data))
       mutable
     end    
   end
   
+  def send_downstream(after: calc) when is_function(calc, 2) do
+    fn pulse_data, mutable, configuration ->
+      {new_pulse, mutated} = calc.(pulse_data, mutable)
+      configuration.send_pulse_downstream.(carrying: new_pulse)
+      mutated
+    end
+  end
+  
+
   describe "circular cluster handling: function version: basics" do 
     test "a transmission of pulses" do
-      first = Cluster.circular(:first, send_unchanged(after: & &1 + 1))
+      first = Cluster.circular(:first, send_downstream(after: & &1 + 1))
       switchboard = from_trace([first, endpoint()])
     
       Switchboard.external_pulse(switchboard, to: :first, carrying: 1)
       assert_test_receives(2)
     end
   end
-
+  
   describe "longevity of circular clusters" do 
-    def initialize_with_empty_pids do
-      fn _configuration -> %{pids: []} end
-    end
+    def empty_pids, do: constantly(%{pids: []})
     
-    def pulse_accumulated_pids() do
-      fn :nothing, mutable, configuration ->
-        mutated = update_in(mutable.pids, &([self() | &1]))
-        configuration.send_pulse_downstream.(carrying: mutated.pids)
-        mutated
+    def accumulate_pids() do
+      fn _, mutable ->
+        mutated = update_in(mutable.pids, & [self() | &1])
+        {mutated.pids, mutated}
       end
     end
     
     test "succeeding pulses go to the same process" do
       first = Cluster.circular(:first,
-                               pulse_accumulated_pids(),
-                               initialize_mutable: initialize_with_empty_pids())
-      second = Cluster.circular(:second, forward_pulse_to_test())
-      switchboard = from_trace([first, second])
+                               empty_pids(),
+                               send_downstream(after: accumulate_pids()))
+      switchboard = from_trace([first, endpoint()])
       
       Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
-      [first_pid] = assert_receive(_)
+      assert_test_receives([first_pid])
       
       Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
-      assert_receive([^first_pid, ^first_pid])
+      assert_test_receives([^first_pid, ^first_pid])
+
+      # asynchrony, just for fun
+      Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
+      Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
+      assert_test_receives([^first_pid, ^first_pid, ^first_pid, ^first_pid])
+      
     end
-    
+
     test "... however, processes 'age out'" do
       first = Cluster.circular(:first,
-                               pulse_accumulated_pids(),
-                               initialize_mutable: initialize_with_empty_pids(),
+                               empty_pids(),
+                               send_downstream(after: accumulate_pids()),
                                starting_pulses: 2)
-      second = Cluster.circular(:second, forward_pulse_to_test())
-      switchboard = from_trace([first, second], pulse_rate: 1)
+      switchboard = from_trace([first, endpoint()], pulse_rate: 1)
       
       Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
-      [first_pid] = assert_receive(_)
+      assert_test_receives([first_pid])
       
       Process.sleep(30)
       Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
       
-      [second_pid] = assert_receive(_)
+      assert_test_receives([second_pid])
       refute second_pid == first_pid
     end
+
+    test "a circular trace" do
+      calc = 
+        fn _, mutable, configuration ->
+          mutated = 
+            %{mutable | pids: [self() | mutable.pids],
+                        count: mutable.count - 1}
+          if mutated.count >= 0,
+             do: configuration.send_pulse_downstream.(carrying: mutated.pids)
+          mutated
+        end
+      
+      first = Cluster.circular(:first,
+                               fn _configuration -> %{pids: [], count: 3} end,
+                               calc)
+
+      network =
+        Builder.independent([first, first])
+        |>  Builder.extend(at: :first, with: [endpoint()])
+      switchboard = switchboard(network: network)
+      Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
+      assert_test_receives([pid])
+      assert_test_receives([^pid, ^pid])
+      assert_test_receives([^pid, ^pid, ^pid])
+    end
+
   end
   
   defmodule ModuleVersion do

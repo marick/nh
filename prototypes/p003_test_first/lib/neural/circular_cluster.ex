@@ -19,6 +19,7 @@ defmodule AppAnimal.Extras.SplitState do
   end
 end
 
+
 defmodule AppAnimal.Neural.CircularCluster do
   use AppAnimal
   use AppAnimal.GenServer

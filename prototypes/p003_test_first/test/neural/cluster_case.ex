@@ -26,12 +26,12 @@ defmodule ClusterCase do
   def switchboard(keys) when is_list(keys) do
     with_defaults =
       keys 
-      |> Keyword.put_new(:affordances, "test doesn't use affordances")
       |> Keyword.put_new(:network, "test doesn't use a network")
     
     state = struct(Switchboard, with_defaults)
     start_link_supervised!({Switchboard, state})
   end
+  
 
   def mkfn__exit_to_test() do
     test_pid = self()
@@ -43,7 +43,8 @@ defmodule ClusterCase do
 
   defmacro assert_test_receives(value, keys \\ [from: :endpoint]) do
     quote do 
-      ExUnit.Assertions.assert_receive([unquote(value) | unquote(keys)])
+      [retval, from: _] = ExUnit.Assertions.assert_receive([unquote(value) | unquote(keys)])
+      retval
     end
   end
 
@@ -57,6 +58,7 @@ defmodule ClusterCase do
       use AppAnimal
       alias AppAnimal.Neural
       alias Neural.Switchboard
+      alias Neural.NetworkBuilder, as: Builder
       alias Neural.Cluster
       import ClusterCase
       use FlowAssertions

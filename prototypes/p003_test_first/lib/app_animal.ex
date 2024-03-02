@@ -5,6 +5,7 @@ defmodule AppAnimal do
       use Private
       alias AppAnimal.Map2
       import AppAnimal.Extras.Tuples
+      import AppAnimal.Extras.Kernel
     end
   end
 end
