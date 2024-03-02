@@ -1,30 +1,9 @@
 defmodule AppAnimal.Neural.CircularClusterTest do
   use ClusterCase, async: true
 
-
-
-
-  # This can be useful if the cluster's state is set at initialization and
-  # thereafter not changed.
-  def send_downstream(after: calc) when is_function(calc, 1) do
-    fn pulse_data, mutable, configuration ->
-      configuration.send_pulse_downstream.(carrying: calc.(pulse_data))
-      mutable
-    end    
-  end
-  
-  def send_downstream(after: calc) when is_function(calc, 2) do
-    fn pulse_data, mutable, configuration ->
-      {new_pulse, mutated} = calc.(pulse_data, mutable)
-      configuration.send_pulse_downstream.(carrying: new_pulse)
-      mutated
-    end
-  end
-  
-
   describe "circular cluster handling: function version: basics" do 
     test "a transmission of pulses" do
-      first = Cluster.circular(:first, send_downstream(after: & &1 + 1))
+      first = Cluster.circular(:first, Cluster.one_pulse(after: & &1 + 1))
       switchboard = from_trace([first, endpoint()])
     
       Switchboard.external_pulse(switchboard, to: :first, carrying: 1)
@@ -45,7 +24,7 @@ defmodule AppAnimal.Neural.CircularClusterTest do
     test "succeeding pulses go to the same process" do
       first = Cluster.circular(:first,
                                empty_pids(),
-                               send_downstream(after: accumulate_pids()))
+                               Cluster.one_pulse(after: accumulate_pids()))
       switchboard = from_trace([first, endpoint()])
       
       Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
@@ -64,7 +43,7 @@ defmodule AppAnimal.Neural.CircularClusterTest do
     test "... however, processes 'age out'" do
       first = Cluster.circular(:first,
                                empty_pids(),
-                               send_downstream(after: accumulate_pids()),
+                               Cluster.one_pulse(after: accumulate_pids()),
                                starting_pulses: 2)
       switchboard = from_trace([first, endpoint()], pulse_rate: 1)
       
