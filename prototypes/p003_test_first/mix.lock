@@ -1,4 +1,5 @@
 %{
+  "circular_buffer": {:hex, :circular_buffer, "0.4.1", "477f370fd8cfe1787b0a1bade6208bbd274b34f1610e41f1180ba756a7679839", [:mix], [], "hexpm", "633ef2e059dde0d7b89bbab13b1da9d04c6685e80e68fbdf41282d4fae746b72"},
   "flow_assertions": {:hex, :flow_assertions, "0.7.1", "b175bffdc551b5ce3d0586aa4580f1708a2d98665e1d8b1f13f5dd9521f6d828", [:mix], [], "hexpm", "c83622f227bb6bf2b5c11f5515af1121884194023dbda424035c4dbbb0982b7c"},
   "iteraptor": {:hex, :iteraptor, "1.14.0", "a6a23ec9ac1c25f3065138fd87f7f739f9b5a7e08fe915cfefcd155105445167", [:mix], [], "hexpm", "88d7a8bb7829a0faa8f99e15b12a8082403f07236d0911e55ad9245b306fd558"},
   "private": {:hex, :private, "0.1.2", "da4add9f36c3818a9f849840ca43016c8ae7f76d7a46c3b2510f42dcc5632932", [:mix], [], "hexpm", "22ee01c3f450cf8d135da61e10ec59dde006238fab1ea039014791fc8f3ff075"},

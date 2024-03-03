@@ -31,7 +31,6 @@ defmodule ClusterCase do
     state = struct(Switchboard, with_defaults)
     start_link_supervised!({Switchboard, state})
   end
-  
 
   def mkfn__exit_to_test() do
     test_pid = self()

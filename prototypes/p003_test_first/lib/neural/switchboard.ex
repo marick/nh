@@ -1,8 +1,12 @@
 defmodule AppAnimal.Neural.Switchboard do
   use AppAnimal
   use AppAnimal.GenServer
+  alias Neural.PulseLogger
 
-  defstruct [:network, started_circular_clusters: %{}, pulse_rate: 100]
+  defstruct [:network,
+             started_circular_clusters: %{},
+             pulse_rate: 100,
+             logger: :set_at_start_link_time]
 
   runs_in_sender do
     def start_link(%__MODULE__{} = state) do
@@ -37,6 +41,7 @@ defmodule AppAnimal.Neural.Switchboard do
 
       me
       |> Map2.map_within(:network, add_individualized_pulses)
+      |> Map.put(:logger, PulseLogger.start)
       |> ok()
     end
 
@@ -53,7 +58,9 @@ defmodule AppAnimal.Neural.Switchboard do
     end
 
     def handle_cast({:distribute_downstream, from: source_name, carrying: pulse_data}, me) do
-      destination_names = me.network[source_name].downstream
+      source = me.network[source_name]
+      destination_names = source.downstream
+      PulseLogger.log(source, pulse_data)
       handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me)
     end
 

@@ -9,7 +9,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
 
 
     network = NetworkBuilder.independent([Cluster.linear(:linear, irrelevant_forwarder),
-                                    Cluster.circular(:circular, irrelevant_forwarder)])
+                                          Cluster.circular(:circular, irrelevant_forwarder)])
 
     [:linear, :circular]
     |> Switchboard.separate_by_cluster_type(given: network)

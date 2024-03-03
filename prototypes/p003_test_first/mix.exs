@@ -32,6 +32,7 @@ defmodule AppAnimal.MixProject do
       {:flow_assertions, "~> 0.6", only: :test},
       {:shorter_maps, "~> 2.2"},
       {:iteraptor, "~> 1.14"},
+      {:circular_buffer, "~> 0.4"},
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
