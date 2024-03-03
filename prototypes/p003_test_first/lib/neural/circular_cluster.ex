@@ -27,6 +27,7 @@ defmodule AppAnimal.Neural.CircularCluster do
 
   defstruct [:name,
              :handlers,
+             type: __MODULE__,
              downstream: [],
              starting_pulses: 20,
              send_pulse_downstream: :installed_by_switchboard]
