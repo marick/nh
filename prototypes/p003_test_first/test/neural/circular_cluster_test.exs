@@ -56,32 +56,32 @@ defmodule AppAnimal.Neural.CircularClusterTest do
       assert_test_receives([second_pid])
       refute second_pid == first_pid
     end
+  end
 
-    test "a circular trace" do
-      calc = 
-        fn _, mutable, configuration ->
-          mutated = 
-            %{mutable | pids: [self() | mutable.pids],
-                        count: mutable.count - 1}
-          if mutated.count >= 0,
-             do: configuration.send_pulse_downstream.(carrying: mutated.pids)
-          mutated
-        end
-      
-      first = Cluster.circular(:first,
-                               fn _configuration -> %{pids: [], count: 3} end,
-                               calc)
 
-      network =
-        Builder.independent([first, first])
-        |>  Builder.extend(at: :first, with: [endpoint()])
-      switchboard = switchboard(network: network)
-      Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
-      assert_test_receives([pid])
-      assert_test_receives([^pid, ^pid])
-      assert_test_receives([^pid, ^pid, ^pid])
-    end
-
+  test "a circular trace" do
+    calc = 
+      fn _, mutable, configuration ->
+        mutated = 
+          %{mutable | pids: [self() | mutable.pids],
+                      count: mutable.count - 1}
+        if mutated.count >= 0,
+           do: configuration.send_pulse_downstream.(carrying: mutated.pids)
+        mutated
+      end
+    
+    first = Cluster.circular(:first,
+                             fn _configuration -> %{pids: [], count: 3} end,
+                             calc)
+    
+    network =
+      Builder.independent([first, first])
+      |>  Builder.extend(at: :first, with: [endpoint()])
+    switchboard = switchboard(network: network)
+    Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
+    assert_test_receives([pid])
+    assert_test_receives([^pid, ^pid])
+    assert_test_receives([^pid, ^pid, ^pid])
   end
   
   defmodule ModuleVersion do
