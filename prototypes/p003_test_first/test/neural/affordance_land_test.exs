@@ -3,7 +3,7 @@ defmodule AppAnimal.Neural.AffordanceLandTest do
 
   test "a simple send downstream" do
     switchboard =
-      [Cluster.affordance(:paragraph_text), endpoint()] |> from_trace()
+      [Cluster.perception_edge(:paragraph_text), endpoint()] |> from_trace()
     out_there = world_connected_to(switchboard)
 
     affordance_from!(out_there, paragraph_text: "some text")

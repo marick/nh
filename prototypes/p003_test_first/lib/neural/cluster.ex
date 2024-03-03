@@ -58,10 +58,10 @@ defmodule AppAnimal.Neural.Cluster do
   end
   
 
-  ## Affordances
+  ## Edges
 
-  def affordance(name) do
-    %Neural.Affordance{name: name}
+  def perception_edge(name) do
+    %Neural.PerceptionEdge{name: name}
   end
 
  end

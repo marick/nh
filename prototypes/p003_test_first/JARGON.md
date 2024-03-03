@@ -1,10 +1,11 @@
+#### Action Edge
+
 #### Affordance
 
 As a descriptive term, used in the psychology sense:
-what the environment offers the individual. Also a particular type of
-*cluster* that receives data from *Affordance Land*. Affordance Land
-generates named data. The same-named affordance routes the data to
-other, downstream clusters.
+what the environment offers the individual. Affordances are received from *Affordance Land* by 
+*perception edges*. *Action edges* change Affordance Land to present new affordances to either
+some later perceptiuon edge or to the user.
 
 #### Affordance Land
 
@@ -61,6 +62,12 @@ A structure of interconnected **clusters** that interact with
 **Affordance Land**: by receiving incoming **affordances** and acting
 (on the output side) to produce new affordances.
 
+#### Perception Edge
+
+A type of *cluster* that receives an *affordance* (an Elixir message)
+from *Affordance Land*. Typically, it forwards the message to its
+downstream clusters.
+xo
 #### Trace
 
 A linear sequence of _clusters_. Each cluster is downstream of its

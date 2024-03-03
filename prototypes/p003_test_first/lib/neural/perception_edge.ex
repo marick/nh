@@ -1,4 +1,4 @@
-defmodule AppAnimal.Neural.Affordance do
+defmodule AppAnimal.Neural.PerceptionEdge do
   use AppAnimal
 
   defstruct [:name,
