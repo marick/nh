@@ -4,6 +4,7 @@ defmodule AppAnimal do
       require Logger
       use Private
       alias AppAnimal.Map2
+      alias AppAnimal.Pretty
       import AppAnimal.Extras.Tuples
       import AppAnimal.Extras.Kernel
     end

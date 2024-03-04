@@ -27,6 +27,18 @@ defmodule AppAnimal.Neural.Switchboard do
     def forward_affordance(switchboard_pid, named: name, conveying: perception) do
       send_pulse_downstream(switchboard_pid, from: name, carrying: perception)
     end
+
+    def spill_log_to_terminal(switchboard_pid) do
+      GenServer.cast(switchboard_pid, [spill_log_to_terminal: true])
+    end
+
+    def silence_terminal_log(switchboard_pid) do
+      GenServer.cast(switchboard_pid, [spill_log_to_terminal: false])
+    end
+
+    def get_log(switchboard_pid) do
+      GenServer.call(switchboard_pid, :get_log)
+    end
   end
 
   runs_in_receiver do 
@@ -39,10 +51,18 @@ defmodule AppAnimal.Neural.Switchboard do
         %{cluster | send_pulse_downstream: sending_function}
       end
 
+      {:ok, logger} = PulseLogger.start_link
+
       me
       |> Map2.map_within(:network, add_individualized_pulses)
-      |> Map.put(:logger, PulseLogger.start)
+      |> Map.put(:logger, logger)
       |> ok()
+    end
+
+    @impl GenServer
+    def handle_call(:get_log, _from, me) do
+      log = PulseLogger.get_log(me.logger)
+      {:reply, log, me}
     end
 
     @impl GenServer
@@ -60,8 +80,13 @@ defmodule AppAnimal.Neural.Switchboard do
     def handle_cast({:distribute_downstream, from: source_name, carrying: pulse_data}, me) do
       source = me.network[source_name]
       destination_names = source.downstream
-      PulseLogger.log(source, pulse_data)
+      PulseLogger.log(me.logger, source.type, source.name, pulse_data)
       handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me)
+    end
+
+    def handle_cast([spill_log_to_terminal: value], me) do
+      PulseLogger.spill_log_to_terminal(me.logger, value)
+      continue(me)
     end
 
     @impl GenServer

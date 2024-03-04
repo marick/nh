@@ -18,20 +18,20 @@ defmodule AppAnimal.Pretty.LogFormat do
     String.duplicate(" ", current_value - name_length)
   end
 
+  def module_format(module) do
+    Pretty.Module.terse(module) |> Macro.underscore
+  end
+  
   private do
 
     def format_name(metadata) do
-      case Keyword.get(metadata, :cluster) do
-        {cluster_type, cluster_name} ->
-          "#{module_format(cluster_type)} #{cluster_name}"
+      case Keyword.get(metadata, :pulse_entry) do
+        %{cluster_type: type, name: name} ->
+          "#{type} #{name}"
         _ ->
           {module, _function, _arity} = Keyword.get(metadata, :mfa)
           module_format(module)
       end
-    end
-
-    def module_format(module) do
-      Pretty.Module.terse(module) |> Macro.underscore
     end
 
     def format(message, metadata) do

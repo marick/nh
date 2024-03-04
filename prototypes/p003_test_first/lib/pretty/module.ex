@@ -1,5 +1,7 @@
 defmodule AppAnimal.Pretty.Module do
   use Private
+
+  # Note that, unlike Module.split, these functions work with plain atoms.
   
   def terse(arg) when is_atom(arg),
       do: split_module_name(arg) |> Enum.slice(-2..-1) |> Enum.join(".")

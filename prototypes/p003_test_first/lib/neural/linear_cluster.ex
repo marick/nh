@@ -3,7 +3,7 @@ defmodule AppAnimal.Neural.LinearCluster do
 
   defstruct [:name,
              :handlers,
-             type: __MODULE__,
+             type: :linear_cluster,
              downstream: [],
              send_pulse_downstream: :installed_by_switchboard]   
 end
