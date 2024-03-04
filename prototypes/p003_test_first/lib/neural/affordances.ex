@@ -1,4 +1,4 @@
-defmodule AppAnimal.Neural.AffordanceLand do
+defmodule AppAnimal.Neural.Affordances do
   use AppAnimal
   use AppAnimal.GenServer 
 
@@ -7,7 +7,7 @@ defmodule AppAnimal.Neural.AffordanceLand do
       GenServer.start_link(__MODULE__, switchboard)
     end
 
-    def provide_affordance(me, named: affordance_name, conveying: data) do
+    def spontaneous_affordance(me, [{affordance_name, data}]) do
       GenServer.cast(me, {:affordance, affordance_name, data})
     end
   end
