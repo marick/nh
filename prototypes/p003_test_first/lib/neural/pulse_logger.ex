@@ -47,11 +47,12 @@ defmodule AppAnimal.Neural.PulseLogger do
     end
 
     def handle_call([also_to_terminal: value], _from, me) do
-      {:reply, :ok, %{me | also_to_terminal: value}}
+      %{me | also_to_terminal: value}
+      |> continue(returning: :ok)
     end
 
     def handle_call(:get_log, _from, me) do
-      {:reply, CircularBuffer.to_list(me.buffer), me}
+      continue(me, returning: CircularBuffer.to_list(me.buffer))
     end
 
     def handle_cast([log: entry], me) do

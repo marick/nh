@@ -60,10 +60,8 @@ defmodule AppAnimal.Neural.Switchboard do
     end
 
     @impl GenServer
-    def handle_call(:get_log, _from, me) do
-      log = PulseLogger.get_log(me.logger)
-      {:reply, log, me}
-    end
+    def handle_call(:get_log, _from, me), 
+        do: continue(me, returning: PulseLogger.get_log(me.logger))
 
     @impl GenServer
     def handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me) do

@@ -21,9 +21,12 @@ defmodule AppAnimal.GenServer do
     end
   end
 
-
   # special names for my style of genserver. Allows pipelines.
-  def continue(arg), do: {:noreply, arg}
+  def continue(mutable),
+      do: {:noreply, mutable}  # for `cast`
+  def continue(mutable, returning: retval),
+      do: {:reply, retval, mutable}
+
   def stop(arg), do: {:stop, :normal, arg}
 end
 
