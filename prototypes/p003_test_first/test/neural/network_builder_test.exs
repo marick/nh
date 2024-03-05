@@ -22,12 +22,12 @@ defmodule AppAnimal.Neural.NetworkBuilderTest do
   describe "building a network" do
     test "singleton" do
       first = named(:first)
-      assert UT.independent([first]) == %{first: first}
+      assert UT.trace([first]) == %{first: first}
     end
     
     test "multiple clusters in a row (a 'trace')" do
       named([:first, :second, :third])
-      |> UT.independent
+      |> UT.trace
       |> assert_connections(first: [:second], second: [:third])
     end
 
@@ -35,21 +35,21 @@ defmodule AppAnimal.Neural.NetworkBuilderTest do
       [first, second, third] = named([:first, :second, :third])
 
       [first, second, first, third, second]
-      |> UT.independent
+      |> UT.trace
       |> assert_connections(first: in_any_order([:second, :third]),
                             second: [:first],
                             third: [:second])
     end
 
     test "can build from multiple disjoint traces" do
-         UT.independent(named([:a1, :a2]))
-      |> UT.independent(named([:b1, :b2]))
+         UT.trace(named([:a1, :a2]))
+      |> UT.trace(named([:b1, :b2]))
       |> assert_connections(a1: [:a2], a2: [],
                             b1: [:b2], b2: [])
     end
 
     test "can add a branch starting at an existing node" do
-      UT.independent(named([:first,              :second_a, :third]))
+      UT.trace(named([:first,              :second_a, :third]))
       |> UT.extend(     at: :first, with: named([:second_b, :third]))
       |> assert_connections(first: in_any_order([:second_a, :second_b]),
                             second_a: [:third],

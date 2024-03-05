@@ -8,9 +8,24 @@ defmodule AppAnimal.Neural.AffordancesTest do
                                   endpoint()])
     affordances_pid = affordances(sent_to: switchboard_pid)
     
-    UT.spontaneous_affordance(affordances_pid, big_paragraph_change: :no_data)
+    UT.send_spontaneous_affordance(affordances_pid, big_paragraph_change: :no_data)
     assert_receive([:no_data, from: :endpoint])
+  end
 
+  test "programming a response to an affordance request" do
+    switchboard_pid = from_trace([Cluster.perception_edge(:current_paragraph_text),
+                                  endpoint()])
+    affordances_pid = affordances(sent_to: switchboard_pid)
+
+
+    UT.program_focus_response(affordances_pid, :current_paragraph_text, fn -> "paragraph\n" end)
+    
+    UT.send_focus_affordance(affordances_pid, :current_paragraph_text)
+    assert_receive(["paragraph\n", from: :endpoint])
+  end
+
+
+  
     
     # UT.affordance_request(affordances_pid, current_paragraph_text: :no_data)
     # UT.make_change(affordances_pid, named: x, using: data, auto_request: :current_paragraph_text)
@@ -19,5 +34,4 @@ defmodule AppAnimal.Neural.AffordancesTest do
     
 
     # assert_receive(["some text", from: :endpoint])
-  end
 end

@@ -8,8 +8,8 @@ defmodule AppAnimal.Neural.SwitchboardTest do
   test "can separate names into linear and circular clusters" do
     irrelevant_forwarder = fn _, _ -> 5 end
 
-    network = NetworkBuilder.independent([Cluster.linear(:linear, irrelevant_forwarder),
-                                          Cluster.circular(:circular, irrelevant_forwarder)])
+    network = NetworkBuilder.trace([Cluster.linear(:linear, irrelevant_forwarder),
+                                    Cluster.circular(:circular, irrelevant_forwarder)])
 
     [:linear, :circular]
     |> Switchboard.separate_by_cluster_type(given: network)

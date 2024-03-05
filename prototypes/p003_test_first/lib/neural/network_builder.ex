@@ -1,14 +1,14 @@
 defmodule AppAnimal.Neural.NetworkBuilder do
   use AppAnimal
-  
-  def independent(network \\ %{},  trace) do
-    put_new(network, trace)
-    |> add_downstream(Enum.chunk_every(trace, 2, 1, :discard))
-  end
 
+  def trace(network \\ %{}, clusters) do
+    put_new(network, clusters)
+    |> add_downstream(Enum.chunk_every(clusters, 2, 1, :discard))
+  end
+  
   def extend(network, at: name, with: trace) do
     existing = network[name]
-    independent(network, [existing | trace])
+    trace(network, [existing | trace])
   end
 
   private do 

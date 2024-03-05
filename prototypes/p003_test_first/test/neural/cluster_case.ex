@@ -6,9 +6,9 @@ defmodule ClusterCase do
   alias Neural.Cluster
   import ExUnit.Callbacks, only: [start_link_supervised!: 1]
   require ExUnit.Assertions
-  
+
   def from_trace(clusters, keys \\ []) when is_list(clusters) do
-    network = Builder.independent(clusters)
+    network = Builder.trace(clusters)
     keys
     |> Keyword.put_new(:network, network)
     |> switchboard()
@@ -27,14 +27,6 @@ defmodule ClusterCase do
     start_link_supervised!({Neural.Affordances, switchboard: switchboard})
   end
 
-  def mkfn__exit_to_test() do
-    test_pid = self()
-    fn data, %{name: name} ->
-      send(test_pid, [data, from: name])
-      :ok
-    end
-  end
-
   defmacro assert_test_receives(value, keys \\ [from: :endpoint]) do
     quote do 
       [retval, from: _] = ExUnit.Assertions.assert_receive([unquote(value) | unquote(keys)])
@@ -44,6 +36,16 @@ defmodule ClusterCase do
 
   def endpoint(name \\ :endpoint) do
     Cluster.linear(name, mkfn__exit_to_test())
+  end
+
+  private do
+    def mkfn__exit_to_test() do
+      test_pid = self()
+      fn data, %{name: name} ->
+        send(test_pid, [data, from: name])
+        :ok
+      end
+    end
   end
 
   defmacro __using__(keys) do

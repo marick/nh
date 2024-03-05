@@ -75,7 +75,7 @@ defmodule AppAnimal.Neural.CircularClusterTest do
                              calc)
     
     network =
-      Builder.independent([first, first])
+      Builder.trace([first, first])
       |>  Builder.extend(at: :first, with: [endpoint()])
     switchboard = switchboard(network: network)
     Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)

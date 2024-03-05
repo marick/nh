@@ -21,8 +21,8 @@ defmodule AppAnimal.Scenarios.SwitchParagraphTest do
     # big_edit? = Cluster.gate(:big_edit?)
 
     # network =
-    #   Build.independent([notice_paragraph_change, react_to_paragraph_change])
-    #   |> Build.independent([scanned_text, edge_detector, big_edit?, endpoint()])
+    #   Build.trace([notice_paragraph_change, react_to_paragraph_change])
+    #   |> Build.trace([scanned_text, edge_detector, big_edit?, endpoint()])
     
   end
 
