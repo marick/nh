@@ -3,11 +3,11 @@ defmodule AppAnimal.Neural.PerceptionEdgeTest do
 
   test "edges serve only to fan out" do
     network =
-      Builder.trace([Cluster.perception_edge(:paragraph_text),
+      Network.trace([Cluster.perception_edge(:paragraph_text),
                      Cluster.linear(:one_calculation,
                                     Cluster.only_pulse(after: &String.reverse/1)),
                      endpoint()])
-    |> Builder.extend(at: :paragraph_text,
+    |> Network.extend(at: :paragraph_text,
                       with: [Cluster.linear(:another, Cluster.only_pulse(after: &(&1 <> &1))),
                              endpoint()])
     

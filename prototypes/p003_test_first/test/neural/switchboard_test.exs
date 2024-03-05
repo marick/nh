@@ -1,6 +1,5 @@
 defmodule AppAnimal.Neural.SwitchboardTest do
   use ClusterCase, async: true
-  alias Neural.NetworkBuilder
   require Neural.Switchboard
 
   ## The switchboard is mostly tested via the different kinds of clusters.
@@ -8,8 +7,8 @@ defmodule AppAnimal.Neural.SwitchboardTest do
   test "can separate names into linear and circular clusters" do
     irrelevant_forwarder = fn _, _ -> 5 end
 
-    network = NetworkBuilder.trace([Cluster.linear(:linear, irrelevant_forwarder),
-                                    Cluster.circular(:circular, irrelevant_forwarder)])
+    network = Network.trace([Cluster.linear(:linear, irrelevant_forwarder),
+                             Cluster.circular(:circular, irrelevant_forwarder)])
 
     [:linear, :circular]
     |> Switchboard.separate_by_cluster_type(given: network)

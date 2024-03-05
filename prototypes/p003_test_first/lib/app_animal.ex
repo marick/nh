@@ -1,4 +1,7 @@
 defmodule AppAnimal do
+
+  defstruct [:network, :switchboard, :affordances]
+
   defmacro __using__(_) do
     quote do
       require Logger

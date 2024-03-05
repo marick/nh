@@ -2,13 +2,13 @@ defmodule ClusterCase do
   use AppAnimal
   alias AppAnimal.Neural
   alias Neural.Switchboard
-  alias Neural.NetworkBuilder, as: Builder
+  alias Neural.Network
   alias Neural.Cluster
   import ExUnit.Callbacks, only: [start_link_supervised!: 1]
   require ExUnit.Assertions
 
   def from_trace(clusters, keys \\ []) when is_list(clusters) do
-    network = Builder.trace(clusters)
+    network = Network.trace(clusters)
     keys
     |> Keyword.put_new(:network, network)
     |> switchboard()
@@ -55,7 +55,7 @@ defmodule ClusterCase do
       alias AppAnimal.Neural
       alias Neural.Switchboard
       alias Neural.Affordances
-      alias Neural.NetworkBuilder, as: Builder
+      alias Neural.Network
       alias Neural.Cluster
       import ClusterCase
       use FlowAssertions

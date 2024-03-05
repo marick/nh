@@ -1,4 +1,4 @@
-defmodule AppAnimal.Neural.NetworkBuilder do
+defmodule AppAnimal.Neural.Network do
   use AppAnimal
 
   def trace(network \\ %{}, clusters) do
