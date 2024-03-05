@@ -1,7 +1,7 @@
 defmodule AppAnimal.Neural.Switchboard do
   use AppAnimal
   use AppAnimal.GenServer
-  alias Neural.PulseLogger
+  alias Neural.ActivityLogger
 
   defstruct [:network,
              started_circular_clusters: %{},
@@ -51,7 +51,7 @@ defmodule AppAnimal.Neural.Switchboard do
         %{cluster | send_pulse_downstream: sending_function}
       end
 
-      {:ok, logger} = PulseLogger.start_link
+      {:ok, logger} = ActivityLogger.start_link
 
       me
       |> Map2.map_within(:network, add_individualized_pulses)
@@ -61,7 +61,7 @@ defmodule AppAnimal.Neural.Switchboard do
 
     @impl GenServer
     def handle_call(:get_log, _from, me), 
-        do: continue(me, returning: PulseLogger.get_log(me.logger))
+        do: continue(me, returning: ActivityLogger.get_log(me.logger))
 
     @impl GenServer
     def handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me) do
@@ -78,12 +78,12 @@ defmodule AppAnimal.Neural.Switchboard do
     def handle_cast({:distribute_downstream, from: source_name, carrying: pulse_data}, me) do
       source = me.network[source_name]
       destination_names = source.downstream
-      PulseLogger.log(me.logger, source.type, source.name, pulse_data)
+      ActivityLogger.log(me.logger, source.type, source.name, pulse_data)
       handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me)
     end
 
     def handle_cast([spill_log_to_terminal: value], me) do
-      PulseLogger.spill_log_to_terminal(me.logger, value)
+      ActivityLogger.spill_log_to_terminal(me.logger, value)
       continue(me)
     end
 

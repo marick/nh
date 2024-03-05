@@ -1,4 +1,4 @@
-defmodule AppAnimal.Neural.PulseLogger do
+defmodule AppAnimal.Neural.ActivityLogger do
   use AppAnimal
   use AppAnimal.GenServer
   require CircularBuffer
@@ -16,7 +16,7 @@ defmodule AppAnimal.Neural.PulseLogger do
   # It turns out that isn't implemented.
   # https://elixirforum.com/t/struggling-with-logger-put-process-level/58702
   #
-  # So instead of relying on each PulseLogger being an independent process,
+  # So instead of relying on each ActivityLogger being an independent process,
   # I have to mess around with state. Bah. As a result of its history, this is
   # probably the Wrong Thing.
   

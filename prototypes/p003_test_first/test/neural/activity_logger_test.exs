@@ -1,6 +1,6 @@
-defmodule AppAnimal.Neural.PulseLoggerTest do
+defmodule AppAnimal.Neural.ActivityLoggerTest do
   use ClusterCase, async: true
-  alias Neural.PulseLogger, as: UT
+  alias Neural.ActivityLogger, as: UT
   
   test "basic operations" do
     pid = start_link_supervised!({UT,100})
