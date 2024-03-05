@@ -16,7 +16,7 @@ defmodule AppAnimal.Neural.PerceptionEdgeTest do
     given(network)
     |> Affordances.send_spontaneous_affordance(paragraph_text: "some text")
 
-    assert_receive(["some textsome text", from: :endpoint])
-    assert_receive(["txet emos", from: :endpoint])
+    assert_test_receives("some textsome text")
+    assert_test_receives("txet emos")
   end
 end

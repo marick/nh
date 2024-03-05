@@ -1,35 +1,12 @@
 defmodule ClusterCase do
   use AppAnimal
   alias AppAnimal.Neural
-  alias Neural.Switchboard
-  alias Neural.Network
   alias Neural.Cluster
-  import ExUnit.Callbacks, only: [start_link_supervised!: 1]
-  require ExUnit.Assertions
-
-  def from_trace(clusters, keys \\ []) when is_list(clusters) do
-    network = Network.trace(clusters)
-    keys
-    |> Keyword.put_new(:network, network)
-    |> switchboard()
-  end
-
-  def switchboard(keys) when is_list(keys) do
-    with_defaults =
-      keys 
-      |> Keyword.put_new(:network, "test doesn't use a network")
-    
-    state = struct(Switchboard, with_defaults)
-    start_link_supervised!({Switchboard, state})
-  end
-
-  def affordances(sent_to: switchboard) do
-    start_link_supervised!({Neural.Affordances, switchboard: switchboard})
-  end
+  alias ExUnit.Assertions
 
   defmacro assert_test_receives(value, keys \\ [from: :endpoint]) do
     quote do 
-      [retval, from: _] = ExUnit.Assertions.assert_receive([unquote(value) | unquote(keys)])
+      [retval, from: _] = Assertions.assert_receive([unquote(value) | unquote(keys)])
       retval
     end
   end

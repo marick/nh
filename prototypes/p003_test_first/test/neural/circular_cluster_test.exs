@@ -103,9 +103,6 @@ defmodule AppAnimal.Neural.CircularClusterTest do
   describe "a circular cluster as a module" do
     @tag :skip   # don't know if I'll want a module version
     test "a single-cluster chain" do
-      # switchboard = from_trace([Cluster.circular(:some_cluster, ModuleVersion)])
-      # Switchboard.external_pulse(to: :some_cluster, carrying: "pulse data", via: switchboard)
-      # assert_receive("pulse data")
     end
   end
 end
