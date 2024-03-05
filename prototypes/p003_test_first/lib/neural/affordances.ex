@@ -12,14 +12,17 @@ defmodule AppAnimal.Neural.Affordances do
 
     def send_spontaneous_affordance(pid, [{affordance_name, data}]) do
       GenServer.cast(pid, {:affordance, affordance_name, data})
+      pid
     end
 
     def program_focus_response(pid, affordance_name, response_generator) do
       GenServer.cast(pid, {:add_programmed_response, affordance_name, response_generator})
+      pid
     end
 
     def send_focus_affordance(pid, affordance_name) do
       GenServer.cast(pid, {:affordance_request, affordance_name})
+      pid
     end
   end
 

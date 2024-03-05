@@ -1,12 +1,15 @@
 defmodule AppAnimal.Neural.CircularClusterTest do
   use ClusterCase, async: true
 
+  def given(trace_or_network), do: AppAnimal.switchboard(trace_or_network)
+
   describe "circular cluster handling: function version: basics" do 
     test "a transmission of pulses" do
-      first = Cluster.circular(:first, Cluster.one_pulse(after: & &1 + 1))
-      switchboard = from_trace([first, endpoint()])
-    
-      Switchboard.external_pulse(switchboard, to: :first, carrying: 1)
+
+      given([Cluster.circular(:first,
+                              Cluster.one_pulse(after: & &1 + 1)),
+             endpoint()])
+      |> Switchboard.external_pulse(to: :first, carrying: 1)
       assert_test_receives(2)
     end
   end
@@ -22,36 +25,39 @@ defmodule AppAnimal.Neural.CircularClusterTest do
     end
     
     test "succeeding pulses go to the same process" do
-      first = Cluster.circular(:first,
-                               empty_pids(),
-                               Cluster.one_pulse(after: accumulate_pids()))
-      switchboard = from_trace([first, endpoint()])
+      switchboard_pid = 
+        given([Cluster.circular(:first,
+                                empty_pids(),
+                                Cluster.one_pulse(after: accumulate_pids())),
+               endpoint()])
       
-      Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
+      Switchboard.external_pulse(switchboard_pid, to: :first, carrying: :nothing)
       assert_test_receives([first_pid])
       
-      Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
+      Switchboard.external_pulse(switchboard_pid, to: :first, carrying: :nothing)
       assert_test_receives([^first_pid, ^first_pid])
 
       # asynchrony, just for fun
-      Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
-      Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
+      Switchboard.external_pulse(switchboard_pid, to: :first, carrying: :nothing)
+      Switchboard.external_pulse(switchboard_pid, to: :first, carrying: :nothing)
       assert_test_receives([^first_pid, ^first_pid, ^first_pid, ^first_pid])
       
     end
 
     test "... however, processes 'age out'" do
-      first = Cluster.circular(:first,
-                               empty_pids(),
-                               Cluster.one_pulse(after: accumulate_pids()),
-                               starting_pulses: 2)
-      switchboard = from_trace([first, endpoint()], pulse_rate: 1)
+      switchboard_pid =
+        [Cluster.circular(:first,
+                          empty_pids(),
+                          Cluster.one_pulse(after: accumulate_pids()),
+                          starting_pulses: 2),
+         endpoint()]
+        |> AppAnimal.switchboard(pulse_rate: 1)
       
-      Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
+      Switchboard.external_pulse(switchboard_pid, to: :first, carrying: :nothing)
       assert_test_receives([first_pid])
       
       Process.sleep(30)
-      Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
+      Switchboard.external_pulse(switchboard_pid, to: :first, carrying: :nothing)
       
       assert_test_receives([second_pid])
       refute second_pid == first_pid
@@ -73,12 +79,14 @@ defmodule AppAnimal.Neural.CircularClusterTest do
     first = Cluster.circular(:first,
                              fn _configuration -> %{pids: [], count: 3} end,
                              calc)
-    
-    network =
+
+    network = 
       Network.trace([first, first])
-      |>  Network.extend(at: :first, with: [endpoint()])
-    switchboard = switchboard(network: network)
-    Switchboard.external_pulse(switchboard, to: :first, carrying: :nothing)
+      |> Network.extend(at: :first, with: [endpoint()])
+
+    given(network)
+    |> Switchboard.external_pulse(to: :first, carrying: :nothing)
+
     assert_test_receives([pid])
     assert_test_receives([^pid, ^pid])
     assert_test_receives([^pid, ^pid, ^pid])
@@ -93,7 +101,7 @@ defmodule AppAnimal.Neural.CircularClusterTest do
   end
 
   describe "a circular cluster as a module" do
-    @tag :skip
+    @tag :skip   # don't know if I'll want a module version
     test "a single-cluster chain" do
       # switchboard = from_trace([Cluster.circular(:some_cluster, ModuleVersion)])
       # Switchboard.external_pulse(to: :some_cluster, carrying: "pulse data", via: switchboard)
