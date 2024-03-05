@@ -4,24 +4,24 @@ defmodule AppAnimal.Neural.ActivityLoggerTest do
   
   test "basic operations" do
     pid = start_link_supervised!({UT,100})
-    UT.log(pid, :a_type, :a_name, "pulse data")
-    UT.log(pid, :b_type, :b_name, 5)
+    UT.log_pulse_sent(pid, :a_type, :a_name, "pulse data")
+    UT.log_pulse_sent(pid, :b_type, :b_name, 5)
 
 
     assert [a, b] = UT.get_log(pid)
-    assert a == %UT.Entry{cluster_type: :a_type, name: :a_name, pulse_data: "pulse data"}
-    assert b == %UT.Entry{cluster_type: :b_type, name: :b_name, pulse_data: 5}
+    assert a == %UT.PulseSent{cluster_type: :a_type, name: :a_name, pulse_data: "pulse data"}
+    assert b == %UT.PulseSent{cluster_type: :b_type, name: :b_name, pulse_data: 5}
   end
 
   test "log is circular" do
     pid = start_link_supervised!({UT,2})
-    UT.log(pid, :a_type, :a_name, 1)
-    UT.log(pid, :b_type, :b_name, 2)
-    UT.log(pid, :c_type, :c_name, 3)
+    UT.log_pulse_sent(pid, :a_type, :a_name, 1)
+    UT.log_pulse_sent(pid, :b_type, :b_name, 2)
+    UT.log_pulse_sent(pid, :c_type, :c_name, 3)
 
     assert [b, c] = UT.get_log(pid)  # A is pushed off
-    assert b == %UT.Entry{cluster_type: :b_type, name: :b_name, pulse_data: 2}
-    assert c == %UT.Entry{cluster_type: :c_type, name: :c_name, pulse_data: 3}
+    assert b == %UT.PulseSent{cluster_type: :b_type, name: :b_name, pulse_data: 2}
+    assert c == %UT.PulseSent{cluster_type: :c_type, name: :c_name, pulse_data: 3}
   end
 
   # The actual working of the terminal log is tested indirectly elsewhere

@@ -6,7 +6,7 @@ defmodule AppAnimal.Neural.ActivityLogger do
 
   defstruct [:buffer, also_to_terminal: false]
   
-  defmodule Entry do
+  defmodule PulseSent do
     @enforce_keys [:cluster_type, :name, :pulse_data]
     defstruct [:cluster_type, :name, :pulse_data]
   end
@@ -30,8 +30,8 @@ defmodule AppAnimal.Neural.ActivityLogger do
       GenServer.call(pid, [also_to_terminal: value])
     end
 
-    def log(pid, type, name, pulse_data) do
-      entry = %Entry{cluster_type: type, name: name, pulse_data: pulse_data}
+    def log_pulse_sent(pid, type, name, pulse_data) do
+      entry = %PulseSent{cluster_type: type, name: name, pulse_data: pulse_data}
       GenServer.cast(pid, [log: entry])
     end
 

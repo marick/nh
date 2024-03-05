@@ -78,7 +78,7 @@ defmodule AppAnimal.Neural.Switchboard do
     def handle_cast({:distribute_downstream, from: source_name, carrying: pulse_data}, me) do
       source = me.network[source_name]
       destination_names = source.downstream
-      ActivityLogger.log(me.logger, source.type, source.name, pulse_data)
+      ActivityLogger.log_pulse_sent(me.logger, source.type, source.name, pulse_data)
       handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me)
     end
 
