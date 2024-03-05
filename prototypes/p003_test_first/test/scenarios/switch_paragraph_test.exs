@@ -1,5 +1,6 @@
 defmodule AppAnimal.Scenarios.SwitchParagraphTest do
   use ClusterCase, async: true
+  import Cluster
 
   setup do
     # Pieces
@@ -28,6 +29,8 @@ defmodule AppAnimal.Scenarios.SwitchParagraphTest do
 
   @tag :skip
   test "simple run-through" do
-    
+    _trace = [perception_edge(:notice_new_paragraph),
+    ]
+      
   end
 end
