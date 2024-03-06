@@ -12,6 +12,11 @@ defmodule AppAnimal.Neural.Switchboard do
     def start_link(%__MODULE__{} = state) do
       GenServer.start_link(__MODULE__, state)
     end
+
+    def link_clusters_to_pids(switchboard_pid, affordances_pid) do
+      GenServer.call(switchboard_pid,
+                     {:individualize_pulses, switchboard_pid, affordances_pid})
+    end
     
     # An entry point, called to initiate or reinitiate a network.
     def external_pulse(switchboard_pid, to: destination_name, carrying: pulse_data) do
@@ -33,14 +38,19 @@ defmodule AppAnimal.Neural.Switchboard do
     @impl GenServer
     def init(me) do
       schedule_weakening(me.pulse_rate)
+      ok(me)
+    end
 
+    @impl GenServer
+    def handle_call({:individualize_pulses, switchboard_pid, affordances_pid},
+                    _from, me) do
       add_individualized_pulse = fn cluster -> 
-        Neural.Clusterish.install_pulse_sender(cluster, {self(), :ok})
+        Neural.Clusterish.install_pulse_sender(cluster, {switchboard_pid, affordances_pid})
       end
 
       me
       |> Map2.map_within(:network, add_individualized_pulse)
-      |> ok
+      |> continue(returning: :ok)
     end
 
     @impl GenServer

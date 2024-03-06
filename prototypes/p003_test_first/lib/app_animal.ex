@@ -24,6 +24,8 @@ defmodule AppAnimal do
     affordances_pid = compatibly_start_link(Affordances,
                                             %{switchboard_pid: switchboard_pid,
                                               logger_pid: logger_pid})
+
+    Switchboard.link_clusters_to_pids(switchboard_pid, affordances_pid)
     %{switchboard_pid: switchboard_pid,
       affordances_pid: affordances_pid,
       logger_pid: logger_pid
