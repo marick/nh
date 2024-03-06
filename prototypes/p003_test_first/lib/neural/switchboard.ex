@@ -50,16 +50,14 @@ defmodule AppAnimal.Neural.Switchboard do
     def init(me) do
       schedule_weakening(me.pulse_rate)
 
-      {:ok, logger} = ActivityLogger.start_link
-
       add_individualized_pulse = fn cluster -> 
         Neural.Clusterish.install_pulse_sender(cluster, {self(), :ok})
       end
 
       me
       |> Map2.map_within(:network, add_individualized_pulse)
-      |> Map.put(:logger, logger)
-      |> ok()
+      |> Map.put(:logger, ActivityLogger.start_link |> okval)
+      |> ok
     end
 
     @impl GenServer
@@ -71,14 +69,10 @@ defmodule AppAnimal.Neural.Switchboard do
 
     @impl GenServer
     def handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me) do
-      %{linear: linear_names, circular: circular_names} =
-        separate_by_cluster_type(destination_names, given: me.network)
-      
-      new_me = ensure_clusters_are_ready(circular_names, me)
-      pulse_to_circular(pulse_data, circular_names, new_me)
-      pulse_to_linear(pulse_data, linear_names, new_me)
-      
-      continue(new_me)
+      me
+      |> ensure_clusters_are_ready(destination_names)
+      |> tap(& send_pulse(pulse_data, destination_names, &1))
+      |> continue
     end
 
     def handle_cast({:distribute_downstream, from: source_name, carrying: pulse_data}, me) do
@@ -105,22 +99,11 @@ defmodule AppAnimal.Neural.Switchboard do
     def handle_info({:DOWN, _, :process, pid, :normal}, me) do
       me
       |> Map2.reject_value_within(:started_circular_clusters, pid)
-      |> continue()
+      |> continue
     end
-
     
     private do
-      def separate_by_cluster_type(names, given: network) do
-        {linears, circulars} =
-          names
-          |> Enum.split_with(fn name ->
-            is_struct(Map.fetch!(network, name), Neural.LinearCluster)
-          end)
-
-        %{linear: linears, circular: circulars}
-      end
-
-      def ensure_clusters_are_ready(names, me) do
+      def ensure_clusters_are_ready(me, names) do
         ensure_one_name = fn name, acc ->
           Neural.Clusterish.ensure_ready(me.network[name], acc) 
         end
@@ -130,20 +113,18 @@ defmodule AppAnimal.Neural.Switchboard do
         |> then(& put_in(me.started_circular_clusters, &1))
       end
 
-      def pulse_to_circular(pulse_data, circular_names, me) do
-        for name <- circular_names do
-          destination_pid = me.started_circular_clusters[name]
-          GenServer.cast(destination_pid, [handle_pulse: pulse_data])
-        end
-        :ok
-      end
-
-      def pulse_to_linear(pulse_data, linear_names, me) do
-        for name <- linear_names do
-          config = me.network[name]
-          Task.start(fn ->
-            config.handlers.handle_pulse.(pulse_data, config)
-          end)
+      def send_pulse(pulse_data, names, me) do
+        for name <- names do
+          case Map.has_key?(me.started_circular_clusters, name) do
+            true ->
+              destination_pid = me.started_circular_clusters[name]
+              GenServer.cast(destination_pid, [handle_pulse: pulse_data])
+            false ->
+              config = me.network[name]
+              Task.start(fn ->
+                config.handlers.handle_pulse.(pulse_data, config)
+              end)
+          end
         end
       end
 

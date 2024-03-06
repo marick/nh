@@ -8,19 +8,6 @@ defmodule AppAnimal.Neural.SwitchboardTest do
   def given(trace_or_network), do: AppAnimal.switchboard(trace_or_network)
 
   
-  test "can separate names into linear and circular clusters" do
-    irrelevant_forwarder = fn _, _ -> 5 end
-
-    network = Network.trace([Cluster.linear(:linear, irrelevant_forwarder),
-                             Cluster.circular(:circular, irrelevant_forwarder)])
-
-    [:linear, :circular]
-    |> UT.separate_by_cluster_type(given: network)
-    |> assert_fields(linear: [:linear],
-                     circular: [:circular])
-  end
-
-
   test "the switchboard has a log" do
     IO.puts("=== #{Pretty.Module.minimal(__MODULE__)} (around line #{__ENV__.line}) " <>
               "produces `info` entries, to catch crashes.")
