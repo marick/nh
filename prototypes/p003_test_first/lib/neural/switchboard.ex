@@ -74,7 +74,7 @@ defmodule AppAnimal.Neural.Switchboard do
       %{linear: linear_names, circular: circular_names} =
         separate_by_cluster_type(destination_names, given: me.network)
       
-      new_me = ensure_circular_clusters_are_ready(circular_names, me)
+      new_me = ensure_clusters_are_ready(circular_names, me)
       pulse_to_circular(pulse_data, circular_names, new_me)
       pulse_to_linear(pulse_data, linear_names, new_me)
       
@@ -120,20 +120,14 @@ defmodule AppAnimal.Neural.Switchboard do
         %{linear: linears, circular: circulars}
       end
 
-      def ensure_circular_clusters_are_ready(names, me) do
-        already_started = me.started_circular_clusters
+      def ensure_clusters_are_ready(names, me) do
+        ensure_one_name = fn name, acc ->
+          Neural.Clusterish.ensure_ready(me.network[name], acc) 
+        end
 
-        next_started = 
-          names
-          |> Enum.reject(&(Map.has_key?(already_started, &1)))
-          |> Enum.reduce(already_started, fn name, acc ->
-            configuration = me.network[name]
-            {:ok, pid} = GenServer.start(configuration.__struct__, configuration)
-            Process.monitor(pid)
-            Map.put(acc, name, pid)
-          end)
-
-        %{me | started_circular_clusters: next_started}
+        names
+        |> Enum.reduce(me.started_circular_clusters, ensure_one_name)
+        |> then(& put_in(me.started_circular_clusters, &1))
       end
 
       def pulse_to_circular(pulse_data, circular_names, me) do
