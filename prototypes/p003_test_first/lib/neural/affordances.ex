@@ -2,8 +2,8 @@ defmodule AppAnimal.Neural.Affordances do
   use AppAnimal
   use AppAnimal.GenServer
 
-  defstruct [:switchboard,
-             logger: :created_at_start_link_time,
+  defstruct [:switchboard_pid,
+             logger_pid: :created_at_start_link_time,
              programmed_responses: []]
 
   runs_in_sender do
@@ -33,7 +33,7 @@ defmodule AppAnimal.Neural.Affordances do
     end
 
     def handle_cast({:affordance, affordance_name, data}, mutable) do
-      Neural.Switchboard.forward_affordance(mutable.switchboard,
+      Neural.Switchboard.forward_affordance(mutable.switchboard_pid,
                                             named: affordance_name, conveying: data)
       continue(mutable)
     end

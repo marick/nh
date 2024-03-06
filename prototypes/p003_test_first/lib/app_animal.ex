@@ -21,8 +21,8 @@ defmodule AppAnimal do
     switchboard_pid = compatibly_start_link(Switchboard, switchboard_struct)
     logger_pid = Switchboard.get_logger_pid(switchboard_pid)
     affordances_pid = compatibly_start_link(Affordances,
-                                            %{switchboard: switchboard_pid,
-                                            logger: logger_pid})
+                                            %{switchboard_pid: switchboard_pid,
+                                              logger_pid: logger_pid})
     {switchboard_pid, affordances_pid}
   end
 
