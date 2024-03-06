@@ -19,11 +19,13 @@ defmodule AppAnimal.Extras.SplitState do
   end
 end
 
+alias AppAnimal.Neural
 
-defmodule AppAnimal.Neural.CircularCluster do
+defmodule Neural.CircularCluster do
   use AppAnimal
   use AppAnimal.GenServer
   import AppAnimal.Extras.SplitState
+  alias AppAnimal.Neural.Cluster
 
   defstruct [:name,
              :handlers,
@@ -39,6 +41,11 @@ defmodule AppAnimal.Neural.CircularCluster do
       |> ok()
     end)
   end
+
+  def install_pulse_sender(%__MODULE__{} = cluster, {switchboard_pid, _affordances_pid}) do
+    Cluster.send_via_pid(cluster, switchboard_pid)
+  end
+  
 
   def handle_cast([handle_pulse: small_data], state) do
     mutating(state, fn mutable, configuration ->
@@ -61,3 +68,10 @@ defmodule AppAnimal.Neural.CircularCluster do
     end)
   end
 end
+
+
+defimpl Neural.Clusterish, for: Neural.CircularCluster  do
+  def install_pulse_sender(cluster, {switchboard_pid, _affordances_pid}) do
+    Neural.Cluster.send_via_pid(cluster, switchboard_pid)
+  end
+end 

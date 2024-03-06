@@ -1,6 +1,15 @@
 defmodule AppAnimal.Neural.Cluster do
   alias AppAnimal.Neural
 
+  # Generic
+  def send_via_pid(cluster, pid) do
+    sender = fn carrying: pulse_data ->
+      payload = {:distribute_downstream, from: cluster.name, carrying: pulse_data}
+      GenServer.cast(pid, payload)
+    end
+    %{cluster | send_pulse_downstream: sender}
+  end
+
   # Circular clusters
 
   def circular(name, mutable_initializer, handle_pulse, keys \\ []) do

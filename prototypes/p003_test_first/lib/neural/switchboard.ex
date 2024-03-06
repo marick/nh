@@ -50,17 +50,16 @@ defmodule AppAnimal.Neural.Switchboard do
     def init(me) do
       schedule_weakening(me.pulse_rate)
 
-      add_individualized_pulses = fn cluster ->
-        sending_function = mkfn__individualized_pulse_downstream(cluster.name)
-        %{cluster | send_pulse_downstream: sending_function}
-      end
-
       {:ok, logger} = ActivityLogger.start_link
 
       me
-      |> Map2.map_within(:network, add_individualized_pulses)
+      |> Map2.map_within(:network, &add_individualized_pulse/1)
       |> Map.put(:logger, logger)
       |> ok()
+    end
+
+    def add_individualized_pulse(cluster) do
+      Neural.Clusterish.install_pulse_sender(cluster, {self(), :ok})
     end
 
     @impl GenServer
@@ -113,6 +112,7 @@ defmodule AppAnimal.Neural.Switchboard do
     private do
       def mkfn__individualized_pulse_downstream(source_name) do
         my_pid = self()
+        
         fn carrying: pulse_data ->
           payload = {:distribute_downstream, from: source_name, carrying: pulse_data}
           GenServer.cast(my_pid, payload)
