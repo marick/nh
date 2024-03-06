@@ -26,8 +26,12 @@ defmodule AppAnimal.Neural.ActivityLogger do
       GenServer.start_link(__MODULE__, buffer_size)
     end
     
-    def spill_log_to_terminal(pid, value) do
-      GenServer.call(pid, [also_to_terminal: value])
+    def spill_log_to_terminal(pid) do
+      GenServer.call(pid, [also_to_terminal: true])
+    end
+
+    def silence_terminal_log(pid) do
+      GenServer.cast(pid, [also_to_terminal: false])
     end
 
     def log_pulse_sent(pid, type, name, pulse_data) do

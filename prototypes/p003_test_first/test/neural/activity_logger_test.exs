@@ -27,9 +27,9 @@ defmodule AppAnimal.Neural.ActivityLoggerTest do
   # The actual working of the terminal log is tested indirectly elsewhere
   test "there is a terminal log option" do
     pid = start_link_supervised!({UT,100})
-    UT.spill_log_to_terminal(pid, true)
+    UT.spill_log_to_terminal(pid)
     # Just checking that calls are correct
-    UT.spill_log_to_terminal(pid, false)
+    UT.silence_terminal_log(pid)
   end
   
 end

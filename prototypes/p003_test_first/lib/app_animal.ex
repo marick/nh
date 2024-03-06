@@ -1,7 +1,6 @@
 defmodule AppAnimal do
-  alias AppAnimal.Neural.Switchboard
-  alias AppAnimal.Neural.Affordances
-  alias AppAnimal.Neural.Network
+  alias AppAnimal.Neural
+  alias Neural.{Switchboard, Affordances, Network, ActivityLogger}
   import Private
   use AppAnimal.Extras.TestAwareProcessStarter
 
@@ -16,10 +15,12 @@ defmodule AppAnimal do
   end
 
   def enliven(network, switchboard_options) when is_map(network) do
+    {:ok, logger_pid} = ActivityLogger.start_link
     switchboard_struct = struct(Switchboard,
-                                Keyword.put_new(switchboard_options, :network, network))
+                                Keyword.merge(switchboard_options,
+                                              network: network,
+                                              logger_pid: logger_pid))
     switchboard_pid = compatibly_start_link(Switchboard, switchboard_struct)
-    logger_pid = Switchboard.get_logger_pid(switchboard_pid)
     affordances_pid = compatibly_start_link(Affordances,
                                             %{switchboard_pid: switchboard_pid,
                                               logger_pid: logger_pid})

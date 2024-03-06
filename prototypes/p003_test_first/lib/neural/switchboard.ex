@@ -6,7 +6,7 @@ defmodule AppAnimal.Neural.Switchboard do
   defstruct [:network,
              started_circular_clusters: %{},
              pulse_rate: 100,
-             logger_pid: :set_at_start_link_time]
+             logger_pid: ActivityLogger.start_link |> okval]
 
   runs_in_sender do
     def start_link(%__MODULE__{} = state) do
@@ -27,22 +27,6 @@ defmodule AppAnimal.Neural.Switchboard do
     def forward_affordance(switchboard_pid, named: name, conveying: perception) do
       send_pulse_downstream(switchboard_pid, from: name, carrying: perception)
     end
-
-    def spill_log_to_terminal(switchboard_pid) do
-      GenServer.cast(switchboard_pid, [spill_log_to_terminal: true])
-    end
-
-    def silence_terminal_log(switchboard_pid) do
-      GenServer.cast(switchboard_pid, [spill_log_to_terminal: false])
-    end
-
-    def get_log(switchboard_pid) do
-      GenServer.call(switchboard_pid, :get_log)
-    end
-
-    def get_logger_pid(switchboard_pid) do
-      GenServer.call(switchboard_pid, :get_logger_pid)
-    end
   end
 
   runs_in_receiver do 
@@ -56,16 +40,8 @@ defmodule AppAnimal.Neural.Switchboard do
 
       me
       |> Map2.map_within(:network, add_individualized_pulse)
-      |> Map.put(:logger_pid, ActivityLogger.start_link |> okval)
       |> ok
     end
-
-    @impl GenServer
-    def handle_call(:get_log, _from, me), 
-        do: continue(me, returning: ActivityLogger.get_log(me.logger_pid))
-
-    def handle_call(:get_logger_pid, _from, me), 
-        do: continue(me, returning: me.logger_pid)
 
     @impl GenServer
     def handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me) do
@@ -80,11 +56,6 @@ defmodule AppAnimal.Neural.Switchboard do
       destination_names = source.downstream
       ActivityLogger.log_pulse_sent(me.logger_pid, source.type, source.name, pulse_data)
       handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me)
-    end
-
-    def handle_cast([spill_log_to_terminal: value], me) do
-      ActivityLogger.spill_log_to_terminal(me.logger_pid, value)
-      continue(me)
     end
 
     @impl GenServer
