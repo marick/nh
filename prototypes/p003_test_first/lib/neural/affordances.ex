@@ -3,6 +3,7 @@ defmodule AppAnimal.Neural.Affordances do
   use AppAnimal.GenServer
 
   defstruct [:switchboard,
+             logger: :created_at_start_link_time,
              programmed_responses: []]
 
   runs_in_sender do

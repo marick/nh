@@ -19,7 +19,10 @@ defmodule AppAnimal do
     switchboard_struct = struct(Switchboard,
                                 Keyword.put_new(switchboard_options, :network, network))
     switchboard_pid = compatibly_start_link(Switchboard, switchboard_struct)
-    affordances_pid = compatibly_start_link(Affordances, %{switchboard: switchboard_pid})
+    logger_pid = Switchboard.get_logger_pid(switchboard_pid)
+    affordances_pid = compatibly_start_link(Affordances,
+                                            %{switchboard: switchboard_pid,
+                                            logger: logger_pid})
     {switchboard_pid, affordances_pid}
   end
 

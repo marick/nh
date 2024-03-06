@@ -39,6 +39,10 @@ defmodule AppAnimal.Neural.Switchboard do
     def get_log(switchboard_pid) do
       GenServer.call(switchboard_pid, :get_log)
     end
+
+    def get_logger_pid(switchboard_pid) do
+      GenServer.call(switchboard_pid, :get_logger_pid)
+    end
   end
 
   runs_in_receiver do 
@@ -62,6 +66,9 @@ defmodule AppAnimal.Neural.Switchboard do
     @impl GenServer
     def handle_call(:get_log, _from, me), 
         do: continue(me, returning: ActivityLogger.get_log(me.logger))
+
+    def handle_call(:get_logger_pid, _from, me), 
+        do: continue(me, returning: me.logger)
 
     @impl GenServer
     def handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me) do
