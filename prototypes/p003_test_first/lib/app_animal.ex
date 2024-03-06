@@ -23,18 +23,14 @@ defmodule AppAnimal do
     affordances_pid = compatibly_start_link(Affordances,
                                             %{switchboard_pid: switchboard_pid,
                                               logger_pid: logger_pid})
-    {switchboard_pid, affordances_pid}
+    %{switchboard_pid: switchboard_pid,
+      affordances_pid: affordances_pid,
+      logger_pid: logger_pid
+    }
   end
 
-  def switchboard(network, options \\ []) do
-    {switchboard_pid, _} = enliven(network, options)
-    switchboard_pid
-  end
-
-  def affordances(network) do
-    {_, affordances_pid} = enliven(network)
-    affordances_pid
-  end
+  def switchboard(network, options \\ []), do: enliven(network, options).switchboard_pid
+  def affordances(network), do: enliven(network).affordances_pid
 
   private do
     def default_start(module, initial_mutable) do
