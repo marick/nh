@@ -46,9 +46,6 @@ defmodule AppAnimal.Neural.Cluster do
     end
   end
   
-
-  
-
   # Linear Clusters
 
   def linear(name, handle_pulse) when is_function(handle_pulse) do

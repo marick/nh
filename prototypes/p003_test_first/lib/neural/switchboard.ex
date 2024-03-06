@@ -52,14 +52,14 @@ defmodule AppAnimal.Neural.Switchboard do
 
       {:ok, logger} = ActivityLogger.start_link
 
+      add_individualized_pulse = fn cluster -> 
+        Neural.Clusterish.install_pulse_sender(cluster, {self(), :ok})
+      end
+
       me
-      |> Map2.map_within(:network, &add_individualized_pulse/1)
+      |> Map2.map_within(:network, add_individualized_pulse)
       |> Map.put(:logger, logger)
       |> ok()
-    end
-
-    def add_individualized_pulse(cluster) do
-      Neural.Clusterish.install_pulse_sender(cluster, {self(), :ok})
     end
 
     @impl GenServer
@@ -110,15 +110,6 @@ defmodule AppAnimal.Neural.Switchboard do
 
     
     private do
-      def mkfn__individualized_pulse_downstream(source_name) do
-        my_pid = self()
-        
-        fn carrying: pulse_data ->
-          payload = {:distribute_downstream, from: source_name, carrying: pulse_data}
-          GenServer.cast(my_pid, payload)
-        end
-      end
-
       def separate_by_cluster_type(names, given: network) do
         {linears, circulars} =
           names
