@@ -30,7 +30,7 @@ defmodule AppAnimal.Neural.Switchboard do
     end
 
     def forward_affordance(switchboard_pid, named: name, conveying: perception) do
-      send_pulse_downstream(switchboard_pid, from: name, carrying: perception)
+      external_pulse(switchboard_pid, to: name, carrying: perception)
     end
   end
 
@@ -88,7 +88,7 @@ defmodule AppAnimal.Neural.Switchboard do
         ensure_one_name = fn name, acc ->
           Neural.Clusterish.ensure_ready(me.network[name], acc) 
         end
-
+        
         names
         |> Enum.reduce(me.started_circular_clusters, ensure_one_name)
         |> then(& put_in(me.started_circular_clusters, &1))

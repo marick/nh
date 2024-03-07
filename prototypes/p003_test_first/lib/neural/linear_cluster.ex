@@ -1,5 +1,5 @@
 alias AppAnimal.Neural
-alias AppAnimal.Neural.LinearCluster
+alias Neural.LinearCluster
 
 defmodule LinearCluster do
   use AppAnimal

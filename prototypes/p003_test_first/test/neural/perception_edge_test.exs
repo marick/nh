@@ -13,10 +13,15 @@ defmodule AppAnimal.Neural.PerceptionEdgeTest do
                       with: [Cluster.linear(:another, Cluster.only_pulse(after: &(&1 <> &1))),
                              endpoint()])
 
-    given(network)
-    |> Affordances.send_spontaneous_affordance(paragraph_text: "some text")
+    a = AppAnimal.enliven(network)
+      
+    Affordances.send_spontaneous_affordance(a.affordances_pid, paragraph_text: "some text")
 
     assert_test_receives("some textsome text")
     assert_test_receives("txet emos")
+
+    IO.puts "==TODO== Complete perception-edge-test with a trace of the log"
+    # ActivityLogger.get_log(a.logger_pid)
+    
   end
 end

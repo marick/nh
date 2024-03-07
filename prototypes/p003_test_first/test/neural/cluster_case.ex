@@ -33,6 +33,7 @@ defmodule ClusterCase do
       alias Neural.Switchboard
       alias Neural.Affordances
       alias Neural.Network
+      alias Neural.ActivityLogger
       alias Neural.Cluster
       import ClusterCase
       use FlowAssertions

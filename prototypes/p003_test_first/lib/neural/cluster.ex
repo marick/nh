@@ -1,4 +1,5 @@
 defmodule AppAnimal.Neural.Cluster do
+  use AppAnimal
   alias AppAnimal.Neural
 
   # Generic
@@ -67,7 +68,20 @@ defmodule AppAnimal.Neural.Cluster do
   ## Edges
 
   def perception_edge(name) do
-    %Neural.PerceptionEdge{name: name}
+    just_forward_pulse_data = fn pulse_data, configuration -> 
+      configuration.send_pulse_downstream.(carrying: pulse_data)
+      :there_is_never_a_meaningful_return_value
+    end
+    %Neural.PerceptionEdge{name: name, handlers: %{handle_pulse: just_forward_pulse_data}}
   end
+  
 
+  def action_edge(name) do
+    handle_pulse = 
+      fn pulse_data, configuration ->
+        configuration.send_pulse_downstream.(carrying: {configuration.name, pulse_data})
+        :there_is_never_a_meaningful_return_value
+      end
+    %Neural.ActionEdge{name: name, handlers: %{handle_pulse: handle_pulse}}
+  end
  end
