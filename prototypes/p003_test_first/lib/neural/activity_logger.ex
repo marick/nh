@@ -9,9 +9,24 @@ defmodule AppAnimal.Neural.ActivityLogger do
   defmodule PulseSent do
     @enforce_keys [:cluster_type, :name, :pulse_data]
     defstruct [:cluster_type, :name, :pulse_data]
-  end
 
-  # An earlier version of this modul used
+    def new(cluster_type, name, pulse_data) do
+      %__MODULE__{cluster_type: cluster_type, name: name, pulse_data: pulse_data}
+    end
+
+    # I should make this a standalone matcher.
+    def matches?(pulse_data, cluster_type, name) do
+      pulse_data.cluster_type == cluster_type
+      && pulse_data.name == name
+    end
+
+    def matches?(pulse_data, name) do
+      pulse_data.name == name
+    end
+  end
+    
+
+  # An earlier version of this module used
   #    Logger.put_process_level(self(), :debug)
   # It turns out that isn't implemented.
   # https://elixirforum.com/t/struggling-with-logger-put-process-level/58702

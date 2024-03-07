@@ -13,6 +13,17 @@ defmodule AppAnimal.Neural.ActivityLoggerTest do
     assert b == %UT.PulseSent{cluster_type: :b_type, name: :b_name, pulse_data: 5}
   end
 
+  test "there is shorthand useful for tests" do
+    pid = start_link_supervised!({UT,100})
+    UT.log_pulse_sent(pid, :a_type, :a_name, "pulse data")
+
+    assert [entry] = UT.get_log(pid)
+    assert entry == UT.PulseSent.new(:a_type, :a_name, "pulse data")
+
+    assert UT.PulseSent.matches?(entry, :a_type, :a_name)
+    assert UT.PulseSent.matches?(entry, :a_name)
+  end
+
   test "log is circular" do
     pid = start_link_supervised!({UT,2})
     UT.log_pulse_sent(pid, :a_type, :a_name, 1)
