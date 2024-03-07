@@ -36,6 +36,7 @@ defmodule ClusterCase do
       alias Neural.ActivityLogger
       alias Neural.Cluster
       import ClusterCase
+      import AppAnimal.TraceAssertions
       use FlowAssertions
     end
   end
