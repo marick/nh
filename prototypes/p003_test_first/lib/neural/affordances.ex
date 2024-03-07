@@ -1,4 +1,5 @@
 defmodule AppAnimal.Neural.Affordances do
+  alias AppAnimal.Neural.ActivityLogger
   use AppAnimal
   use AppAnimal.GenServer
 
@@ -55,6 +56,11 @@ defmodule AppAnimal.Neural.Affordances do
       mutable
       |> Map.put(:programmed_responses, remaining_responses)
       |> continue()
+    end
+
+    def handle_cast([focus: {new_focus, data}], mutable) do
+      ActivityLogger.log_pulse_sent(mutable.logger_pid, :focus, new_focus, data)
+      continue(mutable)
     end
   end
   
