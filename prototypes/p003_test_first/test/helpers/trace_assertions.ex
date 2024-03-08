@@ -72,6 +72,9 @@ defmodule AppAnimal.TraceAssertions do
   end
 
   private do
+    def entry_match?(%a_type{} = a, %other_type{} = other),
+        do: a_type == other_type && a == other
+    
     def entry_match?(a, name) when is_atom(name),
         do: a.name == name
     def entry_match?(a, [{name, pulse_data}]),
