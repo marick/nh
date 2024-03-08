@@ -33,7 +33,7 @@ defmodule AppAnimal.Neural.PerceptionEdgeTest do
 
     log
     |> assert_trace([
-      #focus_on(:paragraph),
+      # focus_on(:paragraph),
       [paragraph_text: "some text"],
       [joiner: "some textsome text"],
     ])

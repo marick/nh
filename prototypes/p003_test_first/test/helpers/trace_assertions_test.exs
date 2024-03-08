@@ -4,7 +4,8 @@ defmodule TraceAssertionsTest do
 #  import FlowAssertions.TabularA
   alias AppAnimal.TraceAssertions, as: UT
   alias AppAnimal.Neural.ActivityLogger
-  alias ActivityLogger.{PulseSent}
+  alias ActivityLogger.{PulseSent, FocusReceived}
+  import AppAnimal.TraceAssertions, only: [focus_on: 1]
 
 
   describe "element comparison" do
@@ -15,19 +16,6 @@ defmodule TraceAssertionsTest do
       UT.assert_log_entry(actual, [a_name: "data"])
       UT.assert_log_entry(actual, :a_name)
     end
-
-    test "an explicit expected value must be of same type" do
-      actual = PulseSent.new(:a_type, :a_name, "data")
-      expected = %{cluster_type: :a_type, name: :a_name, pulse_data: "data"}
-
-      assertion_fails(
-        "Assertion with == failed",
-        [left: actual, right: expected],
-        fn ->
-          UT.assert_log_entry(actual, expected)
-        end)
-    end
-
 
     test "reporting of field failures is per `assert_fields`" do
       actual = PulseSent.new(:a_type, :a_name, "data")
@@ -45,13 +33,44 @@ defmodule TraceAssertionsTest do
           UT.assert_log_entry(actual, [a_ame: "data"])
         end)
 
-
       assertion_fails(
         "Field `:pulse_data` has the wrong value",
         [left: "data", right: "dat"],
         fn -> 
           UT.assert_log_entry(actual, [a_name: "dat"])
         end)
+    end
+
+    test "focus entries match on name" do
+      example = FocusReceived.new(:name)
+      UT.assert_log_entry(example, focus_on(:name))
+
+      assertion_fails(
+        "Field `:name` has the wrong value",
+        [left: :name, right: :not_name],
+        fn -> 
+          UT.assert_log_entry(example, focus_on(:not_name))
+        end)
+    end
+
+    test "can't compare different types of entries" do
+      actual = PulseSent.new(:a_type, :a_name, "data")
+
+      plain_map = %{cluster_type: :a_type, name: :a_name, pulse_data: "data"}
+      assertion_fails(
+        "The expectation cannot match a PulseSent.",
+        [right: plain_map],
+        fn ->
+          UT.assert_log_entry(actual, plain_map)
+        end)
+
+      focus = focus_on(:name)
+      assertion_fails(
+        "The expectation, for a FocusReceived, cannot match a PulseSent.",
+        fn ->
+          UT.assert_log_entry(actual, focus)
+        end)
+
     end
   end
   

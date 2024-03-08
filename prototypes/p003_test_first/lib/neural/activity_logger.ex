@@ -15,6 +15,14 @@ defmodule AppAnimal.Neural.ActivityLogger do
     end
   end
 
+  defmodule FocusReceived do
+    @enforce_keys [:name]
+    defstruct [:name]
+
+    def new(name), do: %__MODULE__{name: name}
+  end
+    
+
   # An earlier version of this module used
   #    Logger.put_process_level(self(), :debug)
   # It turns out that isn't implemented.
