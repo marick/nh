@@ -4,8 +4,8 @@ defmodule TraceAssertionsTest do
 #  import FlowAssertions.TabularA
   alias AppAnimal.TraceAssertions, as: UT
   alias AppAnimal.Neural.ActivityLogger
-  alias ActivityLogger.{PulseSent, FocusReceived}
-  import AppAnimal.TraceAssertions, only: [focus_on: 1]
+  alias ActivityLogger.{PulseSent, ActionReceived}
+  import AppAnimal.TraceAssertions, only: [action: 1]
 
 
   describe "element comparison" do
@@ -41,15 +41,15 @@ defmodule TraceAssertionsTest do
         end)
     end
 
-    test "focus entries match on name" do
-      example = FocusReceived.new(:name)
-      UT.assert_log_entry(example, focus_on(:name))
+    test "action entries match on name" do
+      example = ActionReceived.new(:name)
+      UT.assert_log_entry(example, action(:name))
 
       assertion_fails(
         "Field `:name` has the wrong value",
         [left: :name, right: :not_name],
         fn -> 
-          UT.assert_log_entry(example, focus_on(:not_name))
+          UT.assert_log_entry(example, action(:not_name))
         end)
     end
 
@@ -64,9 +64,9 @@ defmodule TraceAssertionsTest do
           UT.assert_log_entry(actual, plain_map)
         end)
 
-      focus = focus_on(:name)
+      focus = action(:name)
       assertion_fails(
-        "The expectation, for a FocusReceived, cannot match a PulseSent.",
+        "The expectation, for ActionReceived, cannot match a PulseSent.",
         fn ->
           UT.assert_log_entry(actual, focus)
         end)

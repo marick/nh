@@ -4,9 +4,9 @@ defmodule AppAnimal.TraceAssertions do
   use FlowAssertions.Define
   use Private
   alias AppAnimal.Neural.ActivityLogger
-  alias ActivityLogger.{FocusReceived, PulseSent}
+  alias ActivityLogger.{ActionReceived, PulseSent}
 
-  def focus_on(name), do: FocusReceived.new(name)
+  def action(name, data \\ :no_data), do: ActionReceived.new(name, data)
 
   # Assert_log_entry
   
@@ -22,14 +22,14 @@ defmodule AppAnimal.TraceAssertions do
     assert_field(actual, name: name)
   end
   
-  def assert_log_entry(%FocusReceived{} = actual, %FocusReceived{name: name}) do
+  def assert_log_entry(%ActionReceived{} = actual, %ActionReceived{name: name}) do
     assert_field(actual, name: name)
   end
 
   def assert_log_entry(%actual_type{}, %expected_type{}) do
     actual_name = Pretty.Module.minimal(actual_type)
     expected_name = Pretty.Module.minimal(expected_type)
-    flunk("The expectation, for a #{expected_name}, cannot match a #{actual_name}.")
+    flunk("The expectation, for #{expected_name}, cannot match a #{actual_name}.")
   end
 
   def assert_log_entry(%struct_type{}, entry_desc) do

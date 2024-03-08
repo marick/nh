@@ -15,11 +15,11 @@ defmodule AppAnimal.Neural.ActivityLogger do
     end
   end
 
-  defmodule FocusReceived do
-    @enforce_keys [:name]
-    defstruct [:name]
+  defmodule ActionReceived do
+    @enforce_keys [:name, :data]
+    defstruct [:name, :data]
 
-    def new(name), do: %__MODULE__{name: name}
+    def new(name, data \\ :no_data), do: %__MODULE__{name: name, data: data}
   end
     
 
@@ -49,6 +49,12 @@ defmodule AppAnimal.Neural.ActivityLogger do
     def log_pulse_sent(pid, type, name, pulse_data) do
       entry = %PulseSent{cluster_type: type, name: name, pulse_data: pulse_data}
       GenServer.cast(pid, [log: entry])
+    end
+
+    def log_action_received(pid, name, data) do
+      entry = ActionReceived.new(name, data)
+      GenServer.cast(pid, [log: entry])
+      
     end
 
     def get_log(pid) do

@@ -14,8 +14,12 @@ defmodule AppAnimal.Neural.PerceptionEdgeTest do
                              endpoint()])
 
     a = AppAnimal.enliven(network)
-      
-    Affordances.send_spontaneous_affordance(a.affordances_pid, paragraph_text: "some text")
+
+    a.affordances_pid
+    |> Affordances.script([
+      focus_on_paragraph: [paragraph_text: "some text"]
+    ])
+    |> Affordances.note_action(:focus_on_paragraph)
 
     assert_test_receives("some textsome text")
     assert_test_receives("txet emos")
@@ -26,14 +30,14 @@ defmodule AppAnimal.Neural.PerceptionEdgeTest do
 
     log 
     |> assert_trace([
-      # focus_on(:paragraph),
+      action(:focus_on_paragraph),
       [paragraph_text: "some text"],
       [reverser: "txet emos"]
     ])
 
     log
     |> assert_trace([
-      # focus_on(:paragraph),
+      action(:focus_on_paragraph),
       [paragraph_text: "some text"],
       [joiner: "some textsome text"],
     ])

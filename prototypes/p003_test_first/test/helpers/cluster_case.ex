@@ -38,6 +38,7 @@ defmodule ClusterCase do
       import ClusterCase
       import AppAnimal.TraceAssertions
       use FlowAssertions
+      import Affordances, only: [response_to: 2, affords: 1]
     end
   end
 end

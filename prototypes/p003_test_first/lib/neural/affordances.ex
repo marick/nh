@@ -7,24 +7,31 @@ defmodule AppAnimal.Neural.Affordances do
              logger_pid: :created_at_start_link_time,
              programmed_responses: []]
 
+
+  def response_to(action, response), do: {action, response}
+  def affords([{name, data}]), do: {name, data}
+  
   runs_in_sender do
+    
     def start_link(keys) do
       GenServer.start_link(__MODULE__, keys)
     end
 
-    def send_spontaneous_affordance(pid, [{affordance_name, data}]) do
-      GenServer.cast(pid, {:affordance, affordance_name, data})
+    def produce_this_affordance(pid, [{name, data}]) do
+      GenServer.cast(pid, [:produce_this_affordance, {name, data}])
+    end
+
+    def script(pid, list) do
+      GenServer.cast(pid, [script: list])
       pid
     end
 
-    def program_focus_response(pid, affordance_name, response_generator) do
-      GenServer.cast(pid, {:add_programmed_response, affordance_name, response_generator})
-      pid
+    def note_action(pid, action) when is_atom(action) do
+      note_action(pid, [{action, :no_data}])
     end
 
-    def send_focus_affordance(pid, affordance_name) do
-      GenServer.cast(pid, {:affordance_request, affordance_name})
-      pid
+    def note_action(pid, [{_name, _data}] = action) do
+      GenServer.cast(pid, [:note_action, action])
     end
   end
 
@@ -33,35 +40,45 @@ defmodule AppAnimal.Neural.Affordances do
       {:ok, struct(__MODULE__, keys)}
     end
 
-    def handle_cast({:affordance, affordance_name, data}, mutable) do
+    def handle_cast([:produce_this_affordance, {name, data}], mutable) do
       Neural.Switchboard.forward_affordance(mutable.switchboard_pid,
-                                            named: affordance_name, conveying: data)
+                                            named: name, conveying: data)
       continue(mutable)
     end
 
-    def handle_cast({:add_programmed_response, affordance_name, response_generator},
-                    mutable) do
+    def handle_cast([script: responses], mutable) do
       mutable
-      |> Map.update!(:programmed_responses,
-                    &(&1 ++ [{affordance_name, response_generator}]))
+      |> Map.update!(:programmed_responses, & append_programmed_responses(&1, responses))
       |> continue()
     end
 
-    def handle_cast({:affordance_request, affordance_name}, mutable) do
-      {handler, remaining_responses} =
-        Keyword.pop_first(mutable.programmed_responses, affordance_name)
+    def handle_cast([:note_action, [{name, data}]], mutable) do
+      {responses, remaining_programmed_responses} =
+        Keyword.pop_first(mutable.programmed_responses, name)
 
-      handle_cast({:affordance, affordance_name, handler.()}, mutable)
+      ActivityLogger.log_action_received(mutable.logger_pid, name, data)
+      for response <- responses do
+        handle_cast([:produce_this_affordance, response], mutable)
+      end
 
-      mutable
-      |> Map.put(:programmed_responses, remaining_responses)
+      %{mutable | programmed_responses: remaining_programmed_responses}
       |> continue()
-    end
-
-    def handle_cast([focus: {new_focus, data}], mutable) do
-      ActivityLogger.log_pulse_sent(mutable.logger_pid, :focus, new_focus, data)
-      continue(mutable)
     end
   end
-  
+
+  private do
+    def append_programmed_responses(keywords, new) do
+      wrapped = Enum.map(new, &wrap/1)
+      keywords ++ wrapped
+    end
+    
+    def wrap({action, responses}) do
+      case responses do
+        _ when is_list(responses) -> 
+          {action, responses}
+        _ ->
+          {action, [responses]}
+      end
+    end
+  end
 end
