@@ -24,11 +24,11 @@ defmodule AppAnimal.Scenarios.SwitchParagraphTest do
     # network =
     #   Build.trace([notice_paragraph_change, react_to_paragraph_change])
     #   |> Build.trace([scanned_text, edge_detector, big_edit?, endpoint()])
-    
+    :ok
   end
 
-  @tag :skip
   test "simple run-through" do
+    IO.puts "======= switch_paragraph_test"
     _trace = [perception_edge(:notice_new_paragraph),
     ]
       

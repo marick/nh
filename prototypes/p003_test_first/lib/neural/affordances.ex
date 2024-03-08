@@ -56,6 +56,9 @@ defmodule AppAnimal.Neural.Affordances do
       {responses, remaining_programmed_responses} =
         Keyword.pop_first(mutable.programmed_responses, name)
 
+      if responses == nil,
+      do: IO.puts("==== SAY, there is no programmed resonse for #{name}. Test error.")
+        
       ActivityLogger.log_action_received(mutable.logger_pid, name, data)
       for response <- responses do
         handle_cast([:produce_this_affordance, response], mutable)

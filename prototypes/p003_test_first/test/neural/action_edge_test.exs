@@ -6,16 +6,23 @@ defmodule AppAnimal.Neural.ActionEdgeTest do
     
     a =
       Network.trace([Cluster.action_edge(:focus_on_new_paragraph)])
+      |> Network.trace([Cluster.perception_edge(:paragraph_text), endpoint()])
       |> AppAnimal.enliven()
+    
 
-    ActivityLogger.spill_log_to_terminal(a.logger_pid)
-    # Switchboard.external_pulse(a.switchboard_pid,
-    #                            to: :focus_on_new_paragraph, carrying: :nothing)
-    # Process.sleep(300)
-    # [only_entry] = ActivityLogger.get_log(a.logger_pid)
-    # only_entry
-    # |> assert_fields(name: :focus_on_new_paragraph,
-    #                  pulse_data: :nothing)
-    IO.inspect("=====  continue in #{__MODULE__}")
+    Affordances.script(a.affordances_pid, [
+      focus_on_new_paragraph: [paragraph_text: "some text"]
+    ])
+
+    Switchboard.external_pulse(a.switchboard_pid,
+                               to: :focus_on_new_paragraph, carrying: :nothing)
+    
+    assert_test_receives("some text")
+  
+
+    [first, second] = ActivityLogger.get_log(a.logger_pid)
+    assert_fields(first, name: :focus_on_new_paragraph)
+    assert_fields(second, name: :paragraph_text,
+                          pulse_data: "some text")
   end
 end

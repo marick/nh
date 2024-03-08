@@ -24,8 +24,6 @@ defmodule AppAnimal.Neural.PerceptionEdgeTest do
     assert_test_receives("some textsome text")
     assert_test_receives("txet emos")
 
-    IO.puts "==TODO== Complete perception-edge-test with an assertion log entry"
-
     log = ActivityLogger.get_log(a.logger_pid)
 
     log 

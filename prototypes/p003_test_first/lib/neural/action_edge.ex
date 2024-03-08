@@ -13,9 +13,8 @@ end
 
 defimpl Neural.Clusterish, for: ActionEdge do
   def install_pulse_sender(cluster, {_switchboard_pid, affordances_pid}) do
-    sender = fn carrying: pulse_data ->
-      payload = [focus: pulse_data]
-      GenServer.cast(affordances_pid, payload)
+    sender = fn carrying: {action_name, _action_data} ->
+      Neural.Affordances.note_action(affordances_pid, action_name)
     end
     %{cluster | send_pulse_downstream: sender}
   end

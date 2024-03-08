@@ -10,7 +10,8 @@ defmodule AppAnimal.Neural.SwitchboardTest do
   
   test "the switchboard has a log" do
     IO.puts("=== #{Pretty.Module.minimal(__MODULE__)} (around line #{__ENV__.line}) " <>
-              "produces `info` entries, to catch crashes.")
+              "prints log entries.")
+    IO.puts("=== By doing so, I hope to catch cases where log printing breaks.")
 
     trace = [Cluster.circular(:first,
                               constantly(%{}),

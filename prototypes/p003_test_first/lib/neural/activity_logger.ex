@@ -16,10 +16,10 @@ defmodule AppAnimal.Neural.ActivityLogger do
   end
 
   defmodule ActionReceived do
-    @enforce_keys [:name, :data]
-    defstruct [:name, :data]
+    @enforce_keys [:name, :pulse_data]
+    defstruct [:name, :pulse_data]
 
-    def new(name, data \\ :no_data), do: %__MODULE__{name: name, data: data}
+    def new(name, data \\ :no_data), do: %__MODULE__{name: name, pulse_data: data}
   end
     
 
