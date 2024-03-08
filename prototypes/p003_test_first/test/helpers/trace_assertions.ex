@@ -6,7 +6,7 @@ defmodule AppAnimal.TraceAssertions do
   alias AppAnimal.Neural.ActivityLogger
   alias ActivityLogger.{FocusReceived, PulseSent}
 
-  def focus_on(name), do: [FocusReceived, name]
+  def focus_on(name), do: FocusReceived.new(name)
 
   # Assert_log_entry
   
@@ -22,14 +22,14 @@ defmodule AppAnimal.TraceAssertions do
     assert_field(actual, name: name)
   end
   
-  def assert_log_entry(%FocusReceived{} = actual, [FocusReceived, name] = _expected_desc) do
+  def assert_log_entry(%FocusReceived{} = actual, %FocusReceived{name: name}) do
     assert_field(actual, name: name)
   end
 
-  def assert_log_entry(%struct_type{}, [entry_type | _desc]) do
-    struct_name = Pretty.Module.minimal(struct_type)
-    entry_name = Pretty.Module.minimal(entry_type)
-    flunk("The expectation, for a #{entry_name}, cannot match a #{struct_name}.")
+  def assert_log_entry(%actual_type{}, %expected_type{}) do
+    actual_name = Pretty.Module.minimal(actual_type)
+    expected_name = Pretty.Module.minimal(expected_type)
+    flunk("The expectation, for a #{expected_name}, cannot match a #{actual_name}.")
   end
 
   def assert_log_entry(%struct_type{}, entry_desc) do
