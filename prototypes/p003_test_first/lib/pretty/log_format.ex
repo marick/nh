@@ -3,6 +3,7 @@
 defmodule AppAnimal.Pretty.LogFormat do
   alias AppAnimal.Pretty
   use Private
+  alias AppAnimal.Neural.ActivityLogger
   
   def format(_level, message, _timestamp, metadata) do
     message = format(message, metadata)
@@ -12,7 +13,7 @@ defmodule AppAnimal.Pretty.LogFormat do
 
   def spacing_before(source_description) do
     name_length = String.length(source_description)
-    known_value = Application.get_env(:logger, :longest_prefix_so_far, 16)
+    known_value = Application.get_env(:logger, :longest_prefix_so_far, 40)
     current_value = max(known_value, name_length)
     Application.put_env(:logger, :longest_prefix_so_far, current_value)
     String.duplicate(" ", current_value - name_length)
@@ -26,8 +27,10 @@ defmodule AppAnimal.Pretty.LogFormat do
 
     def format_name(metadata) do
       case Keyword.get(metadata, :pulse_entry) do
-        %{cluster_type: type, name: name} ->
+        %ActivityLogger.PulseSent{cluster_type: type, name: name} ->
           "#{type} #{name}"
+        %ActivityLogger.ActionReceived{name: name} ->
+          "#{name}"
         _ ->
           {module, _function, _arity} = Keyword.get(metadata, :mfa)
           module_format(module)

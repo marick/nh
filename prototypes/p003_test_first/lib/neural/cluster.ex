@@ -57,6 +57,8 @@ defmodule AppAnimal.Neural.Cluster do
     linear(name, only_pulse(after: f))
   end
 
+  def linear(only_name), do: linear(only_name, calc: fn _ -> :no_data end)
+
   def only_pulse(after: calc) when is_function(calc, 1) do
     fn pulse_data, configuration ->
       configuration.send_pulse_downstream.(carrying: calc.(pulse_data))

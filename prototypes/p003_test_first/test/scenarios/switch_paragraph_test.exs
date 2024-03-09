@@ -28,9 +28,33 @@ defmodule AppAnimal.Scenarios.SwitchParagraphTest do
   end
 
   test "simple run-through" do
-    IO.puts "======= switch_paragraph_test"
-    _trace = [perception_edge(:notice_new_paragraph),
+    IO.puts "======= switch_paragraph_test ============="
+    reaction_to_new_paragraph = [
+      perception_edge(:notice_new_paragraph),
+      linear(:new_paragraph_decision),
+      action_edge(:focus_on_paragraph),
     ]
-      
+
+    reaction_to_focus = [focus_on_paragraph: [paragraph_text: "para\n"]]
+
+    reaction_to_paragraph_text = [
+      perception_edge(:paragraph_text),
+      endpoint()
+    ]
+
+    a = 
+      Network.trace(reaction_to_new_paragraph)
+      |> Network.trace(reaction_to_paragraph_text)
+      |> AppAnimal.enliven
+
+    Affordances.script(a.affordances_pid, reaction_to_focus)
+
+    ActivityLogger.spill_log_to_terminal(a.logger_pid)
+    Affordances.produce_this_affordance(a.affordances_pid, notice_new_paragraph: :no_data)
+
+    assert_test_receives("para\n")
+    ActivityLogger.get_log(a.logger_pid)
+    
+    
   end
 end

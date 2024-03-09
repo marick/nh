@@ -8,7 +8,7 @@ defmodule AppAnimal do
     defstruct [:network, switchboard_keys: []]
   end
 
-  def enliven(trace, options \\ [])
+  def enliven(trace_or_network, options \\ [])
 
   def enliven(trace, options)               when is_list(trace) do
     Network.trace(trace) |> enliven(options)

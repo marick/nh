@@ -57,7 +57,7 @@ defmodule AppAnimal.Neural.Affordances do
         Keyword.pop_first(mutable.programmed_responses, name)
 
       if responses == nil,
-      do: IO.puts("==== SAY, there is no programmed resonse for #{name}. Test error.")
+      do: IO.puts("==== SAY, there is no programmed response for #{name}. Test error.")
         
       ActivityLogger.log_action_received(mutable.logger_pid, name, data)
       for response <- responses do
