@@ -36,72 +36,72 @@ defmodule AppAnimal.Neural.Switchboard do
 
   runs_in_receiver do 
     @impl GenServer
-    def init(me) do
-      schedule_weakening(me.pulse_rate)
-      ok(me)
+    def init(mutable) do
+      schedule_weakening(mutable.pulse_rate)
+      ok(mutable)
     end
 
     @impl GenServer
     def handle_call({:individualize_pulses, switchboard_pid, affordances_pid},
-                    _from, me) do
+                    _from, mutable) do
       add_individualized_pulse = fn cluster -> 
         Neural.Clusterish.install_pulse_sender(cluster, {switchboard_pid, affordances_pid})
       end
 
-      me
+      mutable
       |> Map2.map_within(:network, add_individualized_pulse)
       |> continue(returning: :ok)
     end
 
     @impl GenServer
-    def handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me) do
-      me
+    def handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, mutable) do
+      mutable
       |> ensure_clusters_are_ready(destination_names)
       |> tap(& send_pulse(pulse_data, destination_names, &1))
       |> continue
     end
 
-    def handle_cast({:distribute_downstream, from: source_name, carrying: pulse_data}, me) do
-      source = me.network[source_name]
+    def handle_cast({:distribute_downstream, from: source_name, carrying: pulse_data}, mutable) do
+      source = mutable.network[source_name]
       destination_names = source.downstream
-      ActivityLogger.log_pulse_sent(me.logger_pid, source.type, source.name, pulse_data)
-      handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, me)
+      ActivityLogger.log_pulse_sent(mutable.logger_pid, source.type, source.name, pulse_data)
+      handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, mutable)
     end
 
     @impl GenServer
-    def handle_info(:weaken_all_active, me) do
-      for {_name, pid} <- me.started_circular_clusters do
+    def handle_info(:weaken_all_active, mutable) do
+      for {_name, pid} <- mutable.started_circular_clusters do
         GenServer.cast(pid, [weaken: 1])
       end
-      schedule_weakening(me.pulse_rate)
-      continue(me)
+      schedule_weakening(mutable.pulse_rate)
+      continue(mutable)
     end
 
-    def handle_info({:DOWN, _, :process, pid, :normal}, me) do
-      me
+    def handle_info({:DOWN, _, :process, pid, :normal}, mutable) do
+      mutable
       |> Map2.reject_value_within(:started_circular_clusters, pid)
       |> continue
     end
     
     private do
-      def ensure_clusters_are_ready(me, names) do
+      def ensure_clusters_are_ready(mutable, names) do
         ensure_one_name = fn name, acc ->
-          Neural.Clusterish.ensure_ready(me.network[name], acc) 
+          Neural.Clusterish.ensure_ready(mutable.network[name], acc) 
         end
         
         names
-        |> Enum.reduce(me.started_circular_clusters, ensure_one_name)
-        |> then(& put_in(me.started_circular_clusters, &1))
+        |> Enum.reduce(mutable.started_circular_clusters, ensure_one_name)
+        |> then(& put_in(mutable.started_circular_clusters, &1))
       end
 
-      def send_pulse(pulse_data, names, me) do
+      def send_pulse(pulse_data, names, mutable) do
         for name <- names do
-          case Map.has_key?(me.started_circular_clusters, name) do
+          case Map.has_key?(mutable.started_circular_clusters, name) do
             true ->
-              destination_pid = me.started_circular_clusters[name]
+              destination_pid = mutable.started_circular_clusters[name]
               GenServer.cast(destination_pid, [handle_pulse: pulse_data])
             false ->
-              config = me.network[name]
+              config = mutable.network[name]
               Task.start(fn ->
                 config.handlers.handle_pulse.(pulse_data, config)
               end)
