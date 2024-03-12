@@ -26,13 +26,6 @@ defmodule CircularCluster do
   use AppAnimal.GenServer
   import AppAnimal.Extras.SplitState
   
-  defstruct [:name,
-             :handlers,
-             type: :circular_cluster,
-             downstream: [],
-             starting_pulses: 20,
-             send_pulse_downstream: :installed_by_switchboard]
-
   def init(configuration) do
     creating_mutable(configuration, fn ->
       %{reinforcement_strength: configuration.starting_pulses}
