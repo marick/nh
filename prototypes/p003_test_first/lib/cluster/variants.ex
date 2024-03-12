@@ -1,6 +1,14 @@
-defmodule AppAnimal.Cluster.Versions do
+defmodule AppAnimal.Cluster.Variants do
   use AppAnimal
   alias AppAnimal.Neural.{CircularCluster, Affordances, Cluster}
+
+  defprotocol AppAnimal.Cluster.SendsWhere do
+  end
+
+  defprotocol AppAnimal.Cluster.ReceivesHow do
+  end
+  
+  
   
   def ensure_ready(%{type: :circular_cluster} = cluster, started_processes_by_name) do
     case Map.has_key?(started_processes_by_name, cluster.name) do
@@ -48,5 +56,4 @@ defmodule AppAnimal.Cluster.Versions do
       cluster.handlers.handle_pulse.(pulse_data, cluster)
     end)
   end    
-  
 end

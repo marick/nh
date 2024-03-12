@@ -49,6 +49,7 @@ defmodule AppAnimal do
       alias AppAnimal.Pretty
       import AppAnimal.Extras.Tuples
       import AppAnimal.Extras.Kernel
+      alias AppAnimal.Cluster
     end
   end
 end
