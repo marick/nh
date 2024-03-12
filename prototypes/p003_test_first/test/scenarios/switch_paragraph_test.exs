@@ -31,7 +31,6 @@ defmodule AppAnimal.Scenarios.SwitchParagraphTest do
     IO.puts "======= switch_paragraph_test ============="
     reaction_to_new_paragraph = [
       perception_edge(:notice_new_paragraph),
-      linear(:new_paragraph_decision),
       action_edge(:focus_on_paragraph),
     ]
 
@@ -39,8 +38,12 @@ defmodule AppAnimal.Scenarios.SwitchParagraphTest do
 
     reaction_to_paragraph_text = [
       perception_edge(:paragraph_text),
+      # linear(:count_gaps, only_pulse(after: fn -> 2 end))
+      # delay(:desire_to_mark_paragraph_with_big_edit, 2_000)
+      # action_edge(:mark_paragraph_with_big_edit)
       endpoint()
     ]
+
 
     a = 
       Network.trace(reaction_to_new_paragraph)
