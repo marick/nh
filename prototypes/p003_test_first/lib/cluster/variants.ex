@@ -1,12 +1,12 @@
 defmodule AppAnimal.Cluster.Variants do
   use AppAnimal
-  alias AppAnimal.Neural.{CircularCluster, Affordances, Cluster}
+  alias AppAnimal.Neural.{CircularCluster, Affordances}
 
-  defprotocol AppAnimal.Cluster.SendsWhere do
-  end
+  # defprotocol AppAnimal.Cluster.SendsWhere do
+  # end
 
-  defprotocol AppAnimal.Cluster.ReceivesHow do
-  end
+  # defprotocol AppAnimal.Cluster.ReceivesHow do
+  # end
   
   
   
@@ -34,8 +34,13 @@ defmodule AppAnimal.Cluster.Variants do
     %{cluster | send_pulse_downstream: sender}
   end
 
-  def send_to_internal_pid(cluster, switchboard_pid),
-      do: Cluster.send_via_pid(cluster, switchboard_pid)
+  def send_to_internal_pid(cluster, switchboard_pid) do
+    sender = fn carrying: pulse_data ->
+      payload = {:distribute_downstream, from: cluster.name, carrying: pulse_data}
+      GenServer.cast(switchboard_pid, payload)
+    end
+    %{cluster | send_pulse_downstream: sender}
+  end
 
   def install_pulse_sender(%{type: :action_edge} = cluster, {_switchboard_pid, affordances_pid}) do
     send_to_affordances_pid(cluster, affordances_pid)

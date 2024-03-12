@@ -2,6 +2,7 @@ defmodule AppAnimal.Cluster.Base do
 
   defstruct [:name,
              :handlers,
+             :receives_how,
              :type,
              downstream: [],
              starting_pulses: 20,
