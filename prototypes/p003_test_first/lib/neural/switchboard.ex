@@ -45,7 +45,7 @@ defmodule AppAnimal.Neural.Switchboard do
     def handle_call({:individualize_pulses, switchboard_pid, affordances_pid},
                     _from, mutable) do
       add_individualized_pulse = fn cluster -> 
-        Neural.Clusterish.install_pulse_sender(cluster, {switchboard_pid, affordances_pid})
+        AppAnimal.Cluster.Versions.install_pulse_sender(cluster, {switchboard_pid, affordances_pid})
       end
 
       mutable
@@ -86,7 +86,7 @@ defmodule AppAnimal.Neural.Switchboard do
     private do
       def ensure_clusters_are_ready(mutable, names) do
         ensure_one_name = fn name, acc ->
-          Neural.Clusterish.ensure_ready(mutable.network[name], acc) 
+          AppAnimal.Cluster.Versions.ensure_ready(mutable.network[name], acc) 
         end
         
         names
@@ -96,16 +96,9 @@ defmodule AppAnimal.Neural.Switchboard do
 
       def send_pulse(pulse_data, names, mutable) do
         for name <- names do
-          case Map.has_key?(mutable.started_circular_clusters, name) do
-            true ->
-              destination_pid = mutable.started_circular_clusters[name]
-              GenServer.cast(destination_pid, [handle_pulse: pulse_data])
-            false ->
-              config = mutable.network[name]
-              Task.start(fn ->
-                config.handlers.handle_pulse.(pulse_data, config)
-              end)
-          end
+          pid = mutable.started_circular_clusters[name]
+          cluster = mutable.network[name]
+          AppAnimal.Cluster.Versions.generic_pulse(cluster, pid, pulse_data)
         end
       end
 

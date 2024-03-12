@@ -11,11 +11,3 @@ defmodule Neural.PerceptionEdge do
   ]
 end
 
-defimpl Neural.Clusterish, for: Neural.PerceptionEdge do
-  use AppAnimal
-  def install_pulse_sender(cluster, {switchboard_pid, _affordances_pid}),
-      do: Neural.Cluster.send_via_pid(cluster, switchboard_pid)
-
-  def ensure_ready(_cluster, started_processes_by_name),
-      do: started_processes_by_name
-end 

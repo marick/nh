@@ -19,7 +19,6 @@ defmodule AppAnimal.Extras.SplitState do
   end
 end
 
-alias AppAnimal.Neural
 alias AppAnimal.Neural.CircularCluster
 
 defmodule CircularCluster do
@@ -63,20 +62,3 @@ defmodule CircularCluster do
     end)
   end
 end
-
-
-defimpl Neural.Clusterish, for: CircularCluster  do
-  def install_pulse_sender(cluster, {switchboard_pid, _affordances_pid}),
-      do: Neural.Cluster.send_via_pid(cluster, switchboard_pid)
-
-  def ensure_ready(cluster, started_processes_by_name) do
-    case Map.has_key?(started_processes_by_name, cluster.name) do
-      true ->
-        started_processes_by_name
-      false ->
-        {:ok, pid} = GenServer.start(CircularCluster, cluster)
-        Process.monitor(pid)
-        Map.put(started_processes_by_name, cluster.name, pid)
-    end
-  end
-end 
