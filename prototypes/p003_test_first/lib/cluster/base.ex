@@ -21,7 +21,6 @@ defmodule Cluster.Base do
 
     ### These are to be gotten rid of
     field :handlers, %{atom => fun}
-    field :starting_pulses, integer, default: 20
     field :send_pulse_downstream, atom | fun, default: :installed_by_switchboard
   end
 end

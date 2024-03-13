@@ -2,18 +2,21 @@ alias AppAnimal.Cluster
 
 defmodule Cluster.Make do
   use AppAnimal
+  alias AppAnimal.Cluster.Variations.Topology.{Circular, Linear}
 
 
   # Circular clusters
 
-  def circular(name, mutable_initializer, handle_pulse, keys \\ []) do
+  def circular(name, mutable_initializer, handle_pulse, opts \\ []) do
     handlers = %{
       pulse: handle_pulse,
       initialize: mutable_initializer
     }
 
     full_keyset =
-      Keyword.merge(keys, label: :circular_cluster, name: name, handlers: handlers)
+      Keyword.merge(opts, label: :circular_cluster,
+                          topology: Circular.new(opts),
+                          name: name, handlers: handlers)
 
     struct(Cluster.Base, full_keyset)
   end
@@ -43,7 +46,9 @@ defmodule Cluster.Make do
   # Linear Clusters
 
   def linear(name, handle_pulse) when is_function(handle_pulse) do
-    %Cluster.Base{name: name, label: :linear_cluster, handlers: %{handle_pulse: handle_pulse}}
+    %Cluster.Base{name: name, label: :linear_cluster,
+                  topology: Linear.new,
+                  handlers: %{handle_pulse: handle_pulse}}
   end
 
   def linear(name, calc: f) do
@@ -67,7 +72,9 @@ defmodule Cluster.Make do
       configuration.send_pulse_downstream.(carrying: pulse_data)
       :there_is_never_a_meaningful_return_value
     end
-    %Cluster.Base{name: name, label: :perception_edge, handlers: %{handle_pulse: just_forward_pulse_data}}
+    %Cluster.Base{name: name, label: :perception_edge,
+                  topology: Linear.new,
+                  handlers: %{handle_pulse: just_forward_pulse_data}}
   end
   
 
@@ -77,6 +84,8 @@ defmodule Cluster.Make do
         configuration.send_pulse_downstream.(carrying: {configuration.name, pulse_data})
         :there_is_never_a_meaningful_return_value
       end
-    %Cluster.Base{name: name, label: :action_edge, handlers: %{handle_pulse: handle_pulse}}
+    %Cluster.Base{name: name, label: :action_edge,
+                  topology: Linear.new,
+                  handlers: %{handle_pulse: handle_pulse}}
   end
  end

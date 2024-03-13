@@ -9,7 +9,7 @@ defmodule Variations do
 
 
   
-  defprotocol Variations.Topology do
+  defprotocol Topology do
     @spec ensure_ready(Cluster.Base.t, Variations.process_map) :: Variations.process_map
     def ensure_ready(cluster, started_processes)
 
@@ -17,23 +17,32 @@ defmodule Variations do
     def generic_pulse(cluster, pid, pulse_data)
   end
 
-  defmodule Variations.Topology.Circular do
+  defmodule Topology.Circular do
+    defstruct [:dummy,
+               starting_pulses: 20]
+
+    def new(opts \\ []), do: struct(__MODULE__, opts)
   end
 
-  defmodule Variations.Topology.Linear do
+  defmodule Topology.Linear do
+    defstruct [:dummy]
+
+    def new(opts \\ []), do: struct(__MODULE__, opts)
   end
 
   # ===
 
-  defprotocol Variations.Propagation do
+  defprotocol Propagation do
     @spec send_pulse(Propagation.t, any) :: no_return
     def send_pulse(propagation, pulse_data)
   end
 
-  defmodule Variations.Propagation.Internal do
+  defmodule Propagation.Internal do
+    defstruct [:dummy]
   end
 
-  defmodule Varations.Propagation.External do
+  defmodule Propagation.External do
+    defstruct [:dummy]
   end
 
 
