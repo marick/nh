@@ -57,38 +57,11 @@ defmodule Cluster.Make do
      }
   end
 
-  # def linear(name, handle_pulse) when is_function(handle_pulse) do
-  #   %Cluster.Base{name: name, label: :linear_cluster,
-  #                 topology: Linear.new,
-  #                 propagate: Internal.new(from_name: name),
-  #                 handlers: %{handle_pulse: handle_pulse}}
-  # end
-
-  # def linear(name, calc: f) do
-  #   linear(name, only_pulse(after: f))
-  # end
-
-  # def linear(only_name), do: linear(only_name, calc: fn _ -> :no_data end)
-
-  # def only_pulse(after: calc) when is_function(calc, 1) do
-  #   fn pulse_data, configuration ->
-  #     configuration.send_pulse_downstream.(carrying: calc.(pulse_data))
-  #     :there_is_never_a_meaningful_return_value
-  #   end
-  # end
-  
-
   ## Edges
 
   def perception_edge(name) do
-    just_forward_pulse_data = fn pulse_data, configuration -> 
-      configuration.send_pulse_downstream.(carrying: pulse_data)
-      :there_is_never_a_meaningful_return_value
-    end
-    %Cluster.Base{name: name, label: :perception_edge,
-                  topology: Linear.new,
-                  propagate: Internal.new(from_name: name),
-                  handlers: %{handle_pulse: just_forward_pulse_data}}
+    linear(name, &Function.identity/1)
+    |> Map.put(:label, :perception_edge)
   end
   
 
