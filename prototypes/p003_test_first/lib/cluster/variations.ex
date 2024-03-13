@@ -10,23 +10,43 @@ defmodule Variations do
 
   
   defprotocol Topology do
-    @spec ensure_ready(Cluster.Base.t, Variations.process_map) :: Variations.process_map
-    def ensure_ready(cluster, started_processes)
+    @spec ensure_ready(Topology.t, Cluster.Base.t, Variations.process_map) :: Variations.process_map
+    def ensure_ready(struct, cluster, started_processes)
 
-    @spec generic_pulse(Cluster.Base.t, pid, any) :: no_return
-    def generic_pulse(cluster, pid, pulse_data)
+    # @spec generic_pulse(Cluster.Base.t, pid, any) :: no_return
+    # def generic_pulse(cluster, pid, pulse_data)
   end
 
   defmodule Topology.Circular do
     defstruct [starting_pulses: 20]
 
     def new(opts \\ []), do: struct(__MODULE__, opts)
+
+    defimpl Topology, for: __MODULE__ do
+      def ensure_ready(_struct, cluster, started_processes_by_name) do
+        case Map.has_key?(started_processes_by_name, cluster.name) do
+          true ->
+            started_processes_by_name
+          false ->
+            {:ok, pid} = GenServer.start(CircularCluster, cluster)
+            Process.monitor(pid)
+            Map.put(started_processes_by_name, cluster.name, pid)
+        end
+      end
+    end
+    
   end
 
   defmodule Topology.Linear do
     defstruct [:dummy]
 
     def new(opts \\ []), do: struct(__MODULE__, opts)
+
+    defimpl Topology, for: __MODULE__ do
+      def ensure_ready(_struct, _cluster, started_processes_by_name) do
+        started_processes_by_name
+      end
+    end
   end
 
   # ===
@@ -93,21 +113,6 @@ defmodule Variations do
         send(struct.pid, [pulse_data, from: struct.name])
       end
     end
-  end
-  
-  def ensure_ready(%{label: :circular_cluster} = cluster, started_processes_by_name) do
-    case Map.has_key?(started_processes_by_name, cluster.name) do
-      true ->
-        started_processes_by_name
-      false ->
-        {:ok, pid} = GenServer.start(CircularCluster, cluster)
-        Process.monitor(pid)
-        Map.put(started_processes_by_name, cluster.name, pid)
-    end
-  ;end
-
-  def ensure_ready(_cluster, started_processes_by_name) do
-    started_processes_by_name
   end
 
   ##

@@ -86,7 +86,8 @@ defmodule AppAnimal.Neural.Switchboard do
     private do
       def ensure_clusters_are_ready(mutable, names) do
         ensure_one_name = fn name, acc ->
-          AppAnimal.Cluster.Variations.ensure_ready(mutable.network[name], acc) 
+          cluster = mutable.network[name]
+          AppAnimal.Cluster.Variations.Topology.ensure_ready(cluster.topology, cluster, acc) 
         end
         
         names
