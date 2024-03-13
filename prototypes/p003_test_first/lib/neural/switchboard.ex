@@ -45,7 +45,7 @@ defmodule AppAnimal.Neural.Switchboard do
     def handle_call({:individualize_pulses, switchboard_pid, affordances_pid},
                     _from, mutable) do
       add_individualized_pulse = fn cluster -> 
-        AppAnimal.Cluster.Variants.install_pulse_sender(cluster, {switchboard_pid, affordances_pid})
+        AppAnimal.Cluster.Variations.install_pulse_sender(cluster, {switchboard_pid, affordances_pid})
       end
 
       mutable
@@ -86,7 +86,7 @@ defmodule AppAnimal.Neural.Switchboard do
     private do
       def ensure_clusters_are_ready(mutable, names) do
         ensure_one_name = fn name, acc ->
-          AppAnimal.Cluster.Variants.ensure_ready(mutable.network[name], acc) 
+          AppAnimal.Cluster.Variations.ensure_ready(mutable.network[name], acc) 
         end
         
         names
@@ -98,7 +98,7 @@ defmodule AppAnimal.Neural.Switchboard do
         for name <- names do
           pid = mutable.started_circular_clusters[name]
           cluster = mutable.network[name]
-          AppAnimal.Cluster.Variants.generic_pulse(cluster, pid, pulse_data)
+          AppAnimal.Cluster.Variations.generic_pulse(cluster, pid, pulse_data)
         end
       end
 

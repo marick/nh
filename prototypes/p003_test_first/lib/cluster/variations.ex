@@ -1,14 +1,51 @@
-defmodule AppAnimal.Cluster.Variants do
+alias AppAnimal.Cluster.Variations
+
+
+defmodule Variations do
   use AppAnimal
   alias AppAnimal.Neural.{CircularCluster, Affordances}
 
-  # defprotocol AppAnimal.Cluster.SendsWhere do
+  @type process_map :: %{atom => pid}
+
+
+  # defprotocol Variations.ReceivesHow do
+  #   @spec ensure_ready(Cluster.Base.t, Variations.process_map) :: Variations.process_map
+  #   def ensure_ready(cluster, started_processes)
+
+  #   @spec generic_pulse(Cluster.Base.t, pid, any) :: no_return
+  #   def generic_pulse(cluster, pid, pulse_data)
   # end
 
-  # defprotocol AppAnimal.Cluster.ReceivesHow do
+  # defmodule Variations.ReceivesAsCircular do
+  #   defstruct [:pulser]
+    
+  #   def ensure_ready(cluster, started_processes_by_name) do
+  #     case Map.has_key?(started_processes_by_name, cluster.name) do
+  #       true ->
+  #         started_processes_by_name
+  #       false ->
+  #         {:ok, pid} = GenServer.start(CircularCluster, cluster)
+  #         Process.monitor(pid)
+  #         Map.put(started_processes_by_name, cluster.name, pid)
+  #     end
+  #   end
+
+  #   def generic_pulse(cluster, _destination_pid, pulse_data) do
+  #     Task.start(fn ->
+  #       cluster.handlers.handle_pulse.(pulse_data, cluster)
+  #     end)
+  #   end    
+  # end
+
+  # defprotocol AppAnimal.Cluster.SendsWhere do
   # end
   
-  
+
+  # defmodule Variations.ReceivesAsX do
+  #   defimpl Variations.ReceivesHow, for: __MODULE__  do
+  #     def dummy(arg), do: IO.inspect arg
+  #   end
+  # end
   
   def ensure_ready(%{type: :circular_cluster} = cluster, started_processes_by_name) do
     case Map.has_key?(started_processes_by_name, cluster.name) do
