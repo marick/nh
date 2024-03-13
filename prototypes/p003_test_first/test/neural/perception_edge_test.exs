@@ -6,12 +6,11 @@ defmodule AppAnimal.Neural.PerceptionEdgeTest do
   test "edges serve only to fan out" do
     network =
       Network.trace([perception_edge(:paragraph_text),
-                     linear(:reverser,
-                                    only_pulse(after: &String.reverse/1)),
-                     endpoint()])
+                     linear(:reverser, &String.reverse/1),
+                     to_test()])
     |> Network.extend(at: :paragraph_text,
-                      with: [linear(:joiner, only_pulse(after: &(&1 <> &1))),
-                             endpoint()])
+                      with: [linear(:joiner, &(&1 <> &1)),
+                             to_test()])
 
     a = AppAnimal.enliven(network)
 

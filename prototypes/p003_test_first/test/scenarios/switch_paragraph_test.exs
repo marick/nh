@@ -23,7 +23,7 @@ defmodule AppAnimal.Scenarios.SwitchParagraphTest do
 
     # network =
     #   Build.trace([notice_paragraph_change, react_to_paragraph_change])
-    #   |> Build.trace([scanned_text, edge_detector, big_edit?, endpoint()])
+    #   |> Build.trace([scanned_text, edge_detector, big_edit?, to_test()])
     :ok
   end
 
@@ -41,7 +41,7 @@ defmodule AppAnimal.Scenarios.SwitchParagraphTest do
       # linear(:count_gaps, only_pulse(after: fn -> 2 end))
       # delay(:desire_to_mark_paragraph_with_big_edit, 2_000)
       # action_edge(:mark_paragraph_with_big_edit)
-      endpoint()
+      to_test()
     ]
 
 

@@ -49,25 +49,33 @@ defmodule Cluster.Make do
   
   # Linear Clusters
 
-  def linear(name, handle_pulse) when is_function(handle_pulse) do
+  def linear(name, calc) do
     %Cluster.Base{name: name, label: :linear_cluster,
                   topology: Linear.new,
-                  propagate: Internal.new(from_name: name),
-                  handlers: %{handle_pulse: handle_pulse}}
+                  calc: calc,
+                  propagate: Internal.new(from_name: name)
+     }
   end
 
-  def linear(name, calc: f) do
-    linear(name, only_pulse(after: f))
-  end
+  # def linear(name, handle_pulse) when is_function(handle_pulse) do
+  #   %Cluster.Base{name: name, label: :linear_cluster,
+  #                 topology: Linear.new,
+  #                 propagate: Internal.new(from_name: name),
+  #                 handlers: %{handle_pulse: handle_pulse}}
+  # end
 
-  def linear(only_name), do: linear(only_name, calc: fn _ -> :no_data end)
+  # def linear(name, calc: f) do
+  #   linear(name, only_pulse(after: f))
+  # end
 
-  def only_pulse(after: calc) when is_function(calc, 1) do
-    fn pulse_data, configuration ->
-      configuration.send_pulse_downstream.(carrying: calc.(pulse_data))
-      :there_is_never_a_meaningful_return_value
-    end
-  end
+  # def linear(only_name), do: linear(only_name, calc: fn _ -> :no_data end)
+
+  # def only_pulse(after: calc) when is_function(calc, 1) do
+  #   fn pulse_data, configuration ->
+  #     configuration.send_pulse_downstream.(carrying: calc.(pulse_data))
+  #     :there_is_never_a_meaningful_return_value
+  #   end
+  # end
   
 
   ## Edges

@@ -17,8 +17,8 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     trace = [Make.circular(:first,
                               constantly(%{}),
                               Make.one_pulse(after: & &1+1)),
-             Make.linear(:second, Make.only_pulse(after: & &1+1)),
-             endpoint()]
+             Make.linear(:second, & &1+1),
+             to_test()]
     a = AppAnimal.enliven(trace)
 
     ActivityLogger.spill_log_to_terminal(a.logger_pid)
