@@ -8,13 +8,36 @@ defmodule Variations do
   @type process_map :: %{atom => pid}
 
 
-  # defprotocol Variations.ReceivesHow do
-  #   @spec ensure_ready(Cluster.Base.t, Variations.process_map) :: Variations.process_map
-  #   def ensure_ready(cluster, started_processes)
+  
+  defprotocol Variations.Topology do
+    @spec ensure_ready(Cluster.Base.t, Variations.process_map) :: Variations.process_map
+    def ensure_ready(cluster, started_processes)
 
-  #   @spec generic_pulse(Cluster.Base.t, pid, any) :: no_return
-  #   def generic_pulse(cluster, pid, pulse_data)
-  # end
+    @spec generic_pulse(Cluster.Base.t, pid, any) :: no_return
+    def generic_pulse(cluster, pid, pulse_data)
+  end
+
+  defmodule Variations.Topology.Circular do
+  end
+
+  defmodule Variations.Topology.Linear do
+  end
+
+  # ===
+
+  defprotocol Variations.Propagation do
+    @spec send_pulse(Propagation.t, any) :: no_return
+    def send_pulse(propagation, pulse_data)
+  end
+
+  defmodule Variations.Propagation.Internal do
+  end
+
+  defmodule Varations.Propagation.External do
+  end
+
+
+  
 
   # defmodule Variations.ReceivesAsCircular do
   #   defstruct [:pulser]
