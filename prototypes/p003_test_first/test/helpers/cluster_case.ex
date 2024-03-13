@@ -14,19 +14,17 @@ defmodule ClusterCase do
 
   # The stripping out of `carrying` is a hack because of old behavior.
   def to_test(name \\ :endpoint) do
-    handler =
+    filter =
       fn
-        [carrying: pulse], cluster -> 
-          Propagation.send_pulse(cluster.propagate, pulse)
-        pulse, cluster ->
-          Propagation.send_pulse(cluster.propagate, pulse)
+        [carrying: pulse] -> pulse
+        pulse -> pulse
       end
     
     %Base{name: name,
           label: :test_endpoint,
           topology: Topology.Linear.new,
-          propagate: Propagation.Test.new(name, self()),
-          handlers: %{handle_pulse: handler}
+          calc: filter,
+          propagate: Propagation.Test.new(name, self())
   }
   end
 

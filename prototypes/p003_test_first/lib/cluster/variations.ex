@@ -95,39 +95,6 @@ defmodule Variations do
     end
   end
   
-  
-
-  # defmodule Variations.ReceivesAsCircular do
-  #   defstruct [:pulser]
-    
-  #   def ensure_ready(cluster, started_processes_by_name) do
-  #     case Map.has_key?(started_processes_by_name, cluster.name) do
-  #       true ->
-  #         started_processes_by_name
-  #       false ->
-  #         {:ok, pid} = GenServer.start(CircularCluster, cluster)
-  #         Process.monitor(pid)
-  #         Map.put(started_processes_by_name, cluster.name, pid)
-  #     end
-  #   end
-
-  #   def generic_pulse(cluster, _destination_pid, pulse_data) do
-  #     Task.start(fn ->
-  #       cluster.handlers.handle_pulse.(pulse_data, cluster)
-  #     end)
-  #   end    
-  # end
-
-  # defprotocol AppAnimal.Cluster.SendsWhere do
-  # end
-  
-
-  # defmodule Variations.ReceivesAsX do
-  #   defimpl Variations.ReceivesHow, for: __MODULE__  do
-  #     def dummy(arg), do: IO.inspect arg
-  #   end
-  # end
-  
   def ensure_ready(%{label: :circular_cluster} = cluster, started_processes_by_name) do
     case Map.has_key?(started_processes_by_name, cluster.name) do
       true ->
@@ -181,12 +148,8 @@ defmodule Variations do
 
   def generic_pulse(cluster, _destination_pid, pulse_data) do
     Task.start(fn ->
-      if cluster.handlers do 
-        cluster.handlers.handle_pulse.(pulse_data, cluster)
-      else
-        outgoing_data = cluster.calc.(pulse_data)
-        Propagation.send_pulse(cluster.propagate, outgoing_data)
-      end
+      outgoing_data = cluster.calc.(pulse_data)
+      Propagation.send_pulse(cluster.propagate, outgoing_data)
     end)
   end    
 end
