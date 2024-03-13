@@ -19,7 +19,7 @@ defmodule AppAnimal.Neural.PerceptionEdgeTest do
     |> Affordances.script([
       focus_on_paragraph: [paragraph_text: "some text"]
     ])
-    |> Affordances.note_action(:focus_on_paragraph)
+    |> Affordances.note_action(focus_on_paragraph: :no_data)
 
     assert_test_receives("some textsome text")
     assert_test_receives("txet emos")

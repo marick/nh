@@ -31,7 +31,7 @@ defmodule AppAnimal.Scenarios.SwitchParagraphTest do
     IO.puts "======= switch_paragraph_test ============="
     reaction_to_new_paragraph = [
       perception_edge(:notice_new_paragraph),
-      action_edge(:focus_on_paragraph),
+      action_edge(focus_on_paragraph: :no_data),
     ]
 
     reaction_to_focus = [focus_on_paragraph: [paragraph_text: "para\n"]]
