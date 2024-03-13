@@ -42,7 +42,7 @@ defmodule Variations do
   defmodule Propagation.Internal do
     defstruct [:switchboard_pid, :from_name]
 
-    def new(from_name) do
+    def new(from_name: from_name) do
       %__MODULE__{from_name: from_name}
     end
 
@@ -159,9 +159,9 @@ defmodule Variations do
       payload = {:distribute_downstream, from: cluster.name, carrying: pulse_data}
       GenServer.cast(switchboard_pid, payload)
     end
-    %{cluster | send_pulse_downstream: sender,
-#                propagate: Propagation.Internal.new(switchboard_pid, cluster.name)
-    }
+    cluster
+    |> Map.put(:send_pulse_downstream, sender)
+    |> Map.update!(:propagate, & Propagation.put_pid(&1, {switchboard_pid, :foo}))
   end
 
   def install_pulse_sender(%{label: :action_edge} = cluster, {_switchboard_pid, affordances_pid}) do

@@ -1,7 +1,8 @@
 defmodule ClusterCase do
   use AppAnimal
   alias AppAnimal.Neural
-  alias Cluster.Make
+  alias Cluster.{Make, Base}
+  alias Cluster.Variations.{Topology, Propagation}
   alias ExUnit.Assertions
 
   defmacro assert_test_receives(value, keys \\ [from: :endpoint]) do
@@ -9,6 +10,24 @@ defmodule ClusterCase do
       [retval, from: _] = Assertions.assert_receive([unquote(value) | unquote(keys)])
       retval
     end
+  end
+
+  # The stripping out of `carrying` is a hack because of old behavior.
+  def to_test(name \\ :endpoint) do
+    handler =
+      fn
+        [carrying: pulse], cluster -> 
+          Propagation.send_pulse(cluster.propagate, pulse)
+        pulse, cluster ->
+          Propagation.send_pulse(cluster.propagate, pulse)
+      end
+    
+    %Base{name: name,
+          label: :test_endpoint,
+          topology: Topology.Linear.new,
+          propagate: Propagation.Test.new(name, self()),
+          handlers: %{handle_pulse: handler}
+  }
   end
 
   def endpoint(name \\ :endpoint) do
