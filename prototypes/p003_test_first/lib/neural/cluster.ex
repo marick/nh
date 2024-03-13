@@ -12,7 +12,7 @@ defmodule AppAnimal.Neural.Cluster do
     }
 
     full_keyset =
-      Keyword.merge(keys, type: :circular_cluster, name: name, handlers: handlers)
+      Keyword.merge(keys, label: :circular_cluster, name: name, handlers: handlers)
 
     struct(Cluster.Base, full_keyset)
   end
@@ -42,7 +42,7 @@ defmodule AppAnimal.Neural.Cluster do
   # Linear Clusters
 
   def linear(name, handle_pulse) when is_function(handle_pulse) do
-    %Cluster.Base{name: name, type: :linear_cluster, handlers: %{handle_pulse: handle_pulse}}
+    %Cluster.Base{name: name, label: :linear_cluster, handlers: %{handle_pulse: handle_pulse}}
   end
 
   def linear(name, calc: f) do
@@ -66,7 +66,7 @@ defmodule AppAnimal.Neural.Cluster do
       configuration.send_pulse_downstream.(carrying: pulse_data)
       :there_is_never_a_meaningful_return_value
     end
-    %Cluster.Base{name: name, type: :perception_edge, handlers: %{handle_pulse: just_forward_pulse_data}}
+    %Cluster.Base{name: name, label: :perception_edge, handlers: %{handle_pulse: just_forward_pulse_data}}
   end
   
 
@@ -76,6 +76,6 @@ defmodule AppAnimal.Neural.Cluster do
         configuration.send_pulse_downstream.(carrying: {configuration.name, pulse_data})
         :there_is_never_a_meaningful_return_value
       end
-    %Cluster.Base{name: name, type: :action_edge, handlers: %{handle_pulse: handle_pulse}}
+    %Cluster.Base{name: name, label: :action_edge, handlers: %{handle_pulse: handle_pulse}}
   end
  end

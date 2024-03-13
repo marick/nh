@@ -8,13 +8,13 @@ defmodule Cluster.Base do
     plugin TypedStructLens
 
     # Set first thing
+    field :label, atom    # only for human readability
     field :name, atom
-    field :type, atom
     field :configuration, %{atom => any}
     
     # The main axes of variation
     field :topology, Cluster.Variations.Topology.t
-    field :guts, fun
+    field :calc, fun
     field :propagate, Cluster.Variations.Propagation.t
 
     # Set when compiled into a network

@@ -10,15 +10,15 @@ defmodule TraceAssertionsTest do
 
   describe "element comparison" do
     test "success cases" do
-      actual = PulseSent.new(:a_type, :a_name, "data")
+      actual = PulseSent.new(:a_label, :a_name, "data")
       
-      UT.assert_log_entry(actual, PulseSent.new(:a_type, :a_name, "data"))
+      UT.assert_log_entry(actual, PulseSent.new(:a_label, :a_name, "data"))
       UT.assert_log_entry(actual, [a_name: "data"])
       UT.assert_log_entry(actual, :a_name)
     end
 
     test "reporting of field failures is per `assert_fields`" do
-      actual = PulseSent.new(:a_type, :a_name, "data")
+      actual = PulseSent.new(:a_label, :a_name, "data")
 
       assertion_fails(
         "Assertion with == failed",
@@ -54,9 +54,9 @@ defmodule TraceAssertionsTest do
     end
 
     test "can't compare different types of entries" do
-      actual = PulseSent.new(:a_type, :a_name, "data")
+      actual = PulseSent.new(:a_label, :a_name, "data")
 
-      plain_map = %{cluster_type: :a_type, name: :a_name, pulse_data: "data"}
+      plain_map = %{cluster_label: :a_label, name: :a_name, pulse_data: "data"}
       assertion_fails(
         "The expectation cannot match a PulseSent.",
         [right: plain_map],
@@ -77,8 +77,8 @@ defmodule TraceAssertionsTest do
   
   describe "assert_exact_trace" do
     setup do
-      [actual: [PulseSent.new(:a_type, :a_name, "a_data"),
-                PulseSent.new(:b_type, :b_name, "b_data")]]
+      [actual: [PulseSent.new(:a_label, :a_name, "a_data"),
+                PulseSent.new(:b_label, :b_name, "b_data")]]
     end
 
     test "compares element by element", %{actual: actual} do
@@ -105,9 +105,9 @@ defmodule TraceAssertionsTest do
 
   describe "assert_trace" do
     setup do
-      [actual: [PulseSent.new(:a_type, :a_name, "a_data"),
-                PulseSent.new(:b_type, :b_name, "b_data"),
-                PulseSent.new(:c_type, :c_name, "c_data")]]
+      [actual: [PulseSent.new(:a_label, :a_name, "a_data"),
+                PulseSent.new(:b_label, :b_name, "b_data"),
+                PulseSent.new(:c_label, :c_name, "c_data")]]
     end
 
     test "elements can be skipped", %{actual: actual} do

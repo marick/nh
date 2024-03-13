@@ -70,7 +70,7 @@ defmodule Variations do
   #   end
   # end
   
-  def ensure_ready(%{type: :circular_cluster} = cluster, started_processes_by_name) do
+  def ensure_ready(%{label: :circular_cluster} = cluster, started_processes_by_name) do
     case Map.has_key?(started_processes_by_name, cluster.name) do
       true ->
         started_processes_by_name
@@ -102,7 +102,7 @@ defmodule Variations do
     %{cluster | send_pulse_downstream: sender}
   end
 
-  def install_pulse_sender(%{type: :action_edge} = cluster, {_switchboard_pid, affordances_pid}) do
+  def install_pulse_sender(%{label: :action_edge} = cluster, {_switchboard_pid, affordances_pid}) do
     send_to_affordances_pid(cluster, affordances_pid)
   end
 
@@ -112,7 +112,7 @@ defmodule Variations do
 
   ####
 
-  def generic_pulse(%{type: :circular_cluster}, destination_pid, pulse_data) do
+  def generic_pulse(%{label: :circular_cluster}, destination_pid, pulse_data) do
     GenServer.cast(destination_pid, [handle_pulse: pulse_data])
   end
 
