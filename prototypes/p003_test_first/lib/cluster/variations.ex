@@ -7,50 +7,6 @@ defmodule Variations do
 
   @type process_map :: %{atom => pid}
 
-
-  
-  defprotocol Topology do
-    @spec ensure_ready(Topology.t, Cluster.Base.t, Variations.process_map) :: Variations.process_map
-    def ensure_ready(struct, cluster, started_processes)
-
-    # @spec generic_pulse(Cluster.Base.t, pid, any) :: no_return
-    # def generic_pulse(cluster, pid, pulse_data)
-  end
-
-  defmodule Topology.Circular do
-    defstruct [starting_pulses: 20]
-
-    def new(opts \\ []), do: struct(__MODULE__, opts)
-
-    defimpl Topology, for: __MODULE__ do
-      def ensure_ready(_struct, cluster, started_processes_by_name) do
-        case Map.has_key?(started_processes_by_name, cluster.name) do
-          true ->
-            started_processes_by_name
-          false ->
-            {:ok, pid} = GenServer.start(CircularCluster, cluster)
-            Process.monitor(pid)
-            Map.put(started_processes_by_name, cluster.name, pid)
-        end
-      end
-    end
-    
-  end
-
-  defmodule Topology.Linear do
-    defstruct [:dummy]
-
-    def new(opts \\ []), do: struct(__MODULE__, opts)
-
-    defimpl Topology, for: __MODULE__ do
-      def ensure_ready(_struct, _cluster, started_processes_by_name) do
-        started_processes_by_name
-      end
-    end
-  end
-
-  # ===
-
   defprotocol Propagation do
     @spec put_pid(Propagation.t, {pid, pid}) :: Propagation.t
     def put_pid(propagation, pid)
@@ -115,6 +71,63 @@ defmodule Variations do
     end
   end
 
+  
+  defprotocol Topology do
+    @spec ensure_ready(Topology.t, Cluster.Base.t, Variations.process_map) :: Variations.process_map
+    def ensure_ready(struct, cluster, started_processes)
+
+    @spec generic_pulse(struct, Cluster.Base.t, pid, any) :: no_return
+    def generic_pulse(struct, cluster, pid, pulse_data)
+  end
+
+  defmodule Topology.Circular do
+    defstruct [starting_pulses: 20]
+
+    def new(opts \\ []), do: struct(__MODULE__, opts)
+
+    defimpl Topology, for: __MODULE__ do
+      def ensure_ready(_struct, cluster, started_processes_by_name) do
+        case Map.has_key?(started_processes_by_name, cluster.name) do
+          true ->
+            started_processes_by_name
+          false ->
+            {:ok, pid} = GenServer.start(CircularCluster, cluster)
+            Process.monitor(pid)
+            Map.put(started_processes_by_name, cluster.name, pid)
+        end
+      end
+
+      def generic_pulse(_struct, _cluster, destination_pid, pulse_data) do
+        GenServer.cast(destination_pid, [handle_pulse: pulse_data])
+      end
+
+    end
+    
+  end
+
+  defmodule Topology.Linear do
+    defstruct [:dummy]
+
+    def new(opts \\ []), do: struct(__MODULE__, opts)
+
+    defimpl Topology, for: __MODULE__ do
+      def ensure_ready(_struct, _cluster, started_processes_by_name) do
+        started_processes_by_name
+      end
+
+      def generic_pulse(_struct, cluster, _destination_pid, pulse_data) do
+        Task.start(fn ->
+          outgoing_data = cluster.calc.(pulse_data)
+          Propagation.send_pulse(cluster.propagate, outgoing_data)
+        end)
+      end    
+      
+    end
+  end
+
+  # ===
+
+
   ##
 
   def send_to_affordances_pid(cluster, affordances_pid) do 
@@ -144,17 +157,4 @@ defmodule Variations do
   def install_pulse_sender(cluster, {switchboard_pid, _affordances_pid}) do
     send_to_internal_pid(cluster, switchboard_pid)
   end
-
-  ####
-
-  def generic_pulse(%{label: :circular_cluster}, destination_pid, pulse_data) do
-    GenServer.cast(destination_pid, [handle_pulse: pulse_data])
-  end
-
-  def generic_pulse(cluster, _destination_pid, pulse_data) do
-    Task.start(fn ->
-      outgoing_data = cluster.calc.(pulse_data)
-      Propagation.send_pulse(cluster.propagate, outgoing_data)
-    end)
-  end    
 end

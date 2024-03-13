@@ -99,7 +99,7 @@ defmodule AppAnimal.Neural.Switchboard do
         for name <- names do
           pid = mutable.started_circular_clusters[name]
           cluster = mutable.network[name]
-          AppAnimal.Cluster.Variations.generic_pulse(cluster, pid, pulse_data)
+          AppAnimal.Cluster.Variations.Topology.generic_pulse(cluster.topology, cluster, pid, pulse_data)
         end
       end
 
