@@ -6,7 +6,7 @@ defmodule AppAnimal.Neural.ActionEdgeTest do
     
     a =
       Network.trace([action_edge(:focus_on_new_paragraph)])
-      |> Network.trace([perception_edge(:paragraph_text), endpoint()])
+      |> Network.trace([perception_edge(:paragraph_text), to_test()])
       |> AppAnimal.enliven()
     
 

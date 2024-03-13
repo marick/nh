@@ -2,8 +2,9 @@ alias AppAnimal.Cluster
 
 defmodule Cluster.Make do
   use AppAnimal
-  alias AppAnimal.Cluster.Variations.Topology.{Circular, Linear}
-  alias AppAnimal.Cluster.Variations.Propagation.{Internal, External}
+  alias AppAnimal.Cluster.Variations.{Topology, Propagation}
+  alias Topology.{Circular, Linear}
+  alias Propagation.{Internal, External}
 
 
   # Circular clusters
@@ -84,14 +85,9 @@ defmodule Cluster.Make do
   
 
   def action_edge(name) do
-    handle_pulse = 
-      fn pulse_data, configuration ->
-        configuration.send_pulse_downstream.(carrying: {configuration.name, pulse_data})
-        :there_is_never_a_meaningful_return_value
-      end
     %Cluster.Base{name: name, label: :action_edge,
                   topology: Linear.new,
-                  propagate: External.new(Affordances, :note_action),
-                  handlers: %{handle_pulse: handle_pulse}}
+                  calc: & [{name, &1}],
+                  propagate: External.new(AppAnimal.Neural.Affordances, :note_action)}
   end
  end

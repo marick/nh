@@ -67,7 +67,7 @@ defmodule Variations do
 
     defimpl Propagation, for: __MODULE__ do
       def put_pid(struct, {_switchboard_pid, affordances_pid}) do
-        %{struct | affordances_pid: affordances_pid}
+        %{struct | pid: affordances_pid}
       end
       
       def send_pulse(struct, pulse_data) do
@@ -149,9 +149,10 @@ defmodule Variations do
     sender = fn carrying: {action_name, _action_data} ->
       Affordances.note_action(affordances_pid, action_name)
     end
-    %{cluster | send_pulse_downstream: sender,
-#                propagate: Propagation.External.new(Affordances, :note_action, affordances_pid)
-    }
+
+    cluster
+    |> Map.put(:send_pulse_downstream, sender)
+    |> Map.update!(:propagate, & Propagation.put_pid(&1, {:foo, affordances_pid}))
   end
 
   def send_to_internal_pid(cluster, switchboard_pid) do
@@ -180,7 +181,12 @@ defmodule Variations do
 
   def generic_pulse(cluster, _destination_pid, pulse_data) do
     Task.start(fn ->
-      cluster.handlers.handle_pulse.(pulse_data, cluster)
+      if cluster.handlers do 
+        cluster.handlers.handle_pulse.(pulse_data, cluster)
+      else
+        outgoing_data = cluster.calc.(pulse_data)
+        Propagation.send_pulse(cluster.propagate, outgoing_data)
+      end
     end)
   end    
 end
