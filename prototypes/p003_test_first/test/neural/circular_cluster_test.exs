@@ -6,8 +6,8 @@ defmodule AppAnimal.Neural.CircularClusterTest do
   describe "circular cluster handling: function version: basics" do 
     test "a transmission of pulses" do
 
-      given([Cluster.circular(:first,
-                              Cluster.one_pulse(after: & &1 + 1)),
+      given([circular(:first,
+                              one_pulse(after: & &1 + 1)),
              endpoint()])
       |> Switchboard.external_pulse(to: :first, carrying: 1)
       assert_test_receives(2)
@@ -26,9 +26,9 @@ defmodule AppAnimal.Neural.CircularClusterTest do
     
     test "succeeding pulses go to the same process" do
       switchboard_pid = 
-        given([Cluster.circular(:first,
+        given([circular(:first,
                                 empty_pids(),
-                                Cluster.one_pulse(after: accumulate_pids())),
+                                one_pulse(after: accumulate_pids())),
                endpoint()])
       
       Switchboard.external_pulse(switchboard_pid, to: :first, carrying: :nothing)
@@ -46,9 +46,9 @@ defmodule AppAnimal.Neural.CircularClusterTest do
 
     test "... however, processes 'age out'" do
       switchboard_pid =
-        [Cluster.circular(:first,
+        [circular(:first,
                           empty_pids(),
-                          Cluster.one_pulse(after: accumulate_pids()),
+                          one_pulse(after: accumulate_pids()),
                           starting_pulses: 2),
          endpoint()]
         |> AppAnimal.switchboard(pulse_rate: 1)
@@ -76,7 +76,7 @@ defmodule AppAnimal.Neural.CircularClusterTest do
         mutated
       end
     
-    first = Cluster.circular(:first,
+    first = circular(:first,
                              fn _configuration -> %{pids: [], count: 3} end,
                              calc)
 

@@ -1,6 +1,6 @@
 defmodule AppAnimal.Scenarios.SwitchParagraphTest do
   use ClusterCase, async: true
-  import Cluster
+  import AppAnimal.Cluster.Make
 
   setup do
     # Pieces

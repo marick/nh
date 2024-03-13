@@ -10,7 +10,6 @@ defmodule Cluster.Base do
     # Set first thing
     field :label, atom    # only for human readability
     field :name, atom
-    field :configuration, %{atom => any}
     
     # The main axes of variation
     field :topology, Cluster.Variations.Topology.t
@@ -25,15 +24,5 @@ defmodule Cluster.Base do
     field :starting_pulses, integer, default: 20
     field :send_pulse_downstream, atom | fun, default: :installed_by_switchboard
   end
-
-
-  
-  # defstruct [:name,
-  #            :handlers,
-  #            :receives_how,
-  #            :type,
-  #            downstream: [],
-  #            starting_pulses: 20,
-  #            send_pulse_downstream: :installed_by_switchboard]
 end
 

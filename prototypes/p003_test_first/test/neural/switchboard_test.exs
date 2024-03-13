@@ -2,7 +2,8 @@ defmodule AppAnimal.Neural.SwitchboardTest do
   use ClusterCase, async: true
   alias AppAnimal.Neural.ActivityLogger
   alias Neural.Switchboard, as: UT
-
+  alias AppAnimal.Cluster.Make
+  
   ## The switchboard is mostly tested via the different kinds of clusters.
 
   def given(trace_or_network), do: AppAnimal.switchboard(trace_or_network)
@@ -13,10 +14,10 @@ defmodule AppAnimal.Neural.SwitchboardTest do
               "prints log entries.")
     IO.puts("=== By doing so, I hope to catch cases where log printing breaks.")
 
-    trace = [Cluster.circular(:first,
+    trace = [Make.circular(:first,
                               constantly(%{}),
-                              Cluster.one_pulse(after: & &1+1)),
-             Cluster.linear(:second, Cluster.only_pulse(after: & &1+1)),
+                              Make.one_pulse(after: & &1+1)),
+             Make.linear(:second, Make.only_pulse(after: & &1+1)),
              endpoint()]
     a = AppAnimal.enliven(trace)
 

@@ -5,13 +5,13 @@ defmodule AppAnimal.Neural.AffordancesTest do
   def given(trace_or_network), do: AppAnimal.affordances(trace_or_network)
 
   test "a 'self-generated' affordance" do
-    given([Cluster.perception_edge(:big_paragraph_change), endpoint()])
+    given([perception_edge(:big_paragraph_change), endpoint()])
     |> UT.produce_this_affordance(big_paragraph_change: :no_data)
     assert_test_receives(:no_data)
   end
 
   test "programming a response to an affordance request" do
-    given([Cluster.perception_edge(:current_paragraph_text), endpoint()])
+    given([perception_edge(:current_paragraph_text), endpoint()])
     |> UT.script([
       response_to(:focus_on_paragraph, affords(current_paragraph_text: "para\n"))
     ])

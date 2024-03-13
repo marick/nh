@@ -1,5 +1,6 @@
-defmodule AppAnimal.Neural.Cluster do
-  alias AppAnimal.Neural.Cluster
+alias AppAnimal.Cluster
+
+defmodule Cluster.Make do
   use AppAnimal
 
 

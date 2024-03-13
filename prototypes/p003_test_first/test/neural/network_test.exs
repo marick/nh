@@ -5,7 +5,7 @@ defmodule AppAnimal.Neural.NetworkTest do
   def named(names) when is_list(names),
       do: Enum.map(names, &named/1)
   def named(name),
-      do: Cluster.circular(name, fn _, _ -> :irrelevant end)
+      do: circular(name, fn _, _ -> :irrelevant end)
 
   def downstreams(cluster_map) do
     Enum.reduce(cluster_map, %{}, fn {name, cluster}, acc ->

@@ -1,7 +1,7 @@
 defmodule ClusterCase do
   use AppAnimal
   alias AppAnimal.Neural
-  alias Neural.Cluster
+  alias Cluster.Make
   alias ExUnit.Assertions
 
   defmacro assert_test_receives(value, keys \\ [from: :endpoint]) do
@@ -12,7 +12,7 @@ defmodule ClusterCase do
   end
 
   def endpoint(name \\ :endpoint) do
-    Cluster.linear(name, mkfn__exit_to_test())
+    Make.linear(name, mkfn__exit_to_test())
   end
 
   private do
@@ -34,11 +34,11 @@ defmodule ClusterCase do
       alias Neural.Affordances
       alias Neural.Network
       alias Neural.ActivityLogger
-      alias Neural.Cluster
       import ClusterCase
       import AppAnimal.TraceAssertions
       use FlowAssertions
       import Affordances, only: [response_to: 2, affords: 1]
+      import Cluster.Make
     end
   end
 end

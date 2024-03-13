@@ -5,8 +5,8 @@ defmodule AppAnimal.Neural.ActionEdgeTest do
   test "action edges call into the affordances" do
     
     a =
-      Network.trace([Cluster.action_edge(:focus_on_new_paragraph)])
-      |> Network.trace([Cluster.perception_edge(:paragraph_text), endpoint()])
+      Network.trace([action_edge(:focus_on_new_paragraph)])
+      |> Network.trace([perception_edge(:paragraph_text), endpoint()])
       |> AppAnimal.enliven()
     
 
