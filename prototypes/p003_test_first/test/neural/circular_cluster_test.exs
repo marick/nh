@@ -71,7 +71,7 @@ defmodule AppAnimal.Neural.CircularClusterTest do
           %{mutable | pids: [self() | mutable.pids],
                       count: mutable.count - 1}
         if mutated.count >= 0 do
-          Cluster.Variations.Propagation.send_pulse(configuration.propagate, carrying: mutated.pids)
+          Cluster.PulseLogic.send_pulse(configuration.pulse_logic, carrying: mutated.pids)
         end
         mutated
       end

@@ -14,7 +14,7 @@ defmodule Cluster.Base do
     # The main axes of variation
     field :shape, Cluster.Shape.t
     field :calc, fun
-    field :propagate, atom | Cluster.Variations.Propagation.t, default: :installed_later
+    field :pulse_logic, atom | Cluster.PulseLogic.t, default: :installed_later
 
     # Set when compiled into a network
     field :downstream, [atom], default: []

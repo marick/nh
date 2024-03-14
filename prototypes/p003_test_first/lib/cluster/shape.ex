@@ -2,6 +2,8 @@ alias AppAnimal.Cluster
 alias Cluster.Shape
 
 defprotocol Shape do
+  @type process_map :: %{atom => pid}
+
   @spec ensure_ready(Shape.t, Cluster.Base.t, Variations.process_map) :: Variations.process_map
   def ensure_ready(struct, cluster, started_processes)
   
@@ -49,7 +51,7 @@ defmodule Shape.Linear do
 end
 
 defimpl Shape, for: Shape.Linear do
-  alias Cluster.Variations.Propagation
+  alias Cluster.PulseLogic
   
   def ensure_ready(_struct, _cluster, started_processes_by_name) do
     started_processes_by_name
@@ -58,7 +60,7 @@ defimpl Shape, for: Shape.Linear do
   def generic_pulse(_struct, cluster, _destination_pid, pulse_data) do
     Task.start(fn ->
       outgoing_data = cluster.calc.(pulse_data)
-      Propagation.send_pulse(cluster.propagate, outgoing_data)
+      PulseLogic.send_pulse(cluster.pulse_logic, outgoing_data)
     end)
   end    
 end

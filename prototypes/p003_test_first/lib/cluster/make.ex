@@ -2,9 +2,9 @@ alias AppAnimal.Cluster
 
 defmodule Cluster.Make do
   use AppAnimal
-  alias AppAnimal.Cluster.Variations.{Propagation}
   alias Cluster.Shape.{Circular, Linear}
-  alias Propagation.{Internal, External}
+  alias Cluster.PulseLogic
+  alias PulseLogic.{Internal, External}
 
 
   # Circular clusters
@@ -19,7 +19,7 @@ defmodule Cluster.Make do
       Keyword.merge(opts, label: :circular_cluster,
                           name: name,
                           shape: Circular.new(opts),
-                          propagate: Internal.new(from_name: name),
+                          pulse_logic: Internal.new(from_name: name),
                           handlers: handlers)
 
     struct(Cluster.Base, full_keyset)
@@ -53,7 +53,7 @@ defmodule Cluster.Make do
     %Cluster.Base{name: name, label: :linear_cluster,
                   shape: Linear.new,
                   calc: calc,
-                  propagate: Internal.new(from_name: name)
+                  pulse_logic: Internal.new(from_name: name)
      }
   end
 
@@ -69,6 +69,6 @@ defmodule Cluster.Make do
     %Cluster.Base{name: name, label: :action_edge,
                   shape: Linear.new,
                   calc: & [{name, &1}],
-                  propagate: External.new(AppAnimal.Neural.Affordances, :note_action)}
+                  pulse_logic: External.new(AppAnimal.Neural.Affordances, :note_action)}
   end
  end
