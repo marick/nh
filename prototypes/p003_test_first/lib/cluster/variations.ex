@@ -3,7 +3,7 @@ alias AppAnimal.Cluster.Variations
 
 defmodule Variations do
   use AppAnimal
-  alias AppAnimal.Neural.{CircularCluster, Affordances}
+  alias AppAnimal.Neural.{CircularCluster}
 
   @type process_map :: %{atom => pid}
 
@@ -131,12 +131,7 @@ defmodule Variations do
   ##
 
   def send_to_affordances_pid(cluster, affordances_pid) do 
-    sender = fn carrying: {action_name, _action_data} ->
-      Affordances.note_action(affordances_pid, action_name)
-    end
-
     cluster
-    |> Map.put(:send_pulse_downstream, sender)
     |> Map.update!(:propagate, & Propagation.put_pid(&1, {:foo, affordances_pid}))
   end
 
