@@ -9,6 +9,16 @@ defmodule Cluster.Make do
 
   # Circular clusters
 
+  def circular2(name, calc, opts \\ []) do
+    struct(Cluster.Base,
+           name: name,
+           label: :circular_cluster,
+           shape: Cluster.Shape.Circular.new(opts),
+           calc: calc,
+           pulse_logic: Cluster.PulseLogic.Internal.new(from_name: name)
+    )
+  end
+
   def circular(name, mutable_initializer, handle_pulse, opts \\ []) do
     handlers = %{
       pulse: handle_pulse,

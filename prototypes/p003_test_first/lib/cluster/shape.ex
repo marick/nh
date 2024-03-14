@@ -15,8 +15,7 @@ end
 
 
 defmodule Shape.Circular do
-  IO.inspect __MODULE__
-  defstruct [starting_pulses: 20]
+  defstruct [starting_pulses: 20, initial_value: %{}]
   
   def new(opts \\ []), do: struct(__MODULE__, opts)
 end
@@ -39,7 +38,6 @@ defimpl Shape, for: Shape.Circular do
     GenServer.cast(destination_pid, [handle_pulse: pulse_data])
   end
 end
-
 
 ## 
 
