@@ -1,8 +1,8 @@
 defmodule ClusterCase do
   use AppAnimal
   alias AppAnimal.Neural
-  alias Cluster.Base
-  alias Cluster.Variations.{Topology, Propagation}
+  alias Cluster.{Base, Shape}
+  alias Cluster.Variations.{Propagation}
   alias ExUnit.Assertions
 
   defmacro assert_test_receives(value, keys \\ [from: :endpoint]) do
@@ -22,7 +22,7 @@ defmodule ClusterCase do
     
     %Base{name: name,
           label: :test_endpoint,
-          topology: Topology.Linear.new,
+          shape: Shape.Linear.new,
           calc: filter,
           propagate: Propagation.Test.new(name, self())
   }

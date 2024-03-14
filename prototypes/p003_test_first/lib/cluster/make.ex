@@ -2,8 +2,8 @@ alias AppAnimal.Cluster
 
 defmodule Cluster.Make do
   use AppAnimal
-  alias AppAnimal.Cluster.Variations.{Topology, Propagation}
-  alias Topology.{Circular, Linear}
+  alias AppAnimal.Cluster.Variations.{Propagation}
+  alias Cluster.Shape.{Circular, Linear}
   alias Propagation.{Internal, External}
 
 
@@ -18,7 +18,7 @@ defmodule Cluster.Make do
     full_keyset =
       Keyword.merge(opts, label: :circular_cluster,
                           name: name,
-                          topology: Circular.new(opts),
+                          shape: Circular.new(opts),
                           propagate: Internal.new(from_name: name),
                           handlers: handlers)
 
@@ -51,7 +51,7 @@ defmodule Cluster.Make do
 
   def linear(name, calc) do
     %Cluster.Base{name: name, label: :linear_cluster,
-                  topology: Linear.new,
+                  shape: Linear.new,
                   calc: calc,
                   propagate: Internal.new(from_name: name)
      }
@@ -67,7 +67,7 @@ defmodule Cluster.Make do
 
   def action_edge(name) do
     %Cluster.Base{name: name, label: :action_edge,
-                  topology: Linear.new,
+                  shape: Linear.new,
                   calc: & [{name, &1}],
                   propagate: External.new(AppAnimal.Neural.Affordances, :note_action)}
   end

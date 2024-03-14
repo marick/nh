@@ -12,7 +12,7 @@ defmodule Cluster.Base do
     field :name, atom
     
     # The main axes of variation
-    field :topology, Cluster.Variations.Topology.t
+    field :shape, Cluster.Shape.t
     field :calc, fun
     field :propagate, atom | Cluster.Variations.Propagation.t, default: :installed_later
 

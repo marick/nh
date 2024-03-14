@@ -2,6 +2,7 @@ defmodule AppAnimal.Neural.Switchboard do
   use AppAnimal
   use AppAnimal.GenServer
   alias Neural.ActivityLogger
+  alias AppAnimal.Cluster
 
   defstruct [:network,
              started_circular_clusters: %{},
@@ -87,7 +88,7 @@ defmodule AppAnimal.Neural.Switchboard do
       def ensure_clusters_are_ready(mutable, names) do
         ensure_one_name = fn name, acc ->
           cluster = mutable.network[name]
-          AppAnimal.Cluster.Variations.Topology.ensure_ready(cluster.topology, cluster, acc) 
+          Cluster.Shape.ensure_ready(cluster.shape, cluster, acc) 
         end
         
         names
@@ -99,7 +100,7 @@ defmodule AppAnimal.Neural.Switchboard do
         for name <- names do
           pid = mutable.started_circular_clusters[name]
           cluster = mutable.network[name]
-          AppAnimal.Cluster.Variations.Topology.generic_pulse(cluster.topology, cluster, pid, pulse_data)
+          Cluster.Shape.generic_pulse(cluster.shape, cluster, pid, pulse_data)
         end
       end
 

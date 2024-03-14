@@ -28,7 +28,7 @@ defmodule CircularCluster do
   
   def init(configuration) do
     creating_mutable(configuration, fn ->
-      %{reinforcement_strength: configuration.topology.starting_pulses}
+      %{reinforcement_strength: configuration.shape.starting_pulses}
       |> Map.merge(configuration.handlers.initialize.(configuration))
       |> ok()
     end)
