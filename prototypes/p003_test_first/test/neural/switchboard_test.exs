@@ -28,4 +28,29 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     assert_fields(second, name: :second,
                           pulse_data: 2)
   end
+
+  test "a circular trace" do
+    calc = 
+      fn _pulse, mutable ->
+        mutated = 
+          %{mutable | pids: [self() | mutable.pids],
+                      count: mutable.count - 1}
+        if mutated.count >= 0,
+           do: pulse(mutated.pids, mutated),
+           else: no_pulse(mutated)
+      end
+    
+    first = circular2(:first, calc, initial_value: %{pids: [], count: 3})
+    
+    network = 
+      Network.trace([first, first])
+      |> Network.extend(at: :first, with: [to_test()])
+    
+    given(network)
+    |> Switchboard.external_pulse(to: :first, carrying: :nothing)
+    
+    assert_test_receives([pid])
+    assert_test_receives([^pid, ^pid])
+    assert_test_receives([^pid, ^pid, ^pid])
+  end
 end
