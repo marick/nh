@@ -1,13 +1,20 @@
 defmodule AppAnimal.Neural.Switchboard do
   use AppAnimal
   use AppAnimal.GenServer
+  use TypedStruct
   alias Neural.ActivityLogger
   alias AppAnimal.Cluster
 
-  defstruct [:network,
-             started_circular_clusters: %{},
-             pulse_rate: 100,
-             logger_pid: ActivityLogger.start_link |> okval]
+  @type process_map :: %{atom => pid}
+
+  typedstruct do
+    plugin TypedStructLens, prefix: :_
+
+    field :network, %{atom => Cluster.Base.t}
+    field :started_circular_clusters, process_map, default: %{}
+    field :pulse_rate, integer, default: 100
+    field :logger_pid, ActivityLogger.t, default: ActivityLogger.start_link |> okval
+  end
 
   runs_in_sender do
     def start_link(%__MODULE__{} = state) do
@@ -45,8 +52,9 @@ defmodule AppAnimal.Neural.Switchboard do
     @impl GenServer
     def handle_call({:individualize_pulses, switchboard_pid, affordances_pid},
                     _from, mutable) do
-      add_individualized_pulse = fn cluster -> 
-        AppAnimal.Cluster.Variations.install_pulse_sender(cluster, {switchboard_pid, affordances_pid})
+      add_individualized_pulse = fn cluster ->
+        cluster
+        |> Map.update!(:pulse_logic, & Cluster.PulseLogic.put_pid(&1, {switchboard_pid, affordances_pid}))
       end
 
       mutable
