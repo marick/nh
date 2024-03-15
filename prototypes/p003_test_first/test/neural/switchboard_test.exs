@@ -13,7 +13,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
               "prints log entries.")
     IO.puts("=== By doing so, I hope to catch cases where log printing breaks.")
 
-    trace = [Make.circular2(:first, & &1+1),
+    trace = [Make.circular(:first, & &1+1),
              Make.linear(:second, & &1+1),
              to_test()]
     a = AppAnimal.enliven(trace)
@@ -40,7 +40,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
            else: no_pulse(mutated)
       end
     
-    first = circular2(:first, calc, initial_value: %{pids: [], count: 3})
+    first = circular(:first, calc, initial_value: %{pids: [], count: 3})
     
     network = 
       Network.trace([first, first])

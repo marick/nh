@@ -8,7 +8,7 @@ defmodule Cluster.CircularProcessTest do
   describe "initialization" do 
     test "with default starting value" do
 
-      cluster = Make.circular2(:example, & &1+1)
+      cluster = Make.circular(:example, & &1+1)
       state = UT.State.from_cluster(cluster)
 
       state
@@ -24,7 +24,7 @@ defmodule Cluster.CircularProcessTest do
 
 
     test "with a given starting value" do
-      Make.circular2(:example, & &1+1, initial_value: 777)
+      Make.circular(:example, & &1+1, initial_value: 777)
       |> UT.State.from_cluster
       |> assert_field(previously: 777)
     end
@@ -32,7 +32,7 @@ defmodule Cluster.CircularProcessTest do
   end
 
   def with_calc(calc, opts \\ []) do
-    cluster = Make.circular2(:example, calc, opts)
+    cluster = Make.circular(:example, calc, opts)
     UT.State.from_cluster(cluster)
   end    
 
@@ -108,7 +108,7 @@ defmodule Cluster.CircularProcessTest do
 
   describe "counting down via weaken" do
     test "an ordinary call to weaken" do
-      state = Make.circular2(:example, & &1+1) |> UT.State.from_cluster
+      state = Make.circular(:example, & &1+1) |> UT.State.from_cluster
             starting_strength = lens_one!(state, :_current_strength)
       assert starting_strength == lens_one!(state, :_starting_strength)
       assert starting_strength > 2
@@ -120,7 +120,7 @@ defmodule Cluster.CircularProcessTest do
     end
     
     test "decreasing down to zero" do
-      state = Make.circular2(:example, & &1+1) |> UT.State.from_cluster
+      state = Make.circular(:example, & &1+1) |> UT.State.from_cluster
       starting_strength = lens_one!(state, :_current_strength)
 
       assert {:stop, :normal, next_state} = UT.handle_cast([weaken: starting_strength], state)
