@@ -10,7 +10,7 @@ defmodule AppAnimal.Neural.Switchboard do
   typedstruct do
     plugin TypedStructLens, prefix: :_
 
-    field :network, %{atom => Cluster.Base.t}
+    field :network, %{atom => Cluster.t}
     field :started_circular_clusters, process_map, default: %{}
     field :pulse_rate, integer, default: 100
     field :logger_pid, ActivityLogger.t, default: ActivityLogger.start_link |> okval

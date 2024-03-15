@@ -3,10 +3,10 @@ alias Cluster.Shape
 alias AppAnimal.Switchboard
 
 defprotocol Shape do
-  @spec ensure_ready(Shape.t, Cluster.Base.t, Switchboard.process_map) :: Switchboard.process_map
+  @spec ensure_ready(Shape.t, Cluster.t, Switchboard.process_map) :: Switchboard.process_map
   def ensure_ready(struct, cluster, started_processes)
   
-  @spec accept_pulse(struct, Cluster.Base.t, pid, any) :: no_return
+  @spec accept_pulse(struct, Cluster.t, pid, any) :: no_return
     def accept_pulse(struct, cluster, pid, pulse_data)
 end
 

@@ -10,7 +10,7 @@ defmodule Cluster.Make do
   # Circular clusters
 
   def circular(name, calc, opts \\ []) do
-    struct(Cluster.Base,
+    struct(Cluster,
            name: name,
            label: :circular_cluster,
            shape: Circular.new(opts),
@@ -34,11 +34,11 @@ defmodule Cluster.Make do
   # Linear Clusters
 
   def linear(name, calc) do
-    %Cluster.Base{name: name, label: :linear_cluster,
-                  shape: Linear.new,
-                  calc: calc,
-                  pulse_logic: Internal.new(from_name: name)
-     }
+    %Cluster{name: name, label: :linear_cluster,
+             shape: Linear.new,
+             calc: calc,
+             pulse_logic: Internal.new(from_name: name)
+    }
   end
 
   ## Edges
@@ -50,9 +50,9 @@ defmodule Cluster.Make do
   
 
   def action_edge(name) do
-    %Cluster.Base{name: name, label: :action_edge,
-                  shape: Linear.new,
-                  calc: & [{name, &1}],
-                  pulse_logic: External.new(AppAnimal.Neural.Affordances, :note_action)}
+    %Cluster{name: name, label: :action_edge,
+             shape: Linear.new,
+             calc: & [{name, &1}],
+             pulse_logic: External.new(AppAnimal.Neural.Affordances, :note_action)}
   end
  end

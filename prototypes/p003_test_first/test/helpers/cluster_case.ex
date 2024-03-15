@@ -1,8 +1,7 @@
 defmodule ClusterCase do
   use AppAnimal
-  alias AppAnimal.Neural
-  alias Cluster.{Base, Shape}
-  alias Cluster.PulseLogic
+  alias AppAnimal.{Neural, Cluster}
+  alias Cluster.{Shape, PulseLogic}
   alias ExUnit.Assertions
 
   defmacro assert_test_receives(value, keys \\ [from: :endpoint]) do
@@ -20,12 +19,12 @@ defmodule ClusterCase do
         pulse -> pulse
       end
     
-    %Base{name: name,
-          label: :test_endpoint,
-          shape: Shape.Linear.new,
-          calc: filter,
-          pulse_logic: PulseLogic.Test.new(name, self())
-  }
+    %Cluster{name: name,
+             label: :test_endpoint,
+             shape: Shape.Linear.new,
+             calc: filter,
+             pulse_logic: PulseLogic.Test.new(name, self())
+    }
   end
 
   defmacro __using__(keys) do

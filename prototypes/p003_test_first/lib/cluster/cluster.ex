@@ -1,7 +1,7 @@
 alias AppAnimal.Cluster
 
 
-defmodule Cluster.Base do
+defmodule Cluster do
   use TypedStruct
 
   typedstruct do
