@@ -5,7 +5,7 @@ defmodule Cluster.Base do
   use TypedStruct
 
   typedstruct do
-    plugin TypedStructLens
+    plugin TypedStructLens, prefix: :_
 
     # Set first thing
     field :label, atom    # only for human readability

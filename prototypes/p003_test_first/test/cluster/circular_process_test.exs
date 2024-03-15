@@ -91,9 +91,29 @@ defmodule Cluster.CircularProcessTest do
       assert_same_map(next_state, state,
                       except: [previously: :next_value])
 
-
       assert_test_receives(2, from: :test)
+    end
+  end
+
+  describe "counting down via weaken" do
+    test "an ordinary call to weaken" do
+      state = Make.circular2(:example, & &1+1) |> UT.State.from_cluster
+            starting_strength = lens_one!(state, :_current_strength)
+assert starting_strength == lens_one!(state, :_starting_strength)
+      assert starting_strength > 2
       
+      assert {:noreply, next_state} = UT.handle_cast([weaken: 2], state)
+      
+      assert lens_one!(next_state, :_current_strength) ==
+               lens_one!(state, :_current_strength) - 2
+    end
+    
+    test "decreasing down to zero" do
+      state = Make.circular2(:example, & &1+1) |> UT.State.from_cluster
+      starting_strength = lens_one!(state, :_current_strength)
+
+      assert {:stop, :normal, next_state} = UT.handle_cast([weaken: starting_strength], state)
+      assert lens_one!(next_state, :_current_strength) == 0
     end
   end
 end
