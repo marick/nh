@@ -1,10 +1,9 @@
 alias AppAnimal.Cluster
 alias Cluster.Shape
+alias AppAnimal.Switchboard
 
 defprotocol Shape do
-  @type process_map :: %{atom => pid}
-
-  @spec ensure_ready(Shape.t, Cluster.Base.t, Variations.process_map) :: Variations.process_map
+  @spec ensure_ready(Shape.t, Cluster.Base.t, Switchboard.process_map) :: Switchboard.process_map
   def ensure_ready(struct, cluster, started_processes)
   
   @spec accept_pulse(struct, Cluster.Base.t, pid, any) :: no_return
