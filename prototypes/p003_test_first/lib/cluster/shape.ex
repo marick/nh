@@ -14,7 +14,15 @@ end
 
 
 defmodule Shape.Circular do
-  defstruct [starting_pulses: 20, initial_value: %{}]
+  use TypedStruct
+
+  typedstruct do
+    plugin TypedStructLens, prefix: :_
+
+    field :starting_pulses, integer, default: 20
+    field :initial_value, any, default: %{}
+    field :pid, pid
+  end
   
   def new(opts \\ []), do: struct(__MODULE__, opts)
 end
