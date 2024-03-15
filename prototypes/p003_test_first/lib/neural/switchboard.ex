@@ -63,7 +63,7 @@ defmodule AppAnimal.Neural.Switchboard do
     end
 
     def handle_cast({:distribute_downstream, from: source_name, carrying: pulse_data}, mutable) do
-      source = mutable.network[source_name]
+      source = mutable.network[source_name] # |> IO.inspect
       destination_names = source.downstream
       ActivityLogger.log_pulse_sent(mutable.logger_pid, source.label, source.name, pulse_data)
       handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, mutable)
@@ -100,7 +100,7 @@ defmodule AppAnimal.Neural.Switchboard do
         for name <- names do
           pid = mutable.started_circular_clusters[name]
           cluster = mutable.network[name]
-          Cluster.Shape.generic_pulse(cluster.shape, cluster, pid, pulse_data)
+          Cluster.Shape.accept_pulse(cluster.shape, cluster, pid, pulse_data)
         end
       end
 

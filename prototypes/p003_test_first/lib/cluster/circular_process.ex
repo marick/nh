@@ -60,8 +60,11 @@ defmodule CircularProcess do
 
   def handle_cast([handle_pulse: small_data], state) do
     case run_calculation(state, small_data) do
-      {:ok, outgoing_pulse_data, next_previously} ->
+      {:pulse, outgoing_pulse_data, next_previously} ->
         Cluster.PulseLogic.send_pulse(state.pulse_logic, outgoing_pulse_data)
+        Map.put(state, :previously, next_previously)
+        |> continue
+      {:no_pulse, next_previously} -> 
         Map.put(state, :previously, next_previously)
         |> continue
     end
@@ -76,9 +79,6 @@ defmodule CircularProcess do
        else: continue(new_state)
   end
 
-
-  
-
   private do
     def run_calculation(%State{} = mutable, pulse_data) do
       result =
@@ -89,16 +89,19 @@ defmodule CircularProcess do
             f.(pulse_data, mutable.previously)
         end
       case result do
-        {:ok, _, _} = verbatim ->
+        {:pulse, _, _} = verbatim ->
+          verbatim
+        {:no_pulse, _} = verbatim ->
           verbatim
         _ -> 
-          {:ok, result, mutable.previously}
+          {:pulse, result, mutable.previously}
       end
     end
 
-    def update_state(state, {:ok, _outgoing_value}), do: state
+    # Not sure this one is ever really used
+    def update_state(state, {:pulse, _outgoing_value}), do: state
 
-    def update_state(state, {:ok, _outgoing_value, next_value_for_previously}),
+    def update_state(state, {:pulse, _outgoing_value, next_value_for_previously}),
         do: Map.put(state, :previously, next_value_for_previously)
   end
 end

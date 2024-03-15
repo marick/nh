@@ -19,6 +19,17 @@ defmodule Cluster.Make do
     )
   end
 
+  def pulse_and_save(f) when is_function(f, 2) do
+    fn pulse, mutable ->
+      mutated = f.(pulse, mutable)
+      pulse(mutated, mutated)
+    end
+  end
+
+  def pulse(pulse_data, mutated), do: {:pulse, pulse_data, mutated}
+  def no_pulse(mutated), do: {:no_pulse, mutated}
+  def no_pulse(), do: {:no_pulse}
+
   def circular(name, mutable_initializer, handle_pulse, opts \\ []) do
     handlers = %{
       pulse: handle_pulse,

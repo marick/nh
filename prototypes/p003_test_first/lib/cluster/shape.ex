@@ -7,8 +7,8 @@ defprotocol Shape do
   @spec ensure_ready(Shape.t, Cluster.Base.t, Variations.process_map) :: Variations.process_map
   def ensure_ready(struct, cluster, started_processes)
   
-  @spec generic_pulse(struct, Cluster.Base.t, pid, any) :: no_return
-    def generic_pulse(struct, cluster, pid, pulse_data)
+  @spec accept_pulse(struct, Cluster.Base.t, pid, any) :: no_return
+    def accept_pulse(struct, cluster, pid, pulse_data)
 end
 
 ##
@@ -21,20 +21,21 @@ defmodule Shape.Circular do
 end
 
 defimpl Shape, for: Shape.Circular do
-  alias AppAnimal.Neural.CircularCluster
+  alias AppAnimal.Cluster.CircularProcess
 
   def ensure_ready(_struct, cluster, started_processes_by_name) do
     case Map.has_key?(started_processes_by_name, cluster.name) do
       true ->
         started_processes_by_name
       false ->
-        {:ok, pid} = GenServer.start(CircularCluster, cluster)
+        starting_state = CircularProcess.State.from_cluster(cluster) # |> IO.inspect
+        {:ok, pid} = GenServer.start(CircularProcess, starting_state) # |> IO.inspect
         Process.monitor(pid)
         Map.put(started_processes_by_name, cluster.name, pid)
     end
   end
   
-  def generic_pulse(_struct, _cluster, destination_pid, pulse_data) do
+  def accept_pulse(_struct, _cluster, destination_pid, pulse_data) do
     GenServer.cast(destination_pid, [handle_pulse: pulse_data])
   end
 end
@@ -54,8 +55,8 @@ defimpl Shape, for: Shape.Linear do
   def ensure_ready(_struct, _cluster, started_processes_by_name) do
     started_processes_by_name
   end
-  
-  def generic_pulse(_struct, cluster, _destination_pid, pulse_data) do
+
+  def accept_pulse(_struct, cluster, _destination_pid, pulse_data) do
     Task.start(fn ->
       outgoing_data = cluster.calc.(pulse_data)
       PulseLogic.send_pulse(cluster.pulse_logic, outgoing_data)
