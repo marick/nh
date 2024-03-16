@@ -39,7 +39,7 @@ defmodule Cluster do
         starting_state = CircularProcess.State.from_cluster(cluster)
         {:ok, new_pid} = GenServer.start(CircularProcess, starting_state)
         Process.monitor(new_pid)
-        lens_put(cluster, :_pid, new_pid)
+        deeply_put(cluster, :_pid, new_pid)
       pid when is_pid(pid) ->
         cluster
     end
@@ -50,7 +50,7 @@ defmodule Cluster do
   end
 
   def unready(%{shape: %Cluster.Shape.Circular{}} = cluster) do
-    lens_put(cluster, :_pid, nil)
+    deeply_put(cluster, :_pid, nil)
   end
 end
 

@@ -72,9 +72,9 @@ defmodule CircularProcess do
 
 
   def handle_cast([weaken: n], state) do
-    new_state = lens_update(state, :_current_strength, & &1-n)
+    new_state = deeply_map(state, :_current_strength, & &1-n)
 
-    if lens_one!(new_state, :_current_strength) <= 0,
+    if deeply_get_only(new_state, :_current_strength) <= 0,
        do: stop(new_state),
        else: continue(new_state)
   end
