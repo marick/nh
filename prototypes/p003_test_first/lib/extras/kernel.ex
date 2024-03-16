@@ -5,20 +5,26 @@ defmodule AppAnimal.Extras.Kernel do
   
   def pi([{tag, value}]), do: IO.puts "#{tag}: #{inspect value}"
 
-  def lens_update(struct, lens_name, f) do
-    lens = lookup_lens(struct, lens_name)
-    update_in(struct, [lens], f)
-  end
 
-  def lens_put(struct, lens_name, value) do
-    lens = lookup_lens(struct, lens_name)
-    put_in(struct, [lens], value)
-  end
+  def deeply_put(struct, lens_name, value) when is_atom(lens_name),
+      do: deeply_put(struct, lookup_lens(struct, lens_name), value)
+  def deeply_put(struct, lens, value),
+      do: Lens.put(lens, struct, value)
 
-  def lens_one!(struct, lens_name) do
-    lens = lookup_lens(struct, lens_name)
-    Lens.one!(lens, struct)
-  end
+  def deeply_get_only(struct, lens_name) when is_atom(lens_name),
+      do: deeply_get_only(struct, lookup_lens(struct, lens_name))
+  def deeply_get_only(struct, lens),
+      do: Lens.one!(lens, struct)
+
+  def deeply_get_all(struct, lens_name) when is_atom(lens_name),
+      do: deeply_get_all(struct, lookup_lens(struct, lens_name))
+  def deeply_get_all(struct, lens),
+      do: Lens.to_list(lens, struct)
+
+  def deeply_map(struct, lens_name, f) when is_atom(lens_name),
+      do: deeply_map(struct, lookup_lens(struct, lens_name), f)
+  def deeply_map(struct, lens, f),
+      do: Lens.map(lens, struct, f)
 
   private do
     def lookup_lens(struct, lens_name), do: apply(struct.__struct__, lens_name, [])
