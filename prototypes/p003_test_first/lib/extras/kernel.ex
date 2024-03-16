@@ -26,6 +26,11 @@ defmodule AppAnimal.Extras.Kernel do
   def deeply_map(struct, lens, f),
       do: Lens.map(lens, struct, f)
 
+  def deeply_side_effect(struct, lens_name, f) when is_atom(lens_name),
+      do: deeply_side_effect(struct, lookup_lens(struct, lens_name), f)
+  def deeply_side_effect(struct, lens, f),
+      do: Lens.each(lens, struct, f)
+
   private do
     def lookup_lens(struct, lens_name), do: apply(struct.__struct__, lens_name, [])
   end
