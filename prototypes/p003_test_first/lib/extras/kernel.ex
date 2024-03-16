@@ -10,6 +10,11 @@ defmodule AppAnimal.Extras.Kernel do
     update_in(struct, [lens], f)
   end
 
+  def lens_put(struct, lens_name, value) do
+    lens = lookup_lens(struct, lens_name)
+    put_in(struct, [lens], value)
+  end
+
   def lens_one!(struct, lens_name) do
     lens = lookup_lens(struct, lens_name)
     Lens.one!(lens, struct)

@@ -41,7 +41,7 @@ defimpl Shape, for: Shape.Circular do
         Map.put(started_processes_by_name, cluster.name, pid)
     end
   end
-  
+
   def accept_pulse(_struct, _cluster, destination_pid, pulse_data) do
     GenServer.cast(destination_pid, [handle_pulse: pulse_data])
   end
