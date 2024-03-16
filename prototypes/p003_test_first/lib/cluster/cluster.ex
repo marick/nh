@@ -28,11 +28,16 @@ defmodule Cluster do
 
   def _pid(), do: Lens.seq(_shape(), Cluster.Shape.Circular._pid())
 
+
+  # I could push the polymorphism down into the Cluster.Shape protocol, but this
+  # is really a cluster-wide behavior, given that the data to initialize the
+  # new process is collected from this entire cluster. 
+
   def ensure_ready(%{shape: %Cluster.Shape.Circular{}} = cluster) do
     case cluster.shape.pid do
       nil -> 
-        starting_state = CircularProcess.State.from_cluster(cluster) # |> IO.inspect
-        {:ok, new_pid} = GenServer.start(CircularProcess, starting_state) # |> IO.inspect
+        starting_state = CircularProcess.State.from_cluster(cluster)
+        {:ok, new_pid} = GenServer.start(CircularProcess, starting_state)
         Process.monitor(new_pid)
         lens_put(cluster, :_pid, new_pid)
       pid when is_pid(pid) ->
