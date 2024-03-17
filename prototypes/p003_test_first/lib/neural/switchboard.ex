@@ -81,7 +81,7 @@ defmodule AppAnimal.Neural.Switchboard do
 
     @impl GenServer
     def handle_info(:weaken_all_active, mutable) do
-      for {_name, pid} <- mutable.started_circular_clusters do
+      for {_name, pid} <- started_circular_clusters(mutable) do
         GenServer.cast(pid, [weaken: 1])
       end
       schedule_weakening(mutable.pulse_rate)
@@ -90,11 +90,20 @@ defmodule AppAnimal.Neural.Switchboard do
 
     def handle_info({:DOWN, _, :process, pid, :normal}, mutable) do
       mutable
-      |> Map2.reject_value_within(:started_circular_clusters, pid)
+      |> unstart_circular_cluster(pid)
       |> continue
     end
     
     private do
+      def started_circular_clusters(mutable) do
+        mutable.started_circular_clusters
+      end
+
+      def unstart_circular_cluster(mutable, pid) do
+        mutable 
+        |> Map2.reject_value_within(:started_circular_clusters, pid)        
+      end
+      
       def ensure_clusters_are_ready(mutable, names) do
         ensure_one_name = fn name, acc ->
           cluster = mutable.network[name]
@@ -102,13 +111,13 @@ defmodule AppAnimal.Neural.Switchboard do
         end
         
         names
-        |> Enum.reduce(mutable.started_circular_clusters, ensure_one_name)
+        |> Enum.reduce(started_circular_clusters(mutable), ensure_one_name)
         |> then(& put_in(mutable.started_circular_clusters, &1))
       end
 
       def send_pulse(pulse_data, names, mutable) do
         for name <- names do
-          pid = mutable.started_circular_clusters[name]
+          pid = started_circular_clusters(mutable)[name]
           cluster = mutable.network[name]
           Cluster.Shape.accept_pulse(cluster.shape, cluster, pid, pulse_data)
         end
