@@ -6,8 +6,6 @@ defmodule AppAnimal.Neural.SwitchboardTest do
   
   ## The switchboard is mostly tested via the different kinds of clusters.
 
-  def given(trace_or_network), do: AppAnimal.switchboard(trace_or_network)
-
   test "the switchboard has a log" do
     IO.puts("=== #{Pretty.Module.minimal(__MODULE__)} (around line #{__ENV__.line}) " <>
               "prints log entries.")
@@ -28,6 +26,8 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     assert_fields(second, name: :second,
                           pulse_data: 2)
   end
+
+  def given(trace_or_network), do: AppAnimal.switchboard(trace_or_network)
 
   test "a circular trace" do
     calc = 

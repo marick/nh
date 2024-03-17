@@ -16,8 +16,6 @@ defmodule AppAnimal.Neural.Switchboard do
     field :logger_pid, ActivityLogger.t, default: ActivityLogger.start_link |> okval
   end
 
-  def _clusters_named(names), do: _network() |> Lens.keys(names)
-
   runs_in_sender do
     def start_link(%__MODULE__{} = state) do
       GenServer.start_link(__MODULE__, state)
