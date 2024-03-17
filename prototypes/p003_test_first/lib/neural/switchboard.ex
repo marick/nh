@@ -103,14 +103,17 @@ defmodule AppAnimal.Neural.Switchboard do
       end
       
       def ensure_clusters_are_ready(mutable, names) do
-        ensure_one_name = fn name, acc ->
-          cluster = mutable.network[name]
-          Cluster.Shape.ensure_ready(cluster.shape, cluster, acc) 
-        end
-        
-        names
-        |> Enum.reduce(started_circular_clusters(mutable), ensure_one_name)
-        |> then(& put_in(mutable.started_circular_clusters, &1))
+        lens = _network() |> Lens.keys!(names) |> Lens.filter(&Cluster.can_be_active?/1)
+
+        startable = deeply_get_all(mutable, lens)
+        unstarted = Enum.reject(startable, & &1.name in Map.keys(mutable.started_circular_clusters))
+        now_started =
+          for cluster <- unstarted, into: %{} do
+            Cluster.activate(cluster)
+          end
+
+        all_started = Map.merge(mutable.started_circular_clusters, now_started)
+        %{mutable | started_circular_clusters: all_started}
       end
 
       def send_pulse(pulse_data, names, mutable) do

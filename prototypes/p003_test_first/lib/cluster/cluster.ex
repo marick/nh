@@ -24,6 +24,17 @@ defmodule Cluster do
     field :handlers, %{atom => fun}
     field :send_pulse_downstream, atom | fun, default: :installed_by_switchboard
   end
+
+
+  def can_be_active?(struct), do: Cluster.Shape.can_be_active?(struct.shape)
+
+  def activate(struct) do
+    starting_state = Cluster.CircularProcess.State.from_cluster(struct)
+    {:ok, pid} = GenServer.start(Cluster.CircularProcess, starting_state)
+    Process.monitor(pid)
+    {struct.name, pid}
+  end
+
 end
 
 
