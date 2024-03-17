@@ -19,10 +19,6 @@ defmodule Cluster do
 
     # Set when compiled into a network
     field :downstream, [atom], default: []
-
-    ### These are to be gotten rid of
-    field :handlers, %{atom => fun}
-    field :send_pulse_downstream, atom | fun, default: :installed_by_switchboard
   end
 
 
