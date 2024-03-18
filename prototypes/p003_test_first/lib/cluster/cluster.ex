@@ -4,6 +4,7 @@ alias AppAnimal.Cluster
 defmodule Cluster do
   use AppAnimal
   use TypedStruct
+  import Lens.Macros
 
   typedstruct do
     plugin TypedStructLens, prefix: :_
@@ -23,6 +24,7 @@ defmodule Cluster do
 
 
   def can_be_active?(struct), do: Cluster.Shape.can_be_active?(struct.shape)
+  deflens l_never_active(), do: Lens.filter(& can_be_active?(&1) == false)
 
   def activate(struct) do
     starting_state = Cluster.CircularProcess.State.from_cluster(struct)

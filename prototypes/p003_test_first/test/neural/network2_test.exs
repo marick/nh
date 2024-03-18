@@ -86,6 +86,59 @@ defmodule AppAnimal.Neural.Network2Test do
     end
   end
 
+  describe "handling of active clusters" do
+    setup do
+      [network: UT.trace([linear(:one_shot), circular(:inactive), circular(:active)])]
+    end
+
+    test "originally nothing is active", %{network: network} do 
+      assert UT.active_names(network) == []
+      assert UT.active_pids(network) == []
+      assert UT.active_clusters(network) == []
+    end
+
+    test "effect of one active cluster", %{network: original} do
+      network = put_in(original.active, %{active: "some pid"})
+
+      assert UT.active_names(network) == [:active]
+      assert UT.active_pids(network) == ["some pid"]
+      assert UT.active_clusters(network) == [circular(:active)]
+    end
+
+    test "determining which of a set of names should be ensured active", %{network: network} do
+      assert UT.needs_to_be_started(network, [:one_shot]) == []
+
+      
+      assert [%Cluster{name: :inactive}]
+             = UT.needs_to_be_started(network, [:one_shot, :inactive])
+
+      # After an activation (faked here) there's no need to activate again
+      assert [%Cluster{name: :inactive}] = 
+               network
+               |> Map.put(:active, %{active: "pid"})
+               |> UT.needs_to_be_started([:one_shot, :inactive, :active])
+    end
+
+    test "let's do activation for real", %{network: original} do
+      network = UT.activate(original, [:active])
+      
+      assert UT.active_names(network) == [:active]
+      assert UT.active_clusters(network) == [circular(:active)]
+ 
+      [pid] = UT.active_pids(network)
+      assert is_pid(pid)
+    end
+
+    test "dropping active pids", %{network: original} do
+      network = UT.activate(original, [:active])
+      assert [pid] = UT.active_pids(network)
+
+      network
+      |> UT.drop_active_pid(pid)
+      |> UT.active_pids()
+      |> assert_equals([])
+    end
+  end
 
 
   describe "helpers" do 

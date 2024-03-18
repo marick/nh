@@ -15,7 +15,56 @@ defmodule AppAnimal.Neural.Network2 do
     _cluster(name) |> Lens.key!(:downstream)
   end
 
-  
+  # Getters
+
+  def active_names(network), do: Map.keys(network.active)
+  def active_pids(network), do: Map.values(network.active)
+
+  def active_clusters(network) do
+    active_names(network)
+    |> Enum.map(& network.clusters[&1])
+  end
+
+  # Working with clusters
+
+  def activate(network, names) do
+    to_start = needs_to_be_started(network, names)
+    now_started =
+      for cluster <- to_start, into: %{} do
+        Cluster.activate(cluster)
+      end
+    deeply_map(network, :_active, & Map.merge(&1, now_started))
+  end
+
+  def drop_active_pid(network, pid) do
+    actives = network.active
+    
+    [{name, _pid}] = 
+      actives
+      |> Enum.filter(fn {_name, value} -> value == pid end)
+
+
+    %{network | active: Map.drop(actives, [name])}
+  end
+
+
+  private do 
+    def needs_to_be_started(network, names) do
+      l_irrelevant_names =
+        _clusters() |> Lens.map_values |> Cluster.l_never_active |> Lens.key!(:name)
+      
+      nameset = MapSet.new(names)
+      ignore_irrelevant = deeply_get_all(network, l_irrelevant_names) |> MapSet.new
+      ignore_already = Map.keys(network.active) |> MapSet.new
+      
+      nameset
+      |> MapSet.difference(ignore_irrelevant)
+      |> MapSet.difference(ignore_already)
+      |> Enum.map(& network.clusters[&1])
+    end
+  end
+
+  ## Builders
 
   def trace(network \\ %__MODULE__{}, clusters) do
     old = network.clusters
