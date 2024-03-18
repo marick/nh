@@ -9,7 +9,7 @@ defmodule Cluster.Make do
 
   # Circular clusters
 
-  def circular(name, calc, opts \\ []) do
+  def circular(name, calc \\ &Function.identity/1, opts \\ []) do
     struct(Cluster,
            name: name,
            label: :circular_cluster,
@@ -33,7 +33,7 @@ defmodule Cluster.Make do
   
   # Linear Clusters
 
-  def linear(name, calc) do
+  def linear(name, calc \\ &Function.identity/1) do
     %Cluster{name: name, label: :linear_cluster,
              shape: Linear.new,
              calc: calc,
