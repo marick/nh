@@ -8,7 +8,7 @@ defmodule AppAnimal.Neural.Switchboard do
   @type process_map :: %{atom => pid}
 
   typedstruct do
-    plugin TypedStructLens, prefix: :_
+    plugin TypedStructLens, prefix: :l_
 
     field :network, Network.t
     field :pulse_rate, integer, default: 100
@@ -53,14 +53,14 @@ defmodule AppAnimal.Neural.Switchboard do
                     _from, mutable) do
 
       mutable
-      |> deeply_map(_network(), & Network.individualize_pulses(&1, switchboard_pid, affordances_pid))
+      |> deeply_map(l_network(), & Network.individualize_pulses(&1, switchboard_pid, affordances_pid))
       |> continue(returning: :ok)
     end
 
     @impl GenServer
     def handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, mutable) do
       mutable
-      |> deeply_map(_network(), & Network.deliver_pulse(&1, destination_names, pulse_data))
+      |> deeply_map(l_network(), & Network.deliver_pulse(&1, destination_names, pulse_data))
       |> continue
     end
 
@@ -80,7 +80,7 @@ defmodule AppAnimal.Neural.Switchboard do
 
     def handle_info({:DOWN, _, :process, pid, :normal}, mutable) do
       mutable
-      |> deeply_map(_network(), & Network.drop_active_pid(&1, pid))
+      |> deeply_map(l_network(), & Network.drop_active_pid(&1, pid))
       |> continue
     end
     

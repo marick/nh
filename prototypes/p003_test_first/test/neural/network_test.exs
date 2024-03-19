@@ -8,7 +8,7 @@ defmodule AppAnimal.Neural.NetworkTest do
        do: circular(name)
 
   defp downstreams(network) do
-    l_clusters = UT._clusters |> Lens.map_values
+    l_clusters = UT.l_clusters |> Lens.map_values
 
     for one <- deeply_get_all(network, l_clusters), into: %{} do
       {one.name, one.downstream}
@@ -24,12 +24,12 @@ defmodule AppAnimal.Neural.NetworkTest do
   describe "lenses" do
     test "_cluster" do 
       network = %UT{clusters: %{first: "a cluster"}}
-      assert deeply_get_only(network, UT._cluster(:first)) == "a cluster"
+      assert deeply_get_only(network, UT.l_cluster(:first)) == "a cluster"
     end
 
     test "_downstream_of" do
       network = %UT{clusters: %{first: named(:first)}}
-      assert deeply_get_only(network, UT._downstream_of(:first)) == []
+      assert deeply_get_only(network, UT.l_downstream_of(:first)) == []
     end
   end
   

@@ -7,7 +7,7 @@ defmodule Cluster do
   import Lens.Macros
 
   typedstruct do
-    plugin TypedStructLens, prefix: :_
+    plugin TypedStructLens, prefix: :l_
 
     # Set first thing
     field :label, atom    # only for human readability
@@ -34,6 +34,3 @@ defmodule Cluster do
   end
 
 end
-
-
-

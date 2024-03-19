@@ -109,22 +109,22 @@ defmodule Cluster.CircularProcessTest do
   describe "counting down via weaken" do
     test "an ordinary call to weaken" do
       state = Make.circular(:example, & &1+1) |> UT.State.from_cluster
-            starting_strength = deeply_get_only(state, :_current_strength)
-      assert starting_strength == deeply_get_only(state, :_starting_strength)
+            starting_strength = deeply_get_only(state, :l_current_strength)
+      assert starting_strength == deeply_get_only(state, :l_starting_strength)
       assert starting_strength > 2
       
       assert {:noreply, next_state} = UT.handle_cast([weaken: 2], state)
       
-      assert deeply_get_only(next_state, :_current_strength) ==
-               deeply_get_only(state, :_current_strength) - 2
+      assert deeply_get_only(next_state, :l_current_strength) ==
+               deeply_get_only(state, :l_current_strength) - 2
     end
     
     test "decreasing down to zero" do
       state = Make.circular(:example, & &1+1) |> UT.State.from_cluster
-      starting_strength = deeply_get_only(state, :_current_strength)
+      starting_strength = deeply_get_only(state, :l_current_strength)
 
       assert {:stop, :normal, next_state} = UT.handle_cast([weaken: starting_strength], state)
-      assert deeply_get_only(next_state, :_current_strength) == 0
+      assert deeply_get_only(next_state, :l_current_strength) == 0
     end
   end
 end

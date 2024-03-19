@@ -16,7 +16,7 @@ defmodule Shape.Circular do
   use TypedStruct
 
   typedstruct do
-    plugin TypedStructLens, prefix: :_
+    plugin TypedStructLens, prefix: :l_
 
     field :starting_pulses, integer, default: 20
     field :initial_value, any, default: %{}

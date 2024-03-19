@@ -3,7 +3,7 @@ defmodule AppAnimal.Neural.Network do
   use TypedStruct
 
   typedstruct do
-    plugin TypedStructLens, prefix: :_
+    plugin TypedStructLens, prefix: :l_
 
     field :clusters, %{atom => Cluster.t}, default: %{}
     field :active, %{atom => pid}, default: %{}
@@ -11,10 +11,10 @@ defmodule AppAnimal.Neural.Network do
 
   def new(cluster_map), do: %__MODULE__{clusters: cluster_map}
 
-  def _cluster(name), do: _clusters() |> Lens.key!(name)
+  def l_cluster(name), do: l_clusters() |> Lens.key!(name)
 
-  def _downstream_of(name) do
-    _cluster(name) |> Lens.key!(:downstream)
+  def l_downstream_of(name) do
+    l_cluster(name) |> Lens.key!(:downstream)
   end
 
   # Getters
@@ -35,7 +35,7 @@ defmodule AppAnimal.Neural.Network do
       for cluster <- to_start, into: %{} do
         Cluster.activate(cluster)
       end
-    deeply_map(network, :_active, & Map.merge(&1, now_started))
+    deeply_map(network, :l_active, & Map.merge(&1, now_started))
   end
 
   def drop_active_pid(network, pid) do
@@ -68,7 +68,7 @@ defmodule AppAnimal.Neural.Network do
   private do 
     def needs_to_be_started(network, names) do
       l_irrelevant_names =
-        _clusters() |> Lens.map_values |> Cluster.l_never_active |> Lens.key!(:name)
+        l_clusters() |> Lens.map_values |> Cluster.l_never_active |> Lens.key!(:name)
       
       nameset = MapSet.new(names)
       ignore_irrelevant = deeply_get_all(network, l_irrelevant_names) |> MapSet.new
@@ -92,12 +92,12 @@ defmodule AppAnimal.Neural.Network do
   end
   
   def extend(network, at: name, with: trace) do
-    existing = deeply_get_only(network, _cluster(name))
+    existing = deeply_get_only(network, l_cluster(name))
     trace(network, [existing | trace])
   end
 
   def individualize_pulses(network, switchboard_pid, affordances_pid) do
-    deeply_map(network, _clusters() |> Lens.map_values() |> Lens.key!(:pulse_logic),
+    deeply_map(network, l_clusters() |> Lens.map_values() |> Lens.key!(:pulse_logic),
                & Cluster.PulseLogic.put_pid(&1, {switchboard_pid, affordances_pid}))
   end
 

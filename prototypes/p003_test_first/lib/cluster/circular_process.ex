@@ -5,7 +5,7 @@ defmodule CircularProcess.TimerLogic do
   use TypedStruct
 
   typedstruct do
-    plugin TypedStructLens, prefix: :_
+    plugin TypedStructLens, prefix: :l_
 
     field :current_strength, integer
     field :starting_strength, integer
@@ -21,7 +21,7 @@ defmodule CircularProcess.State do
   use TypedStruct
 
   typedstruct do
-    plugin TypedStructLens, prefix: :_
+    plugin TypedStructLens, prefix: :l_
 
     field :timer_logic, CircularProcess.TimerLogic.t
     field :shape, Cluster.Shape.t
@@ -41,11 +41,11 @@ defmodule CircularProcess.State do
   }
   end
 
-  def _current_strength(), do: timer_seq(:current_strength)
-  def _starting_strength(), do: timer_seq(:starting_strength)
+  def l_current_strength(), do: timer_seq(:current_strength)
+  def l_starting_strength(), do: timer_seq(:starting_strength)
   
   private do
-    def timer_seq(key), do: Lens.seq(_timer_logic(), Lens.key(key))
+    def timer_seq(key), do: Lens.seq(l_timer_logic(), Lens.key(key))
   end
 end
 
@@ -72,9 +72,9 @@ defmodule CircularProcess do
 
 
   def handle_cast([weaken: n], state) do
-    new_state = deeply_map(state, :_current_strength, & &1-n)
+    new_state = deeply_map(state, :l_current_strength, & &1-n)
 
-    if deeply_get_only(new_state, :_current_strength) <= 0,
+    if deeply_get_only(new_state, :l_current_strength) <= 0,
        do: stop(new_state),
        else: continue(new_state)
   end
