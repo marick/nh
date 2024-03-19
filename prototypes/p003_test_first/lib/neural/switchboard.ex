@@ -3,15 +3,14 @@ defmodule AppAnimal.Neural.Switchboard do
   use AppAnimal.GenServer
   use TypedStruct
   alias Neural.ActivityLogger
-  alias AppAnimal.Cluster
+  alias AppAnimal.Neural.Network
 
   @type process_map :: %{atom => pid}
 
   typedstruct do
     plugin TypedStructLens, prefix: :_
 
-    field :network, %{atom => Cluster.t}
-    field :started_circular_clusters, process_map, default: %{}
+    field :network, Network.t
     field :pulse_rate, integer, default: 100
     field :logger_pid, ActivityLogger.t, default: ActivityLogger.start_link |> okval
   end
@@ -52,26 +51,21 @@ defmodule AppAnimal.Neural.Switchboard do
     @impl GenServer
     def handle_call({:individualize_pulses, switchboard_pid, affordances_pid},
                     _from, mutable) do
-      add_individualized_pulse = fn cluster ->
-        cluster
-        |> Map.update!(:pulse_logic, & Cluster.PulseLogic.put_pid(&1, {switchboard_pid, affordances_pid}))
-      end
 
       mutable
-      |> Map2.map_within(:network, add_individualized_pulse)
+      |> deeply_map(_network(), & Network.individualize_pulses(&1, switchboard_pid, affordances_pid))
       |> continue(returning: :ok)
     end
 
     @impl GenServer
     def handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, mutable) do
       mutable
-      |> ensure_clusters_are_ready(destination_names)
-      |> tap(& send_pulse(pulse_data, destination_names, &1))
+      |> deeply_map(_network(), & Network.deliver_pulse(&1, destination_names, pulse_data))
       |> continue
     end
 
     def handle_cast({:distribute_downstream, from: source_name, carrying: pulse_data}, mutable) do
-      source = mutable.network[source_name] # |> IO.inspect
+      source = mutable.network.clusters[source_name]
       destination_names = source.downstream
       ActivityLogger.log_pulse_sent(mutable.logger_pid, source.label, source.name, pulse_data)
       handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, mutable)
@@ -79,51 +73,18 @@ defmodule AppAnimal.Neural.Switchboard do
 
     @impl GenServer
     def handle_info(:weaken_all_active, mutable) do
-      for {_name, pid} <- started_circular_clusters(mutable) do
-        GenServer.cast(pid, [weaken: 1])
-      end
+      Network.weaken_all_active(mutable.network)
       schedule_weakening(mutable.pulse_rate)
       continue(mutable)
     end
 
     def handle_info({:DOWN, _, :process, pid, :normal}, mutable) do
       mutable
-      |> unstart_circular_cluster(pid)
+      |> deeply_map(_network(), & Network.drop_active_pid(&1, pid))
       |> continue
     end
     
     private do
-      def started_circular_clusters(mutable) do
-        mutable.started_circular_clusters
-      end
-
-      def unstart_circular_cluster(mutable, pid) do
-        mutable 
-        |> Map2.reject_value_within(:started_circular_clusters, pid)        
-      end
-      
-      def ensure_clusters_are_ready(mutable, names) do
-        lens = _network() |> Lens.keys!(names) |> Lens.filter(&Cluster.can_be_active?/1)
-
-        startable = deeply_get_all(mutable, lens)
-        unstarted = Enum.reject(startable, & &1.name in Map.keys(mutable.started_circular_clusters))
-        now_started =
-          for cluster <- unstarted, into: %{} do
-            Cluster.activate(cluster)
-          end
-
-        all_started = Map.merge(mutable.started_circular_clusters, now_started)
-        %{mutable | started_circular_clusters: all_started}
-      end
-
-      def send_pulse(pulse_data, names, mutable) do
-        for name <- names do
-          pid = started_circular_clusters(mutable)[name]
-          cluster = mutable.network[name]
-          Cluster.Shape.accept_pulse(cluster.shape, cluster, pid, pulse_data)
-        end
-      end
-
       def schedule_weakening(pulse_delay) do
         Process.send_after(self(), :weaken_all_active, pulse_delay)
       end

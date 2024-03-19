@@ -9,7 +9,6 @@ defmodule AppAnimal.Neural.ActionEdgeTest do
       |> Network.trace([perception_edge(:paragraph_text), to_test()])
       |> AppAnimal.enliven()
     
-
     Affordances.script(a.affordances_pid, [
       focus_on_new_paragraph: [paragraph_text: "some text"]
     ])
