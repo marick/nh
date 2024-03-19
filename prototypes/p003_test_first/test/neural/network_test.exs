@@ -140,17 +140,6 @@ defmodule AppAnimal.Neural.NetworkTest do
     end
   end
 
-  @tag :skip
-  test "delivering pulses via a linear cluster" do
-    a =
-      UT.trace([linear(:one), to_test()])
-      |> AppAnimal.enliven
-
-    UT.deliver_pulse(a.network.clusters, [:one], "pulse data")
-
-    assert_test_receives(_)
-  end
-  
   describe "helpers" do 
     test "add_only_new_clusters" do
       UT.add_only_new_clusters(%{}, [%{name: :one, value: "original"},
