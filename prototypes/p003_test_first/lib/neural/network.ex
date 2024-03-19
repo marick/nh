@@ -1,6 +1,7 @@
 defmodule AppAnimal.Neural.Network do
   use AppAnimal
   use TypedStruct
+  import Lens.Macros
 
   typedstruct do
     plugin TypedStructLens, prefix: :l_
@@ -9,13 +10,12 @@ defmodule AppAnimal.Neural.Network do
     field :active, %{atom => pid}, default: %{}
   end
 
+  deflens l_cluster(name), do: l_clusters() |> Lens.key!(name)
+  deflens l_downstream_of(name), do: l_cluster(name) |> Lens.key!(:downstream)
+  deflens l_irrelevant_names, 
+          do: l_clusters() |> Lens.map_values |> Cluster.l_never_active |> Lens.key!(:name)
+
   def new(cluster_map), do: %__MODULE__{clusters: cluster_map}
-
-  def l_cluster(name), do: l_clusters() |> Lens.key!(name)
-
-  def l_downstream_of(name) do
-    l_cluster(name) |> Lens.key!(:downstream)
-  end
 
   # Getters
 
@@ -67,11 +67,8 @@ defmodule AppAnimal.Neural.Network do
 
   private do 
     def needs_to_be_started(network, names) do
-      l_irrelevant_names =
-        l_clusters() |> Lens.map_values |> Cluster.l_never_active |> Lens.key!(:name)
-      
       nameset = MapSet.new(names)
-      ignore_irrelevant = deeply_get_all(network, l_irrelevant_names) |> MapSet.new
+      ignore_irrelevant = deeply_get_all(network, l_irrelevant_names()) |> MapSet.new
       ignore_already = Map.keys(network.active) |> MapSet.new
       
       nameset
