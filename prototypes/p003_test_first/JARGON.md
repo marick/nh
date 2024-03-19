@@ -36,18 +36,24 @@ may use some stored configuration information. All clusters run
 asynchronously from other clusters. Clusters may be implemented by
 modules or maps of named functions.
 
-A **linear** cluster represents a plain function: each pulse spawns
-an independent Elixir process, which exits immediately after sending
-its result downstream.
+A **linear** cluster represents a plain function: each pulse spawns an
+independent Elixir process, which exits immediately after sending its
+result downstream. As far as anything external to the task can tell,
+the cluster is always *waiting* to be provoked to (instantaneously)
+calculate something.
 
-A **circular** cluster is a cluster that (conceptually) has a
-circular connection of neurons that keeps the cluster active. Such a
-cluster stores a bit of mutable state, and that state might be used in
-the computation following a pulse. For example, a cluster might
-remember the results of its last calculation and only send a *pulse*
-downstream if the value changes. Circular clusters "weaken" over time
-and eventually become inactive. (The Elixir process exits.) However,
-incoming pulses can strengthen a cluster, so some could have
+A **circular** cluster is a cluster that (conceptually) has a circular
+connection of neurons that keeps the cluster active. I whimsically
+call this "throbbing", intended to convey the idea that
+self-reinforcing waves of activation flood across the cluster at
+intervals.
+
+Such a cluster stores a bit of mutable state, and that state might be
+used in the computation following a pulse. For example, a cluster
+might remember the results of its last calculation and only send a
+*pulse* downstream if the value changes. Circular clusters "weaken"
+over time and eventually become inactive. (The Elixir process exits.)
+However, incoming pulses can strengthen a cluster, so some could have
 indefinite lifespans.
 
 #### Focus
@@ -55,6 +61,12 @@ indefinite lifespans.
 Certain *clusters* will at times act to focus on a part of the
 *Affordance Land*. That will cause new, now relevant *affordances* to
 flow into the *network*.
+
+#### Idle
+
+A *cluster* is idle if it's consuming no resources but is waiting for
+a *pulse*. In Elixir terms, this means it has no associated running
+process.
 
 #### Network
 
@@ -67,9 +79,34 @@ A structure of interconnected **clusters** that interact with
 A type of *cluster* that receives an *affordance* (an Elixir message)
 from *Affordance Land*. Typically, it forwards the message to its
 downstream clusters.
-xo
+
+#### Throbbing
+
+When the process behind a circular cluster is alive, it is referred to
+as "throbbing". This evokes the periodic self-reinforcement of the
+cluster. When a circular cluster hasn't ever been started, or when
+it's died off because of a lack of work to do, it's callec *waiting*.
+
 #### Trace
 
 A linear sequence of _clusters_. Each cluster is downstream of its
 predecessor, meaning it receives *pulses* from it. Traces are
 combined to form a *network*.
+
+
+#### Waiting
+
+Thinking of clusters as biological, they can be in two states. They
+can be sitting around, doing the minimal metabolism to keep themselves
+alive, waiting for some *pulse* to arrive and prompt them to start
+expending energy on some calculation that will (usually) provoke an
+outgoing pulse.
+
+*Linear* clusters are always waiting. Technically, there's a brief
+time in which they are performing a calculation; however, no outside
+observer can see that.
+
+*Circular* clusters are more relevant. The first pulse they receive
+starts them working. They continue to remain active (and retain some
+state) for some time, waiting to receive a new pulse. If they don't
+receive such pulses, they typically "weaken" and eventually go *idle*.

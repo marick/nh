@@ -2,8 +2,8 @@ alias AppAnimal.Cluster
 alias Cluster.Shape
 
 defprotocol Shape do
-  @spec can_be_active?(Shape.t) :: boolean
-  def can_be_active?(shape)
+  @spec can_throb?(Shape.t) :: boolean
+  def can_throb?(shape)
 
   @spec accept_pulse(struct, Cluster.t, pid, any) :: no_return
     def accept_pulse(struct, cluster, pid, pulse_data)
@@ -26,7 +26,7 @@ defmodule Shape.Circular do
 end
 
 defimpl Shape, for: Shape.Circular do
-  def can_be_active?(_struct), do: true
+  def can_throb?(_struct), do: true
 
   def accept_pulse(_struct, _cluster, destination_pid, pulse_data) do
     GenServer.cast(destination_pid, [handle_pulse: pulse_data])
@@ -45,7 +45,7 @@ end
 defimpl Shape, for: Shape.Linear do
   alias Cluster.PulseLogic
   
-  def can_be_active?(_struct), do: false
+  def can_throb?(_struct), do: false
 
   def accept_pulse(_struct, cluster, _destination_pid, pulse_data) do
     Task.start(fn ->

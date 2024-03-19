@@ -7,7 +7,7 @@ defmodule AppAnimal.Neural.Network do
     plugin TypedStructLens, prefix: :l_
 
     field :clusters_by_name, %{atom => Cluster.t}, default: %{}
-    field :active_by_name, %{atom => pid}, default: %{}
+    field :throbbers_by_name, %{atom => pid}, default: %{}
   end
 
   deflens l_clusters,
@@ -20,7 +20,7 @@ defmodule AppAnimal.Neural.Network do
           do: l_cluster_named(name) |> Lens.key!(:downstream)
 
   deflens l_irrelevant_names,
-          do: l_clusters() |> Cluster.l_never_active |> Lens.key!(:name)
+          do: l_clusters() |> Cluster.l_never_throbs |> Lens.key!(:name)
 
   deflens l_pulse_logic,
           do: l_clusters() |> Lens.key!(:pulse_logic)
@@ -31,48 +31,48 @@ defmodule AppAnimal.Neural.Network do
 
   # Getters
 
-  def active_names(network), do: Map.keys(network.active_by_name)
-  def active_pids(network), do: Map.values(network.active_by_name)
+  def throbbing_names(network), do: Map.keys(network.throbbers_by_name)
+  def throbbing_pids(network), do: Map.values(network.throbbers_by_name)
 
-  def active_clusters(network) do
-    active_names(network)
+  def throbbing_clusters(network) do
+    throbbing_names(network)
     |> Enum.map(& network.clusters_by_name[&1])
   end
 
   # Working with clusters
 
-  def activate(network, names) do
+  def start_throbbing(network, names) do
     to_start = needs_to_be_started(network, names)
      
     now_started =
       for cluster <- to_start, into: %{} do
-        Cluster.activate(cluster)
+        Cluster.start_throbbing(cluster)
       end
-    deeply_map(network, :l_active_by_name, & Map.merge(&1, now_started))
+    deeply_map(network, :l_throbbers_by_name, & Map.merge(&1, now_started))
   end
 
-  def drop_active_pid(network, pid) do
-    actives = network.active_by_name
+  def drop_idling_pid(network, pid) do
+    throbbers = network.throbbers_by_name
     
     [{name, _pid}] = 
-      actives
+      throbbers
       |> Enum.filter(fn {_name, value} -> value == pid end)
 
-    %{network | active_by_name: Map.drop(actives, [name])}
+    %{network | throbbers_by_name: Map.drop(throbbers, [name])}
   end
 
   def deliver_pulse(network, names, pulse_data) do
-    activated = activate(network, names)
+    with_new_throbbers = start_throbbing(network, names)
     for name <- names do
-      cluster = activated.clusters_by_name[name]
-      pid = activated.active_by_name[name]
+      cluster = with_new_throbbers.clusters_by_name[name]
+      pid = with_new_throbbers.throbbers_by_name[name]
       Cluster.Shape.accept_pulse(cluster.shape, cluster, pid, pulse_data)
     end
-    activated
+    with_new_throbbers
   end
 
-  def weaken_all_active(network) do
-    for {_name, pid} <- network.active_by_name do
+  def make_throb(network) do
+    for {_name, pid} <- network.throbbers_by_name do
       GenServer.cast(pid, [weaken: 1])
     end
     :no_return_value
@@ -82,7 +82,7 @@ defmodule AppAnimal.Neural.Network do
     def needs_to_be_started(network, names) do
       nameset = MapSet.new(names)
       ignore_irrelevant = deeply_get_all(network, l_irrelevant_names()) |> MapSet.new
-      ignore_already = Map.keys(network.active_by_name) |> MapSet.new
+      ignore_already = Map.keys(network.throbbers_by_name) |> MapSet.new
       
       nameset
       |> MapSet.difference(ignore_irrelevant)

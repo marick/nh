@@ -23,10 +23,10 @@ defmodule Cluster do
   end
 
 
-  def can_be_active?(struct), do: Cluster.Shape.can_be_active?(struct.shape)
-  deflens l_never_active(), do: Lens.filter(& can_be_active?(&1) == false)
+  def can_throb?(struct), do: Cluster.Shape.can_throb?(struct.shape)
+  deflens l_never_throbs(), do: Lens.filter(& can_throb?(&1) == false)
 
-  def activate(struct) do
+  def start_throbbing(struct) do
     starting_state = Cluster.CircularProcess.State.from_cluster(struct)
     {:ok, pid} = GenServer.start(Cluster.CircularProcess, starting_state)
     Process.monitor(pid)

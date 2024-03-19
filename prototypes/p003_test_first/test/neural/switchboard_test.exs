@@ -64,11 +64,11 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     Switchboard.external_pulse(a.switchboard_pid, to: :first, carrying: :irrelevant)
     assert_test_receives(pid)
 
-    send(a.switchboard_pid, :weaken_all_active)
+    send(a.switchboard_pid, :make_throb)
     Switchboard.external_pulse(a.switchboard_pid, to: :first, carrying: :irrelevant)
     assert_test_receives(^pid)
 
-    send(a.switchboard_pid, :weaken_all_active)
+    send(a.switchboard_pid, :make_throb)
     # Need to make sure there's time to handle the "down" message, else the pulse will
     # be lost. The app_animal must tolerate dropped messages.
     Process.sleep(100)  
