@@ -10,10 +10,17 @@ defmodule AppAnimal.Neural.Network do
     field :active, %{atom => pid}, default: %{}
   end
 
-  deflens l_cluster(name), do: l_clusters() |> Lens.key!(name)
-  deflens l_downstream_of(name), do: l_cluster(name) |> Lens.key!(:downstream)
+  deflens l_cluster(name),
+          do: l_clusters() |> Lens.key!(name)
+
+  deflens l_downstream_of(name),
+          do: l_cluster(name) |> Lens.key!(:downstream)
+
   deflens l_irrelevant_names, 
           do: l_clusters() |> Lens.map_values |> Cluster.l_never_active |> Lens.key!(:name)
+
+  deflens l_pulse_logic,
+          do: l_clusters() |> Lens.map_values() |> Lens.key!(:pulse_logic)
 
   def new(cluster_map), do: %__MODULE__{clusters: cluster_map}
 
@@ -94,7 +101,7 @@ defmodule AppAnimal.Neural.Network do
   end
 
   def individualize_pulses(network, switchboard_pid, affordances_pid) do
-    deeply_map(network, l_clusters() |> Lens.map_values() |> Lens.key!(:pulse_logic),
+    deeply_map(network, :l_pulse_logic,
                & Cluster.PulseLogic.put_pid(&1, {switchboard_pid, affordances_pid}))
   end
 

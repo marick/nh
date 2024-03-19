@@ -15,6 +15,8 @@ defmodule AppAnimal.Neural.Switchboard do
     field :logger_pid, ActivityLogger.t, default: ActivityLogger.start_link |> okval
   end
 
+  def within_network(struct, f), do: deeply_map(struct, :l_network, f)
+  
   runs_in_sender do
     def start_link(%__MODULE__{} = state) do
       GenServer.start_link(__MODULE__, state)
@@ -53,14 +55,14 @@ defmodule AppAnimal.Neural.Switchboard do
                     _from, mutable) do
 
       mutable
-      |> deeply_map(l_network(), & Network.individualize_pulses(&1, switchboard_pid, affordances_pid))
+      |> within_network(& Network.individualize_pulses(&1, switchboard_pid, affordances_pid))
       |> continue(returning: :ok)
     end
 
     @impl GenServer
     def handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names}, mutable) do
       mutable
-      |> deeply_map(l_network(), & Network.deliver_pulse(&1, destination_names, pulse_data))
+      |> within_network(& Network.deliver_pulse(&1, destination_names, pulse_data))
       |> continue
     end
 
@@ -80,7 +82,7 @@ defmodule AppAnimal.Neural.Switchboard do
 
     def handle_info({:DOWN, _, :process, pid, :normal}, mutable) do
       mutable
-      |> deeply_map(l_network(), & Network.drop_active_pid(&1, pid))
+      |> within_network(& Network.drop_active_pid(&1, pid))
       |> continue
     end
     
