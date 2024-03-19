@@ -53,4 +53,28 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     assert_test_receives([^pid, ^pid])
     assert_test_receives([^pid, ^pid, ^pid])
   end
+
+  test "what happens when a circular cluster 'ages out'" do
+    first = circular(:first, fn _pulse -> self() end, starting_pulses: 2)
+    
+    a =
+      Network.trace([first, to_test()])
+      |> AppAnimal.enliven(pulse_rate: 100_000) # don't allow automatic pulses.
+    
+    Switchboard.external_pulse(a.switchboard_pid, to: :first, carrying: :irrelevant)
+    assert_test_receives(pid)
+
+    send(a.switchboard_pid, :weaken_all_active)
+    Switchboard.external_pulse(a.switchboard_pid, to: :first, carrying: :irrelevant)
+    assert_test_receives(^pid)
+
+    send(a.switchboard_pid, :weaken_all_active)
+    # Need to make sure there's time to handle the "down" message, else the pulse will
+    # be lost. The app_animal must tolerate dropped messages.
+    Process.sleep(100)  
+    Switchboard.external_pulse(a.switchboard_pid, to: :first, carrying: :irrelevant)
+
+    another_pid = assert_test_receives(_)
+    refute another_pid == pid
+  end
 end
