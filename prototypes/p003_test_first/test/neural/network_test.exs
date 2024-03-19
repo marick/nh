@@ -8,7 +8,7 @@ defmodule AppAnimal.Neural.NetworkTest do
        do: circular(name)
 
   defp downstreams(network) do
-    l_clusters = UT.l_clusters |> Lens.map_values
+    l_clusters = UT.l_clusters_by_name |> Lens.map_values
 
     for one <- deeply_get_all(network, l_clusters), into: %{} do
       {one.name, one.downstream}
@@ -23,12 +23,12 @@ defmodule AppAnimal.Neural.NetworkTest do
   
   describe "lenses" do
     test "_cluster" do 
-      network = %UT{clusters: %{first: "a cluster"}}
-      assert deeply_get_only(network, UT.l_cluster(:first)) == "a cluster"
+      network = UT.new(first: "a cluster")
+      assert deeply_get_only(network, UT.l_cluster_named(:first)) == "a cluster"
     end
 
     test "_downstream_of" do
-      network = %UT{clusters: %{first: named(:first)}}
+      network = UT.new(first: named(:first))
       assert deeply_get_only(network, UT.l_downstream_of(:first)) == []
     end
   end
@@ -36,7 +36,7 @@ defmodule AppAnimal.Neural.NetworkTest do
   describe "building a network (basics)" do
     test "singleton" do
       first = linear(:first)
-      assert UT.trace([first]).clusters.first == first
+      assert UT.trace([first]).clusters_by_name.first == first
     end
 
     test "multiple clusters in a row (a 'trace')" do
@@ -59,11 +59,11 @@ defmodule AppAnimal.Neural.NetworkTest do
       first = linear(:first, & &1+1000)
       new_first = linear(:first, &Function.identity/1)
       network = UT.trace([first, new_first])
-      assert network.clusters.first.calc == first.calc
+      assert network.clusters_by_name.first.calc == first.calc
 
       # Note that there's a loop because some version of first appears twice in the
       # trace.
-      assert network.clusters.first.downstream == [:first]
+      assert network.clusters_by_name.first.downstream == [:first]
     end
 
     test "adding duplicates doesn't overwrite the first cluster, but it makes traces loopy" do
@@ -98,7 +98,7 @@ defmodule AppAnimal.Neural.NetworkTest do
     end
 
     test "effect of one active cluster", %{network: original} do
-      network = put_in(original.active, %{active: "some pid"})
+      network = put_in(original.active_by_name, %{active: "some pid"})
 
       assert UT.active_names(network) == [:active]
       assert UT.active_pids(network) == ["some pid"]
@@ -115,7 +115,7 @@ defmodule AppAnimal.Neural.NetworkTest do
       # After an activation (faked here) there's no need to activate again
       assert [%Cluster{name: :inactive}] = 
                network
-               |> Map.put(:active, %{active: "pid"})
+               |> Map.put(:active_by_name, %{active: "pid"})
                |> UT.needs_to_be_started([:one_shot, :inactive, :active])
     end
 
