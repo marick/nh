@@ -10,18 +10,20 @@ defmodule AppAnimal.Neural.Network do
     field :active_by_name, %{atom => pid}, default: %{}
   end
 
+  deflens l_clusters,
+          do: l_clusters_by_name() |> Lens.map_values()
+  
   deflens l_cluster_named(name),
           do: l_clusters_by_name() |> Lens.key!(name)
 
   deflens l_downstream_of(name),
           do: l_cluster_named(name) |> Lens.key!(:downstream)
 
-  deflens l_irrelevant_names do
-    l_clusters_by_name() |> Lens.map_values |> Cluster.l_never_active |> Lens.key!(:name)
-  end
+  deflens l_irrelevant_names,
+          do: l_clusters() |> Cluster.l_never_active |> Lens.key!(:name)
 
   deflens l_pulse_logic,
-          do: l_clusters_by_name() |> Lens.map_values() |> Lens.key!(:pulse_logic)
+          do: l_clusters() |> Lens.key!(:pulse_logic)
 
   def new(cluster_map_or_keyword) do
     %__MODULE__{clusters_by_name: cluster_map_or_keyword |> Enum.into(%{})}
@@ -41,6 +43,7 @@ defmodule AppAnimal.Neural.Network do
 
   def activate(network, names) do
     to_start = needs_to_be_started(network, names)
+     
     now_started =
       for cluster <- to_start, into: %{} do
         Cluster.activate(cluster)
@@ -120,7 +123,7 @@ defmodule AppAnimal.Neural.Network do
     def add_downstream(network, []), do: network
 
     def add_downstream(network, [[upstream, downstream] | rest]) do
-      network 
+      network
       |> update_in([upstream.name, Access.key(:downstream)], &([downstream.name | &1]))
       |> add_downstream(rest)
     end

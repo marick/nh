@@ -8,9 +8,7 @@ defmodule AppAnimal.Neural.NetworkTest do
        do: circular(name)
 
   defp downstreams(network) do
-    l_clusters = UT.l_clusters_by_name |> Lens.map_values
-
-    for one <- deeply_get_all(network, l_clusters), into: %{} do
+    for one <- deeply_get_all(network, :l_clusters), into: %{} do
       {one.name, one.downstream}
     end
   end
