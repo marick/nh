@@ -53,6 +53,6 @@ defmodule Cluster.Make do
     %Cluster{name: name, label: :action_edge,
              shape: Linear.new,
              calc: & [{name, &1}],
-             pulse_logic: External.new(AppAnimal.Neural.Affordances, :note_action)}
+             pulse_logic: External.new(AppAnimal.Neural.AffordanceLand, :note_action)}
   end
  end

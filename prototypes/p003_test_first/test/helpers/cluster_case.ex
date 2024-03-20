@@ -33,13 +33,13 @@ defmodule ClusterCase do
       use AppAnimal
       alias AppAnimal.Neural
       alias Neural.Switchboard
-      alias Neural.Affordances
+      alias Neural.AffordanceLand
       alias Neural.Network
       alias Neural.ActivityLogger
       import ClusterCase
       import AppAnimal.TraceAssertions
       use FlowAssertions
-      import Affordances, only: [response_to: 2, affords: 1]
+      import AffordanceLand, only: [response_to: 2, affords: 1]
       import Cluster.Make
     end
   end

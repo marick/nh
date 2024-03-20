@@ -1,6 +1,6 @@
 defmodule AppAnimal do
   alias AppAnimal.Neural
-  alias Neural.{Switchboard, Affordances, Network, ActivityLogger}
+  alias Neural.{Switchboard, AffordanceLand, Network, ActivityLogger}
   import Private
   use AppAnimal.Extras.TestAwareProcessStarter
 
@@ -21,7 +21,7 @@ defmodule AppAnimal do
                                               network: network,
                                               logger_pid: logger_pid))
     switchboard_pid = compatibly_start_link(Switchboard, switchboard_struct)
-    affordances_pid = compatibly_start_link(Affordances,
+    affordances_pid = compatibly_start_link(AffordanceLand,
                                             %{switchboard_pid: switchboard_pid,
                                               logger_pid: logger_pid})
 

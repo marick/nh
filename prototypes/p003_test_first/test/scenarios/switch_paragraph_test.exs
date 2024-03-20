@@ -50,10 +50,10 @@ defmodule AppAnimal.Scenarios.SwitchParagraphTest do
       |> Network.trace(reaction_to_paragraph_text)
       |> AppAnimal.enliven
 
-    Affordances.script(a.affordances_pid, reaction_to_focus)
+    AffordanceLand.script(a.affordances_pid, reaction_to_focus)
 
     ActivityLogger.spill_log_to_terminal(a.logger_pid)
-    Affordances.produce_this_affordance(a.affordances_pid, notice_new_paragraph: :no_data)
+    AffordanceLand.produce_this_affordance(a.affordances_pid, notice_new_paragraph: :no_data)
 
     assert_test_receives("para\n")
     ActivityLogger.get_log(a.logger_pid)
