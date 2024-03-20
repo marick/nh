@@ -20,12 +20,12 @@ defmodule AppAnimal.Neural.NetworkTest do
   end
   
   describe "lenses" do
-    test "_cluster" do 
+    test "l_cluster_named" do 
       network = UT.new(first: "a cluster")
       assert deeply_get_only(network, UT.l_cluster_named(:first)) == "a cluster"
     end
 
-    test "_downstream_of" do
+    test "l_downstream_of" do
       network = UT.new(first: named(:first))
       assert deeply_get_only(network, UT.l_downstream_of(:first)) == []
     end

@@ -4,11 +4,12 @@ defmodule Extras.KernelTest do
   use ExUnit.Case, async: true
   use FlowAssertions
   alias Extras.Kernel, as: UT
+  import Lens.Macros
 
   defstruct [:clusters]
 
-  def _by_name(name), do: Lens.key!(:clusters) |> Lens.key!(name)
-  def _count, do: Lens.key!(:clusters) |> Lens.map_values() |> Lens.key!(:count)
+  deflens l_by_name(name), do: Lens.key!(:clusters) |> Lens.key!(name)
+  deflens l_count, do: Lens.key!(:clusters) |> Lens.map_values() |> Lens.key!(:count)
   
   describe "lens utilities" do
     test "all" do
@@ -18,22 +19,22 @@ defmodule Extras.KernelTest do
       }
 
 
-      result = UT.deeply_put(data, :_count, "replace")
+      result = UT.deeply_put(data, :l_count, "replace")
       
       assert result == %__MODULE__{clusters: %{fred: %{count: "replace"},
                                                betty: %{count: "replace"},
                                                bambam: %{count: "replace"}}}
 
 
-      result = UT.deeply_get_only(data, _by_name(:betty))
+      result = UT.deeply_get_only(data, l_by_name(:betty))
       assert result == %{count: 1}
 
-      result = UT.deeply_get_all(data, :_count)
+      result = UT.deeply_get_all(data, :l_count)
       assert result == [0, 1, 2]
 
 
-      UT.deeply_map(data, :_count, & &1*10)
-      |> UT.deeply_get_all(:_count)
+      UT.deeply_map(data, :l_count, & &1*10)
+      |> UT.deeply_get_all(:l_count)
       |> assert_equals([00, 10, 20])
     end
   end
