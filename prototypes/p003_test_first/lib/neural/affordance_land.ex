@@ -41,8 +41,8 @@ defmodule AppAnimal.Neural.AffordanceLand do
     end
 
     def handle_cast([:produce_this_affordance, {name, data}], mutable) do
-      Neural.Switchboard.forward_affordance(mutable.switchboard_pid,
-                                            named: name, conveying: data)
+      GenServer.cast(mutable.switchboard_pid,
+                     {:distribute_pulse, carrying: data, to: [name]})
       continue(mutable)
     end
 

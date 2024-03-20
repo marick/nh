@@ -21,16 +21,6 @@ defmodule AppAnimal.Neural.Switchboard do
     def start_link(%__MODULE__{} = state) do
       GenServer.start_link(__MODULE__, state)
     end
-
-    def send_pulse_downstream(switchboard_pid, from: source_name, carrying: pulse_data) do
-      GenServer.cast(switchboard_pid,
-                     {:distribute_downstream, from: source_name, carrying: pulse_data})
-    end
-
-    def forward_affordance(switchboard_pid, named: name, conveying: perception) do
-      GenServer.cast(switchboard_pid,
-                     {:distribute_pulse, carrying: perception, to: [name]})
-    end
   end
 
   runs_in_receiver do 
