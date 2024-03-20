@@ -63,11 +63,11 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     send_test_pulse(a.switchboard_pid, to: :first, carrying: :irrelevant)
     assert_test_receives(pid)
 
-    send(a.switchboard_pid, :make_throb)
+    send(a.switchboard_pid, :time_to_throb)
     send_test_pulse(a.switchboard_pid, to: :first, carrying: :irrelevant)
     assert_test_receives(^pid)
 
-    send(a.switchboard_pid, :make_throb)
+    send(a.switchboard_pid, :time_to_throb)
     # Need to make sure there's time to handle the "down" message, else the pulse will
     # be lost. The app_animal must tolerate dropped messages.
     Process.sleep(100)  

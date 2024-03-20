@@ -71,7 +71,7 @@ defmodule AppAnimal.Neural.Network do
     with_new_throbbers
   end
 
-  def make_throb(network) do
+  def time_to_throb(network) do
     for {_name, pid} <- network.throbbers_by_name do
       GenServer.cast(pid, [weaken: 1])
     end

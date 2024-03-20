@@ -56,8 +56,8 @@ defmodule AppAnimal.Neural.Switchboard do
     end
 
     @impl GenServer
-    def handle_info(:make_throb, mutable) do
-      Network.make_throb(mutable.network)
+    def handle_info(:time_to_throb, mutable) do
+      Network.time_to_throb(mutable.network)
       schedule_weakening(mutable.pulse_rate)
       continue(mutable)
     end
@@ -70,7 +70,7 @@ defmodule AppAnimal.Neural.Switchboard do
     
     private do
       def schedule_weakening(pulse_delay) do
-        Process.send_after(self(), :make_throb, pulse_delay)
+        Process.send_after(self(), :time_to_throb, pulse_delay)
       end
     end
   end
