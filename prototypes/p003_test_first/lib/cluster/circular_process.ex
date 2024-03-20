@@ -98,7 +98,6 @@ defmodule CircularProcess do
       end
     end
 
-    # Not sure this one is ever really used
     def update_state(state, {:pulse, _outgoing_value}), do: state
 
     def update_state(state, {:pulse, _outgoing_value, next_value_for_previously}),
