@@ -106,7 +106,7 @@ defmodule AppAnimal.Neural.Network do
     trace(network, [existing | trace])
   end
 
-  def individualize_pulses(network, switchboard_pid, affordances_pid) do
+  def link_clusters_to_architecture(network, switchboard_pid, affordances_pid) do
     deeply_map(network, :l_pulse_logic,
                & Cluster.PulseLogic.put_pid(&1, {switchboard_pid, affordances_pid}))
   end

@@ -25,7 +25,8 @@ defmodule AppAnimal do
                                             %{switchboard_pid: switchboard_pid,
                                               logger_pid: logger_pid})
 
-    Switchboard.link_clusters_to_pids(switchboard_pid, affordances_pid)
+    GenServer.call(switchboard_pid,
+                   {:link_clusters_to_architecture, switchboard_pid, affordances_pid})
     %{switchboard_pid: switchboard_pid,
       affordances_pid: affordances_pid,
       logger_pid: logger_pid

@@ -22,11 +22,6 @@ defmodule AppAnimal.Neural.Switchboard do
       GenServer.start_link(__MODULE__, state)
     end
 
-    def link_clusters_to_pids(switchboard_pid, affordances_pid) do
-      GenServer.call(switchboard_pid,
-                     {:individualize_pulses, switchboard_pid, affordances_pid})
-    end
-    
     # An entry point, called to initiate or reinitiate a network.
     def external_pulse(switchboard_pid, to: destination_name, carrying: pulse_data) do
       GenServer.cast(switchboard_pid,
@@ -51,11 +46,13 @@ defmodule AppAnimal.Neural.Switchboard do
     end
 
     @impl GenServer
-    def handle_call({:individualize_pulses, switchboard_pid, affordances_pid},
+    def handle_call({:link_clusters_to_architecture, switchboard_pid, affordances_pid},
                     _from, mutable) do
 
       mutable
-      |> within_network(& Network.individualize_pulses(&1, switchboard_pid, affordances_pid))
+      |> within_network(& Network.link_clusters_to_architecture(&1,
+                                                                switchboard_pid,
+                                                                affordances_pid))
       |> continue(returning: :ok)
     end
 
