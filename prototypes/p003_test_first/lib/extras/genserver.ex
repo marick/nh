@@ -6,6 +6,7 @@ defmodule AppAnimal.GenServer do
       require AppAnimal.GenServer
       import AppAnimal.GenServer
       alias AppAnimal.Neural
+      alias AppAnimal.Cluster      
     end
   end
 
