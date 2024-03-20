@@ -3,7 +3,7 @@ alias Cluster.CircularProcess
 
 defmodule CircularProcess.TimerLogic do
   use TypedStruct
-
+  
   typedstruct do
     plugin TypedStructLens, prefix: :l_
 
@@ -41,35 +41,32 @@ defmodule CircularProcess.State do
   }
   end
 
-  def l_current_strength(), do: timer_seq(:current_strength)
-  def l_starting_strength(), do: timer_seq(:starting_strength)
+  deflens l_current_strength(), do: in_timer(:current_strength)
+  deflens l_starting_strength(), do: in_timer(:starting_strength)
   
   private do
-    def timer_seq(key), do: Lens.seq(l_timer_logic(), Lens.key(key))
+    def in_timer(key), do: l_timer_logic() |> Lens.key(key)
   end
 end
 
 defmodule CircularProcess do
   use AppAnimal
   use AppAnimal.GenServer
-  alias __MODULE__.State
+  alias Cluster.Calc
 
   def init(starting_state) do
     ok(starting_state)
   end
 
   def handle_cast([handle_pulse: small_data], state) do
-    case run_calculation(state, small_data) do
-      {:pulse, outgoing_pulse_data, next_previously} ->
-        Cluster.PulseLogic.send_pulse(state.pulse_logic, outgoing_pulse_data)
-        Map.put(state, :previously, next_previously)
-        |> continue
-      {:no_pulse, next_previously} -> 
-        Map.put(state, :previously, next_previously)
-        |> continue
-    end
-  end
+    result = Calc.run(state.calc, on: small_data, with_state: state.previously)
 
+    Calc.maybe_pulse(result, & Cluster.PulseLogic.send_pulse(state.pulse_logic, &1))
+    
+    state
+    |> deeply_put(:l_previously, Calc.next_state(result))
+    |> continue
+  end
 
   def handle_cast([weaken: n], state) do
     new_state = deeply_map(state, :l_current_strength, & &1-n)
@@ -77,30 +74,5 @@ defmodule CircularProcess do
     if deeply_get_only(new_state, :l_current_strength) <= 0,
        do: stop(new_state),
        else: continue(new_state)
-  end
-
-  private do
-    def run_calculation(%State{} = mutable, pulse_data) do
-      result =
-        case mutable.calc do
-          f when is_function(f, 1) -> 
-            f.(pulse_data)
-          f when is_function(f, 2) ->
-            f.(pulse_data, mutable.previously)
-        end
-      case result do
-        {:pulse, _, _} = verbatim ->
-          verbatim
-        {:no_pulse, _} = verbatim ->
-          verbatim
-        _ -> 
-          {:pulse, result, mutable.previously}
-      end
-    end
-
-    def update_state(state, {:pulse, _outgoing_value}), do: state
-
-    def update_state(state, {:pulse, _outgoing_value, next_value_for_previously}),
-        do: Map.put(state, :previously, next_value_for_previously)
   end
 end

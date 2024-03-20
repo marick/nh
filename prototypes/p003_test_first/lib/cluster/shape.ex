@@ -11,7 +11,6 @@ end
 
 ##
 
-
 defmodule Shape.Circular do
   use TypedStruct
 
@@ -43,13 +42,15 @@ end
 
 defimpl Shape, for: Shape.Linear do
   alias Cluster.PulseLogic
+  alias Cluster.Calc
   
   def can_throb?(_struct), do: false
 
   def accept_pulse(_struct, cluster, _destination_pid, pulse_data) do
     Task.start(fn ->
-      outgoing_data = cluster.calc.(pulse_data)
-      PulseLogic.send_pulse(cluster.pulse_logic, outgoing_data)
+      Calc.run(cluster.calc, on: pulse_data)
+      |> Calc.maybe_pulse(& PulseLogic.send_pulse(cluster.pulse_logic, &1))
+      :there_is_no_return_value
     end)
   end    
 end
