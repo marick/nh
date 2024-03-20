@@ -4,9 +4,9 @@ defmodule ClusterCase do
   alias Cluster.{Shape, PulseLogic}
   alias ExUnit.Assertions
 
-  defmacro assert_test_receives(value, keys \\ [from: :endpoint]) do
+  defmacro assert_test_receives(value, opts \\ [from: :endpoint]) do
     quote do 
-      [retval, from: _] = Assertions.assert_receive([unquote(value) | unquote(keys)])
+      [retval, from: _] = Assertions.assert_receive([unquote(value) | unquote(opts)])
       retval
     end
   end
@@ -33,9 +33,9 @@ defmodule ClusterCase do
   end
     
 
-  defmacro __using__(keys) do
+  defmacro __using__(opts) do
     quote do
-      use ExUnit.Case, unquote(keys)
+      use ExUnit.Case, unquote(opts)
       use AppAnimal
       alias AppAnimal.Neural
       alias Neural.Switchboard

@@ -13,8 +13,8 @@ defmodule AppAnimal.Neural.AffordanceLand do
   
   runs_in_sender do
     
-    def start_link(keys) do
-      GenServer.start_link(__MODULE__, keys)
+    def start_link(opts) do
+      GenServer.start_link(__MODULE__, opts)
     end
 
     def produce_this_affordance(pid, [{name, data}]) do
@@ -36,8 +36,8 @@ defmodule AppAnimal.Neural.AffordanceLand do
   end
 
   runs_in_receiver do
-    def init(keys) do
-      {:ok, struct(__MODULE__, keys)}
+    def init(opts) do
+      {:ok, struct(__MODULE__, opts)}
     end
 
     def handle_cast([:produce_this_affordance, {name, data}], mutable) do
