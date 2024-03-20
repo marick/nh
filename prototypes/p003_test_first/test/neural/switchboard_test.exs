@@ -1,7 +1,6 @@
 defmodule AppAnimal.Neural.SwitchboardTest do
   use ClusterCase, async: true
   alias AppAnimal.Neural.ActivityLogger
-  alias Neural.Switchboard, as: UT
   alias AppAnimal.Cluster.Make
   
   ## The switchboard is mostly tested via the different kinds of clusters.
@@ -17,7 +16,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
     a = AppAnimal.enliven(trace)
 
     ActivityLogger.spill_log_to_terminal(a.logger_pid)
-    UT.external_pulse(a.switchboard_pid, to: :first, carrying: 0)
+    send_test_pulse(a.switchboard_pid, to: :first, carrying: 0)
     assert_test_receives(2)
     
     [first, second] = ActivityLogger.get_log(a.logger_pid)
@@ -47,7 +46,7 @@ defmodule AppAnimal.Neural.SwitchboardTest do
       |> Network.extend(at: :first, with: [to_test()])
     
     given(network)
-    |> Switchboard.external_pulse(to: :first, carrying: :nothing)
+    |> send_test_pulse(to: :first, carrying: :nothing)
     
     assert_test_receives([pid])
     assert_test_receives([^pid, ^pid])
@@ -61,18 +60,18 @@ defmodule AppAnimal.Neural.SwitchboardTest do
       Network.trace([first, to_test()])
       |> AppAnimal.enliven(pulse_rate: 100_000) # don't allow automatic pulses.
     
-    Switchboard.external_pulse(a.switchboard_pid, to: :first, carrying: :irrelevant)
+    send_test_pulse(a.switchboard_pid, to: :first, carrying: :irrelevant)
     assert_test_receives(pid)
 
     send(a.switchboard_pid, :make_throb)
-    Switchboard.external_pulse(a.switchboard_pid, to: :first, carrying: :irrelevant)
+    send_test_pulse(a.switchboard_pid, to: :first, carrying: :irrelevant)
     assert_test_receives(^pid)
 
     send(a.switchboard_pid, :make_throb)
     # Need to make sure there's time to handle the "down" message, else the pulse will
     # be lost. The app_animal must tolerate dropped messages.
     Process.sleep(100)  
-    Switchboard.external_pulse(a.switchboard_pid, to: :first, carrying: :irrelevant)
+    send_test_pulse(a.switchboard_pid, to: :first, carrying: :irrelevant)
 
     another_pid = assert_test_receives(_)
     refute another_pid == pid

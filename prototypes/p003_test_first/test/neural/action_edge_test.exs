@@ -13,8 +13,8 @@ defmodule AppAnimal.Neural.ActionEdgeTest do
       focus_on_new_paragraph: [paragraph_text: "some text"]
     ])
 
-    Switchboard.external_pulse(a.switchboard_pid,
-                               to: :focus_on_new_paragraph, carrying: :nothing)
+    send_test_pulse(a.switchboard_pid,
+                    to: :focus_on_new_paragraph, carrying: :nothing)
     
     assert_test_receives("some text")
   

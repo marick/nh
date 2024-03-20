@@ -22,19 +22,14 @@ defmodule AppAnimal.Neural.Switchboard do
       GenServer.start_link(__MODULE__, state)
     end
 
-    # An entry point, called to initiate or reinitiate a network.
-    def external_pulse(switchboard_pid, to: destination_name, carrying: pulse_data) do
-      GenServer.cast(switchboard_pid,
-                     {:distribute_pulse, carrying: pulse_data, to: [destination_name]})
-    end
-
     def send_pulse_downstream(switchboard_pid, from: source_name, carrying: pulse_data) do
       GenServer.cast(switchboard_pid,
                      {:distribute_downstream, from: source_name, carrying: pulse_data})
     end
 
     def forward_affordance(switchboard_pid, named: name, conveying: perception) do
-      external_pulse(switchboard_pid, to: name, carrying: perception)
+      GenServer.cast(switchboard_pid,
+                     {:distribute_pulse, carrying: perception, to: [name]})
     end
   end
 

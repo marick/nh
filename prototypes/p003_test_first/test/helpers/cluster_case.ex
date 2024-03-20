@@ -27,6 +27,12 @@ defmodule ClusterCase do
     }
   end
 
+  def send_test_pulse(switchboard_pid, to: destination_name, carrying: pulse_data) do
+    GenServer.cast(switchboard_pid,
+                   {:distribute_pulse, carrying: pulse_data, to: [destination_name]})
+  end
+    
+
   defmacro __using__(keys) do
     quote do
       use ExUnit.Case, unquote(keys)
