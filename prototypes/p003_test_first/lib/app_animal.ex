@@ -51,6 +51,7 @@ defmodule AppAnimal do
       import AppAnimal.Extras.Tuples
       import AppAnimal.Extras.Kernel
       alias AppAnimal.Cluster
+      import Lens.Macros
     end
   end
 end

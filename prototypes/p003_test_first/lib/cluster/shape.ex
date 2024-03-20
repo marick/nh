@@ -36,10 +36,9 @@ end
 ## 
 
 defmodule Shape.Linear do
-  defstruct [:dummy]
+  defstruct [] # This is just to create the type. 
   
   def new(opts \\ []), do: struct(__MODULE__, opts)
-  
 end
 
 defimpl Shape, for: Shape.Linear do

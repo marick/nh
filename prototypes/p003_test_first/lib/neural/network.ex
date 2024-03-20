@@ -1,7 +1,6 @@
 defmodule AppAnimal.Neural.Network do
   use AppAnimal
   use TypedStruct
-  import Lens.Macros
 
   typedstruct do
     plugin TypedStructLens, prefix: :l_
