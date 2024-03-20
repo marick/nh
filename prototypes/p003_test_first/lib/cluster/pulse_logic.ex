@@ -26,7 +26,7 @@ defimpl PulseLogic, for: PulseLogic.Internal do
   end
     
   def send_pulse(struct, pulse_data) do
-    payload = {:distribute_downstream, from: struct.from_name, carrying: pulse_data}
+    payload = {:distribute_pulse, carrying: pulse_data, from: struct.from_name}
     GenServer.cast(struct.switchboard_pid, payload)
   end
 end
