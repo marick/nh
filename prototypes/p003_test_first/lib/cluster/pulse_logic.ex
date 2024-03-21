@@ -13,10 +13,10 @@ end
 ## 
 
 defmodule PulseLogic.Internal do
-  defstruct [:p_switchboard, :from_name]
+  defstruct [:p_switchboard, :pid_taker]
 
-  def new(from_name: from_name) do
-    %__MODULE__{from_name: from_name}
+  def new(pid_taker) do
+    %__MODULE__{pid_taker: pid_taker}
   end
 end
 
@@ -26,18 +26,17 @@ defimpl PulseLogic, for: PulseLogic.Internal do
   end
     
   def send_pulse(struct, pulse_data) do
-    payload = {:distribute_pulse, carrying: pulse_data, from: struct.from_name}
-    GenServer.cast(struct.p_switchboard, payload)
+    struct.pid_taker.(struct.p_switchboard, pulse_data)
   end
 end
 
 ## 
   
 defmodule PulseLogic.External do
-  defstruct [:module, :fun, :pid]
+  defstruct [:pid_taker, :pid]
 
-  def new(module, fun) do
-    %__MODULE__{module: module, fun: fun}
+  def new(pid_taker) do
+    %__MODULE__{pid_taker: pid_taker}
   end
 
 end
@@ -48,17 +47,17 @@ defimpl PulseLogic, for: PulseLogic.External do
   end
     
   def send_pulse(struct, pulse_data) do
-    apply(struct.module, struct.fun, [struct.pid, pulse_data])
+    struct.pid_taker.(struct.pid, pulse_data)
   end
 end
 
 ## 
 
 defmodule PulseLogic.Test do
-  defstruct [:pid, :name]
+  defstruct [:pid, :pid_taker]
 
-  def new(name, test_pid) do
-    %__MODULE__{pid: test_pid, name: name}
+  def new(pid_taker, test_pid) do
+    %__MODULE__{pid: test_pid, pid_taker: pid_taker}
   end
 end
 
@@ -68,7 +67,7 @@ defimpl PulseLogic, for: PulseLogic.Test do
   end
       
   def send_pulse(struct, pulse_data) do
-    send(struct.pid, [pulse_data, from: struct.name])
+    struct.pid_taker.(struct.pid, pulse_data)
   end
 end
   

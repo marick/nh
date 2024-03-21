@@ -11,10 +11,8 @@ defmodule Cluster.MakeTest do
 
       |> assert_fields(name: :example,
                        label: :circular_cluster,
-                       shape: Cluster.Shape.Circular.new,
-                       pulse_logic: Cluster.PulseLogic.Internal.new(from_name: :example)
-      )
-
+                       shape: Cluster.Shape.Circular.new)
+                       
       assert cluster.calc.(1) == 2
       end
     

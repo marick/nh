@@ -15,7 +15,7 @@ defmodule Cluster.Make do
            label: :circular_cluster,
            shape: Circular.new(opts),
            calc: calc,
-           pulse_logic: PulseLogic.Internal.new(from_name: name)
+           pulse_logic: PulseLogic.Internal.new(linear_pid_taker(name))
     )
   end
 
@@ -33,11 +33,19 @@ defmodule Cluster.Make do
   
   # Linear Clusters
 
+  def linear_pid_taker(name) do
+    fn pid, pulse_data ->
+      payload = {:distribute_pulse, carrying: pulse_data, from: name}
+      GenServer.cast(pid, payload)
+    end
+  end
+      
+
   def linear(name, calc \\ &Function.identity/1) do
     %Cluster{name: name, label: :linear_cluster,
              shape: Linear.new,
              calc: calc,
-             pulse_logic: Internal.new(from_name: name)
+             pulse_logic: Internal.new(linear_pid_taker(name))
     }
   end
 
@@ -50,9 +58,13 @@ defmodule Cluster.Make do
   
 
   def action_edge(name) do
+    pid_taker = fn pid, pulse_data ->
+      GenServer.cast(pid, [:note_action, pulse_data])
+    end
+    
     %Cluster{name: name, label: :action_edge,
              shape: Linear.new,
              calc: & [{name, &1}],
-             pulse_logic: External.new(AppAnimal.Neural.AffordanceLand, :note_action)}
+             pulse_logic: External.new(pid_taker)}
   end
  end
