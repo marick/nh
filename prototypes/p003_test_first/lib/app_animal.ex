@@ -15,26 +15,26 @@ defmodule AppAnimal do
   end
 
   def enliven(network, switchboard_options) when is_map(network) do
-    {:ok, logger_pid} = ActivityLogger.start_link
+    {:ok, p_logger} = ActivityLogger.start_link
     switchboard_struct = struct(Switchboard,
                                 Keyword.merge(switchboard_options,
                                               network: network,
-                                              logger_pid: logger_pid))
-    switchboard_pid = compatibly_start_link(Switchboard, switchboard_struct)
-    affordances_pid = compatibly_start_link(AffordanceLand,
-                                            %{switchboard_pid: switchboard_pid,
-                                              logger_pid: logger_pid})
+                                              p_logger: p_logger))
+    p_switchboard = compatibly_start_link(Switchboard, switchboard_struct)
+    p_affordances = compatibly_start_link(AffordanceLand,
+                                            %{p_switchboard: p_switchboard,
+                                              p_logger: p_logger})
 
-    GenServer.call(switchboard_pid,
-                   {:link_clusters_to_architecture, switchboard_pid, affordances_pid})
-    %{switchboard_pid: switchboard_pid,
-      affordances_pid: affordances_pid,
-      logger_pid: logger_pid
+    GenServer.call(p_switchboard,
+                   {:link_clusters_to_architecture, p_switchboard, p_affordances})
+    %{p_switchboard: p_switchboard,
+      p_affordances: p_affordances,
+      p_logger: p_logger
     }
   end
 
-  def switchboard(network, options \\ []), do: enliven(network, options).switchboard_pid
-  def affordances(network), do: enliven(network).affordances_pid
+  def switchboard(network, options \\ []), do: enliven(network, options).p_switchboard
+  def affordances(network), do: enliven(network).p_affordances
 
   private do
     def default_start(module, initial_mutable) do

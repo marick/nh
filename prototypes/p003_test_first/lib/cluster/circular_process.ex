@@ -30,14 +30,14 @@ defmodule CircularProcess.State do
     field :previously, any
   end
     
-  def from_cluster(cluster) do
-    timer = TimerLogic.new(cluster.shape.starting_pulses)
+  def from_cluster(s_cluster) do
+    timer = TimerLogic.new(s_cluster.shape.starting_pulses)
 
-    %__MODULE__{shape: cluster.shape,
-                calc: cluster.calc,
-                pulse_logic: cluster.pulse_logic,
+    %__MODULE__{shape: s_cluster.shape,
+                calc: s_cluster.calc,
+                pulse_logic: s_cluster.pulse_logic,
                 timer_logic: timer,
-                previously: cluster.shape.initial_value
+                previously: s_cluster.shape.initial_value
   }
   end
 
@@ -58,18 +58,18 @@ defmodule CircularProcess do
     ok(starting_state)
   end
 
-  def handle_cast([handle_pulse: small_data], state) do
-    result = Calc.run(state.calc, on: small_data, with_state: state.previously)
+  def handle_cast([handle_pulse: small_data], s_state) do
+    result = Calc.run(s_state.calc, on: small_data, with_state: s_state.previously)
 
-    Calc.maybe_pulse(result, & Cluster.PulseLogic.send_pulse(state.pulse_logic, &1))
+    Calc.maybe_pulse(result, & Cluster.PulseLogic.send_pulse(s_state.pulse_logic, &1))
     
-    state
+    s_state
     |> deeply_put(:l_previously, Calc.next_state(result))
     |> continue
   end
 
-  def handle_cast([weaken: n], state) do
-    new_state = deeply_map(state, :l_current_strength, & &1-n)
+  def handle_cast([weaken: n], s_state) do
+    new_state = deeply_map(s_state, :l_current_strength, & &1-n)
 
     if deeply_get_only(new_state, :l_current_strength) <= 0,
        do: stop(new_state),

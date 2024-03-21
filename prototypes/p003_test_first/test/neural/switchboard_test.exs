@@ -15,11 +15,11 @@ defmodule AppAnimal.Neural.SwitchboardTest do
              to_test()]
     a = AppAnimal.enliven(trace)
 
-    ActivityLogger.spill_log_to_terminal(a.logger_pid)
-    send_test_pulse(a.switchboard_pid, to: :first, carrying: 0)
+    ActivityLogger.spill_log_to_terminal(a.p_logger)
+    send_test_pulse(a.p_switchboard, to: :first, carrying: 0)
     assert_test_receives(2)
     
-    [first, second] = ActivityLogger.get_log(a.logger_pid)
+    [first, second] = ActivityLogger.get_log(a.p_logger)
     assert_fields(first, name: :first,
                          pulse_data: 1)
     assert_fields(second, name: :second,
@@ -60,18 +60,18 @@ defmodule AppAnimal.Neural.SwitchboardTest do
       Network.trace([first, to_test()])
       |> AppAnimal.enliven(pulse_rate: 100_000) # don't allow automatic pulses.
     
-    send_test_pulse(a.switchboard_pid, to: :first, carrying: :irrelevant)
+    send_test_pulse(a.p_switchboard, to: :first, carrying: :irrelevant)
     assert_test_receives(pid)
 
-    send(a.switchboard_pid, :time_to_throb)
-    send_test_pulse(a.switchboard_pid, to: :first, carrying: :irrelevant)
+    send(a.p_switchboard, :time_to_throb)
+    send_test_pulse(a.p_switchboard, to: :first, carrying: :irrelevant)
     assert_test_receives(^pid)
 
-    send(a.switchboard_pid, :time_to_throb)
+    send(a.p_switchboard, :time_to_throb)
     # Need to make sure there's time to handle the "down" message, else the pulse will
     # be lost. The app_animal must tolerate dropped messages.
     Process.sleep(100)  
-    send_test_pulse(a.switchboard_pid, to: :first, carrying: :irrelevant)
+    send_test_pulse(a.p_switchboard, to: :first, carrying: :irrelevant)
 
     another_pid = assert_test_receives(_)
     refute another_pid == pid

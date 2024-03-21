@@ -27,8 +27,8 @@ defmodule ClusterCase do
     }
   end
 
-  def send_test_pulse(switchboard_pid, to: destination_name, carrying: pulse_data) do
-    GenServer.cast(switchboard_pid,
+  def send_test_pulse(p_switchboard, to: destination_name, carrying: pulse_data) do
+    GenServer.cast(p_switchboard,
                    {:distribute_pulse, carrying: pulse_data, to: [destination_name]})
   end
     

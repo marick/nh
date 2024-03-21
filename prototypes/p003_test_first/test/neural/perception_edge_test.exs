@@ -14,7 +14,7 @@ defmodule AppAnimal.Neural.PerceptionEdgeTest do
 
     a = AppAnimal.enliven(network)
 
-    a.affordances_pid
+    a.p_affordances
     |> AffordanceLand.script([
       focus_on_paragraph: [paragraph_text: "some text"]
     ])
@@ -23,7 +23,7 @@ defmodule AppAnimal.Neural.PerceptionEdgeTest do
     assert_test_receives("some textsome text")
     assert_test_receives("txet emos")
 
-    log = ActivityLogger.get_log(a.logger_pid)
+    log = ActivityLogger.get_log(a.p_logger)
 
     log 
     |> assert_trace([

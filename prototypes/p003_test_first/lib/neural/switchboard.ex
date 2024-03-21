@@ -10,7 +10,7 @@ defmodule AppAnimal.Neural.Switchboard do
 
     field :network,    Network.t
     field :pulse_rate, integer,          default: 100  # in milliseconds
-    field :logger_pid, ActivityLogger.t, default: ActivityLogger.start_link |> okval
+    field :p_logger, ActivityLogger.t, default: ActivityLogger.start_link |> okval
   end
 
   def l_cluster_named(name),
@@ -33,13 +33,13 @@ defmodule AppAnimal.Neural.Switchboard do
     end
 
     @impl GenServer
-    def handle_call({:link_clusters_to_architecture, switchboard_pid, affordances_pid},
+    def handle_call({:link_clusters_to_architecture, p_switchboard, p_affordances},
                     _from, s_switchboard) do
 
       s_switchboard
       |> within_network(& Network.link_clusters_to_architecture(&1,
-                                                                switchboard_pid,
-                                                                affordances_pid))
+                                                                p_switchboard,
+                                                                p_affordances))
       |> continue(returning: :ok)
     end
 
@@ -55,7 +55,7 @@ defmodule AppAnimal.Neural.Switchboard do
                     s_switchboard) do
       source = deeply_get_only(s_switchboard, l_cluster_named(source_name))
       destination_names = source.downstream
-      ActivityLogger.log_pulse_sent(s_switchboard.logger_pid, source.label,
+      ActivityLogger.log_pulse_sent(s_switchboard.p_logger, source.label,
                                     source.name, pulse_data)
       handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names},
                   s_switchboard)

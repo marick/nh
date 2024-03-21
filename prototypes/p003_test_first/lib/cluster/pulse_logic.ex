@@ -13,7 +13,7 @@ end
 ## 
 
 defmodule PulseLogic.Internal do
-  defstruct [:switchboard_pid, :from_name]
+  defstruct [:p_switchboard, :from_name]
 
   def new(from_name: from_name) do
     %__MODULE__{from_name: from_name}
@@ -21,13 +21,13 @@ defmodule PulseLogic.Internal do
 end
 
 defimpl PulseLogic, for: PulseLogic.Internal do
-  def put_pid(struct, {switchboard_pid, _affordances_pid}) do
-    %{struct | switchboard_pid: switchboard_pid}
+  def put_pid(struct, {p_switchboard, _p_affordances}) do
+    %{struct | p_switchboard: p_switchboard}
   end
     
   def send_pulse(struct, pulse_data) do
     payload = {:distribute_pulse, carrying: pulse_data, from: struct.from_name}
-    GenServer.cast(struct.switchboard_pid, payload)
+    GenServer.cast(struct.p_switchboard, payload)
   end
 end
 
@@ -43,8 +43,8 @@ defmodule PulseLogic.External do
 end
 
 defimpl PulseLogic, for: PulseLogic.External do
-  def put_pid(struct, {_switchboard_pid, affordances_pid}) do
-    %{struct | pid: affordances_pid}
+  def put_pid(struct, {_p_switchboard, p_affordances}) do
+    %{struct | pid: p_affordances}
   end
     
   def send_pulse(struct, pulse_data) do

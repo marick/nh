@@ -16,22 +16,22 @@ defmodule AppAnimal.Neural.LinearClusterTest do
   
   describe "handling of a calculation" do
     test "choosing to pulse" do
-      switchboard_pid =
+      p_switchboard =
         Network.trace([linear(:first, & &1+1), to_test()])
         |> AppAnimal.switchboard
       
-      send_test_pulse(switchboard_pid, to: :first, carrying: 3)
+      send_test_pulse(p_switchboard, to: :first, carrying: 3)
       assert_test_receives(4)
     end
 
     test "choosing not to pulse" do
       calc = fn _ -> :no_pulse end
 
-      switchboard_pid =
+      p_switchboard =
         Network.trace([linear(:first, calc), to_test()])
         |> AppAnimal.switchboard
 
-      send_test_pulse(switchboard_pid, to: :first, carrying: 3)
+      send_test_pulse(p_switchboard, to: :first, carrying: 3)
       refute_receive(_)
     end
   end

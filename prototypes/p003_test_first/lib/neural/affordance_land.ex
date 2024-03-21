@@ -3,8 +3,8 @@ defmodule AppAnimal.Neural.AffordanceLand do
   use AppAnimal
   use AppAnimal.GenServer
 
-  defstruct [:switchboard_pid,
-             logger_pid: :created_at_start_link_time,
+  defstruct [:p_switchboard,
+             p_logger: :created_at_start_link_time,
              programmed_responses: []]
 
 
@@ -41,7 +41,7 @@ defmodule AppAnimal.Neural.AffordanceLand do
     end
 
     def handle_cast([:produce_this_affordance, {name, data}], mutable) do
-      GenServer.cast(mutable.switchboard_pid,
+      GenServer.cast(mutable.p_switchboard,
                      {:distribute_pulse, carrying: data, to: [name]})
       continue(mutable)
     end
@@ -59,7 +59,7 @@ defmodule AppAnimal.Neural.AffordanceLand do
       if responses == nil,
       do: IO.puts("==== SAY, there is no programmed response for #{name}. Test error.")
         
-      ActivityLogger.log_action_received(mutable.logger_pid, name, data)
+      ActivityLogger.log_action_received(mutable.p_logger, name, data)
       for response <- responses do
         handle_cast([:produce_this_affordance, response], mutable)
       end

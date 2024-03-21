@@ -5,8 +5,8 @@ defprotocol Shape do
   @spec can_throb?(Shape.t) :: boolean
   def can_throb?(shape)
 
-  @spec accept_pulse(struct, Cluster.t, pid, any) :: no_return
-    def accept_pulse(struct, cluster, pid, pulse_data)
+  @spec accept_pulse(Shape.t, Cluster.t, pid, any) :: no_return
+    def accept_pulse(s_shape, cluster, pid, pulse_data)
 end
 
 ##
@@ -25,9 +25,9 @@ defmodule Shape.Circular do
 end
 
 defimpl Shape, for: Shape.Circular do
-  def can_throb?(_struct), do: true
+  def can_throb?(_s_shape), do: true
 
-  def accept_pulse(_struct, _cluster, destination_pid, pulse_data) do
+  def accept_pulse(_s_shape, _cluster, destination_pid, pulse_data) do
     GenServer.cast(destination_pid, [handle_pulse: pulse_data])
   end
 end
@@ -44,9 +44,9 @@ defimpl Shape, for: Shape.Linear do
   alias Cluster.PulseLogic
   alias Cluster.Calc
   
-  def can_throb?(_struct), do: false
+  def can_throb?(_s_shape), do: false
 
-  def accept_pulse(_struct, cluster, _destination_pid, pulse_data) do
+  def accept_pulse(_s_shape, cluster, _destination_pid, pulse_data) do
     Task.start(fn ->
       Calc.run(cluster.calc, on: pulse_data)
       |> Calc.maybe_pulse(& PulseLogic.send_pulse(cluster.pulse_logic, &1))

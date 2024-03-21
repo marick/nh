@@ -35,14 +35,14 @@ defmodule Cluster.CircularProcessTest do
         pulse_data, _state -> pulse_data + 1
       end
 
-      switchboard_pid =
+      p_switchboard =
         Network.trace([circular(:first, calc, initial_value: "will be unchanged"), to_test()])
         |> AppAnimal.switchboard
 
-      send_test_pulse(switchboard_pid, to: :first, carrying: 3)
+      send_test_pulse(p_switchboard, to: :first, carrying: 3)
       assert_test_receives(4)
 
-      send_test_pulse(switchboard_pid, to: :first, carrying: :report_state)
+      send_test_pulse(p_switchboard, to: :first, carrying: :report_state)
       assert_test_receives("will be unchanged")
     end
 
@@ -52,14 +52,14 @@ defmodule Cluster.CircularProcessTest do
         pulse_data, state -> pulse(pulse_data + 1, [pulse_data | state])
       end
 
-      switchboard_pid =
+      p_switchboard =
         Network.trace([circular(:first, calc, initial_value: []), to_test()])
         |> AppAnimal.switchboard
 
-      send_test_pulse(switchboard_pid, to: :first, carrying: 3)
+      send_test_pulse(p_switchboard, to: :first, carrying: 3)
       assert_test_receives(4)
 
-      send_test_pulse(switchboard_pid, to: :first, carrying: :report_state)
+      send_test_pulse(p_switchboard, to: :first, carrying: :report_state)
       assert_test_receives([3])
     end
 
@@ -69,14 +69,14 @@ defmodule Cluster.CircularProcessTest do
         pulse_data, state -> no_pulse([pulse_data | state])
       end
 
-      switchboard_pid =
+      p_switchboard =
         Network.trace([circular(:first, calc, initial_value: []), to_test()])
         |> AppAnimal.switchboard
 
-      send_test_pulse(switchboard_pid, to: :first, carrying: 3)
+      send_test_pulse(p_switchboard, to: :first, carrying: 3)
       refute_receive(_)
 
-      send_test_pulse(switchboard_pid, to: :first, carrying: :report_state)
+      send_test_pulse(p_switchboard, to: :first, carrying: :report_state)
       assert_test_receives([3])
     end      
 

@@ -6,32 +6,32 @@ defmodule AppAnimal.Extras.Kernel do
   def pi([{tag, value}]), do: IO.puts "#{tag}: #{inspect value}"
 
 
-  def deeply_put(struct, lens_name, value) when is_atom(lens_name),
-      do: deeply_put(struct, lookup_lens(struct, lens_name), value)
-  def deeply_put(struct, lens, value),
-      do: Lens.put(lens, struct, value)
+  def deeply_put(s_struct, lens_name, value) when is_atom(lens_name),
+      do: deeply_put(s_struct, lookup_lens(s_struct, lens_name), value)
+  def deeply_put(s_struct, lens, value),
+      do: Lens.put(lens, s_struct, value)
 
-  def deeply_get_only(struct, lens_name) when is_atom(lens_name),
-      do: deeply_get_only(struct, lookup_lens(struct, lens_name))
-  def deeply_get_only(struct, lens),
-      do: Lens.one!(lens, struct)
+  def deeply_get_only(s_struct, lens_name) when is_atom(lens_name),
+      do: deeply_get_only(s_struct, lookup_lens(s_struct, lens_name))
+  def deeply_get_only(s_struct, lens),
+      do: Lens.one!(lens, s_struct)
 
-  def deeply_get_all(struct, lens_name) when is_atom(lens_name),
-      do: deeply_get_all(struct, lookup_lens(struct, lens_name))
-  def deeply_get_all(struct, lens),
-      do: Lens.to_list(lens, struct)
+  def deeply_get_all(s_struct, lens_name) when is_atom(lens_name),
+      do: deeply_get_all(s_struct, lookup_lens(s_struct, lens_name))
+  def deeply_get_all(s_struct, lens),
+      do: Lens.to_list(lens, s_struct)
 
-  def deeply_map(struct, lens_name, f) when is_atom(lens_name),
-      do: deeply_map(struct, lookup_lens(struct, lens_name), f)
-  def deeply_map(struct, lens, f),
-      do: Lens.map(lens, struct, f)
+  def deeply_map(s_struct, lens_name, f) when is_atom(lens_name),
+      do: deeply_map(s_struct, lookup_lens(s_struct, lens_name), f)
+  def deeply_map(s_struct, lens, f),
+      do: Lens.map(lens, s_struct, f)
 
-  def deeply_side_effect(struct, lens_name, f) when is_atom(lens_name),
-      do: deeply_side_effect(struct, lookup_lens(struct, lens_name), f)
-  def deeply_side_effect(struct, lens, f),
-      do: Lens.each(lens, struct, f)
+  def deeply_side_effect(s_struct, lens_name, f) when is_atom(lens_name),
+      do: deeply_side_effect(s_struct, lookup_lens(s_struct, lens_name), f)
+  def deeply_side_effect(s_struct, lens, f),
+      do: Lens.each(lens, s_struct, f)
 
   private do
-    def lookup_lens(struct, lens_name), do: apply(struct.__struct__, lens_name, [])
+    def lookup_lens(s_struct, lens_name), do: apply(s_struct.__struct__, lens_name, [])
   end
 end
