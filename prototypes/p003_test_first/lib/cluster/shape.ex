@@ -41,7 +41,6 @@ defmodule Shape.Linear do
 end
 
 defimpl Shape, for: Shape.Linear do
-  alias Cluster.PulseLogic
   alias Cluster.Calc
   
   def can_throb?(_s_shape), do: false
@@ -49,7 +48,7 @@ defimpl Shape, for: Shape.Linear do
   def accept_pulse(_s_shape, cluster, _destination_pid, pulse_data) do
     Task.start(fn ->
       Calc.run(cluster.calc, on: pulse_data)
-      |> Calc.maybe_pulse(& PulseLogic.send_pulse(cluster.pulse_logic, &1))
+      |> Calc.maybe_pulse(& Cluster.send_pulse(cluster, &1))
       :there_is_no_return_value
     end)
   end    
