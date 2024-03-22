@@ -49,7 +49,7 @@ defimpl Shape, for: Shape.Linear do
                                          _there_is_no_circular_process, pulse_data) do
     Task.start(fn ->
       Calc.run(cluster.calc, on: pulse_data)
-      |> Calc.maybe_pulse(& Cluster.send_pulse(cluster, &1))
+      |> Calc.maybe_pulse(& Cluster.start_pulse_on_its_way(cluster, &1))
       :there_is_no_return_value
     end)
   end    

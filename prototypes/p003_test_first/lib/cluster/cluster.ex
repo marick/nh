@@ -33,7 +33,7 @@ defmodule Cluster do
     {s_cluster.name, pid}
   end
 
-  def send_pulse(s_cluster, pulse_data) do
+  def start_pulse_on_its_way(s_cluster, pulse_data) do
     s_cluster.pulse_logic.pid_taker.(s_cluster.pulse_logic.pid, pulse_data)
   end
 

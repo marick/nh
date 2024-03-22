@@ -61,7 +61,7 @@ defmodule CircularProcess do
   def handle_cast([handle_pulse: small_data], s_state) do
     result = Calc.run(s_state.calc, on: small_data, with_state: s_state.previously)
 
-    Calc.maybe_pulse(result, & Cluster.send_pulse(s_state, &1))
+    Calc.maybe_pulse(result, & Cluster.start_pulse_on_its_way(s_state, &1))
     
     s_state
     |> deeply_put(:l_previously, Calc.next_state(result))
