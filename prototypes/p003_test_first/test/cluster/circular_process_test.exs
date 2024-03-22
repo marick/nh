@@ -13,7 +13,6 @@ defmodule Cluster.CircularProcessTest do
       state
       |> assert_fields(shape: cluster.shape,
                        calc: cluster.calc,
-                       pulse_logic: cluster.pulse_logic,
                        previously: %{})
 
       starting_pulses = cluster.shape.starting_pulses

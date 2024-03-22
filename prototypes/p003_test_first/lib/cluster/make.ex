@@ -3,8 +3,6 @@ alias AppAnimal.Cluster
 defmodule Cluster.Make do
   use AppAnimal
   alias Cluster.Shape.{Circular, Linear}
-  alias Cluster.PulseLogic
-  alias PulseLogic.{Internal, External}
   alias Cluster.OutgoingLogic
 
   # Circular clusters
@@ -15,9 +13,7 @@ defmodule Cluster.Make do
            label: :circular_cluster,
            shape: Circular.new(opts),
            calc: calc,
-           f_outward: OutgoingLogic.mkfn_pulse_direction(:internal, name),
-           pulse_logic: PulseLogic.Internal.new(linear_pid_taker(name))
-    )
+           f_outward: OutgoingLogic.mkfn_pulse_direction(:internal, name))
   end
 
   def pulse_and_save(f) when is_function(f, 2) do
@@ -33,21 +29,12 @@ defmodule Cluster.Make do
 
   
   # Linear Clusters
-  def linear_pid_taker(name) do
-    fn pid, pulse_data ->
-      payload = {:distribute_pulse, carrying: pulse_data, from: name}
-      GenServer.cast(pid, payload)
-    end
-  end
-      
-
 
   def linear(name, calc \\ &Function.identity/1) do
     %Cluster{name: name, label: :linear_cluster,
              shape: Linear.new,
              calc: calc,
-             f_outward: OutgoingLogic.mkfn_pulse_direction(:internal, name),
-             pulse_logic: Internal.new(linear_pid_taker(name))
+             f_outward: OutgoingLogic.mkfn_pulse_direction(:internal, name)
     }
   end
 
@@ -57,17 +44,11 @@ defmodule Cluster.Make do
     linear(name, &Function.identity/1)
     |> Map.put(:label, :perception_edge)
   end
-  
 
   def action_edge(name) do
-    pid_taker = fn pid, pulse_data ->
-      GenServer.cast(pid, [:note_action, pulse_data])
-    end
-    
     %Cluster{name: name, label: :action_edge,
              shape: Linear.new,
              calc: & [{name, &1}],
-             f_outward: OutgoingLogic.mkfn_pulse_direction(:external),
-             pulse_logic: External.new(pid_taker)}
+             f_outward: OutgoingLogic.mkfn_pulse_direction(:external)}
   end
  end

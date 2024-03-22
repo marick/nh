@@ -1,7 +1,7 @@
 defmodule ClusterCase do
   use AppAnimal
   alias AppAnimal.{Neural, Cluster}
-  alias Cluster.{Shape, PulseLogic}
+  alias Cluster.Shape
   alias ExUnit.Assertions
 
   defmacro assert_test_receives(value, opts \\ [from: :endpoint]) do
@@ -19,10 +19,6 @@ defmodule ClusterCase do
         pulse -> pulse
       end
 
-    pid_taker = fn pid, pulse_data ->
-      send(pid, [pulse_data, from: name])
-    end
-
     p_test = self()
     f_outward = fn pulse_data ->
       send(p_test, [pulse_data, from: name])
@@ -32,9 +28,7 @@ defmodule ClusterCase do
              label: :test_endpoint,
              shape: Shape.Linear.new,
              calc: filter,
-             f_outward: f_outward,
-             pulse_logic: PulseLogic.Test.new(pid_taker, self())
-    }
+             f_outward: f_outward}
   end
 
   def send_test_pulse(p_switchboard, to: destination_name, carrying: pulse_data) do

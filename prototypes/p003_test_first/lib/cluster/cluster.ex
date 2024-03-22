@@ -18,8 +18,7 @@ defmodule Cluster do
     field :shape, Shape.Circular.t | Shape.Linear.t
     field :calc, fun
     field :f_outward, fun
-    field :pulse_logic, atom | Cluster.PulseLogic.t, default: :installed_later
-
+    
     # Set when compiled into a network
     field :downstream, [atom], default: []
   end
@@ -42,6 +41,5 @@ defmodule Cluster do
 
   def start_pulse_on_its_way(s_cluster, pulse_data) do
     s_cluster.f_outward.(pulse_data)
-    #    s_cluster.pulse_logic.pid_taker.(s_cluster.pulse_logic.pid, pulse_data)
   end
 end

@@ -21,9 +21,6 @@ defmodule AppAnimal.Neural.Network do
   deflens l_irrelevant_names,
           do: l_clusters() |> Cluster.l_never_throbs |> Lens.key!(:name)
 
-  deflens l_pulse_logic,
-          do: l_clusters() |> Lens.key!(:pulse_logic)
-
   def new(cluster_map_or_keyword) do
     %__MODULE__{clusters_by_name: cluster_map_or_keyword |> Enum.into(%{})}
   end
