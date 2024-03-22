@@ -1,6 +1,6 @@
 defmodule ClusterCase do
   use AppAnimal
-  alias AppAnimal.{Neural, Cluster}
+  alias AppAnimal.{System, Cluster}
   alias Cluster.Shape
   alias ExUnit.Assertions
 
@@ -41,11 +41,11 @@ defmodule ClusterCase do
     quote do
       use ExUnit.Case, unquote(opts)
       use AppAnimal
-      alias AppAnimal.Neural
-      alias Neural.Switchboard
-      alias Neural.AffordanceLand
-      alias Neural.Network
-      alias Neural.ActivityLogger
+      alias AppAnimal.System
+      alias System.Switchboard
+      alias System.AffordanceLand
+      alias System.Network
+      alias System.ActivityLogger
       import ClusterCase
       import AppAnimal.TraceAssertions
       use FlowAssertions

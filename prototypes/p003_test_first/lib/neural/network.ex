@@ -1,7 +1,7 @@
-defmodule AppAnimal.Neural.Network do
+defmodule AppAnimal.System.Network do
   use AppAnimal
   use TypedStruct
-  alias AppAnimal.Neural.{AffordanceLand, Switchboard}
+  alias AppAnimal.System.{AffordanceLand, Switchboard}
 
   typedstruct do
     plugin TypedStructLens, prefix: :l_

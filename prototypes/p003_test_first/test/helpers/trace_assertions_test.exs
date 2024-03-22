@@ -3,7 +3,7 @@ defmodule TraceAssertionsTest do
   import FlowAssertions.AssertionA
 #  import FlowAssertions.TabularA
   alias AppAnimal.TraceAssertions, as: UT
-  alias AppAnimal.Neural.ActivityLogger
+  alias AppAnimal.System.ActivityLogger
   alias ActivityLogger.{PulseSent, ActionReceived}
   import AppAnimal.TraceAssertions, only: [action: 1]
 

@@ -1,6 +1,6 @@
-defmodule AppAnimal.Neural.SwitchboardTest do
+defmodule AppAnimal.System.SwitchboardTest do
   use ClusterCase, async: true
-  alias AppAnimal.Neural.ActivityLogger
+  alias AppAnimal.System.ActivityLogger
   alias AppAnimal.Cluster.Make
   
   ## The switchboard is mostly tested via the different kinds of clusters.

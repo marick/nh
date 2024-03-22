@@ -1,9 +1,9 @@
-defmodule AppAnimal.Neural.Switchboard do
+defmodule AppAnimal.System.Switchboard do
   use AppAnimal
   use AppAnimal.GenServer
   use TypedStruct
-  alias Neural.ActivityLogger
-  alias Neural.Network
+  alias System.ActivityLogger
+  alias System.Network
 
   typedstruct do
     plugin TypedStructLens, prefix: :l_

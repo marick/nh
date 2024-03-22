@@ -1,6 +1,6 @@
 defmodule AppAnimal do
-  alias AppAnimal.Neural
-  alias Neural.{Switchboard, AffordanceLand, Network, ActivityLogger}
+  alias AppAnimal.System
+  alias System.{Switchboard, AffordanceLand, Network, ActivityLogger}
   import Private
   use AppAnimal.Extras.TestAwareProcessStarter
 

@@ -3,7 +3,7 @@
 defmodule AppAnimal.Pretty.LogFormat do
   alias AppAnimal.Pretty
   use Private
-  alias AppAnimal.Neural.ActivityLogger
+  alias AppAnimal.System.ActivityLogger
   
   def format(_level, message, _timestamp, metadata) do
     message = format(message, metadata)

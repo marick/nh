@@ -1,4 +1,4 @@
-defmodule AppAnimal.Neural.ActivityLogger do
+defmodule AppAnimal.System.ActivityLogger do
   use AppAnimal
   use AppAnimal.GenServer
   require CircularBuffer

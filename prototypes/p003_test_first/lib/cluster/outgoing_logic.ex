@@ -16,7 +16,7 @@ defmodule OutgoingLogic do
      around separately from the function that sends to it.
   """
 
-  alias AppAnimal.Neural.{Switchboard, AffordanceLand}
+  alias AppAnimal.System.{Switchboard, AffordanceLand}
 
   def mkfn_pulse_direction(Switchboard, name) do
     f_pid_taker = 

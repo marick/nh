@@ -1,4 +1,4 @@
-defmodule AppAnimal.Neural.LinearClusterTest do
+defmodule AppAnimal.System.LinearClusterTest do
   use ClusterCase, async: true
 
   def given(trace_or_network), do: AppAnimal.switchboard(trace_or_network)

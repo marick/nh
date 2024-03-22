@@ -3,7 +3,7 @@ defmodule AppAnimal.TraceAssertions do
   use FlowAssertions
   use FlowAssertions.Define
   use Private
-  alias AppAnimal.Neural.ActivityLogger
+  alias AppAnimal.System.ActivityLogger
   alias ActivityLogger.{ActionReceived, PulseSent}
 
   def action(name, data \\ :no_data), do: ActionReceived.new(name, data)

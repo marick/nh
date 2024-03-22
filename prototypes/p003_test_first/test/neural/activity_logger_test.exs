@@ -1,6 +1,6 @@
-defmodule AppAnimal.Neural.ActivityLoggerTest do
+defmodule AppAnimal.System.ActivityLoggerTest do
   use ClusterCase, async: true
-  alias Neural.ActivityLogger, as: UT
+  alias System.ActivityLogger, as: UT
   
   test "basic operations" do
     pid = start_link_supervised!({UT,100})

@@ -21,7 +21,7 @@ defmodule Cluster.Make do
   
   use AppAnimal
   alias Cluster.Shape.{Circular, Linear}
-  alias AppAnimal.Neural.{AffordanceLand, Switchboard}
+  alias AppAnimal.System.{AffordanceLand, Switchboard}
   alias Cluster.OutgoingLogic
 
   # Circular clusters

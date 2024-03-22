@@ -1,5 +1,5 @@
-defmodule AppAnimal.Neural.AffordanceLand do
-  alias AppAnimal.Neural.ActivityLogger
+defmodule AppAnimal.System.AffordanceLand do
+  alias AppAnimal.System.ActivityLogger
   use AppAnimal
   use AppAnimal.GenServer
 

@@ -1,6 +1,6 @@
-defmodule AppAnimal.Neural.ActionEdgeTest do
+defmodule AppAnimal.System.ActionEdgeTest do
   use ClusterCase, async: true
-  alias Neural.ActivityLogger
+  alias Systemt.ActivityLogger
 
   test "action edges call into the affordances" do
     

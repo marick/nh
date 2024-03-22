@@ -1,6 +1,6 @@
-defmodule AppAnimal.Neural.NetworkTest do
+defmodule AppAnimal.System.NetworkTest do
   use ClusterCase, async: true
-  alias Neural.Network, as: UT
+  alias System.Network, as: UT
   
   defp named(names) when is_list(names),
        do: Enum.map(names, &named/1)

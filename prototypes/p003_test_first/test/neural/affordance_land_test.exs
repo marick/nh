@@ -1,6 +1,6 @@
-defmodule AppAnimal.Neural.AffordanceLandTest do
+defmodule AppAnimal.System.AffordanceLandTest do
   use ClusterCase, async: true
-  alias Neural.AffordanceLand, as: UT
+  alias System.AffordanceLand, as: UT
 
   def given(trace_or_network), do: AppAnimal.affordances(trace_or_network)
 
