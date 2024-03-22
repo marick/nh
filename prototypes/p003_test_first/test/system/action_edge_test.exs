@@ -1,6 +1,6 @@
 defmodule AppAnimal.System.ActionEdgeTest do
   use ClusterCase, async: true
-  alias Systemt.ActivityLogger
+  alias System.ActivityLogger
 
   test "action edges call into the affordances" do
     
