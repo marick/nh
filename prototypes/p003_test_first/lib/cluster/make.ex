@@ -1,6 +1,24 @@
 alias AppAnimal.Cluster
 
 defmodule Cluster.Make do
+  @moduledoc """
+  Convenience functions for creating various "kinds" of clusters, ranging from
+  generic to specialized. (The kinds are distinguished by the `label` field,
+  which is used to create human-friendly logging messages.)
+
+  Most functions are built on either a `linear` or `circular` cluster. To vary their
+  base behavior, pipe the result into a `Map.put` that alters some field. You should
+  also change the `label`.
+
+  Both linear and circular clusters can send their outgoing pulses to other clusters
+  or to `AffordanceLand` (external reality). You use `OutgoingLogic.mkfn_pulse_direction`
+  to choose.
+
+  Most every cluster created will have a function specified. Return values for linear
+  clusters are trivial: either a value or :no_pulse. But circular clusters can use
+  some convenience functions to avoid having to code up the right tuple.
+  """
+  
   use AppAnimal
   alias Cluster.Shape.{Circular, Linear}
   alias Cluster.OutgoingLogic
@@ -16,16 +34,10 @@ defmodule Cluster.Make do
            f_outward: OutgoingLogic.mkfn_pulse_direction(:internal, name))
   end
 
-  def pulse_and_save(f) when is_function(f, 2) do
-    fn pulse, mutable ->
-      mutated = f.(pulse, mutable)
-      pulse(mutated, mutated)
-    end
-  end
 
-  def pulse(pulse_data, mutated), do: {:pulse, pulse_data, mutated}
-  def no_pulse(mutated), do: {:no_pulse, mutated}
-  def no_pulse(), do: {:no_pulse}
+  def pulse(pulse_data, next_state), do: {:pulse, pulse_data, next_state}
+  def no_pulse(next_state), do: {:no_pulse, next_state}
+  def pulse_and_save(data), do: {:pulse, data, data}
 
   
   # Linear Clusters
@@ -46,9 +58,8 @@ defmodule Cluster.Make do
   end
 
   def action_edge(name) do
-    %Cluster{name: name, label: :action_edge,
-             shape: Linear.new,
-             calc: & [{name, &1}],
-             f_outward: OutgoingLogic.mkfn_pulse_direction(:external)}
+    linear(name, & [{name, &1}])
+    |> Map.put(:f_outward, OutgoingLogic.mkfn_pulse_direction(:external))
+    |> Map.put(:label, :action_edge)
   end
  end

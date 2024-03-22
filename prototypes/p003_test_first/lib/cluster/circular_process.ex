@@ -16,6 +16,16 @@ defmodule CircularProcess.TimerLogic do
 end
 
 defmodule CircularProcess.State do
+  @moduledoc """
+
+  Those parts of a `Cluster` that are relevant to the operation of this gensym. Here are
+  the fields that are new:
+  
+  - timer_logic    - Controls the aging of this cluster and its eventual exit.
+                     Initialized from Shape.Circular.starting_pulses.
+  - previously     - The part of the state the `calc` function can channged.
+                     Initialized from Shape.Circular.starting_pulses.
+  """
   alias CircularProcess.TimerLogic
   use AppAnimal
   use TypedStruct
@@ -24,7 +34,6 @@ defmodule CircularProcess.State do
     plugin TypedStructLens, prefix: :l_
 
     field :timer_logic, CircularProcess.TimerLogic.t
-    field :shape, Cluster.Shape.t
     field :calc, fun
     field :f_outward, fun
     field :previously, any
@@ -33,8 +42,7 @@ defmodule CircularProcess.State do
   def from_cluster(s_cluster) do
     timer = TimerLogic.new(s_cluster.shape.starting_pulses)
 
-    %__MODULE__{shape: s_cluster.shape,
-                calc: s_cluster.calc,
+    %__MODULE__{calc: s_cluster.calc,
                 f_outward: s_cluster.f_outward,
                 timer_logic: timer,
                 previously: s_cluster.shape.initial_value

@@ -17,3 +17,23 @@ Not super-happy about reinventing
 but oh well. 
 
 I will, as whim takes me, break the conventions or not convert old code.
+
+
+### GenServer use
+
+A GenServer's code is tyupically divided into two sections. The first
+are functions that run in a sender's process. They're syntactic sugar
+around, typically, a `GenServer.call`.
+
+The second runs inside the GenServer's (the receiver's) process. They look weird,
+like `handle_call(pattern_for_message_x, _from, state)`. 
+
+The point of the App Animal is to use asynchronous messaging almost
+exclusively. Making the module looke like a regular model with ordinary functions hides
+the asynchrony and I think is confusing. So I prefer not to use those server functions. If one process is to call another, it should use:
+
+     GenServer.cast(pid, pattern_for_message_x)
+     
+... rather than what looks like no process or asynchrony is involved:
+
+    ProcessModule.do_thing(with_arguments)

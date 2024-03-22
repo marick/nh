@@ -25,5 +25,11 @@ defmodule Cluster.MakeTest do
       |> assert_fields(starting_pulses: 1000, initial_value: [])
     end
   end
+
+  test "calc helpers" do
+    assert UT.pulse("pulse data", "next state") == {:pulse,    "pulse data", "next state"}
+    assert UT.no_pulse("next state") ==            {:no_pulse,               "next state"}
+    assert UT.pulse_and_save("both") ==            {:pulse,    "both",       "both"}
+  end
   
 end

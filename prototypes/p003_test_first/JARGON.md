@@ -56,6 +56,18 @@ over time and eventually become inactive. (The Elixir process exits.)
 However, incoming pulses can strengthen a cluster, so some could have
 indefinite lifespans.
 
+#### Downstream
+
+A cluster sends *pulses* to other clusters. They are its "downstream".
+
+#### Edges
+
+Typically a cluster will receive a pulse from one cluster, run a
+calculation, and send the result *downstream*. However, some clusters
+receive an *affordance* from the *Affordance Land* or send pulses into
+it. (That latter is shorthand for metaphorically activating motor
+neural clusters that act on the world.
+
 #### Focus
 
 Certain *clusters* will at times act to focus on a part of the
@@ -79,6 +91,14 @@ A structure of interconnected **clusters** that interact with
 A type of *cluster* that receives an *affordance* (an Elixir message)
 from *Affordance Land*. Typically, it forwards the message to its
 downstream clusters.
+
+#### Pulse
+
+Pulses represent the act of sending an Elixir message
+*downstream*. They carry some amount of data (usually small). A pulse
+represents what, in a real brain, is the combined effect of the
+electrical ("action") potentials sent down axons by a number of
+neurons (which neurons I'm lumping together into a "*cluster*".
 
 #### Throbbing
 
