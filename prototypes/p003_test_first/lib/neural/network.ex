@@ -61,13 +61,34 @@ defmodule AppAnimal.Neural.Network do
   end
 
   def deliver_pulse(network, names, pulse_data) do
-    with_new_throbbers = start_throbbing(network, names)
+    alias Cluster.Shape
+    
+    all_throbbing = start_throbbing(network, names)
     for name <- names do
-      cluster = with_new_throbbers.clusters_by_name[name]
-      pid = with_new_throbbers.throbbers_by_name[name]
-      Cluster.Shape.move_pulse_across_process_boundary(cluster.shape, cluster, pid, pulse_data)
+      cluster = all_throbbing.clusters_by_name[name]
+      case cluster.shape do
+        %Shape.Circular{} ->
+          p_process = all_throbbing.throbbers_by_name[name]
+          send_pulse_into_genserver(p_process, pulse_data)
+        %Shape.Linear{} ->
+          send_pulse_into_task(cluster, pulse_data)
+      end
     end
-    with_new_throbbers
+    all_throbbing
+  end
+
+  def send_pulse_into_genserver(pid, pulse_data) do
+    GenServer.cast(pid, [handle_pulse: pulse_data])
+  end
+
+  def send_pulse_into_task(s_cluster, pulse_data) do
+    alias Cluster.Calc
+    
+    Task.start(fn ->
+      Calc.run(s_cluster.calc, on: pulse_data)
+      |> Calc.maybe_pulse(& Cluster.start_pulse_on_its_way(s_cluster, &1))
+      :there_is_no_return_value
+    end)
   end
 
   def time_to_throb(network) do

@@ -4,9 +4,6 @@ alias Cluster.Shape
 defprotocol Shape do
   @spec can_throb?(Shape.t) :: boolean
   def can_throb?(shape)
-
-  @spec move_pulse_across_process_boundary(Shape.t, Cluster.t, pid, any) :: no_return
-  def move_pulse_across_process_boundary(s_shape, cluster, pid, pulse_data)
 end
 
 ##
@@ -26,10 +23,6 @@ end
 
 defimpl Shape, for: Shape.Circular do
   def can_throb?(_s_shape), do: true
-
-  def move_pulse_across_process_boundary(_s_shape, _cluster, p_circular_process, pulse_data) do
-    GenServer.cast(p_circular_process, [handle_pulse: pulse_data])
-  end
 end
 
 ## 
@@ -41,16 +34,6 @@ defmodule Shape.Linear do
 end
 
 defimpl Shape, for: Shape.Linear do
-  alias Cluster.Calc
   
   def can_throb?(_s_shape), do: false
-
-  def move_pulse_across_process_boundary(_s_shape, cluster,
-                                         _there_is_no_circular_process, pulse_data) do
-    Task.start(fn ->
-      Calc.run(cluster.calc, on: pulse_data)
-      |> Calc.maybe_pulse(& Cluster.start_pulse_on_its_way(cluster, &1))
-      :there_is_no_return_value
-    end)
-  end    
 end
