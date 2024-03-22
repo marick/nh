@@ -1,6 +1,7 @@
 defmodule AppAnimal.Neural.Network do
   use AppAnimal
   use TypedStruct
+  alias AppAnimal.Neural.{AffordanceLand, Switchboard}
 
   typedstruct do
     plugin TypedStructLens, prefix: :l_
@@ -127,9 +128,9 @@ defmodule AppAnimal.Neural.Network do
     mkfn_final =
       fn so_far ->
         case so_far do
-          {:internal, f_maker} ->
+          {Switchboard, f_maker} ->
             f_maker.(p_switchboard)
-          {:external, f_maker} ->
+          {AffordanceLand, f_maker} ->
             f_maker.(p_affordances)
           already_made when is_function(already_made, 1) ->
             already_made

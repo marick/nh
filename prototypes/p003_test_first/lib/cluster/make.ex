@@ -21,6 +21,7 @@ defmodule Cluster.Make do
   
   use AppAnimal
   alias Cluster.Shape.{Circular, Linear}
+  alias AppAnimal.Neural.{AffordanceLand, Switchboard}
   alias Cluster.OutgoingLogic
 
   # Circular clusters
@@ -31,7 +32,7 @@ defmodule Cluster.Make do
            label: :circular_cluster,
            shape: Circular.new(opts),
            calc: calc,
-           f_outward: OutgoingLogic.mkfn_pulse_direction(:internal, name))
+           f_outward: OutgoingLogic.mkfn_pulse_direction(Switchboard, name))
   end
 
 
@@ -46,7 +47,7 @@ defmodule Cluster.Make do
     %Cluster{name: name, label: :linear_cluster,
              shape: Linear.new,
              calc: calc,
-             f_outward: OutgoingLogic.mkfn_pulse_direction(:internal, name)
+             f_outward: OutgoingLogic.mkfn_pulse_direction(Switchboard, name)
     }
   end
 
@@ -59,7 +60,7 @@ defmodule Cluster.Make do
 
   def action_edge(name) do
     linear(name, & [{name, &1}])
-    |> Map.put(:f_outward, OutgoingLogic.mkfn_pulse_direction(:external))
+    |> Map.put(:f_outward, OutgoingLogic.mkfn_pulse_direction(AffordanceLand))
     |> Map.put(:label, :action_edge)
   end
  end

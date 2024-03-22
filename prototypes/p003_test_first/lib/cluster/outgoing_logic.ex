@@ -14,11 +14,11 @@ defmodule OutgoingLogic do
   2. to take a pid and make a function that sends to that pid. By
      encapsulating the pid, client code doesn't have to find it or carry it
      around separately from the function that sends to it.
-
-
   """
 
-  def mkfn_pulse_direction(:internal, name) do
+  alias AppAnimal.Neural.{Switchboard, AffordanceLand}
+
+  def mkfn_pulse_direction(Switchboard, name) do
     f_pid_taker = 
       fn pid ->
         fn pulse_data -> 
@@ -26,16 +26,16 @@ defmodule OutgoingLogic do
           GenServer.cast(pid, payload)
         end
       end
-    {:internal, f_pid_taker}
+    {Switchboard, f_pid_taker}
   end
   
-  def mkfn_pulse_direction(:external) do
+  def mkfn_pulse_direction(AffordanceLand) do
     f_pid_taker = 
       fn pid ->
         fn pulse_data -> 
           GenServer.cast(pid, [:note_action, pulse_data])
         end
       end
-    {:external, f_pid_taker}
+    {AffordanceLand, f_pid_taker}
   end
 end
