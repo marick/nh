@@ -65,7 +65,7 @@ defmodule AppAnimal.Neural.Network do
     for name <- names do
       cluster = with_new_throbbers.clusters_by_name[name]
       pid = with_new_throbbers.throbbers_by_name[name]
-      Cluster.Shape.accept_pulse(cluster.shape, cluster, pid, pulse_data)
+      Cluster.Shape.move_pulse_across_process_boundary(cluster.shape, cluster, pid, pulse_data)
     end
     with_new_throbbers
   end
