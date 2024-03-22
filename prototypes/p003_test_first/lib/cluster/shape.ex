@@ -1,12 +1,8 @@
 alias AppAnimal.Cluster
 alias Cluster.Shape
 
-defprotocol Shape do
-  @spec can_throb?(Shape.t) :: boolean
-  def can_throb?(shape)
-end
-
-##
+# These are a bit funky as they both hold data particular to one of the two
+# cluster shapes and also serve to identify which type of cluster the cluster is.
 
 defmodule Shape.Circular do
   use TypedStruct
@@ -21,19 +17,8 @@ defmodule Shape.Circular do
   def new(opts \\ []), do: struct(__MODULE__, opts)
 end
 
-defimpl Shape, for: Shape.Circular do
-  def can_throb?(_s_shape), do: true
-end
-
-## 
-
 defmodule Shape.Linear do
   defstruct [] # This is just to create the type. 
   
   def new(opts \\ []), do: struct(__MODULE__, opts)
-end
-
-defimpl Shape, for: Shape.Linear do
-  
-  def can_throb?(_s_shape), do: false
 end

@@ -5,6 +5,7 @@ defmodule Cluster do
   use AppAnimal
   use TypedStruct
   import Lens.Macros
+  alias Cluster.Shape
 
   typedstruct do
     plugin TypedStructLens, prefix: :l_
@@ -14,7 +15,7 @@ defmodule Cluster do
     field :name, atom
     
     # The main axes of variation
-    field :shape, Cluster.Shape.t
+    field :shape, Shape.Circular.t | Shape.Linear.t
     field :calc, fun
     field :pulse_logic, atom | Cluster.PulseLogic.t, default: :installed_later
 
@@ -22,8 +23,13 @@ defmodule Cluster do
     field :downstream, [atom], default: []
   end
 
-
-  def can_throb?(s_cluster), do: Cluster.Shape.can_throb?(s_cluster.shape)
+  def can_throb?(s_cluster) do
+    case s_cluster.shape do
+      %Shape.Circular{} -> true
+      %Shape.Linear{} -> false
+    end
+  end
+  
   deflens l_never_throbs(), do: Lens.filter(& can_throb?(&1) == false)
 
   def start_throbbing(s_cluster) do
