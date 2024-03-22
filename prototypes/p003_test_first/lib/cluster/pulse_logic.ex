@@ -1,7 +1,6 @@
 alias AppAnimal.Cluster
 alias Cluster.PulseLogic
 
-
 defprotocol PulseLogic do
   @spec put_pid(PulseLogic.t, {pid, pid}) :: PulseLogic.t
   def put_pid(propagation, pid)

@@ -127,8 +127,21 @@ defmodule AppAnimal.Neural.Network do
   end
 
   def link_clusters_to_architecture(network,  p_switchboard, p_affordances) do
-    deeply_map(network, :l_pulse_logic,
-               & Cluster.PulseLogic.put_pid(&1, {p_switchboard, p_affordances}))
+    mkfn_final =
+      fn so_far ->
+        case so_far do
+          {:internal, f_maker} ->
+            f_maker.(p_switchboard)
+          {:external, f_maker} ->
+            f_maker.(p_affordances)
+          already_made when is_function(already_made, 1) ->
+            already_made
+        end
+      end
+
+    l_f_outward = l_clusters() |> Cluster.l_f_outward()
+    
+    deeply_map(network, l_f_outward, mkfn_final)
   end
 
   private do

@@ -26,6 +26,7 @@ defmodule CircularProcess.State do
     field :timer_logic, CircularProcess.TimerLogic.t
     field :shape, Cluster.Shape.t
     field :calc, fun
+    field :f_outward, fun
     field :pulse_logic, Cluster.PulseLogic.t
     field :previously, any
   end
@@ -35,6 +36,7 @@ defmodule CircularProcess.State do
 
     %__MODULE__{shape: s_cluster.shape,
                 calc: s_cluster.calc,
+                f_outward: s_cluster.f_outward,
                 pulse_logic: s_cluster.pulse_logic,
                 timer_logic: timer,
                 previously: s_cluster.shape.initial_value

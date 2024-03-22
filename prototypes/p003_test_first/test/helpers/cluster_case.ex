@@ -22,11 +22,17 @@ defmodule ClusterCase do
     pid_taker = fn pid, pulse_data ->
       send(pid, [pulse_data, from: name])
     end
-    
+
+    p_test = self()
+    f_outward = fn pulse_data ->
+      send(p_test, [pulse_data, from: name])
+    end
+      
     %Cluster{name: name,
              label: :test_endpoint,
              shape: Shape.Linear.new,
              calc: filter,
+             f_outward: f_outward,
              pulse_logic: PulseLogic.Test.new(pid_taker, self())
     }
   end

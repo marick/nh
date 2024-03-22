@@ -5,7 +5,7 @@ defmodule Cluster.Make do
   alias Cluster.Shape.{Circular, Linear}
   alias Cluster.PulseLogic
   alias PulseLogic.{Internal, External}
-
+  alias Cluster.OutgoingLogic
 
   # Circular clusters
 
@@ -15,6 +15,7 @@ defmodule Cluster.Make do
            label: :circular_cluster,
            shape: Circular.new(opts),
            calc: calc,
+           f_outward: OutgoingLogic.mkfn_pulse_direction(:internal, name),
            pulse_logic: PulseLogic.Internal.new(linear_pid_taker(name))
     )
   end
@@ -32,7 +33,6 @@ defmodule Cluster.Make do
 
   
   # Linear Clusters
-
   def linear_pid_taker(name) do
     fn pid, pulse_data ->
       payload = {:distribute_pulse, carrying: pulse_data, from: name}
@@ -41,10 +41,12 @@ defmodule Cluster.Make do
   end
       
 
+
   def linear(name, calc \\ &Function.identity/1) do
     %Cluster{name: name, label: :linear_cluster,
              shape: Linear.new,
              calc: calc,
+             f_outward: OutgoingLogic.mkfn_pulse_direction(:internal, name),
              pulse_logic: Internal.new(linear_pid_taker(name))
     }
   end
@@ -65,6 +67,7 @@ defmodule Cluster.Make do
     %Cluster{name: name, label: :action_edge,
              shape: Linear.new,
              calc: & [{name, &1}],
+             f_outward: OutgoingLogic.mkfn_pulse_direction(:external),
              pulse_logic: External.new(pid_taker)}
   end
  end
