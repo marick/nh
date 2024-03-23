@@ -77,5 +77,37 @@ defmodule Network.MakeTest do
                             second_b: [:third])
     end
   end
+
+
+  describe "helpers" do 
+    test "add_only_new_clusters" do
+      add_only_new_clusters(%{}, [%{name: :one, value: "original"},
+                                     %{name: :two},
+                                     %{name: :one, value: "duplicate ignored"}])
+      |> assert_equals(%{one: %{name: :one, value: "original"},
+                         two: %{name: :two}})
+    end
+    
+    test "add_only_new_clusters works when the duplicate comes in a different call" do
+      original = %{one: %{name: :one, value: "original"}}
+      add_only_new_clusters(original, [ %{name: :two},
+                                           %{name: :one, value: "duplicate ignored"}])
+      |> assert_equals(%{one: %{name: :one, value: "original"},
+                         two: %{name: :two}})
+    end
+    
+    test "add_downstream" do
+      trace = [first, second, third] = Enum.map([:first, :second, :third], &named/1)
+      
+      network =
+        add_only_new_clusters(%{}, trace)
+        |> add_downstream([[first, second], [second, third]])
+      
+      assert network.first.downstream == [:second]
+      assert network.second.downstream == [:third]
+      assert network.third.downstream == []
+    end
+  end
+  
   
 end
