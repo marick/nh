@@ -40,9 +40,9 @@ defmodule System.Switchboard do
                     _from, s_switchboard) do
 
       s_switchboard
-      |> within_network(& Network.link_clusters_to_architecture(&1,
-                                                                p_switchboard,
-                                                                p_affordances))
+      |> within_network(& Network.Make.link_clusters_to_architecture(&1,
+                                                                     p_switchboard,
+                                                                     p_affordances))
       |> continue(returning: :ok)
     end
 

@@ -46,8 +46,8 @@ defmodule AppAnimal.Scenarios.SwitchParagraphTest do
 
 
     a = 
-      Network.trace(reaction_to_new_paragraph)
-      |> Network.trace(reaction_to_paragraph_text)
+      trace(reaction_to_new_paragraph)
+      |> trace(reaction_to_paragraph_text)
       |> AppAnimal.enliven
 
     script(a.p_affordances, reaction_to_focus)

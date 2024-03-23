@@ -65,6 +65,7 @@ defmodule ClusterCase do
       import AppAnimal.TraceAssertions
       use FlowAssertions
       import Cluster.Make
+      import Network.Make
     end
   end
 end

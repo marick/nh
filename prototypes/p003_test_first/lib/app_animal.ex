@@ -2,11 +2,21 @@ defmodule AppAnimal do
   alias AppAnimal.System
   alias System.{Switchboard, AffordanceLand, Network, ActivityLogger}
   use AppAnimal.Extras.TestAwareProcessStarter
+  use TypedStruct
+  alias Network.Make
+
+  typedstruct do
+    plugin TypedStructLens, prefix: :l_
+
+    field :p_switchboard, pid, required: true
+    field :p_affordances, pid, required: true
+    field :p_logger,      pid, required: true
+  end
 
   def enliven(trace_or_network, options \\ [])
 
   def enliven(trace, options)               when is_list(trace) do
-    Network.trace(trace) |> enliven(options)
+    Make.trace(trace) |> enliven(options)
   end
 
   def enliven(network, switchboard_options) when is_map(network) do
@@ -22,7 +32,8 @@ defmodule AppAnimal do
 
     GenServer.call(p_switchboard,
                    {:link_clusters_to_architecture, p_switchboard, p_affordances})
-    %{p_switchboard: p_switchboard,
+    %__MODULE__{
+      p_switchboard: p_switchboard,
       p_affordances: p_affordances,
       p_logger: p_logger
     }

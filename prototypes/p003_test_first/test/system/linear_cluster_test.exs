@@ -17,7 +17,7 @@ defmodule AppAnimal.System.LinearClusterTest do
   describe "handling of a calculation" do
     test "choosing to pulse" do
       p_switchboard =
-        Network.trace([linear(:first, & &1+1), to_test()])
+        trace([linear(:first, & &1+1), to_test()])
         |> AppAnimal.switchboard
       
       send_test_pulse(p_switchboard, to: :first, carrying: 3)
@@ -28,7 +28,7 @@ defmodule AppAnimal.System.LinearClusterTest do
       calc = fn _ -> :no_pulse end
 
       p_switchboard =
-        Network.trace([linear(:first, calc), to_test()])
+        trace([linear(:first, calc), to_test()])
         |> AppAnimal.switchboard
 
       send_test_pulse(p_switchboard, to: :first, carrying: 3)

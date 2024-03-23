@@ -34,7 +34,7 @@ defmodule Cluster.CircularProcessTest do
       end
 
       p_switchboard =
-        Network.trace([circular(:first, calc, initial_value: "will be unchanged"), to_test()])
+        trace([circular(:first, calc, initial_value: "will be unchanged"), to_test()])
         |> AppAnimal.switchboard
 
       send_test_pulse(p_switchboard, to: :first, carrying: 3)
@@ -51,7 +51,7 @@ defmodule Cluster.CircularProcessTest do
       end
 
       p_switchboard =
-        Network.trace([circular(:first, calc, initial_value: []), to_test()])
+        trace([circular(:first, calc, initial_value: []), to_test()])
         |> AppAnimal.switchboard
 
       send_test_pulse(p_switchboard, to: :first, carrying: 3)
@@ -68,7 +68,7 @@ defmodule Cluster.CircularProcessTest do
       end
 
       p_switchboard =
-        Network.trace([circular(:first, calc, initial_value: []), to_test()])
+        trace([circular(:first, calc, initial_value: []), to_test()])
         |> AppAnimal.switchboard
 
       send_test_pulse(p_switchboard, to: :first, carrying: 3)

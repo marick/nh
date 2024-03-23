@@ -5,8 +5,8 @@ defmodule AppAnimal.System.ActionEdgeTest do
   test "action edges call into the affordances" do
     
     a =
-      Network.trace([action_edge(:focus_on_new_paragraph)])
-      |> Network.trace([perception_edge(:paragraph_text), to_test()])
+      trace([action_edge(:focus_on_new_paragraph)])
+      |> trace([perception_edge(:paragraph_text), to_test()])
       |> AppAnimal.enliven()
     
     script(a.p_affordances, [

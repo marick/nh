@@ -1,6 +1,7 @@
 defmodule AppAnimal.System.NetworkTest do
   use ClusterCase, async: true
   alias System.Network, as: UT
+  alias System.Network.Make
   
   defp named(names) when is_list(names),
        do: Enum.map(names, &named/1)
@@ -34,18 +35,18 @@ defmodule AppAnimal.System.NetworkTest do
   describe "building a network (basics)" do
     test "singleton" do
       first = linear(:first)
-      assert UT.trace([first]).clusters_by_name.first == first
+      assert trace([first]).clusters_by_name.first == first
     end
 
     test "multiple clusters in a row (a 'trace')" do
       named([:first, :second, :third])
-      |> UT.trace
+      |> trace
       |> assert_connections(first: [:second], second: [:third])
     end
 
     test "can build from multiple disjoint traces" do
-         UT.trace(named([:a1, :a2]))
-      |> UT.trace(named([:b1, :b2]))
+         trace(named([:a1, :a2]))
+      |> trace(named([:b1, :b2]))
       |> assert_connections(a1: [:a2], a2: [],
                             b1: [:b2], b2: [])
     end
@@ -56,7 +57,7 @@ defmodule AppAnimal.System.NetworkTest do
     test "new value does not overwrite an existing one" do
       first = linear(:first, & &1+1000)
       new_first = linear(:first, &Function.identity/1)
-      network = UT.trace([first, new_first])
+      network = trace([first, new_first])
       assert network.clusters_by_name.first.calc == first.calc
 
       # Note that there's a loop because some version of first appears twice in the
@@ -68,7 +69,7 @@ defmodule AppAnimal.System.NetworkTest do
       [first, second, third] = named([:first, :second, :third])
 
       [first, second, first, third, second]
-      |> UT.trace
+      |> trace
       |> assert_connections(first: in_any_order([:second, :third]),
                             second: [:first],
                             third: [:second])
@@ -76,8 +77,8 @@ defmodule AppAnimal.System.NetworkTest do
 
     test "can add a branch starting at an existing node" do
       # This is, in effect adding a duplicate
-      UT.trace(named([      :first,              :second_a, :third]))
-      |> UT.extend(     at: :first, with: named([:second_b, :third]))
+      trace(named([      :first,              :second_a, :third]))
+      |> Make.extend(     at: :first, with: named([:second_b, :third]))
       |> assert_connections(first: in_any_order([:second_a, :second_b]),
                             second_a: [:third],
                             second_b: [:third])
@@ -86,7 +87,7 @@ defmodule AppAnimal.System.NetworkTest do
 
   describe "handling of throbbing clusters" do
     setup do
-      [network: UT.trace([linear(:one_shot), circular(:idle), circular(:will_throb)])]
+      [network: trace([linear(:one_shot), circular(:idle), circular(:will_throb)])]
     end
 
     test "originally nothing is throbbing", %{network: network} do 
@@ -140,7 +141,7 @@ defmodule AppAnimal.System.NetworkTest do
 
   describe "helpers" do 
     test "add_only_new_clusters" do
-      UT.add_only_new_clusters(%{}, [%{name: :one, value: "original"},
+      add_only_new_clusters(%{}, [%{name: :one, value: "original"},
                                      %{name: :two},
                                      %{name: :one, value: "duplicate ignored"}])
       |> assert_equals(%{one: %{name: :one, value: "original"},
@@ -149,7 +150,7 @@ defmodule AppAnimal.System.NetworkTest do
     
     test "add_only_new_clusters works when the duplicate comes in a different call" do
       original = %{one: %{name: :one, value: "original"}}
-      UT.add_only_new_clusters(original, [ %{name: :two},
+      add_only_new_clusters(original, [ %{name: :two},
                                            %{name: :one, value: "duplicate ignored"}])
       |> assert_equals(%{one: %{name: :one, value: "original"},
                          two: %{name: :two}})
@@ -159,12 +160,17 @@ defmodule AppAnimal.System.NetworkTest do
       trace = [first, second, third] = Enum.map([:first, :second, :third], &named/1)
       
       network =
-        UT.add_only_new_clusters(%{}, trace)
-        |> UT.add_downstream([[first, second], [second, third]])
+        add_only_new_clusters(%{}, trace)
+        |> add_downstream([[first, second], [second, third]])
       
       assert network.first.downstream == [:second]
       assert network.second.downstream == [:third]
       assert network.third.downstream == []
+    end
+
+    def extend(network, at: name, with: trace) do
+      existing = deeply_get_only(network, Network.l_cluster_named(name))
+      Make.trace(network, [existing | trace])
     end
   end
 end

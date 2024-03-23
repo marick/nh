@@ -42,8 +42,8 @@ defmodule AppAnimal.System.SwitchboardTest do
     first = circular(:first, calc, initial_value: %{pids: [], count: 3})
     
     network = 
-      Network.trace([first, first])
-      |> Network.extend(at: :first, with: [to_test()])
+      trace([first, first])
+      |> extend(at: :first, with: [to_test()])
     
     given(network)
     |> send_test_pulse(to: :first, carrying: :nothing)
@@ -57,7 +57,7 @@ defmodule AppAnimal.System.SwitchboardTest do
     first = circular(:first, fn _pulse -> self() end, starting_pulses: 2)
     
     a =
-      Network.trace([first, to_test()])
+      trace([first, to_test()])
       |> AppAnimal.enliven(pulse_rate: 100_000) # don't allow automatic pulses.
     
     send_test_pulse(a.p_switchboard, to: :first, carrying: :irrelevant)
