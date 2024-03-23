@@ -1,4 +1,4 @@
-defmodule AppAnimal.System.PerceptionEdgeTest do
+defmodule AppAnimal.Cluster.PerceptionEdgeTest do
   use ClusterCase, async: true
 
   def given(trace_or_network), do: AppAnimal.affordances(trace_or_network)

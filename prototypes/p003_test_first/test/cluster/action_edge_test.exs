@@ -1,4 +1,4 @@
-defmodule AppAnimal.System.ActionEdgeTest do
+defmodule AppAnimal.Cluster.ActionEdgeTest do
   use ClusterCase, async: true
   alias System.ActivityLogger
 
