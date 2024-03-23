@@ -1,12 +1,7 @@
 defmodule AppAnimal do
   alias AppAnimal.System
   alias System.{Switchboard, AffordanceLand, Network, ActivityLogger}
-  import Private
   use AppAnimal.Extras.TestAwareProcessStarter
-
-  defmodule Accumulator do
-    defstruct [:network, switchboard_keys: []]
-  end
 
   def enliven(trace_or_network, options \\ [])
 
@@ -35,12 +30,6 @@ defmodule AppAnimal do
 
   def switchboard(network, options \\ []), do: enliven(network, options).p_switchboard
   def affordances(network), do: enliven(network).p_affordances
-
-  private do
-    def default_start(module, initial_mutable) do
-      GenServer.start_link(module, initial_mutable)
-    end
-  end
 
   defmacro __using__(_) do
     quote do
