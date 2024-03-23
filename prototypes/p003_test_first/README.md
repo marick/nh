@@ -1,21 +1,6 @@
 # AppAnimal
 
-**TODO: Add description**
-
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `app_animal` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:app_animal, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/app_animal>.
-
+This is the first prototype that has potential. There's some
+potentially good work on making new clusters easy to define. Clusters
+can be reasonably easily strung together into a network. The
+underlying metaphors (see JARGON.md) are working better. 
