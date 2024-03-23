@@ -9,7 +9,7 @@ defmodule AppAnimal.System.ActionEdgeTest do
       |> Network.trace([perception_edge(:paragraph_text), to_test()])
       |> AppAnimal.enliven()
     
-    AffordanceLand.script(a.p_affordances, [
+    script(a.p_affordances, [
       focus_on_new_paragraph: [paragraph_text: "some text"]
     ])
 

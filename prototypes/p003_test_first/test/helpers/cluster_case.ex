@@ -35,7 +35,22 @@ defmodule ClusterCase do
     GenServer.cast(p_switchboard,
                    {:distribute_pulse, carrying: pulse_data, to: [destination_name]})
   end
-    
+
+  # About programming affordances
+
+  def response_to(action, response), do: {action, response}
+  def affords([{name, data}]), do: {name, data}
+
+  def script(pid, list) do
+    GenServer.cast(pid, [script: list])
+    pid
+  end
+  
+  def note_action(pid, [{_name, _data}] = action) do
+    GenServer.cast(pid, [:note_action, action])
+  end
+  
+
 
   defmacro __using__(opts) do
     quote do
@@ -49,7 +64,6 @@ defmodule ClusterCase do
       import ClusterCase
       import AppAnimal.TraceAssertions
       use FlowAssertions
-      import AffordanceLand, only: [response_to: 2, affords: 1]
       import Cluster.Make
     end
   end

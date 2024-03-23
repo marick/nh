@@ -6,16 +6,16 @@ defmodule AppAnimal.System.AffordanceLandTest do
 
   test "a 'self-generated' affordance" do
     given([perception_edge(:big_paragraph_change), to_test()])
-    |> UT.produce_this_affordance(big_paragraph_change: :no_data)
+    |> GenServer.cast([:produce_this_affordance, big_paragraph_change: :no_data])
     assert_test_receives(:no_data)
   end
 
   test "programming a response to an affordance request" do
     given([perception_edge(:current_paragraph_text), to_test()])
-    |> UT.script([
+    |> script([
       response_to(:focus_on_paragraph, affords(current_paragraph_text: "para\n"))
     ])
-    |> UT.note_action(focus_on_paragraph: :no_data)
+    |> note_action(focus_on_paragraph: :no_data)
 
     assert_test_receives("para\n")
   end

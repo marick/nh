@@ -1,4 +1,7 @@
-defmodule AppAnimal.System.Switchboard do
+alias AppAnimal.System
+
+
+defmodule System.Switchboard do
   use AppAnimal
   use AppAnimal.GenServer
   use TypedStruct

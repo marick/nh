@@ -1,4 +1,12 @@
 defmodule AppAnimal.System.AffordanceLand do
+  @moduledoc """
+  Represents the document in a way that produces affordances and
+  accepts actions in the form of instructions to create an affordance. 
+  See JARGON.md.
+
+  It is rudimentarily scriptable, so that a test can tell it how to
+  respond to an action.
+  """
   alias AppAnimal.System.ActivityLogger
   use AppAnimal
   use AppAnimal.GenServer
@@ -8,30 +16,11 @@ defmodule AppAnimal.System.AffordanceLand do
              programmed_responses: []]
 
 
-  def response_to(action, response), do: {action, response}
-  def affords([{name, data}]), do: {name, data}
-  
   runs_in_sender do
-    
+    # I'd rather not have this layer of indirection, but it's needed for tests to use
+    # start_supervised.
     def start_link(opts) do
       GenServer.start_link(__MODULE__, opts)
-    end
-
-    def produce_this_affordance(pid, [{name, data}]) do
-      GenServer.cast(pid, [:produce_this_affordance, {name, data}])
-    end
-
-    def script(pid, list) do
-      GenServer.cast(pid, [script: list])
-      pid
-    end
-
-    def note_action(pid, action) when is_atom(action) do
-      note_action(pid, [{action, :no_data}])
-    end
-
-    def note_action(pid, [{_name, _data}] = action) do
-      GenServer.cast(pid, [:note_action, action])
     end
   end
 
@@ -51,36 +40,36 @@ defmodule AppAnimal.System.AffordanceLand do
       |> Map.update!(:programmed_responses, & append_programmed_responses(&1, responses))
       |> continue()
     end
-
+    
     def handle_cast([:note_action, [{name, data}]], mutable) do
       {responses, remaining_programmed_responses} =
         Keyword.pop_first(mutable.programmed_responses, name)
-
+      
       if responses == nil,
-      do: IO.puts("==== SAY, there is no programmed response for #{name}. Test error.")
-        
+         do: IO.puts("==== SAY, there is no programmed response for #{name}. Test error.")
+      
       ActivityLogger.log_action_received(mutable.p_logger, name, data)
       for response <- responses do
         handle_cast([:produce_this_affordance, response], mutable)
       end
-
+      
       %{mutable | programmed_responses: remaining_programmed_responses}
       |> continue()
     end
-  end
-
-  private do
-    def append_programmed_responses(keywords, new) do
-      wrapped = Enum.map(new, &wrap/1)
-      keywords ++ wrapped
-    end
     
-    def wrap({action, responses}) do
-      case responses do
-        _ when is_list(responses) -> 
-          {action, responses}
-        _ ->
-          {action, [responses]}
+    private do
+      def append_programmed_responses(keywords, new) do
+        wrapped = Enum.map(new, &wrap/1)
+        keywords ++ wrapped
+      end
+      
+      def wrap({action, responses}) do
+        case responses do
+          _ when is_list(responses) -> 
+            {action, responses}
+          _ ->
+            {action, [responses]}
+        end
       end
     end
   end

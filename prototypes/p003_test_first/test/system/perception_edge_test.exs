@@ -15,10 +15,10 @@ defmodule AppAnimal.System.PerceptionEdgeTest do
     a = AppAnimal.enliven(network)
 
     a.p_affordances
-    |> AffordanceLand.script([
+    |> script([
       focus_on_paragraph: [paragraph_text: "some text"]
     ])
-    |> AffordanceLand.note_action(focus_on_paragraph: :no_data)
+    |> note_action(focus_on_paragraph: :no_data)
 
     assert_test_receives("some textsome text")
     assert_test_receives("txet emos")
