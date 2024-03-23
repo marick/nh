@@ -2,8 +2,25 @@ alias AppAnimal.System
 alias System.Network
 
 defmodule Network do
+  @moduledoc """
+  The structure that represents the static structure of clusters and the connections
+  between them. Also has the responsibility for delivering a pulse to a set of clusters.
+
+  There are two types of clusters: circular (gensyms) and linear
+  (tasks). "Delivering a cluster" works rather differently for each, so this module
+  tries to hide that.
+
+  A linear cluster is just wrapped in a Task and started. Purely asynchronous.
+
+  A circular cluster has to be `start_linked` (a synchronous
+  operation), then the pulse can be `cast` at it, which is the same
+  sort of asynchronous action as starting a Task.
+
+  """
+  
   use AppAnimal
   use TypedStruct
+  alias Network.Throbbing
 
   typedstruct do
     plugin TypedStructLens, prefix: :l_
@@ -28,42 +45,26 @@ defmodule Network do
     %__MODULE__{clusters_by_name: cluster_map_or_keyword |> Enum.into(%{})}
   end
 
-  # Getters
+  @doc """
 
-  def throbbing_names(network), do: Map.keys(network.throbbers_by_name)
-  def throbbing_pids(network), do: Map.values(network.throbbers_by_name)
+  Send a pulse to a mixture of "throbbing" and linear
+  clusters. Throbbing clusters are what are elsewhere called
+  "circular" clusters, just to emphasize that they receive timer
+  pulses. (Possibly a bad naming.)
 
-  def throbbing_clusters(network) do
-    throbbing_names(network)
-    |> Enum.map(& network.clusters_by_name[&1])
-  end
+  A linear cluster is always ready to asynchronously accept a pulse
+  and act on it. Easy peasy.
 
-  # Working with clusters
+  A circular cluster may already be throbbing away, in which case the
+  pulse is just `cast` in its direction. If not, it has to be started before the
+  pulse can be `cast` at it.
 
-  def start_throbbing(network, names) do
-    to_start = needs_to_be_started(network, names)
-     
-    now_started =
-      for cluster <- to_start, into: %{} do
-        Cluster.start_throbbing(cluster)
-      end
-    deeply_map(network, :l_throbbers_by_name, & Map.merge(&1, now_started))
-  end
-
-  def drop_idling_pid(network, pid) do
-    throbbers = network.throbbers_by_name
-    
-    [{name, _pid}] = 
-      throbbers
-      |> Enum.filter(fn {_name, value} -> value == pid end)
-
-    %{network | throbbers_by_name: Map.drop(throbbers, [name])}
-  end
-
+  Yeah, this naming is not great.  
+  """
   def deliver_pulse(network, names, pulse_data) do
     alias Cluster.Shape
     
-    all_throbbing = start_throbbing(network, names)
+    all_throbbing = Throbbing.start_throbbing(network, names)
     for name <- names do
       cluster = all_throbbing.clusters_by_name[name]
       case cluster.shape do
@@ -77,37 +78,19 @@ defmodule Network do
     all_throbbing
   end
 
-  def send_pulse_into_genserver(pid, pulse_data) do
-    GenServer.cast(pid, [handle_pulse: pulse_data])
-  end
-
-  def send_pulse_into_task(s_cluster, pulse_data) do
-    alias Cluster.Calc
-    
-    Task.start(fn ->
-      Calc.run(s_cluster.calc, on: pulse_data)
-      |> Calc.maybe_pulse(& Cluster.start_pulse_on_its_way(s_cluster, &1))
-      :there_is_no_return_value
-    end)
-  end
-
-  def time_to_throb(network) do
-    for {_name, pid} <- network.throbbers_by_name do
-      GenServer.cast(pid, [weaken: 1])
-    end
-    :no_return_value
-  end
-
   private do 
-    def needs_to_be_started(network, names) do
-      nameset = MapSet.new(names)
-      ignore_irrelevant = deeply_get_all(network, l_irrelevant_names()) |> MapSet.new
-      ignore_already = Map.keys(network.throbbers_by_name) |> MapSet.new
+    def send_pulse_into_genserver(pid, pulse_data) do
+      GenServer.cast(pid, [handle_pulse: pulse_data])
+    end
+    
+    def send_pulse_into_task(s_cluster, pulse_data) do
+      alias Cluster.Calc
       
-      nameset
-      |> MapSet.difference(ignore_irrelevant)
-      |> MapSet.difference(ignore_already)
-      |> Enum.map(& network.clusters_by_name[&1])
+      Task.start(fn ->
+        Calc.run(s_cluster.calc, on: pulse_data)
+        |> Calc.maybe_pulse(& Cluster.start_pulse_on_its_way(s_cluster, &1))
+        :there_is_no_return_value
+      end)
     end
   end
 end

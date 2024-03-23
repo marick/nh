@@ -66,14 +66,14 @@ defmodule System.Switchboard do
 
     @impl GenServer
     def handle_info(:time_to_throb, s_switchboard) do
-      Network.time_to_throb(s_switchboard.network)
+      Network.Throbbing.time_to_throb(s_switchboard.network)
       schedule_next_throb(s_switchboard.pulse_rate)
       continue(s_switchboard)
     end
     
     def handle_info({:DOWN, _, :process, pid, :normal}, s_switchboard) do
       s_switchboard
-      |> within_network(& Network.drop_idling_pid(&1, pid))
+      |> within_network(& Network.Throbbing.drop_idling_pid(&1, pid))
       |> continue
     end
     
