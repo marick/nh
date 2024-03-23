@@ -1,4 +1,10 @@
 defmodule AppAnimal.Extras.TestAwareProcessStarter do
+  @moduledoc """
+  In the test environment, start processes using `start_link_supervised`. Otherwise,
+  start with `GenServer.start_link`. 
+  """
+
+  
   import ExUnit.Callbacks, only: [start_link_supervised!: 1]
 
   defmacro __using__(_opts)  do

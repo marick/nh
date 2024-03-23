@@ -1,6 +1,6 @@
-## Used to configure Logger. See root/config/config.exs
-
 defmodule AppAnimal.Pretty.LogFormat do
+  @moduledoc "Used to configure Logger. See root/config/config.exs"
+  
   alias AppAnimal.Pretty
   use Private
   alias AppAnimal.System.ActivityLogger
