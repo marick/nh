@@ -15,7 +15,7 @@ defmodule AppAnimal.System.AffordanceLandTest do
     |> script(
       response_to(:focus_on_paragraph, affords(current_paragraph_text: "para\n"))
     )
-    |> note_action(focus_on_paragraph: :no_data)
+    |> take_action(focus_on_paragraph: :no_data)
 
     assert_test_receives("para\n")
   end

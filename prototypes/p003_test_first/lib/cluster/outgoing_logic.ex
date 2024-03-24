@@ -33,7 +33,7 @@ defmodule OutgoingLogic do
     f_pid_taker = 
       fn pid ->
         fn pulse_data -> 
-          GenServer.cast(pid, [:note_action, pulse_data])
+          GenServer.cast(pid, [:take_action, pulse_data])
         end
       end
     {AffordanceLand, f_pid_taker}

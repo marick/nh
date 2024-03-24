@@ -50,8 +50,8 @@ defmodule ClusterCase do
   end
 
   
-  def note_action(pid, [{_name, _data}] = action) do
-    GenServer.cast(pid, [:note_action, action])
+  def take_action(pid, [{_name, _data}] = action) do
+    GenServer.cast(pid, [:take_action, action])
   end
   
 

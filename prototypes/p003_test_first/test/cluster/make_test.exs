@@ -18,7 +18,7 @@ defmodule Cluster.MakeTest do
     
     test "optional arguments go into the shape" do
       cluster = UT.circular(:example, & &1+1, starting_pulses: 1000,
-                                               initial_value: [])
+                                              initial_value: [])
 
 
       cluster.shape
@@ -31,5 +31,4 @@ defmodule Cluster.MakeTest do
     assert UT.no_pulse("next state") ==            {:no_pulse,               "next state"}
     assert UT.pulse_and_save("both") ==            {:pulse,    "both",       "both"}
   end
-  
 end

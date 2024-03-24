@@ -41,7 +41,7 @@ defmodule AppAnimal.System.AffordanceLand do
       |> continue()
     end
     
-    def handle_cast([:note_action, [{name, data}]], mutable) do
+    def handle_cast([:take_action, [{name, data}]], mutable) do
       {responses, remaining_programmed_responses} =
         Keyword.pop_first(mutable.programmed_responses, name)
       
