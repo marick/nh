@@ -71,7 +71,6 @@ defmodule Cluster.CalcTest do
     assert_receive(5)
   end
 
-
   test "next_state" do
     assert Calc.next_state({:pulse, "retval", "state"}) == "state"
     assert Calc.next_state({:no_pulse, "state"}) == "state"

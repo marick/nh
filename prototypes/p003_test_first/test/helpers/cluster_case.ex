@@ -41,10 +41,14 @@ defmodule ClusterCase do
   def response_to(action, response), do: {action, response}
   def affords([{name, data}]), do: {name, data}
 
+  def script(pid, {_action_name, {_affordance_name, _affordance_data}} = singleton), 
+      do: script(pid, [singleton])
+  
   def script(pid, list) do
     GenServer.cast(pid, [script: list])
     pid
   end
+
   
   def note_action(pid, [{_name, _data}] = action) do
     GenServer.cast(pid, [:note_action, action])
