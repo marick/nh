@@ -38,7 +38,7 @@ defmodule Network.Throbbing do
   
   def time_to_throb(network) do
     for {_name, pid} <- network.throbbers_by_name do
-      GenServer.cast(pid, [weaken: 1])
+      GenServer.cast(pid, [throb: 1])
     end
     :no_return_value
   end

@@ -34,7 +34,8 @@ defmodule Cluster.CircularProcessTest do
       end
 
       p_switchboard =
-        trace([circular(:first, calc, initial_value: "will be unchanged"), to_test()])
+        trace([circular(:first, calc, initial_value: "will be unchanged"),
+               to_test()])
         |> AppAnimal.switchboard
 
       send_test_pulse(p_switchboard, to: :first, carrying: 3)
@@ -77,17 +78,16 @@ defmodule Cluster.CircularProcessTest do
       send_test_pulse(p_switchboard, to: :first, carrying: :report_state)
       assert_test_receives([3])
     end      
-
   end
 
-  describe "counting down via weaken" do
-    test "an ordinary call to weaken" do
+  describe "counting down via throbbing" do
+    test "an ordinary call to `throb`" do
       state = circular(:example, & &1+1) |> UT.State.from_cluster
             starting_strength = deeply_get_only(state, :l_current_strength)
       assert starting_strength == deeply_get_only(state, :l_starting_strength)
       assert starting_strength > 2
       
-      assert {:noreply, next_state} = UT.handle_cast([weaken: 2], state)
+      assert {:noreply, next_state} = UT.handle_cast([throb: 2], state)
       
       assert deeply_get_only(next_state, :l_current_strength) ==
                deeply_get_only(state, :l_current_strength) - 2
@@ -97,7 +97,7 @@ defmodule Cluster.CircularProcessTest do
       state = circular(:example, & &1+1) |> UT.State.from_cluster
       starting_strength = deeply_get_only(state, :l_current_strength)
 
-      assert {:stop, :normal, next_state} = UT.handle_cast([weaken: starting_strength], state)
+      assert {:stop, :normal, next_state} = UT.handle_cast([throb: starting_strength], state)
       assert deeply_get_only(next_state, :l_current_strength) == 0
     end
   end

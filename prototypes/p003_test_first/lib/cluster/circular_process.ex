@@ -76,7 +76,7 @@ defmodule CircularProcess do
     |> continue
   end
 
-  def handle_cast([weaken: n], s_state) do
+  def handle_cast([throb: n], s_state) do
     new_state = deeply_map(s_state, :l_current_strength, & &1-n)
 
     if deeply_get_only(new_state, :l_current_strength) <= 0,
