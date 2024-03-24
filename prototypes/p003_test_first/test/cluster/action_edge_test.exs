@@ -2,7 +2,7 @@ defmodule AppAnimal.Cluster.ActionEdgeTest do
   use ClusterCase, async: true
   alias System.ActivityLogger
 
-  test "action edges call into the affordances" do
+  test "action edges call into Affordance Land, prompting messages out" do
     
     a =
       trace([action_edge(:focus_on_new_paragraph)])

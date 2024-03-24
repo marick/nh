@@ -2,6 +2,19 @@ alias AppAnimal.System
 
 
 defmodule System.Switchboard do
+  @moduledoc """
+  An intermediary between clusters. It receives all sent messages and routes them
+  to the downstream clusters.
+
+  By putting the switchboard between clusters, there's a sort of
+  centralized control, but one that no cluster code can see. One
+  simple use is that the rate of "throbbing" - timer pulses sent to
+  circular clusters - can be controlled by tests so that what might
+  normally take two seconds happens nearly instantly. Later uses will
+  be along the lines of a "chaos monkey": random delays in pulse
+  delivery, dropping pulses, rearranging the order of pulses, etc.
+  """
+  
   use AppAnimal
   use AppAnimal.GenServer
   use TypedStruct
@@ -12,12 +25,11 @@ defmodule System.Switchboard do
     plugin TypedStructLens, prefix: :l_
 
     field :network,    Network.t
-    field :pulse_rate, integer,          default: 100  # in milliseconds
+    field :pulse_rate, integer,        default: 100  # in milliseconds
     field :p_logger, ActivityLogger.t, default: ActivityLogger.start_link |> okval
   end
 
-  def l_cluster_named(name),
-      do: l_network() |> Network.l_cluster_named(name)
+  def l_cluster_named(name), do: l_network() |> Network.l_cluster_named(name)
   
   def within_network(struct, f), do: deeply_map(struct, :l_network, f)
   
@@ -35,6 +47,9 @@ defmodule System.Switchboard do
       ok(s_switchboard)
     end
 
+    ## Once a network of clusters is built, this call instructs each
+    ## cluster to construct an appropriate sending function that goes to
+    ## either the Switchboard or Affordance Land.
     @impl GenServer
     def handle_call({:link_clusters_to_architecture, p_switchboard, p_affordances},
                     _from, s_switchboard) do
@@ -45,15 +60,10 @@ defmodule System.Switchboard do
                                                                      p_affordances))
       |> continue(returning: :ok)
     end
-
+    
+    ## The main entry point to send a pulse from the `source_name` to the named
+    ## cluster's downstream.
     @impl GenServer
-    def handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names},
-                    s_switchboard) do
-      s_switchboard
-      |> within_network(& Network.deliver_pulse(&1, destination_names, pulse_data))
-      |> continue
-    end
-
     def handle_cast({:distribute_pulse, carrying: pulse_data, from: source_name},
                     s_switchboard) do
       source = deeply_get_only(s_switchboard, l_cluster_named(source_name))
@@ -64,13 +74,35 @@ defmodule System.Switchboard do
                   s_switchboard)
     end
 
+    ## Deliver a pulse to some downstream names.
+    ## 
+    ## Used by `AffordanceLand` and in tests. A helper helper function for delivering
+    ## from a known name to its downstream.
+    ## 
+    ## Note this affects the `s_switchboard` state because pulse delivery may start
+    ## circular clusters (genservers).
+    def handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names},
+                    s_switchboard) do
+      s_switchboard
+      |> within_network(& Network.deliver_pulse(&1, destination_names, pulse_data))
+      |> continue
+    end
+
+    ## Deliver a "throb" message to all circular clusters.
+    ## 
+    ## Essentially a global clock tick, mostly to cause running clusters
+    ## to age out and exit.
     @impl GenServer
     def handle_info(:time_to_throb, s_switchboard) do
       Network.Throbbing.time_to_throb(s_switchboard.network)
       schedule_next_throb(s_switchboard.pulse_rate)
       continue(s_switchboard)
     end
-    
+
+    ## Called by the runtime when a circular cluster exits.
+    ##
+    ## This means it should be removed from the list of clusters sent
+    ## messages that cause them to "throb".
     def handle_info({:DOWN, _, :process, pid, :normal}, s_switchboard) do
       s_switchboard
       |> within_network(& Network.Throbbing.drop_idling_pid(&1, pid))

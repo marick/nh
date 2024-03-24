@@ -105,7 +105,7 @@ neurons (which neurons I'm lumping together into a "*cluster*".
 When the process behind a circular cluster is alive, it is referred to
 as "throbbing". This evokes the periodic self-reinforcement of the
 cluster. When a circular cluster hasn't ever been started, or when
-it's died off because of a lack of work to do, it's callec *waiting*.
+it's died off because of a lack of work to do, it's called *waiting*.
 
 #### Trace
 
