@@ -37,3 +37,12 @@ the asynchrony and I think is confusing. So I prefer not to use those server fun
 ... rather than what looks like no process or asynchrony is involved:
 
     ProcessModule.do_thing(with_arguments)
+
+### Naming the module under tests
+
+When a test file is all about a particular module, I'll often alias
+the module _U_nder _T_test to `UT`. I don't know if that's an OK idea
+or a bad idea that's a habit. Given that I don't have a refactoring
+IDE, it makes my ever-present name changes slightly less annoying and
+less of a sprawling commit.
+

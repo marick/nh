@@ -1,4 +1,6 @@
-defmodule AppAnimal.System.AffordanceLand do
+alias AppAnimal.System
+
+defmodule System.AffordanceLand do
   @moduledoc """
   Represents the document in a way that produces affordances and
   accepts actions in the form of instructions to create an affordance. 
@@ -7,14 +9,16 @@ defmodule AppAnimal.System.AffordanceLand do
   It is rudimentarily scriptable, so that a test can tell it how to
   respond to an action.
   """
-  alias AppAnimal.System.ActivityLogger
   use AppAnimal
   use AppAnimal.GenServer
+  use TypedStruct
+  alias System.ActivityLogger
 
-  defstruct [:p_switchboard,
-             p_logger: :created_at_start_link_time,
-             programmed_responses: []]
-
+  typedstruct do
+    field :p_switchboard, pid
+    field :p_logger, pid
+    field :programmed_responses, list, default: []
+  end
 
   runs_in_sender do
     # I'd rather not have this layer of indirection, but it's needed for tests to use

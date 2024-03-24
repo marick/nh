@@ -37,5 +37,4 @@ defmodule AppAnimal.System.AffordanceLandTest do
                ]
     end
   end
-
 end

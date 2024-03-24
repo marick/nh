@@ -108,6 +108,4 @@ defmodule Network.MakeTest do
       assert network.third.downstream == []
     end
   end
-  
-  
 end
