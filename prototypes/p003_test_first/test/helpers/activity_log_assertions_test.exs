@@ -1,11 +1,10 @@
-defmodule TraceAssertionsTest do
+defmodule ActivityLogAssertionsTest do
   use ExUnit.Case, async: true
   import FlowAssertions.AssertionA
-#  import FlowAssertions.TabularA
-  alias AppAnimal.TraceAssertions, as: UT
+  alias AppAnimal.ActivityLogAssertions, as: UT
   alias AppAnimal.System.ActivityLogger
   alias ActivityLogger.{PulseSent, ActionReceived}
-  import AppAnimal.TraceAssertions, only: [action: 1]
+  import AppAnimal.ActivityLogAssertions, only: [action_taken: 1]
 
 
   describe "element comparison" do
@@ -43,13 +42,13 @@ defmodule TraceAssertionsTest do
 
     test "action entries match on name" do
       example = ActionReceived.new(:name)
-      UT.assert_log_entry(example, action(:name))
+      UT.assert_log_entry(example, action_taken(:name))
 
       assertion_fails(
         "Field `:name` has the wrong value",
         [left: :name, right: :not_name],
         fn -> 
-          UT.assert_log_entry(example, action(:not_name))
+          UT.assert_log_entry(example, action_taken(:not_name))
         end)
     end
 
@@ -64,7 +63,7 @@ defmodule TraceAssertionsTest do
           UT.assert_log_entry(actual, plain_map)
         end)
 
-      focus = action(:name)
+      focus = action_taken(:name)
       assertion_fails(
         "The expectation, for ActionReceived, cannot match a PulseSent.",
         fn ->
@@ -75,16 +74,16 @@ defmodule TraceAssertionsTest do
   end
   
   
-  describe "assert_exact_trace" do
+  describe "assert_log_entries" do
     setup do
       [actual: [PulseSent.new(:a_label, :a_name, "a_data"),
                 PulseSent.new(:b_label, :b_name, "b_data")]]
     end
 
     test "compares element by element", %{actual: actual} do
-      UT.assert_exact_trace(actual, actual)
-      UT.assert_exact_trace(actual, [:a_name, :b_name])
-      UT.assert_exact_trace(actual, [[a_name: "a_data"], [b_name: "b_data"]])
+      UT.assert_log_entries(actual, actual)
+      UT.assert_log_entries(actual, [:a_name, :b_name])
+      UT.assert_log_entries(actual, [[a_name: "a_data"], [b_name: "b_data"]])
       # This is good enough to imply that `assert_log_entry` is used.
     end
 
@@ -92,18 +91,18 @@ defmodule TraceAssertionsTest do
       assertion_fails(
         "The left-hand side has 1 extra value(s).",
         fn ->
-          UT.assert_exact_trace(actual, [:a_name])
+          UT.assert_log_entries(actual, [:a_name])
         end)
 
       assertion_fails(
         "The right-hand side has 1 extra value(s).",
         fn ->
-          UT.assert_exact_trace(actual, [:length, :comparison, :first])
+          UT.assert_log_entries(actual, [:length, :comparison, :first])
         end)
     end
   end
 
-  describe "assert_trace" do
+  describe "assert_causal_chain" do
     setup do
       [actual: [PulseSent.new(:a_label, :a_name, "a_data"),
                 PulseSent.new(:b_label, :b_name, "b_data"),
@@ -111,8 +110,8 @@ defmodule TraceAssertionsTest do
     end
 
     test "elements can be skipped", %{actual: actual} do
-      UT.assert_trace(actual, [:a_name, :b_name])
-      UT.assert_trace(actual, [:a_name, [c_name: "c_data"]])
+      UT.assert_causal_chain(actual, [:a_name, :b_name])
+      UT.assert_causal_chain(actual, [:a_name, [c_name: "c_data"]])
     end
 
     test "a name not found will produce an error", %{actual: actual} do
@@ -120,16 +119,16 @@ defmodule TraceAssertionsTest do
         "There is no entry matching `:missing`.",
         [right: :missing],
         fn ->
-          UT.assert_trace(actual, [:a_name, :missing])
+          UT.assert_causal_chain(actual, [:a_name, :missing])
         end)
     end
 
-    test "a pulse_datanot found will produce an error", %{actual: actual} do
+    test "a pulse_data not found will produce an error", %{actual: actual} do
       assertion_fails(
         "There is no entry matching `:c_name`.",
         [right: [c_name: "not c_data"]],
         fn ->
-          UT.assert_trace(actual, [:a_name, [c_name: "not c_data"]])
+          UT.assert_causal_chain(actual, [:a_name, [c_name: "not c_data"]])
         end)
     end
     

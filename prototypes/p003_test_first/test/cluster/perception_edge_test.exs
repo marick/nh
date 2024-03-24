@@ -24,16 +24,14 @@ defmodule AppAnimal.Cluster.PerceptionEdgeTest do
 
     log = ActivityLogger.get_log(a.p_logger)
 
-    log 
-    |> assert_trace([
-      action(:focus_on_paragraph),
+    assert_causal_chain(log, [
+      action_taken(:focus_on_paragraph),
       [paragraph_text: "some text"],
       [reverser: "txet emos"]
     ])
 
-    log
-    |> assert_trace([
-      action(:focus_on_paragraph),
+    assert_causal_chain(log, [
+      action_taken(:focus_on_paragraph),
       [paragraph_text: "some text"],
       [joiner: "some textsome text"],
     ])

@@ -1,9 +1,37 @@
 defmodule ClusterCase do
+  @moduledoc """
+  Use this package to get various conveniences for working with clusters, message sending,
+  the Switchboard, and AffordanceLand.
+  """
   use AppAnimal
   alias AppAnimal.{System, Cluster}
   alias Cluster.Shape
   alias ExUnit.Assertions
 
+  # About the network
+
+  @doc """
+  Create a pseudo-cluster that will relay a pulse to the current test.
+
+  Catch the pulse with `assert_test_receives` (layered on `assert_receive`).
+
+  By default, the cluster is named `:endpoint`. If you use `to_test` more
+  when making the network, you'll probably want to give a different name.
+  """
+  def to_test(name \\ :endpoint) do
+    p_test = self()
+    f_send_to_test = fn pulse_data ->
+      send(p_test, [pulse_data, from: name])
+    end
+      
+    %Cluster{name: name,
+             label: :test_endpoint,
+             shape: Shape.Linear.new,
+             calc: &Function.identity/1,
+             f_outward: f_send_to_test}
+  end
+
+  @doc "Receive a pulse from a `to_test` node"
   defmacro assert_test_receives(value, opts \\ [from: :endpoint]) do
     quote do 
       [retval, from: _] = Assertions.assert_receive([unquote(value) | unquote(opts)])
@@ -11,36 +39,25 @@ defmodule ClusterCase do
     end
   end
 
-  # The stripping out of `carrying` is a hack because of old behavior.
-  def to_test(name \\ :endpoint) do
-    filter =
-      fn
-        [carrying: pulse] -> pulse
-        pulse -> pulse
-      end
-
-    p_test = self()
-    f_outward = fn pulse_data ->
-      send(p_test, [pulse_data, from: name])
-    end
-      
-    %Cluster{name: name,
-             label: :test_endpoint,
-             shape: Shape.Linear.new,
-             calc: filter,
-             f_outward: f_outward}
-  end
-
+  @doc "Send the pulse from the test as if it came from a network cluster."
   def send_test_pulse(p_switchboard, to: destination_name, carrying: pulse_data) do
     GenServer.cast(p_switchboard,
                    {:distribute_pulse, carrying: pulse_data, to: [destination_name]})
   end
 
-  # About programming affordances
-
-  def response_to(action, response), do: {action, response}
   def affords([{name, data}]), do: {name, data}
+  def response_to(action, response), do: {action, response}
 
+  @doc """
+  Script AffordanceLand to respond to a given action with a given affordance+data.
+
+  Typically:
+
+      |> script(
+           response_to(:focus_on_paragraph, affords(paragraph_text: "some text")))
+      |> take_action(focus_on_paragraph: :no_data)
+
+  """
   def script(pid, {_action_name, {_affordance_name, _affordance_data}} = singleton), 
       do: script(pid, [singleton])
   
@@ -49,12 +66,15 @@ defmodule ClusterCase do
     pid
   end
 
-  
+
+  @doc """
+  Cast a message representing an action to AffordanceLand from a test.
+
+  Behaves the same way as an `action_edge` cluster.
+  """
   def take_action(pid, [{_name, _data}] = action) do
     GenServer.cast(pid, [:take_action, action])
   end
-  
-
 
   defmacro __using__(opts) do
     quote do
@@ -66,7 +86,7 @@ defmodule ClusterCase do
       alias System.Network
       alias System.ActivityLogger
       import ClusterCase
-      import AppAnimal.TraceAssertions
+      import AppAnimal.ActivityLogAssertions
       use FlowAssertions
       import Cluster.Make
       import Network.Make
