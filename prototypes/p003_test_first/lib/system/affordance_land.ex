@@ -33,31 +33,31 @@ defmodule System.AffordanceLand do
       {:ok, struct(__MODULE__, opts)}
     end
 
-    def handle_cast([:produce_this_affordance, {name, data}], mutable) do
-      GenServer.cast(mutable.p_switchboard,
+    def handle_cast([:produce_this_affordance, {name, data}], s_affordances) do
+      GenServer.cast(s_affordances.p_switchboard,
                      {:distribute_pulse, carrying: data, to: [name]})
-      continue(mutable)
+      continue(s_affordances)
     end
 
-    def handle_cast([script: responses], mutable) do
-      mutable
+    def handle_cast([script: responses], s_affordances) do
+      s_affordances
       |> Map.update!(:programmed_responses, & append_programmed_responses(&1, responses))
       |> continue()
     end
     
-    def handle_cast([:take_action, [{name, data}]], mutable) do
+    def handle_cast([:take_action, [{name, data}]], s_affordances) do
       {responses, remaining_programmed_responses} =
-        Keyword.pop_first(mutable.programmed_responses, name)
+        Keyword.pop_first(s_affordances.programmed_responses, name)
       
       if responses == nil,
          do: IO.puts("==== SAY, there is no programmed response for #{name}. Test error.")
       
-      ActivityLogger.log_action_received(mutable.p_logger, name, data)
+      ActivityLogger.log_action_received(s_affordances.p_logger, name, data)
       for response <- responses do
-        handle_cast([:produce_this_affordance, response], mutable)
+        handle_cast([:produce_this_affordance, response], s_affordances)
       end
       
-      %{mutable | programmed_responses: remaining_programmed_responses}
+      %{s_affordances | programmed_responses: remaining_programmed_responses}
       |> continue()
     end
     
