@@ -25,7 +25,7 @@ defmodule System.Switchboard do
     plugin TypedStructLens, prefix: :l_
 
     field :network,    Network.t
-    field :pulse_rate, integer,        default: 100  # in milliseconds
+    field :throb_rate, integer,        default: System.Throb.default_rate
     field :p_logger, ActivityLogger.t, default: ActivityLogger.start_link |> okval
   end
 
@@ -43,7 +43,7 @@ defmodule System.Switchboard do
   runs_in_receiver do 
     @impl GenServer
     def init(s_switchboard) do
-      schedule_next_throb(s_switchboard.pulse_rate)
+      schedule_next_throb(s_switchboard.throb_rate)
       ok(s_switchboard)
     end
 
@@ -95,7 +95,7 @@ defmodule System.Switchboard do
     @impl GenServer
     def handle_info(:time_to_throb, s_switchboard) do
       Network.Throbbing.time_to_throb(s_switchboard.network)
-      schedule_next_throb(s_switchboard.pulse_rate)
+      schedule_next_throb(s_switchboard.throb_rate)
       continue(s_switchboard)
     end
 
