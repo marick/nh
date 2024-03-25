@@ -1,6 +1,10 @@
-defmodule AppAnimal.Scenarios.SwitchParagraphTest do
+alias AppAnimal.Scenarios
+
+
+defmodule Scenarios.SwitchParagraphTest do
   use ClusterCase, async: true
   import AppAnimal.Cluster.Make
+  alias AppAnimal.Calc.ParagraphGaps
 
   setup do
     # Pieces
@@ -34,10 +38,14 @@ defmodule AppAnimal.Scenarios.SwitchParagraphTest do
       action_edge(:focus_on_paragraph),
     ]
 
-    reaction_to_focus = [focus_on_paragraph: [paragraph_text: "para\n"]]
+#    reaction_to_focus = [focus_on_paragraph: [paragraph_text: "para\n\npara\n\npara"]]
+    reaction_to_focus = [focus_on_paragraph: [paragraph_text: "para\n\nparapara"]]
 
     reaction_to_paragraph_text = [
       perception_edge(:paragraph_text),
+      summarizer(:paragraph_structure, &ParagraphGaps.summarize/1),
+      summarizer(:gap_count, &ParagraphGaps.gap_count/1),
+      gate(:is_big_edit?, & &1 >= 2),
       # linear(:count_gaps, only_pulse(after: fn -> 2 end))
       # delay(:desire_to_mark_paragraph_with_big_edit, 2_000)
       # action_edge(:mark_paragraph_with_big_edit)
@@ -56,7 +64,7 @@ defmodule AppAnimal.Scenarios.SwitchParagraphTest do
 
     GenServer.cast(a.p_affordances, [:produce_this_affordance, notice_new_paragraph: :no_data])
 
-    assert_test_receives("para\n")
+    assert_test_receives(2)
     ActivityLogger.get_log(a.p_logger)
     
     

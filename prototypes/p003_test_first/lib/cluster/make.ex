@@ -63,4 +63,23 @@ defmodule Cluster.Make do
     |> Map.put(:f_outward, OutgoingLogic.mkfn_pulse_direction(AffordanceLand))
     |> Map.put(:label, :action_edge)
   end
+
+
+  ### Specializations
+
+  def summarizer(name, calc) do
+    linear(name, calc)
+    |> Map.put(:label, :summarizer)
+  end
+
+  def gate(name, predicate) do
+    f = fn pulse_data ->
+      if predicate.(pulse_data),
+         do: pulse_data,
+         else: :no_pulse
+    end
+
+    linear(name, f)
+    |> Map.put(:label, :gate)
+  end
  end

@@ -17,6 +17,10 @@ defmodule Calc.ParagraphGaps do
     List.zip([labels, ranges])
   end
 
+  def gap_count(summarized) do
+    Keyword.get_values(summarized, :gap) |> length
+  end
+
   private do
     @gap_definition ~r/\n\n+/
 
