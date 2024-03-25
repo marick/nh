@@ -4,7 +4,7 @@ alias System.Network
 defmodule Network.Throbbing do
   use AppAnimal
 
-  # Getters
+  # Getters  
 
   def throbbing_names(network), do: Map.keys(network.throbbers_by_name)
   def throbbing_pids(network), do: Map.values(network.throbbers_by_name)
@@ -13,6 +13,16 @@ defmodule Network.Throbbing do
     throbbing_names(network)
     |> Enum.map(& network.clusters_by_name[&1])
   end
+
+  # conversions
+
+  def default_rate(), do: 100 # milliseconds
+
+  @doc "Used in tests that want to control throbbing themselves"
+  def impossibly_slowly(), do: seconds(1_000_000)
+
+  def seconds(n), do: trunc(n * 1000)
+  
 
   # Working with clusters
 
