@@ -1,50 +1,35 @@
 alias AppAnimal.Cluster
 alias Cluster.CircularProcess
 
-defmodule CircularProcess.TimerLogic do
-  use TypedStruct
-  
-  typedstruct do
-    plugin TypedStructLens, prefix: :l_
-
-    field :current_strength, integer
-    field :starting_strength, integer
-  end
-
-  def new(start_at), do: %__MODULE__{current_strength: start_at, starting_strength: start_at}
-
-end
-
 defmodule CircularProcess.State do
   @moduledoc """
 
   Those parts of a `Cluster` that are relevant to the operation of this gensym. Here are
   the fields that are new:
   
-  - timer_logic    - Controls the aging of this cluster and its eventual exit.
+  - throb_logic    - Controls the aging of this cluster and its eventual exit.
                      Initialized from Shape.Circular.starting_pulses.
   - previously     - The part of the state the `calc` function can channged.
                      Initialized from Shape.Circular.starting_pulses.
   """
-  alias CircularProcess.TimerLogic
   use AppAnimal
   use TypedStruct
 
   typedstruct do
     plugin TypedStructLens, prefix: :l_
 
-    field :timer_logic, CircularProcess.TimerLogic.t
+    field :throb_logic, Cluster.ThrobLogic.t
     field :calc, fun
     field :f_outward, fun
     field :previously, any
   end
     
   def from_cluster(s_cluster) do
-    timer = TimerLogic.new(s_cluster.shape.starting_pulses)
+    throb_logic = Cluster.ThrobLogic.new(s_cluster.shape.starting_pulses)
 
     %__MODULE__{calc: s_cluster.calc,
                 f_outward: s_cluster.f_outward,
-                timer_logic: timer,
+                throb_logic: throb_logic,
                 previously: s_cluster.shape.initial_value
   }
   end
@@ -53,7 +38,7 @@ defmodule CircularProcess.State do
   deflens l_starting_strength(), do: in_timer(:starting_strength)
   
   private do
-    def in_timer(key), do: l_timer_logic() |> Lens.key(key)
+    def in_timer(key), do: l_throb_logic() |> Lens.key(key)
   end
 end
 

@@ -3,6 +3,7 @@ alias AppAnimal.Cluster
 defmodule Cluster.CircularProcessTest do
   use ClusterCase, async: true
   alias Cluster.CircularProcess, as: UT
+  alias Cluster.ThrobLogic
 
   describe "initialization" do 
     test "with default starting value" do
@@ -15,8 +16,8 @@ defmodule Cluster.CircularProcessTest do
                        previously: %{})
 
       starting_pulses = cluster.shape.starting_pulses
-      assert state.timer_logic == %UT.TimerLogic{current_strength: starting_pulses,
-                                                 starting_strength: starting_pulses}
+      assert state.throb_logic == %ThrobLogic{current_strength: starting_pulses,
+                                              starting_strength: starting_pulses}
     end
 
     test "with a given starting value" do
