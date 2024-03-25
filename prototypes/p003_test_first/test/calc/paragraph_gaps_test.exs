@@ -75,5 +75,18 @@ defmodule Calc.ParagraphGapsTest do
     [text: meh, text: meh]           |> returns.("\u25A0\u25A0")
     [text: meh, gap: meh, text: meh] |> returns.("\u25A0_\u25A0")
   end
+
+  test "gap count" do
+    "part\n\nfragment\n\n\ngap\n"
+    |> UT.gap_structure
+    |> UT.gap_count
+    |> assert_equals(2)
+
+
+    "part"
+    |> UT.gap_structure
+    |> UT.gap_count
+    |> assert_equals(0)
+  end
 end
 
