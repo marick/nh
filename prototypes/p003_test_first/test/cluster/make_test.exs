@@ -4,7 +4,7 @@ defmodule Cluster.MakeTest do
   use ExUnit.Case, async: true
   use FlowAssertions
   alias Cluster.Make, as: UT
-  import AppAnimal.System.Network.Throbbing, only: [seconds: 1]
+  import AppAnimal.Throbbing.Units
 
   describe "making circular clusters with circular" do 
     test "basic" do

@@ -90,6 +90,8 @@ defmodule ClusterCase do
       use FlowAssertions
       import Cluster.Make
       import Network.Make
+      alias AppAnimal.Throbbing
+      import Throbbing.Units
     end
   end
 end

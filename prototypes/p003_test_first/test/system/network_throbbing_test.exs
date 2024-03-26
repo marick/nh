@@ -5,13 +5,6 @@ defmodule Network.ThrobbingTest do
   alias Network.Throbbing, as: UT
 
 
-  describe "conversions" do
-    test "seconds into milliseconds" do
-      assert UT.seconds(1) == 1000
-      assert UT.seconds(0.1) == 100
-    end
-  end
-  
   describe "handling of throbbing clusters" do
     setup do
       [network: trace([linear(:one_shot), circular(:idle), circular(:will_throb)])]

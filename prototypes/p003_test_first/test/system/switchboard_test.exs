@@ -5,7 +5,6 @@ defmodule System.SwitchboardTest do
   use ClusterCase, async: true
   alias System.ActivityLogger
   alias Cluster.Make
-  alias Network.Throbbing
   
   ## The switchboard is mostly tested via the different kinds of clusters.
 
@@ -62,7 +61,7 @@ defmodule System.SwitchboardTest do
     
     a =
       trace([first, to_test()])
-      |> AppAnimal.enliven(throb_rate: Throbbing.impossibly_slowly) 
+      |> AppAnimal.enliven(throb_rate: impossibly_slowly()) 
     
     send_test_pulse(a.p_switchboard, to: :first, carrying: :irrelevant)
     assert_test_receives(pid)

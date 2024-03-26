@@ -20,13 +20,13 @@ defmodule System.Switchboard do
   use TypedStruct
   alias System.ActivityLogger
   alias System.Network
-  alias Network.Throbbing
+  import AppAnimal.Throbbing.Units
 
   typedstruct do
     plugin TypedStructLens, prefix: :l_
 
     field :network,    Network.t
-    field :throb_rate, integer,        default: Throbbing.default_rate
+    field :throb_rate, integer,        default: default_rate()
     field :p_logger, ActivityLogger.t, default: ActivityLogger.start_link |> okval
   end
 
