@@ -15,8 +15,8 @@ defmodule Cluster.CircularProcessTest do
       |> assert_fields(calc: cluster.calc,
                        previously: %{})
 
-      starting_pulses = cluster.shape.starting_pulses
-      assert state.throb_logic == ThrobLogic.new(starting_pulses)
+      starting_lifespan = cluster.shape.starting_lifespan
+      assert state.throb_logic == ThrobLogic.new(starting_lifespan)
     end
 
     test "with a given starting value" do

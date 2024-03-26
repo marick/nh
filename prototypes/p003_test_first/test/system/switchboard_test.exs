@@ -58,7 +58,7 @@ defmodule System.SwitchboardTest do
   end
 
   test "what happens when a circular cluster 'ages out'" do
-    first = circular(:first, fn _pulse -> self() end, starting_pulses: 2)
+    first = circular(:first, fn _pulse -> self() end, starting_lifespan: 2)
     
     a =
       trace([first, to_test()])

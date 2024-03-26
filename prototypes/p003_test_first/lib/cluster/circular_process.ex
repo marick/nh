@@ -8,9 +8,9 @@ defmodule CircularProcess.State do
   the fields that are new:
   
   - throb_logic    - Controls the aging of this cluster and its eventual exit.
-                     Initialized from Shape.Circular.starting_pulses.
+                     Initialized from Shape.Circular.starting_lifespan.
   - previously     - The part of the state the `calc` function can channged.
-                     Initialized from Shape.Circular.starting_pulses.
+                     Initialized from Shape.Circular.initial_value.
   """
   use AppAnimal
   use TypedStruct
@@ -25,7 +25,7 @@ defmodule CircularProcess.State do
   end
     
   def from_cluster(s_cluster) do
-    throb_logic = Cluster.ThrobLogic.new(s_cluster.shape.starting_pulses)
+    throb_logic = Cluster.ThrobLogic.new(s_cluster.shape.starting_lifespan)
 
     %__MODULE__{calc: s_cluster.calc,
                 f_outward: s_cluster.f_outward,

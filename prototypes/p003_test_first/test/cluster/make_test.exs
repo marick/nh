@@ -4,6 +4,7 @@ defmodule Cluster.MakeTest do
   use ExUnit.Case, async: true
   use FlowAssertions
   alias Cluster.Make, as: UT
+  import AppAnimal.System.Network.Throbbing, only: [seconds: 1]
 
   describe "making circular clusters with circular" do 
     test "basic" do
@@ -17,12 +18,12 @@ defmodule Cluster.MakeTest do
       end
     
     test "optional arguments go into the shape" do
-      cluster = UT.circular(:example, & &1+1, starting_pulses: 1000,
+      cluster = UT.circular(:example, & &1+1, starting_lifespan: seconds(10),
                                               initial_value: [])
 
 
       cluster.shape
-      |> assert_fields(starting_pulses: 1000, initial_value: [])
+      |> assert_fields(starting_lifespan: seconds(10), initial_value: [])
     end
   end
 
