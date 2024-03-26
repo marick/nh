@@ -34,11 +34,11 @@ defmodule CircularProcess.State do
   }
   end
 
-  deflens l_current_strength(), do: in_timer(:current_strength)
-  deflens l_starting_strength(), do: in_timer(:starting_strength)
+  deflens l_current_strength(), do: in_throb_logic(:current_strength)
+  deflens l_starting_strength(), do: in_throb_logic(:starting_strength)
   
   private do
-    def in_timer(key), do: l_throb_logic() |> Lens.key(key)
+    def in_throb_logic(key), do: l_throb_logic() |> Lens.key(key)
   end
 end
 
