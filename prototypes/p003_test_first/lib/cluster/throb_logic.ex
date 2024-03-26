@@ -18,9 +18,8 @@ defmodule ThrobLogic do
     s_throb_logic
   end
 
-  def throb(s_throb_logic) do
-    
-    mutated = Map.update!(s_throb_logic, :current_strength, & &1-1)
+  def throb(s_throb_logic, n \\ 1) do
+    mutated = Map.update!(s_throb_logic, :current_strength, & &1-n)
     if mutated.current_strength <= 0,
          do: {:stop, mutated},
          else: {:continue, mutated}

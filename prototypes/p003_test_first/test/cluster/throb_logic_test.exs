@@ -21,6 +21,13 @@ defmodule Cluster.ThrobLogicTest do
       assert_field(new_logic, current_strength: 0)
     end
     
+    test "can pack multiple throbs together for testing" do
+      logic = UT.new(5)
+      assert {:stop, new_logic} = UT.throb(logic, 5)
+
+      assert_field(new_logic, current_strength: 0)
+    end
+    
     test "a pulse does not make a difference" do
       logic = UT.new(1)
       assert logic == UT.note_pulse(logic, :irrelevant_pulse_value)

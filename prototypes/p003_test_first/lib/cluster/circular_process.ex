@@ -45,7 +45,7 @@ end
 defmodule CircularProcess do
   use AppAnimal
   use AppAnimal.GenServer
-  alias Cluster.Calc
+  alias Cluster.{Calc, ThrobLogic}
 
   def init(starting_state) do
     ok(starting_state)
@@ -58,14 +58,15 @@ defmodule CircularProcess do
     
     s_state
     |> deeply_put(:l_previously, Calc.next_state(result))
+    |> Map.update!(:throb_logic, &ThrobLogic.note_pulse(&1, result))
     |> continue
   end
 
   def handle_cast([throb: n], s_state) do
-    new_state = deeply_map(s_state, :l_current_strength, & &1-n)
+    {action, next_throb_logic} = ThrobLogic.throb(s_state.throb_logic, n)
 
-    if deeply_get_only(new_state, :l_current_strength) <= 0,
-       do: stop(new_state),
-       else: continue(new_state)
+    s_state
+    |> Map.put(:throb_logic, next_throb_logic)
+    |> then(& apply(AppAnimal.GenServer, action, [&1])) # this is really too cutesy.
   end
 end
