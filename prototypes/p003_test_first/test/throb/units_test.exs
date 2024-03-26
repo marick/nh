@@ -1,8 +1,8 @@
-alias AppAnimal.Throbbing
+alias AppAnimal.Throb
 
-defmodule Throbbing.UnitTest do
+defmodule Throb.UnitsTest do
   use ClusterCase, async: true
-  alias Throbbing.Units, as: UT
+  alias Throb.Units, as: UT
 
 
   describe "conversions" do

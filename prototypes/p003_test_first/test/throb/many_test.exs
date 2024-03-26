@@ -1,8 +1,8 @@
-alias AppAnimal.System.Network
+alias AppAnimal.Throb
 
-defmodule Network.ThrobbingTest do
+defmodule Throb.ManyTest do
   use ClusterCase, async: true
-  alias Network.Throbbing, as: UT
+  alias Throb.Many, as: UT
 
 
   describe "handling of throbbing clusters" do

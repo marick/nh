@@ -1,9 +1,9 @@
-alias AppAnimal.Cluster
+alias AppAnimal.Throb
 
-defmodule Cluster.ThrobLogicTest do
+defmodule Throb.CalcTest do
   use ExUnit.Case, async: true
   use FlowAssertions
-  alias Cluster.ThrobLogic, as: UT
+  alias Throb.Calc, as: UT
   
 
   describe "simply running down" do

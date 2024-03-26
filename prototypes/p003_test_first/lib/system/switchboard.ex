@@ -1,4 +1,4 @@
-alias AppAnimal.{System, Network}
+alias AppAnimal.{System, Network, Throb}
 
 
 defmodule System.Switchboard do
@@ -20,7 +20,7 @@ defmodule System.Switchboard do
   use TypedStruct
   alias System.ActivityLogger
   alias System.Network
-  import AppAnimal.Throbbing.Units
+  import Throb.Units
 
   typedstruct do
     plugin TypedStructLens, prefix: :l_
@@ -95,7 +95,7 @@ defmodule System.Switchboard do
     ## to age out and exit.
     @impl GenServer
     def handle_info(:time_to_throb, s_switchboard) do
-      Network.Throbbing.time_to_throb(s_switchboard.network)
+      Throb.Many.time_to_throb(s_switchboard.network)
       schedule_next_throb(s_switchboard.throb_rate)
       continue(s_switchboard)
     end
@@ -106,7 +106,7 @@ defmodule System.Switchboard do
     ## messages that cause them to "throb".
     def handle_info({:DOWN, _, :process, pid, :normal}, s_switchboard) do
       s_switchboard
-      |> within_network(& Network.Throbbing.drop_idling_pid(&1, pid))
+      |> within_network(& Throb.Many.drop_idling_pid(&1, pid))
       |> continue
     end
     

@@ -1,10 +1,10 @@
-alias AppAnimal.Cluster
+alias AppAnimal.{Cluster,Throb}
 
 defmodule Cluster.MakeTest do
   use ExUnit.Case, async: true
   use FlowAssertions
   alias Cluster.Make, as: UT
-  import AppAnimal.Throbbing.Units
+  import Throb.Units
 
   describe "making circular clusters with circular" do 
     test "basic" do

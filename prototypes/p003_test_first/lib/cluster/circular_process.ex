@@ -1,4 +1,4 @@
-alias AppAnimal.Cluster
+alias AppAnimal.{Cluster,Throb}
 alias Cluster.CircularProcess
 
 defmodule CircularProcess.State do
@@ -7,7 +7,7 @@ defmodule CircularProcess.State do
   Those parts of a `Cluster` that are relevant to the operation of this gensym. Here are
   the fields that are new:
   
-  - throb_logic    - Controls the aging of this cluster and its eventual exit.
+  - throb          - Controls the aging of this cluster and its eventual exit.
                      Initialized from Shape.Circular.starting_lifespan.
   - previously     - The part of the state the `calc` function can channged.
                      Initialized from Shape.Circular.initial_value.
@@ -18,55 +18,55 @@ defmodule CircularProcess.State do
   typedstruct do
     plugin TypedStructLens, prefix: :l_
 
-    field :throb_logic, Cluster.ThrobLogic.t
+    field :throb, Throb.Calc.t
     field :calc, fun
     field :f_outward, fun
     field :previously, any
   end
     
   def from_cluster(s_cluster) do
-    throb_logic = Cluster.ThrobLogic.new(s_cluster.shape.starting_lifespan)
+    throb = Throb.Calc.new(s_cluster.shape.starting_lifespan)
 
     %__MODULE__{calc: s_cluster.calc,
                 f_outward: s_cluster.f_outward,
-                throb_logic: throb_logic,
+                throb: throb,
                 previously: s_cluster.shape.initial_value
   }
   end
 
-  deflens l_current_strength(), do: in_throb_logic(:current_strength)
-  deflens l_starting_strength(), do: in_throb_logic(:starting_strength)
+  deflens l_current_strength(), do: in_throb(:current_strength)
+  deflens l_starting_strength(), do: in_throb(:starting_strength)
   
   private do
-    def in_throb_logic(key), do: l_throb_logic() |> Lens.key(key)
+    def in_throb(key), do: l_throb() |> Lens.key(key)
   end
 end
 
 defmodule CircularProcess do
   use AppAnimal
   use AppAnimal.GenServer
-  alias Cluster.{Calc, ThrobLogic}
+  alias Cluster.Calc
 
   def init(starting_state) do
     ok(starting_state)
   end
 
-  def handle_cast([handle_pulse: small_data], s_state) do
-    result = Calc.run(s_state.calc, on: small_data, with_state: s_state.previously)
+  def handle_cast([handle_pulse: small_data], process_state) do
+    result = Calc.run(process_state.calc, on: small_data, with_state: process_state.previously)
 
-    Calc.maybe_pulse(result, & Cluster.start_pulse_on_its_way(s_state, &1))
+    Calc.maybe_pulse(result, & Cluster.start_pulse_on_its_way(process_state, &1))
     
-    s_state
+    process_state
     |> deeply_put(:l_previously, Calc.next_state(result))
-    |> Map.update!(:throb_logic, &ThrobLogic.note_pulse(&1, result))
+    |> Map.update!(:throb, &Throb.Calc.note_pulse(&1, result))
     |> continue
   end
 
-  def handle_cast([throb: n], s_state) do
-    {action, next_throb_logic} = ThrobLogic.throb(s_state.throb_logic, n)
+  def handle_cast([throb: n], process_state) do
+    {action, next_throb} = Throb.Calc.throb(process_state.throb, n)
 
-    s_state
-    |> Map.put(:throb_logic, next_throb_logic)
+    process_state
+    |> Map.put(:throb, next_throb)
     |> then(& apply(AppAnimal.GenServer, action, [&1])) # this is really too cutesy.
   end
 end

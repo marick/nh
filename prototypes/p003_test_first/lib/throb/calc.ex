@@ -1,6 +1,6 @@
-alias AppAnimal.Cluster.ThrobLogic
+alias AppAnimal.Throb
 
-defmodule ThrobLogic do
+defmodule Throb.Calc do
   use TypedStruct
   
   typedstruct do
@@ -14,12 +14,12 @@ defmodule ThrobLogic do
     %__MODULE__{current_strength: start_at, starting_strength: start_at}
   end
 
-  def note_pulse(s_throb_logic, _calc_value) do
-    s_throb_logic
+  def note_pulse(s_calc, _cluster_calc) do
+    s_calc
   end
 
-  def throb(s_throb_logic, n \\ 1) do
-    mutated = Map.update!(s_throb_logic, :current_strength, & &1-n)
+  def throb(s_calc, n \\ 1) do
+    mutated = Map.update!(s_calc, :current_strength, & &1-n)
     if mutated.current_strength <= 0,
          do: {:stop, mutated},
          else: {:continue, mutated}
