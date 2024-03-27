@@ -35,9 +35,27 @@ defmodule Throb.CalcTest do
 
   describe "pulses increase the lifespan" do
     test "a pulse bumps the current strength by one" do
-      calc = UT.new(2, on_pulse: &UT.pulse_increases_lifespan/2)
-      UT.note_pulse(calc, :irrelevant_calculated_value)
-      |> assert_field(current_strength: 3)
+      s_calc = UT.new(2, on_pulse: &UT.pulse_increases_lifespan/2)
+
+      {:continue, s_calc} = UT.throb(s_calc)   # take it below starting value
+      assert_field(s_calc, current_strength: 1)
+        
+      UT.note_pulse(s_calc, :irrelevant_calculated_value)
+      |> assert_field(current_strength: 2)
+    end
+
+    test "but it does not go beyond the max" do
+      s_calc = UT.new(2, on_pulse: &UT.pulse_increases_lifespan/2)
+
+      {:continue, s_calc} = UT.throb(s_calc)   # take it below starting value
+      assert_field(s_calc, current_strength: 1)
+
+      s_calc
+      |> UT.note_pulse(:irrelevant_calculated_value)
+      |> UT.note_pulse(:irrelevant_calculated_value)
+      |> UT.note_pulse(:irrelevant_calculated_value)
+      |> UT.note_pulse(:irrelevant_calculated_value)
+      |> assert_field(current_strength: 2)
     end
   end
 end

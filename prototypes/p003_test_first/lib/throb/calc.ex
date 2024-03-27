@@ -36,6 +36,7 @@ defmodule Throb.Calc do
       do: s_calc
 
   def pulse_increases_lifespan(s_calc, _cluster_calced_value) do
-    Map.update!(s_calc, :current_strength, & &1+1)
+    next_strength = min(s_calc.starting_strength, s_calc.current_strength + 1)
+    Map.put(s_calc, :current_strength, next_strength)
   end
 end
