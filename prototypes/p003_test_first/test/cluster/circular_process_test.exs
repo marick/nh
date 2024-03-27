@@ -1,8 +1,9 @@
-alias AppAnimal.{Cluster,Throb}
+alias AppAnimal.Cluster
 
 defmodule Cluster.CircularProcessTest do
   use ClusterCase, async: true
   alias Cluster.CircularProcess, as: UT
+  alias Cluster.Throb
 
   describe "initialization" do 
     test "with default starting value" do
@@ -15,7 +16,7 @@ defmodule Cluster.CircularProcessTest do
                        previously: %{})
 
       starting_lifespan = cluster.shape.starting_lifespan
-      assert state.throb == Throb.Calc.new(starting_lifespan)
+      assert state.throb == Throb.new(starting_lifespan)
     end
 
     test "with a given starting value" do

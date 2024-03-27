@@ -1,4 +1,4 @@
-alias AppAnimal.{Cluster,Throb}
+alias AppAnimal.Cluster
 alias Cluster.CircularProcess
 
 defmodule CircularProcess.State do
@@ -18,14 +18,14 @@ defmodule CircularProcess.State do
   typedstruct do
     plugin TypedStructLens, prefix: :l_
 
-    field :throb, Throb.Calc.t
+    field :throb, Cluster.Throb.t
     field :calc, fun
     field :f_outward, fun
     field :previously, any
   end
     
   def from_cluster(s_cluster) do
-    throb = Throb.Calc.new(s_cluster.shape.starting_lifespan)
+    throb = Cluster.Throb.new(s_cluster.shape.starting_lifespan)
 
     %__MODULE__{calc: s_cluster.calc,
                 f_outward: s_cluster.f_outward,
@@ -58,12 +58,12 @@ defmodule CircularProcess do
     
     s_process_state
     |> deeply_put(:l_previously, Calc.next_state(result))
-    |> Map.update!(:throb, &Throb.Calc.note_pulse(&1, result))
+    |> Map.update!(:throb, &Cluster.Throb.note_pulse(&1, result))
     |> continue
   end
 
   def handle_cast([throb: n], s_process_state) do
-    {action, next_throb} = Throb.Calc.throb(s_process_state.throb, n)
+    {action, next_throb} = Cluster.Throb.throb(s_process_state.throb, n)
 
     s_process_state
     |> Map.put(:throb, next_throb)

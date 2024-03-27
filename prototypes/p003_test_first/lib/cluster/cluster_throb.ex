@@ -1,6 +1,7 @@
-alias AppAnimal.Throb
+alias AppAnimal.Cluster
+alias Cluster.Throb
 
-defmodule Throb.Calc do
+defmodule Throb do
   use TypedStruct
   
   typedstruct do
@@ -8,7 +9,7 @@ defmodule Throb.Calc do
 
     field :current_strength, integer
     field :starting_strength, integer
-    field :f_note_pulse, (Throb.Calc.t, any -> Throb.Calc.t)
+    field :f_note_pulse, (Throb.t, any -> Throb.t)
   end
 
   def new(start_at, opts \\ []) do
@@ -19,12 +20,12 @@ defmodule Throb.Calc do
     }
   end
 
-  def note_pulse(s_calc, cluster_calced) do
-    s_calc.f_note_pulse.(s_calc, cluster_calced)
+  def note_pulse(s_throb, cluster_calced) do
+    s_throb.f_note_pulse.(s_throb, cluster_calced)
   end
 
-  def throb(s_calc, n \\ 1) do
-    mutated = Map.update!(s_calc, :current_strength, & &1-n)
+  def throb(s_throb, n \\ 1) do
+    mutated = Map.update!(s_throb, :current_strength, & &1-n)
     if mutated.current_strength <= 0,
          do: {:stop, mutated},
          else: {:continue, mutated}
@@ -32,11 +33,11 @@ defmodule Throb.Calc do
 
   # Various values for `f_note_pulse`
 
-  def pulse_does_nothing(s_calc, _cluster_calced_value),
-      do: s_calc
+  def pulse_does_nothing(s_throb, _cluster_calced_value),
+      do: s_throb
 
-  def pulse_increases_lifespan(s_calc, _cluster_calced_value) do
-    next_strength = min(s_calc.starting_strength, s_calc.current_strength + 1)
-    Map.put(s_calc, :current_strength, next_strength)
+  def pulse_increases_lifespan(s_throb, _cluster_calced_value) do
+    next_strength = min(s_throb.starting_strength, s_throb.current_strength + 1)
+    Map.put(s_throb, :current_strength, next_strength)
   end
 end
