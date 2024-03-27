@@ -34,6 +34,9 @@ defmodule Network do
   deflens l_cluster_named(name),
           do: l_clusters_by_name() |> Lens.key!(name)
 
+  deflens l_pid_named(name),
+          do: l_throbbers_by_name() |> Lens.key!(name)
+
   deflens l_downstream_of(name),
           do: l_cluster_named(name) |> Lens.key!(:downstream)
 

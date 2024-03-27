@@ -51,22 +51,29 @@ defmodule CircularProcess do
     ok(starting_state)
   end
 
-  def handle_cast([handle_pulse: small_data], process_state) do
-    result = Calc.run(process_state.calc, on: small_data, with_state: process_state.previously)
+  def handle_cast([handle_pulse: small_data], s_process_state) do
+    result = Calc.run(s_process_state.calc, on: small_data, with_state: s_process_state.previously)
 
-    Calc.maybe_pulse(result, & Cluster.start_pulse_on_its_way(process_state, &1))
+    Calc.maybe_pulse(result, & Cluster.start_pulse_on_its_way(s_process_state, &1))
     
-    process_state
+    s_process_state
     |> deeply_put(:l_previously, Calc.next_state(result))
     |> Map.update!(:throb, &Throb.Calc.note_pulse(&1, result))
     |> continue
   end
 
-  def handle_cast([throb: n], process_state) do
-    {action, next_throb} = Throb.Calc.throb(process_state.throb, n)
+  def handle_cast([throb: n], s_process_state) do
+    {action, next_throb} = Throb.Calc.throb(s_process_state.throb, n)
 
-    process_state
+    s_process_state
     |> Map.put(:throb, next_throb)
     |> then(& apply(AppAnimal.GenServer, action, [&1])) # this is really too cutesy.
+  end
+
+  # Test support
+
+  def handle_call(:current_strength, _from, s_process_state) do
+    strength = deeply_get_only(s_process_state, :l_current_strength)
+    continue(s_process_state, returning: strength) |> dbg
   end
 end

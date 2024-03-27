@@ -61,6 +61,14 @@ defmodule System.Switchboard do
                                                                      p_affordances))
       |> continue(returning: :ok)
     end
+
+    def handle_call([forward: message, to: circular_cluster_name],
+                    _from, s_switchboard) do
+      dbg s_switchboard
+      pid = deeply_get_only(s_switchboard.network, Network.l_pid_named(circular_cluster_name)) |> dbg
+      result = GenServer.call(pid, message) |> dbg
+      continue(s_switchboard, returning: result)
+    end
     
     ## The main entry point to send a pulse from the `source_name` to the named
     ## cluster's downstream.
