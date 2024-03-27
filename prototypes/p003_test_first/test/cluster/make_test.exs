@@ -54,6 +54,5 @@ defmodule Cluster.MakeTest do
       assert cluster.calc.(0) == :no_pulse
       assert cluster.calc.(1) == 1
     end      
-    
   end
 end

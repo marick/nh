@@ -82,4 +82,14 @@ defmodule Cluster.Make do
     linear(name, f)
     |> Map.put(:label, :gate)
   end
+
+
+  def forward_unique(name) do
+    linear(name, &Function.identity/1) |> labeled(:forward_unique)
+  end
+
+
+  private do
+    def labeled(cluster, label), do: Map.put(cluster, :label, label)
+  end
  end
