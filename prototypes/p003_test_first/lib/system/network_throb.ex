@@ -1,7 +1,7 @@
-alias AppAnimal.{System}
+alias AppAnimal.{Throb,System}
 alias System.Network
 
-defmodule Network.Throbbing do
+defmodule Throb.Many do
   use AppAnimal
 
   # Getters  
@@ -13,7 +13,7 @@ defmodule Network.Throbbing do
     throbbing_names(network)
     |> Enum.map(& network.clusters_by_name[&1])
   end
-
+R
   # Working with clusters
 
   def start_throbbing(network, names) do
