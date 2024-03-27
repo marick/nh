@@ -54,22 +54,20 @@ defmodule Cluster.Make do
   ## Edges
 
   def perception_edge(name) do
-    linear(name, &Function.identity/1)
-    |> Map.put(:label, :perception_edge)
+    linear(name, &Function.identity/1) |> labeled(:perception_edge)
   end
 
   def action_edge(name) do
     linear(name, & [{name, &1}])
     |> Map.put(:f_outward, OutgoingLogic.mkfn_pulse_direction(AffordanceLand))
-    |> Map.put(:label, :action_edge)
+    |> labeled(:action_edge)
   end
 
 
   ### Specializations
 
   def summarizer(name, calc) do
-    linear(name, calc)
-    |> Map.put(:label, :summarizer)
+    linear(name, calc) |> labeled(:summarizer)
   end
 
   def gate(name, predicate) do
@@ -79,8 +77,7 @@ defmodule Cluster.Make do
          else: :no_pulse
     end
 
-    linear(name, f)
-    |> Map.put(:label, :gate)
+    linear(name, f) |> labeled(:gate)
   end
 
 
