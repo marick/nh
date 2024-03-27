@@ -81,8 +81,14 @@ defmodule Cluster.Make do
   end
 
 
-  def forward_unique(name) do
-    linear(name, &Function.identity/1) |> labeled(:forward_unique)
+  def forward_unique(name, opts \\ []) do
+    opts = Keyword.put_new(opts, :initial_value, :erlang.make_ref())
+    f = fn pulse_data, previously ->
+      if pulse_data == previously,
+         do: :no_pulse,
+         else: {:pulse, pulse_data, pulse_data}
+    end
+    circular(name, f, opts) |> labeled(:forward_unique)
   end
 
 
