@@ -1,12 +1,11 @@
 alias AppAnimal.Cluster
 alias Cluster.Shape
-alias AppAnimal.Throb
 
 # These are a bit funky as they both hold data particular to one of the two
 # cluster shapes and also serve to identify which type of cluster the cluster is.
 
 defmodule Shape.Circular do
-  import Throb.Units
+  import AppAnimal.Clock
   use TypedStruct
 
   typedstruct do

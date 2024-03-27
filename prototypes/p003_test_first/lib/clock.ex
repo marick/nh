@@ -1,6 +1,6 @@
-alias AppAnimal.Throb
+alias AppAnimal.Clock
 
-defmodule Throb.Units do
+defmodule Clock do
   def default_rate(), do: 100 # milliseconds
 
   @doc "Used in tests that want to control throbbing themselves"

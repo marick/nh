@@ -1,5 +1,4 @@
-alias AppAnimal.{System,Throb}
-alias System.Network
+alias AppAnimal.System.Network
 
 defmodule Network do
   @moduledoc """
@@ -18,6 +17,7 @@ defmodule Network do
 
   """
   
+  alias Network.Throb
   use AppAnimal
   use TypedStruct
 
@@ -66,7 +66,7 @@ defmodule Network do
   def deliver_pulse(network, names, pulse_data) do
     alias Cluster.Shape
     
-    all_throbbing = Throb.Many.start_throbbing(network, names)
+    all_throbbing = Throb.start_throbbing(network, names)
     for name <- names do
       cluster = all_throbbing.clusters_by_name[name]
       case cluster.shape do

@@ -1,8 +1,8 @@
-alias AppAnimal.Throb
+alias AppAnimal.Clock
 
-defmodule Throb.UnitsTest do
+defmodule AppAnimal.ClockTest do
   use ClusterCase, async: true
-  alias Throb.Units, as: UT
+  alias Clock, as: UT
 
 
   describe "conversions" do

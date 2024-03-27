@@ -1,7 +1,7 @@
-alias AppAnimal.{Throb,System}
+alias AppAnimal.System
 alias System.Network
 
-defmodule Throb.Many do
+defmodule Network.Throb do
   use AppAnimal
 
   # Getters  

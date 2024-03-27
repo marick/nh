@@ -80,7 +80,7 @@ defmodule ClusterCase do
     quote do
       use ExUnit.Case, unquote(opts)
       use AppAnimal
-      alias AppAnimal.{System,Throb}
+      alias AppAnimal.System
       alias System.Switchboard
       alias System.AffordanceLand
       alias System.Network
@@ -90,8 +90,7 @@ defmodule ClusterCase do
       use FlowAssertions
       import Cluster.Make
       import Network.Make
-      alias AppAnimal.Throb
-      import Throb.Units
+      import AppAnimal.Clock
     end
   end
 end
