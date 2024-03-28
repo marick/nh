@@ -51,10 +51,12 @@ intervals.
 Such a cluster stores a bit of mutable state, and that state might be
 used in the computation following a pulse. For example, a cluster
 might remember the results of its last calculation and only send a
-*pulse* downstream if the value changes. Circular clusters "weaken"
-over time and eventually become inactive. (The Elixir process exits.)
-However, incoming pulses can strengthen a cluster, so some could have
-indefinite lifespans.
+*pulse* downstream if the value changes.
+
+As clusters throb, they count down to to their death, when they
+exit. (Perhaps later to be reborn.) However, incoming pulses can
+increase a cluster's strength or *lifespan*, so some might never end
+up exiting.
 
 #### Downstream
 
@@ -79,6 +81,12 @@ flow into the *network*.
 A *cluster* is idle if it's consuming no resources but is waiting for
 a *pulse*. In Elixir terms, this means it has no associated running
 process.
+
+#### Lifespan
+
+A *circular cluster* is "born" and may eventually die. The cluster
+*throbs* at a certain interval, counting down its lifespan. However,
+*pulses* may increase the cluster's lifespan.
 
 #### Network
 

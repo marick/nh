@@ -34,8 +34,8 @@ defmodule CircularProcess.State do
   }
   end
 
-  deflens l_current_strength(), do: in_throb(:current_strength)
-  deflens l_starting_strength(), do: in_throb(:starting_strength)
+  deflens l_current_lifespan(), do: in_throb(:current_lifespan)
+  deflens l_starting_lifespan(), do: in_throb(:starting_lifespan)
   
   private do
     def in_throb(key), do: l_throb() |> Lens.key(key)
@@ -72,8 +72,8 @@ defmodule CircularProcess do
 
   # Test support
 
-  def handle_call(:current_strength, _from, s_process_state) do
-    strength = deeply_get_only(s_process_state, :l_current_strength)
-    continue(s_process_state, returning: strength) |> dbg
+  def handle_call(:current_lifespan, _from, s_process_state) do
+    lifespan = deeply_get_only(s_process_state, :l_current_lifespan)
+    continue(s_process_state, returning: lifespan) |> dbg
   end
 end

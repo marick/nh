@@ -82,7 +82,13 @@ defmodule Cluster.Make do
 
 
   def forward_unique(name, opts \\ []) do
-    opts = Keyword.put_new(opts, :initial_value, :erlang.make_ref())
+    # alias Cluster.Throb
+    opts =
+      opts
+      # No pulse value can accidentally be equal to a new ref.
+      |> Keyword.put_new(:initial_value, :erlang.make_ref()) 
+#      |> Keyword.put_new(:throb, Throb.starting(&Throb.pulse_increases_lifespan/2))
+    
     f = fn pulse_data, previously ->
       if pulse_data == previously,
          do: :no_pulse,

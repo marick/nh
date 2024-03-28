@@ -36,6 +36,6 @@ defmodule Cluster.ForwardUniqueTest do
 
 
     # A test pulse increases the lifespan
-    assert GenServer.call(p_switchboard, forward: :current_strength, to: :first) == 2
+    assert GenServer.call(p_switchboard, forward: :current_lifespan, to: :first) == 2
   end
 end

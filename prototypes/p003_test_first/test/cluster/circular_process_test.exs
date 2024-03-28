@@ -83,22 +83,22 @@ defmodule Cluster.CircularProcessTest do
   describe "counting down via throbbing" do
     test "an ordinary call to `throb`" do
       state = circular(:example, & &1+1) |> UT.State.from_cluster
-            starting_strength = deeply_get_only(state, :l_current_strength)
-      assert starting_strength == deeply_get_only(state, :l_starting_strength)
-      assert starting_strength > 2
+      starting_lifespan = deeply_get_only(state, :l_current_lifespan)
+      assert starting_lifespan == deeply_get_only(state, :l_starting_lifespan)
+      assert starting_lifespan > 2
       
       assert {:noreply, next_state} = UT.handle_cast([throb: 2], state)
       
-      assert deeply_get_only(next_state, :l_current_strength) ==
-               deeply_get_only(state, :l_current_strength) - 2
+      assert deeply_get_only(next_state, :l_current_lifespan) ==
+               deeply_get_only(state, :l_current_lifespan) - 2
     end
     
     test "decreasing down to zero" do
       state = circular(:example, & &1+1) |> UT.State.from_cluster
-      starting_strength = deeply_get_only(state, :l_current_strength)
+      starting_lifespan = deeply_get_only(state, :l_current_lifespan)
 
-      assert {:stop, :normal, next_state} = UT.handle_cast([throb: starting_strength], state)
-      assert deeply_get_only(next_state, :l_current_strength) == 0
+      assert {:stop, :normal, next_state} = UT.handle_cast([throb: starting_lifespan], state)
+      assert deeply_get_only(next_state, :l_current_lifespan) == 0
     end
   end
 end

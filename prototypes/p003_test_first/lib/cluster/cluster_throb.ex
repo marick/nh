@@ -7,15 +7,15 @@ defmodule Throb do
   typedstruct do
     plugin TypedStructLens, prefix: :l_
 
-    field :current_strength, integer
-    field :starting_strength, integer
+    field :current_lifespan, integer
+    field :starting_lifespan, integer
     field :f_note_pulse, (Throb.t, any -> Throb.t)
   end
 
   def new(start_at, opts \\ []) do
     f_note_pulse = Keyword.get(opts, :on_pulse, &__MODULE__.pulse_does_nothing/2)
-    %__MODULE__{current_strength: start_at,
-                starting_strength: start_at,
+    %__MODULE__{current_lifespan: start_at,
+                starting_lifespan: start_at,
                 f_note_pulse: f_note_pulse
     }
   end
@@ -25,8 +25,8 @@ defmodule Throb do
   end
 
   def throb(s_throb, n \\ 1) do
-    mutated = Map.update!(s_throb, :current_strength, & &1-n)
-    if mutated.current_strength <= 0,
+    mutated = Map.update!(s_throb, :current_lifespan, & &1-n)
+    if mutated.current_lifespan <= 0,
          do: {:stop, mutated},
          else: {:continue, mutated}
   end
@@ -37,7 +37,7 @@ defmodule Throb do
       do: s_throb
 
   def pulse_increases_lifespan(s_throb, _cluster_calced_value) do
-    next_strength = min(s_throb.starting_strength, s_throb.current_strength + 1)
-    Map.put(s_throb, :current_strength, next_strength)
+    next_lifespan = min(s_throb.starting_lifespan, s_throb.current_lifespan + 1)
+    Map.put(s_throb, :current_lifespan, next_lifespan)
   end
 end
