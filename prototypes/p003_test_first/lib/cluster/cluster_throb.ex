@@ -2,23 +2,35 @@ alias AppAnimal.Cluster
 alias Cluster.Throb
 
 defmodule Throb do
+  use AppAnimal
   use TypedStruct
+
+  @type pulse_handler :: (Throb.t, any -> Throb.t)
   
-  typedstruct do
+  typedstruct enforce: true do
     plugin TypedStructLens, prefix: :l_
 
-    field :current_lifespan, integer
-    field :starting_lifespan, integer
-    field :f_note_pulse, (Throb.t, any -> Throb.t)
+    field :current_lifespan,  integer,       default: Duration.frequent_glance
+    field :starting_lifespan, integer,       default: Duration.frequent_glance
+    field :f_note_pulse,      pulse_handler, default: &__MODULE__.pulse_does_nothing/2
   end
 
-  def new(start_at, opts \\ []) do
-    f_note_pulse = Keyword.get(opts, :on_pulse, &__MODULE__.pulse_does_nothing/2)
-    %__MODULE__{current_lifespan: start_at,
-                starting_lifespan: start_at,
-                f_note_pulse: f_note_pulse
+  def starting(response_to_pulse) when is_function(response_to_pulse, 2) do
+    %__MODULE__{f_note_pulse: response_to_pulse}
+  end
+
+  def starting(starting_lifespan) when is_integer(starting_lifespan) do
+    %__MODULE__{current_lifespan: starting_lifespan,
+                starting_lifespan: starting_lifespan}
+  end
+  
+  def starting(starting_lifespan, on_pulse: response_to_pulse) do
+    %__MODULE__{current_lifespan: starting_lifespan,
+                starting_lifespan: starting_lifespan,
+                f_note_pulse: response_to_pulse
     }
   end
+  
 
   def note_pulse(s_throb, cluster_calced) do
     s_throb.f_note_pulse.(s_throb, cluster_calced)

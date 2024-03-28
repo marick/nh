@@ -5,6 +5,7 @@ defmodule Cluster.MakeTest do
   use FlowAssertions
   alias Cluster.Make, as: UT
   alias AppAnimal.Duration
+  alias Cluster.Throb
 
   describe "making circular clusters with circular" do 
     test "basic" do
@@ -18,12 +19,14 @@ defmodule Cluster.MakeTest do
       end
     
     test "optional arguments go into the shape" do
-      cluster = UT.circular(:example, & &1+1, starting_lifespan: Duration.seconds(10),
-                                              initial_value: [])
+      cluster = UT.circular(:example, & &1+1,
+                            throb: Throb.starting(Duration.seconds(10)),
+                            initial_value: [])
 
 
-      cluster.shape
-      |> assert_fields(starting_lifespan: Duration.seconds(10), initial_value: [])
+      assert cluster.shape.initial_value == []
+      assert cluster.shape.throb.starting_lifespan == Duration.seconds(10)
+      assert cluster.shape.throb.f_note_pulse == &Throb.pulse_does_nothing/2
     end
   end
 

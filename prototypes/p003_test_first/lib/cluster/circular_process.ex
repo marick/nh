@@ -25,11 +25,9 @@ defmodule CircularProcess.State do
   end
     
   def from_cluster(s_cluster) do
-    throb = Cluster.Throb.new(s_cluster.shape.starting_lifespan)
-
     %__MODULE__{calc: s_cluster.calc,
                 f_outward: s_cluster.f_outward,
-                throb: throb,
+                throb: s_cluster.shape.throb,
                 previously: s_cluster.shape.initial_value
   }
   end
