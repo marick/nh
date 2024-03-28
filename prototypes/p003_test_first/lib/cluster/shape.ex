@@ -5,13 +5,13 @@ alias Cluster.Shape
 # cluster shapes and also serve to identify which type of cluster the cluster is.
 
 defmodule Shape.Circular do
-  import AppAnimal.Clock
+  alias AppAnimal.Duration
   use TypedStruct
 
   typedstruct do
     plugin TypedStructLens, prefix: :l_
 
-    field :starting_lifespan, integer, default: seconds(2)
+    field :starting_lifespan, integer, default: Duration.seconds(2)
     field :initial_value, any, default: %{}
   end
   

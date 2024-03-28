@@ -61,7 +61,7 @@ defmodule System.SwitchboardTest do
     
     a =
       trace([first, to_test()])
-      |> AppAnimal.enliven(throb_rate: impossibly_slowly()) 
+      |> AppAnimal.enliven(throb_interval: Duration.foreverish()) 
     
     send_test_pulse(a.p_switchboard, to: :first, carrying: :irrelevant)
     assert_test_receives(pid)

@@ -30,7 +30,7 @@ defmodule Cluster.ForwardUniqueTest do
   test "a cluster can age out and start over" do
     p_switchboard =
       AppAnimal.switchboard([forward_unique(:first, starting_lifespan: 1), to_test()],
-                            throb_rate: impossibly_slowly())
+                            throb_interval: Duration.foreverish())
 
     send_test_pulse(p_switchboard, to: :first, carrying: "data")
 

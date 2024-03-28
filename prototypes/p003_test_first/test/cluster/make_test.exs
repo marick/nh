@@ -4,7 +4,7 @@ defmodule Cluster.MakeTest do
   use ExUnit.Case, async: true
   use FlowAssertions
   alias Cluster.Make, as: UT
-  import AppAnimal.Clock
+  alias AppAnimal.Duration
 
   describe "making circular clusters with circular" do 
     test "basic" do
@@ -18,12 +18,12 @@ defmodule Cluster.MakeTest do
       end
     
     test "optional arguments go into the shape" do
-      cluster = UT.circular(:example, & &1+1, starting_lifespan: seconds(10),
+      cluster = UT.circular(:example, & &1+1, starting_lifespan: Duration.seconds(10),
                                               initial_value: [])
 
 
       cluster.shape
-      |> assert_fields(starting_lifespan: seconds(10), initial_value: [])
+      |> assert_fields(starting_lifespan: Duration.seconds(10), initial_value: [])
     end
   end
 

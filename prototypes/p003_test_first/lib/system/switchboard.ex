@@ -21,13 +21,13 @@ defmodule System.Switchboard do
   use TypedStruct
   alias System.ActivityLogger
   alias System.Network
-  import AppAnimal.Clock
+  alias AppAnimal.Duration
 
   typedstruct do
     plugin TypedStructLens, prefix: :l_
 
     field :network,    Network.t
-    field :throb_rate, integer,        default: default_rate()
+    field :throb_interval, integer,        default: Duration.quantum()
     field :p_logger, ActivityLogger.t, default: ActivityLogger.start_link |> okval
   end
 
@@ -45,7 +45,7 @@ defmodule System.Switchboard do
   runs_in_receiver do 
     @impl GenServer
     def init(s_switchboard) do
-      schedule_next_throb(s_switchboard.throb_rate)
+      schedule_next_throb(s_switchboard.throb_interval)
       ok(s_switchboard)
     end
 
@@ -105,7 +105,7 @@ defmodule System.Switchboard do
     @impl GenServer
     def handle_info(:time_to_throb, s_switchboard) do
       Network.Throb.time_to_throb(s_switchboard.network)
-      schedule_next_throb(s_switchboard.throb_rate)
+      schedule_next_throb(s_switchboard.throb_interval)
       continue(s_switchboard)
     end
 

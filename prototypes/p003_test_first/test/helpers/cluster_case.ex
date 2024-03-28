@@ -90,7 +90,7 @@ defmodule ClusterCase do
       use FlowAssertions
       import Cluster.Make
       import Network.Make
-      import AppAnimal.Clock
+      alias AppAnimal.Duration
     end
   end
 end
