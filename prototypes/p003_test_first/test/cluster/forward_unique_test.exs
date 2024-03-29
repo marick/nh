@@ -7,8 +7,7 @@ defmodule Cluster.ForwardUniqueTest do
   
   test "only unique values pass through" do
     p_switchboard =
-      AppAnimal.switchboard([forward_unique(:first), 
-                             to_test()])
+      AppAnimal.switchboard([forward_unique(:first), to_test()])
     
     send_test_pulse(p_switchboard, to: :first, carrying: 1)
     assert_test_receives(1)
@@ -26,16 +25,38 @@ defmodule Cluster.ForwardUniqueTest do
     refute_receive(_)
   end
 
-  @tag :skip
+  @tag :test_uses_sleep
   test "a cluster can age out and start over" do
+    alias Cluster.Throb
+    throb = Throb.starting(2, on_pulse: &Throb.pulse_increases_lifespan/2)
+    first = forward_unique(:first, throb: throb)
+    
     p_switchboard =
-      AppAnimal.switchboard([forward_unique(:first, starting_lifespan: 1), to_test()],
-                            throb_interval: Duration.foreverish())
+      AppAnimal.switchboard([first, to_test()],
+                            throb_interval: Duration.foreverish)
 
+    # Start at maximum
     send_test_pulse(p_switchboard, to: :first, carrying: "data")
+    assert_test_receives("data")
+    
+    # As usual, a repetition is not forwarded
+    send_test_pulse(p_switchboard, to: :first, carrying: "data")
+    refute_receive("data")
+    
+    assert GenServer.call(p_switchboard, forward: :current_lifespan, to: :first) == 2
+    
+    # a normal, decrementing throb
+    send(p_switchboard, :time_to_throb)
+    assert GenServer.call(p_switchboard, forward: :current_lifespan, to: :first) == 1
 
+    # decrement to zero - should cause exit
+    send(p_switchboard, :time_to_throb)
 
-    # A test pulse increases the lifespan
+    Process.sleep(100)   # Alas, need to wait for process death to be found.
+
+    # A test pulse recreates the process
+    send_test_pulse(p_switchboard, to: :first, carrying: "data")
+    assert_test_receives("data")
     assert GenServer.call(p_switchboard, forward: :current_lifespan, to: :first) == 2
   end
 end

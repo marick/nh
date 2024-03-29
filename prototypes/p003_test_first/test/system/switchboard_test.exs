@@ -56,6 +56,7 @@ defmodule System.SwitchboardTest do
     assert_test_receives([^pid, ^pid, ^pid])
   end
 
+  @tag :test_uses_sleep
   test "what happens when a circular cluster 'ages out'" do
     first = circular(:first, fn _pulse -> self() end, starting_lifespan: 2)
 
