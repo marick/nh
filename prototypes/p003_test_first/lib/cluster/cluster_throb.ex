@@ -49,7 +49,13 @@ defmodule Throb do
       do: s_throb
 
   def pulse_increases_lifespan(s_throb, _cluster_calced_value) do
-    next_lifespan = min(s_throb.starting_lifespan, s_throb.current_lifespan + 1)
+    next_lifespan = capped_at(s_throb.starting_lifespan, s_throb.current_lifespan + 1)
     Map.put(s_throb, :current_lifespan, next_lifespan)
+  end
+
+  defp capped_at(cap, proposed_value) do
+    if proposed_value < cap,
+       do: proposed_value,
+       else: cap
   end
 end

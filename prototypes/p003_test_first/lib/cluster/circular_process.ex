@@ -72,6 +72,6 @@ defmodule CircularProcess do
 
   def handle_call(:current_lifespan, _from, s_process_state) do
     lifespan = deeply_get_only(s_process_state, :l_current_lifespan)
-    continue(s_process_state, returning: lifespan) |> dbg
+    continue(s_process_state, returning: lifespan)
   end
 end

@@ -65,9 +65,8 @@ defmodule System.Switchboard do
 
     def handle_call([forward: message, to: circular_cluster_name],
                     _from, s_switchboard) do
-      dbg s_switchboard
-      pid = deeply_get_only(s_switchboard.network, Network.l_pid_named(circular_cluster_name)) |> dbg
-      result = GenServer.call(pid, message) |> dbg
+      pid = deeply_get_only(s_switchboard.network, Network.l_pid_named(circular_cluster_name))
+      result = GenServer.call(pid, message)
       continue(s_switchboard, returning: result)
     end
     
