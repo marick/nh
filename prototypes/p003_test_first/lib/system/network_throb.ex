@@ -2,6 +2,16 @@ alias AppAnimal.System
 alias System.Network
 
 defmodule Network.Throb do
+  @moduledoc """
+  Handle network-wide throbbing.
+
+  All activated clusters throb. This module sends out that signal and handles
+  process cleanup when the process "ages out".
+
+  Although the "start throbbing" is sent to all active clusters "at the same time",
+  there's no sort of synchronization of the clusters.
+  """
+  
   use AppAnimal
 
   # Getters  
@@ -15,7 +25,7 @@ defmodule Network.Throb do
   end
 R
   # Working with clusters
-
+  @doc "Cause all active clusters to throb."
   def start_throbbing(network, names) do
     to_start = needs_to_be_started(network, names)
      
@@ -26,7 +36,7 @@ R
     deeply_map(network, :l_throbbers_by_name, & Map.merge(&1, now_started))
   end
 
-  def drop_idling_pid(network, pid) do
+  def pid_has_aged_out(network, pid) do
     throbbers = network.throbbers_by_name
     
     [{name, _pid}] = 

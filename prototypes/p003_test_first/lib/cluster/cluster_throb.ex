@@ -2,6 +2,12 @@ alias AppAnimal.Cluster
 alias Cluster.Throb
 
 defmodule Throb do
+  @moduledoc """
+  Captures the handling of throbbing by a circular cluster.
+
+  Periodic throb messages decrease the cluster's lifespan.
+  Optionally, each pulse increases the lifespan. 
+  """
   use AppAnimal
   use TypedStruct
 
@@ -15,6 +21,11 @@ defmodule Throb do
     field :f_note_pulse,      pulse_handler, default: &__MODULE__.pulse_does_nothing/2
   end
 
+  @doc """
+  Create the structure with one of the starting lifespan or the pulse handler.
+
+  The other is left as the default.
+  """
   def starting(response_to_pulse) when is_function(response_to_pulse, 2) do
     %__MODULE__{f_note_pulse: response_to_pulse}
   end
@@ -23,7 +34,10 @@ defmodule Throb do
     %__MODULE__{current_lifespan: starting_lifespan,
                 starting_lifespan: starting_lifespan}
   end
-  
+
+  @doc """
+  Create the structure with both optional values.
+  """
   def starting(starting_lifespan, on_pulse: response_to_pulse) do
     %__MODULE__{current_lifespan: starting_lifespan,
                 starting_lifespan: starting_lifespan,

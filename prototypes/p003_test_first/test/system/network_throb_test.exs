@@ -53,7 +53,7 @@ defmodule Network.ThrobTest do
       assert [pid] = UT.throbbing_pids(network)
 
       network
-      |> UT.drop_idling_pid(pid)
+      |> UT.pid_has_aged_out(pid)
       |> UT.throbbing_pids()
       |> assert_equals([])
     end

@@ -114,7 +114,7 @@ defmodule System.Switchboard do
     ## messages that cause them to "throb".
     def handle_info({:DOWN, _, :process, pid, :normal}, s_switchboard) do
       s_switchboard
-      |> within_network(& Network.Throb.drop_idling_pid(&1, pid))
+      |> within_network(& Network.Throb.pid_has_aged_out(&1, pid))
       |> continue
     end
     

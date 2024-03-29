@@ -27,6 +27,12 @@ something out of the corner of my eye". For example, movement of the
 cursor into a new paragraph will generate an affordance that causes
 the app animal to focus on that new paragraph.
 
+#### Age Out
+
+*Circular clusters* have a lifespan. It increases or decreases while
+the cluster is active. If it drops to zero, the process "ages out" or
+causes itself to exit.
+
 #### Cluster
 
 A cluster represents a group of neurons that act together to respond
