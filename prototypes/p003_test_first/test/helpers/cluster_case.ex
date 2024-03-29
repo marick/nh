@@ -5,6 +5,7 @@ defmodule ClusterCase do
   """
   use AppAnimal
   alias AppAnimal.{System, Cluster}
+  alias System.Switchboard
   alias Cluster.Shape
   alias ExUnit.Assertions
 
@@ -41,12 +42,9 @@ defmodule ClusterCase do
 
   @doc "Send the pulse from the test as if it came from a network cluster."
   def send_test_pulse(p_switchboard, to: destination_name, carrying: pulse_data) do
-    GenServer.cast(p_switchboard,
-                   {:distribute_pulse, carrying: pulse_data, to: [destination_name]})
+    Switchboard.cast__distribute_pulse(p_switchboard,
+                                       carrying: pulse_data, to: [destination_name])
   end
-
-  def affords([{name, data}]), do: {name, data}
-  def response_to(action, response), do: {action, response}
 
   @doc """
   Script AffordanceLand to respond to a given action with a given affordance+data.
@@ -66,15 +64,27 @@ defmodule ClusterCase do
     pid
   end
 
+  def affords([{name, data}]), do: {name, data}
+  def response_to(action, response), do: {action, response}
+
 
   @doc """
   Cast a message representing an action to AffordanceLand from a test.
 
   Behaves the same way as an `action_edge` cluster.
   """
-  def take_action(pid, [{_name, _data}] = action) do
-    GenServer.cast(pid, [:take_action, action])
-  end
+  def take_action(pid, [{_name, _data}] = action),
+      do: GenServer.cast(pid, [:take_action, action])
+
+  @doc """
+  Used by tests to synchronously access one active process's internal state.
+  """
+  def peek_at(p_switchboard, internal_state_name, of: cluster_name),
+      do: GenServer.call(p_switchboard, forward: internal_state_name, to: cluster_name)
+
+  @doc ""
+  def throb_all_active(p_switchboard),
+      do: send(p_switchboard, :time_to_throb)
 
   defmacro __using__(opts) do
     quote do

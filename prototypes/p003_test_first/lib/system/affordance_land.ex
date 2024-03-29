@@ -12,7 +12,7 @@ defmodule System.AffordanceLand do
   use AppAnimal
   use AppAnimal.GenServer
   use TypedStruct
-  alias System.ActivityLogger
+  alias System.{ActivityLogger,Switchboard}
 
   typedstruct do
     field :p_switchboard, pid
@@ -34,8 +34,8 @@ defmodule System.AffordanceLand do
     end
 
     def handle_cast([:produce_this_affordance, {name, data}], s_affordances) do
-      GenServer.cast(s_affordances.p_switchboard,
-                     {:distribute_pulse, carrying: data, to: [name]})
+      Switchboard.cast__distribute_pulse(s_affordances.p_switchboard,
+                                         carrying: data, to: [name])
       continue(s_affordances)
     end
 

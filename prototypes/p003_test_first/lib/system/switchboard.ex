@@ -14,6 +14,7 @@ defmodule System.Switchboard do
   normally take two seconds happens nearly instantly. Later uses will
   be along the lines of a "chaos monkey": random delays in pulse
   delivery, dropping pulses, rearranging the order of pulses, etc.
+
   """
   
   use AppAnimal
@@ -31,8 +32,9 @@ defmodule System.Switchboard do
     field :p_logger, ActivityLogger.t, default: ActivityLogger.start_link |> okval
   end
 
+  @doc false
   def l_cluster_named(name), do: l_network() |> Network.l_cluster_named(name)
-  
+  @doc false
   def within_network(struct, f), do: deeply_map(struct, :l_network, f)
   
   runs_in_sender do
@@ -40,6 +42,66 @@ defmodule System.Switchboard do
     # start_supervised.
     def start_link(%__MODULE__{} = s_switchboard),
         do: GenServer.start_link(__MODULE__, s_switchboard)
+
+
+    @doc """
+    Connect each cluster to whichever system process handles its outgoing messages.
+
+    This is done by instructing each cluster to construct an
+    appropriate sending function that goes to either the `Switchboard`
+    or `AffordanceLand`.
+
+    Note that this is synchronous, appropriate at app-animal startup.
+    """
+    def call__link_clusters_to_architecture(p_switchboard, p_affordances) do
+      GenServer.call(p_switchboard,
+                     {:link_clusters_to_architecture, p_switchboard, p_affordances})
+    end
+
+    @doc """
+    Send a pulse to a set of clusters.
+
+    There are two variants. You can say the pulse comes *from:* a cluster, in which
+    case the pulse is delivered to that cluster's downstream. Or the pulse can be
+    delivered `to:` a list of names.
+
+    In either case, clusters are identified by their atom names.
+
+    Examples:
+        cast__distribute_pulse(p_switchboard, carrying: pulse_data, from: source_name)
+        cast__distribute_pulse(p_switchboard, carrying: pulse_data, to: destination_names)
+    
+    """
+    def cast__distribute_pulse(p_switchboard, one_of_two_keyword_lists)
+    def cast__distribute_pulse(p_switchboard, carrying: pulse_data, from: source_name),
+        do: GenServer.cast(p_switchboard,
+                           {:distribute_pulse, carrying: pulse_data, from: source_name})
+
+    def cast__distribute_pulse(p_switchboard, carrying: pulse_data, to: destination_names),
+        do: GenServer.cast(p_switchboard,
+                           {:distribute_pulse, carrying: pulse_data, to: destination_names})
+
+    @doc """
+    Document the `handle_info` that throbs all active processes.
+
+    When a `Process.send_after` has scheduled a timer that goes off
+    and delivers an `info` message, `handle_info(:time_to_throb,...)`
+    is called. The `Switchboard` instructs its embedded network to throb all
+    active `CircularProcesses`.
+    """
+    def info__throb_all_active(_p_switchboard), do: :DO_NOT_CALL_FOR_DOCUMENTATION_ONLY
+
+    @doc """
+    Document the `handle_info` that handles an exited process.
+
+    When a `CircularProcess` throbs its last, it exits. As the process creator,
+    this process receives a `:DOWN` message.
+
+    The embedded network removes the process from the list of known-living processes.
+    """
+    def info__down(_p_switchboard, {:DOWN, _, :process, _pid, :normal}),
+        do:  :DO_NOT_CALL_FOR_DOCUMENTATION_ONLY
+
   end
 
   runs_in_receiver do 
@@ -49,9 +111,6 @@ defmodule System.Switchboard do
       ok(s_switchboard)
     end
 
-    ## Once a network of clusters is built, this call instructs each
-    ## cluster to construct an appropriate sending function that goes to
-    ## either the Switchboard or Affordance Land.
     @impl GenServer
     def handle_call({:link_clusters_to_architecture, p_switchboard, p_affordances},
                     _from, s_switchboard) do
@@ -97,10 +156,6 @@ defmodule System.Switchboard do
       |> continue
     end
 
-    ## Deliver a "throb" message to all circular clusters.
-    ## 
-    ## Essentially a global clock tick, mostly to cause running clusters
-    ## to age out and exit.
     @impl GenServer
     def handle_info(:time_to_throb, s_switchboard) do
       Network.Throb.time_to_throb(s_switchboard.network)

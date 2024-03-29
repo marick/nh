@@ -23,7 +23,7 @@ defmodule Network.Make do
     trace(network, [existing | trace])
   end
 
-    def link_clusters_to_architecture(network,  p_switchboard, p_affordances) do
+  def link_clusters_to_architecture(network,  p_switchboard, p_affordances) do
     mkfn_final =
       fn so_far ->
         case so_far do

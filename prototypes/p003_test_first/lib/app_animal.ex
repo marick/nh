@@ -30,8 +30,8 @@ defmodule AppAnimal do
                                             %{p_switchboard: p_switchboard,
                                               p_logger: p_logger})
 
-    GenServer.call(p_switchboard,
-                   {:link_clusters_to_architecture, p_switchboard, p_affordances})
+    Switchboard.call__link_clusters_to_architecture(p_switchboard, p_affordances)
+
     %__MODULE__{
       p_switchboard: p_switchboard,
       p_affordances: p_affordances,

@@ -42,10 +42,6 @@ defmodule Calc do
   `:no_pulse`            - there is no pulse and the state is left unchanged
   any other value        - the value is sent in a pulse, but the state is left unchanged.        
 
-  ``
-  
-  
-
   """
 
   def run(calc, on: pulse_data, with_state: previously) when is_function(calc, 1) do

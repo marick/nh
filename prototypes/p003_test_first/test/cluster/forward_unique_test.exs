@@ -43,20 +43,21 @@ defmodule Cluster.ForwardUniqueTest do
     send_test_pulse(p_switchboard, to: :first, carrying: "data")
     refute_receive("data")
     
-    assert GenServer.call(p_switchboard, forward: :current_lifespan, to: :first) == 2
-    
+    assert peek_at(p_switchboard, :current_lifespan, of: :first) == 2
+
     # a normal, decrementing throb
-    send(p_switchboard, :time_to_throb)
-    assert GenServer.call(p_switchboard, forward: :current_lifespan, to: :first) == 1
+    throb_all_active(p_switchboard)
+    assert peek_at(p_switchboard, :current_lifespan, of: :first) == 1
 
     # decrement to zero - should cause exit
-    send(p_switchboard, :time_to_throb)
+    throb_all_active(p_switchboard)
+    throb_all_active(p_switchboard)
 
     Process.sleep(100)   # Alas, need to wait for process death to be found.
 
     # A test pulse recreates the process
     send_test_pulse(p_switchboard, to: :first, carrying: "data")
     assert_test_receives("data")
-    assert GenServer.call(p_switchboard, forward: :current_lifespan, to: :first) == 2
+    assert peek_at(p_switchboard, :current_lifespan, of: :first) == 2
   end
 end
