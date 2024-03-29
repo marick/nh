@@ -26,6 +26,13 @@ defmodule System.AffordanceLand do
     def start_link(opts) do
       GenServer.start_link(__MODULE__, opts)
     end
+
+    @doc """
+    Given a name/data pair, send that affordance into the network.
+    """
+    def cast__produce_affordance(p_affordances, [{name, data}]),
+        do: GenServer.cast(p_affordances, [:produce_this_affordance, {name, data}])
+    
   end
 
   runs_in_receiver do

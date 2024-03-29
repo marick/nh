@@ -129,8 +129,6 @@ defmodule System.Switchboard do
       continue(s_switchboard, returning: result)
     end
     
-    ## The main entry point to send a pulse from the `source_name` to the named
-    ## cluster's downstream.
     @impl GenServer
     def handle_cast({:distribute_pulse, carrying: pulse_data, from: source_name},
                     s_switchboard) do
@@ -142,13 +140,6 @@ defmodule System.Switchboard do
                   s_switchboard)
     end
 
-    ## Deliver a pulse to some downstream names.
-    ## 
-    ## Used by `AffordanceLand` and in tests. A helper helper function for delivering
-    ## from a known name to its downstream.
-    ## 
-    ## Note this affects the `s_switchboard` state because pulse delivery may start
-    ## circular clusters (genservers).
     def handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names},
                     s_switchboard) do
       s_switchboard
@@ -163,10 +154,6 @@ defmodule System.Switchboard do
       continue(s_switchboard)
     end
 
-    ## Called by the runtime when a circular cluster exits.
-    ##
-    ## This means it should be removed from the list of clusters sent
-    ## messages that cause them to "throb".
     def handle_info({:DOWN, _, :process, pid, :normal}, s_switchboard) do
       s_switchboard
       |> within_network(& Network.Throb.pid_has_aged_out(&1, pid))

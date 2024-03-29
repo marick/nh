@@ -33,15 +33,14 @@ defmodule Scenarios.SwitchParagraphTest do
 
   test "simple run-through" do
     IO.puts "======= switch_paragraph_test ============="
-    reaction_to_new_paragraph = [
+    new_paragraph_perception = [
       perception_edge(:notice_new_paragraph),
       action_edge(:focus_on_paragraph),
     ]
 
-    reaction_to_focus = [focus_on_paragraph: [paragraph_text: "para\n\npara\n\npara"]]
-#    reaction_to_focus = [focus_on_paragraph: [paragraph_text: "para\n\nparapara"]]
+    and_now_paragraph_text = affords(paragraph_text: "para\n\npara\n\npara")
 
-    reaction_to_paragraph_text = [
+    response_to_paragraph_text = [
       perception_edge(:paragraph_text),
       summarizer(:paragraph_structure, &ParagraphGaps.summarize/1),
       summarizer(:gap_count, &ParagraphGaps.gap_count/1),
@@ -52,21 +51,17 @@ defmodule Scenarios.SwitchParagraphTest do
       to_test()
     ]
 
-
     a = 
-      trace(reaction_to_new_paragraph)
-      |> trace(reaction_to_paragraph_text)
+      trace(new_paragraph_perception)
+      |> trace(response_to_paragraph_text)
       |> AppAnimal.enliven
 
-    script(a.p_affordances, reaction_to_focus)
+    script(a.p_affordances, focus_on_paragraph: and_now_paragraph_text)
 
     ActivityLogger.spill_log_to_terminal(a.p_logger)
-
-    GenServer.cast(a.p_affordances, [:produce_this_affordance, notice_new_paragraph: :no_data])
+    produce_affordance(a.p_affordances, notice_new_paragraph: :no_data)
 
     assert_test_receives(2)
     ActivityLogger.get_log(a.p_logger)
-    
-    
   end
 end

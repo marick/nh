@@ -6,7 +6,8 @@ defmodule AppAnimal.System.AffordanceLandTest do
 
   test "a 'self-generated' affordance" do
     given([perception_edge(:big_paragraph_change), to_test()])
-    |> GenServer.cast([:produce_this_affordance, big_paragraph_change: :no_data])
+    |> UT.cast__produce_affordance(big_paragraph_change: :no_data)
+
     assert_test_receives(:no_data)
   end
 

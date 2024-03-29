@@ -5,7 +5,7 @@ defmodule ClusterCase do
   """
   use AppAnimal
   alias AppAnimal.{System, Cluster}
-  alias System.Switchboard
+  alias System.{Switchboard,AffordanceLand}
   alias Cluster.Shape
   alias ExUnit.Assertions
 
@@ -45,6 +45,9 @@ defmodule ClusterCase do
     Switchboard.cast__distribute_pulse(p_switchboard,
                                        carrying: pulse_data, to: [destination_name])
   end
+
+  def produce_affordance(p_affordances, [{_name, _data}] = arg),
+      do: AffordanceLand.cast__produce_affordance(p_affordances, arg)
 
   @doc """
   Script AffordanceLand to respond to a given action with a given affordance+data.
