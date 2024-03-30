@@ -45,8 +45,8 @@ defmodule Scenarios.SwitchParagraphTest do
       summarizer(:paragraph_structure, &ParagraphGaps.summarize/1),
       summarizer(:gap_count, &ParagraphGaps.gap_count/1),
       gate(:is_big_edit?, & &1 >= 2),
-      # linear(:count_gaps, only_pulse(after: fn -> 2 end))
-      # delay(:desire_to_mark_paragraph_with_big_edit, 2_000)
+      forward_unique(:changes),
+      # wait_for_quiet(:big_edit_wait, seconds(2))
       # action_edge(:mark_paragraph_with_big_edit)
       to_test()
     ]

@@ -40,21 +40,21 @@ defmodule Cluster.ThrobTest do
   describe "simply running down: default behavior" do
     test "a throb runs it down a bit" do
       logic = UT.starting(2)
-      assert {:continue, new_logic} = UT.throb(logic)
+      assert {:continue, new_logic} = UT.count_down(logic)
 
       assert_field(new_logic, current_lifespan: 1)
     end
 
     test "stop when zero is hit" do
       logic = UT.starting(1)
-      assert {:stop, new_logic} = UT.throb(logic)
+      assert {:stop, new_logic} = UT.count_down(logic)
 
       assert_field(new_logic, current_lifespan: 0)
     end
     
-    test "can pack multiple throbs together for testing" do
+    test "can pack multiple count_downs together for testing" do
       logic = UT.starting(5)
-      assert {:stop, new_logic} = UT.throb(logic, 5)
+      assert {:stop, new_logic} = UT.count_down(logic, 5)
 
       assert_field(new_logic, current_lifespan: 0)
     end
@@ -69,7 +69,7 @@ defmodule Cluster.ThrobTest do
     test "a pulse bumps the current lifespan by one" do
       s_calc = UT.starting(2, on_pulse: &UT.pulse_increases_lifespan/2)
 
-      {:continue, s_calc} = UT.throb(s_calc)   # take it below starting value
+      {:continue, s_calc} = UT.count_down(s_calc)   # take it below starting value
       assert_field(s_calc, current_lifespan: 1)
         
       UT.note_pulse(s_calc, :irrelevant_calculated_value)
@@ -79,7 +79,7 @@ defmodule Cluster.ThrobTest do
     test "but it does not go beyond the max" do
       s_calc = UT.starting(2, on_pulse: &UT.pulse_increases_lifespan/2)
 
-      {:continue, s_calc} = UT.throb(s_calc)   # take it below starting value
+      {:continue, s_calc} = UT.count_down(s_calc)   # take it below starting value
       assert_field(s_calc, current_lifespan: 1)
 
       s_calc

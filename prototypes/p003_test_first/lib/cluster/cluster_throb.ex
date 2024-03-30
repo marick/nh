@@ -12,6 +12,7 @@ defmodule Throb do
   use TypedStruct
 
   @type pulse_handler :: (Throb.t, any -> Throb.t)
+  @type throb_handler :: (Throb.t, integer -> Throb.t)
   
   typedstruct enforce: true do
     plugin TypedStructLens, prefix: :l_
@@ -19,6 +20,7 @@ defmodule Throb do
     field :current_lifespan,  integer,       default: Duration.frequent_glance
     field :starting_lifespan, integer,       default: Duration.frequent_glance
     field :f_note_pulse,      pulse_handler, default: &__MODULE__.pulse_does_nothing/2
+    field :f_throb,           throb_handler, default: &__MODULE__.count_down/2
   end
 
   @doc """
@@ -51,6 +53,10 @@ defmodule Throb do
   end
 
   def throb(s_throb, n \\ 1) do
+    s_throb.f_throb.(s_throb, n)
+  end
+
+  def count_down(s_throb, n \\ 1) do
     mutated = Map.update!(s_throb, :current_lifespan, & &1-n)
     if mutated.current_lifespan <= 0,
          do: {:stop, mutated},
