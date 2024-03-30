@@ -65,8 +65,12 @@ defmodule CircularProcess do
 
     s_process_state
     |> Map.put(:throb, next_throb)
-    |> then(& apply(AppAnimal.GenServer, action, [&1])) # this is really too cutesy.
+    |> then(& call_action_function(action, &1))
   end
+
+  defp call_action_function(action, next_process_state),
+       do: apply(AppAnimal.GenServer, action, [next_process_state])
+    
 
   # Test support
 

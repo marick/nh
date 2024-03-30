@@ -48,13 +48,11 @@ defmodule Throb do
   end
   
 
-  def note_pulse(s_throb, cluster_calced) do
-    s_throb.f_note_pulse.(s_throb, cluster_calced)
-  end
+  def note_pulse(s_throb, cluster_calced),
+      do: s_throb.f_note_pulse.(s_throb, cluster_calced)
 
-  def throb(s_throb, n \\ 1) do
-    s_throb.f_throb.(s_throb, n)
-  end
+  def throb(s_throb, n \\ 1),
+      do: s_throb.f_throb.(s_throb, n)
 
   def count_down(s_throb, n \\ 1) do
     mutated = Map.update!(s_throb, :current_lifespan, & &1-n)
