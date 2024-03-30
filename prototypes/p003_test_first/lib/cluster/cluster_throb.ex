@@ -27,13 +27,14 @@ defmodule Throb do
   @doc """
   Create the structure with a given starting_lifespan (the most common case)
   """
-  def starting(response_to_pulse) when is_function(response_to_pulse, 2) do
-    %__MODULE__{f_note_pulse: response_to_pulse}
+  def starting(starting_lifespan) when is_integer(starting_lifespan) do
+    %__MODULE__{starting_lifespan: starting_lifespan, current_lifespan: starting_lifespan}
   end
 
-  def starting(starting_lifespan) when is_integer(starting_lifespan) do
-    %__MODULE__{current_lifespan: starting_lifespan,
-                starting_lifespan: starting_lifespan}
+  def starting(opts) when is_list(opts) do
+    internalized = KeywordX.replace_keys(opts, on_pulse: :f_note_pulse)
+
+    struct(__MODULE__, internalized)
   end
 
   @doc """

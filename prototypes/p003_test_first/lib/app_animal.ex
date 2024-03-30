@@ -52,6 +52,7 @@ defmodule AppAnimal do
       alias AppAnimal.Cluster
       import Lens.Macros
       alias AppAnimal.Duration
+      alias AppAnimal.Extras.KeywordX
     end
   end
 end

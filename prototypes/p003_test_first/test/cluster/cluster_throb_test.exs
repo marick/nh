@@ -22,7 +22,7 @@ defmodule Cluster.ThrobTest do
     end
     
     test "with just a function" do
-      UT.starting(&UT.pulse_increases_lifespan/2)
+      UT.starting(on_pulse: &UT.pulse_increases_lifespan/2)
       |> assert_fields(current_lifespan: Duration.frequent_glance,
                        starting_lifespan: Duration.frequent_glance,
                        f_note_pulse: &UT.pulse_increases_lifespan/2)
