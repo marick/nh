@@ -21,12 +21,11 @@ defmodule Throb do
     field :starting_lifespan, integer,       default: Duration.frequent_glance
     field :f_note_pulse,      pulse_handler, default: &__MODULE__.pulse_does_nothing/2
     field :f_throb,           throb_handler, default: &__MODULE__.count_down/2
+    field :f_exit_action,     (Cluster.t -> :none), default: &Function.identity/1
   end
 
   @doc """
-  Create the structure with one of the starting lifespan or the pulse handler.
-
-  The other is left as the default.
+  Create the structure with a given starting_lifespan (the most common case)
   """
   def starting(response_to_pulse) when is_function(response_to_pulse, 2) do
     %__MODULE__{f_note_pulse: response_to_pulse}
@@ -38,7 +37,7 @@ defmodule Throb do
   end
 
   @doc """
-  Create the structure with both optional values.
+  Create the structure from a keyword list
   """
   def starting(starting_lifespan, on_pulse: response_to_pulse) do
     %__MODULE__{current_lifespan: starting_lifespan,
@@ -46,7 +45,6 @@ defmodule Throb do
                 f_note_pulse: response_to_pulse
     }
   end
-  
 
   def note_pulse(s_throb, cluster_calced),
       do: s_throb.f_note_pulse.(s_throb, cluster_calced)

@@ -63,14 +63,15 @@ defmodule CircularProcess do
   def handle_cast([throb: n], s_process_state) do
     {action, next_throb} = Cluster.Throb.throb(s_process_state.throb, n)
 
-    s_process_state
-    |> Map.put(:throb, next_throb)
-    |> then(& call_action_function(action, &1))
+    next_process_state = Map.put(s_process_state, :throb, next_throb)
+    case action do
+      :continue ->
+        AppAnimal.GenServer.continue(next_process_state)
+      :stop ->
+        s_process_state.throb.f_exit_action.(s_process_state.previously)
+        AppAnimal.GenServer.stop(next_process_state)
+    end
   end
-
-  defp call_action_function(action, next_process_state),
-       do: apply(AppAnimal.GenServer, action, [next_process_state])
-    
 
   # Test support
 
