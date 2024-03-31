@@ -31,20 +31,13 @@ defmodule Throb do
     %__MODULE__{starting_lifespan: starting_lifespan, current_lifespan: starting_lifespan}
   end
 
+  IO.puts "======================================= NEXT start adding an f_throb action"
+
   def starting(opts) when is_list(opts) do
-    internalized = KeywordX.replace_keys(opts, on_pulse: :f_note_pulse)
-
-    struct(__MODULE__, internalized)
-  end
-
-  @doc """
-  Create the structure from a keyword list
-  """
-  def starting(starting_lifespan, on_pulse: response_to_pulse) do
-    %__MODULE__{current_lifespan: starting_lifespan,
-                starting_lifespan: starting_lifespan,
-                f_note_pulse: response_to_pulse
-    }
+    opts 
+    |> Opts.replace_keys(on_pulse: :f_note_pulse)
+    |> Opts.copy(:current_lifespan, from_existing: :starting_lifespan)
+    |> then(& struct(__MODULE__, &1))
   end
 
   def note_pulse(s_throb, cluster_calced),

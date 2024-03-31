@@ -29,7 +29,7 @@ defmodule Cluster.ThrobTest do
     end
 
     test "with both arguments" do
-      UT.starting(5, on_pulse: &UT.pulse_increases_lifespan/2)
+      UT.starting(starting_lifespan: 5, on_pulse: &UT.pulse_increases_lifespan/2)
       |> assert_fields(current_lifespan: 5,
                        starting_lifespan: 5,
                        f_note_pulse: &UT.pulse_increases_lifespan/2)
@@ -67,7 +67,7 @@ defmodule Cluster.ThrobTest do
 
   describe "pulses increase the lifespan" do
     test "a pulse bumps the current lifespan by one" do
-      s_calc = UT.starting(2, on_pulse: &UT.pulse_increases_lifespan/2)
+      s_calc = UT.starting(starting_lifespan: 2, on_pulse: &UT.pulse_increases_lifespan/2)
 
       {:continue, s_calc} = UT.count_down(s_calc)   # take it below starting value
       assert_field(s_calc, current_lifespan: 1)
@@ -77,7 +77,7 @@ defmodule Cluster.ThrobTest do
     end
 
     test "but it does not go beyond the max" do
-      s_calc = UT.starting(2, on_pulse: &UT.pulse_increases_lifespan/2)
+      s_calc = UT.starting(starting_lifespan: 2, on_pulse: &UT.pulse_increases_lifespan/2)
 
       {:continue, s_calc} = UT.count_down(s_calc)   # take it below starting value
       assert_field(s_calc, current_lifespan: 1)
