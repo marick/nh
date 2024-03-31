@@ -25,7 +25,7 @@ defmodule Cluster.MakeTest do
 
 
       assert cluster.shape.initial_value == []
-      assert cluster.shape.throb.starting_lifespan == Duration.seconds(10)
+      assert cluster.shape.throb.age_limit == Duration.seconds(10)
       assert cluster.shape.throb.f_note_pulse == &Throb.pulse_does_nothing/2
     end
   end

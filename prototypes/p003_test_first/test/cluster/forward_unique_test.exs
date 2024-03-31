@@ -28,7 +28,7 @@ defmodule Cluster.ForwardUniqueTest do
   @tag :test_uses_sleep
   test "a cluster can age out and start over" do
     alias Cluster.Throb
-    throb = Throb.starting(starting_lifespan: 2, on_pulse: &Throb.pulse_increases_lifespan/2)
+    throb = Throb.starting(age_limit: 2, on_pulse: &Throb.pulse_increases_lifespan/2)
     first = forward_unique(:first, throb: throb)
     
     p_switchboard =
@@ -43,11 +43,11 @@ defmodule Cluster.ForwardUniqueTest do
     send_test_pulse(p_switchboard, to: :first, carrying: "data")
     refute_receive("data")
     
-    assert peek_at(p_switchboard, :current_lifespan, of: :first) == 2
+    assert peek_at(p_switchboard, :current_age, of: :first) == 2
 
     # a normal, decrementing throb
     throb_all_active(p_switchboard)
-    assert peek_at(p_switchboard, :current_lifespan, of: :first) == 1
+    assert peek_at(p_switchboard, :current_age, of: :first) == 1
 
     # decrement to zero - should cause exit
     throb_all_active(p_switchboard)
@@ -58,6 +58,6 @@ defmodule Cluster.ForwardUniqueTest do
     # A test pulse recreates the process
     send_test_pulse(p_switchboard, to: :first, carrying: "data")
     assert_test_receives("data")
-    assert peek_at(p_switchboard, :current_lifespan, of: :first) == 2
+    assert peek_at(p_switchboard, :current_age, of: :first) == 2
   end
 end

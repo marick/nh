@@ -17,18 +17,18 @@ defmodule Throb do
   typedstruct enforce: true do
     plugin TypedStructLens, prefix: :l_
 
-    field :current_lifespan,  integer,       default: Duration.frequent_glance
-    field :starting_lifespan, integer,       default: Duration.frequent_glance
+    field :current_age,       integer,       default: Duration.frequent_glance
+    field :age_limit, integer,       default: Duration.frequent_glance
     field :f_note_pulse,      pulse_handler, default: &__MODULE__.pulse_does_nothing/2
     field :f_throb,           throb_handler, default: &__MODULE__.count_down/2
     field :f_exit_action,     (Cluster.t -> :none), default: &Function.identity/1
   end
 
   @doc """
-  Create the structure with a given starting_lifespan (the most common case)
+  Create the structure with a given age_limit (the most common case)
   """
-  def starting(starting_lifespan) when is_integer(starting_lifespan) do
-    %__MODULE__{starting_lifespan: starting_lifespan, current_lifespan: starting_lifespan}
+  def starting(age_limit) when is_integer(age_limit) do
+    %__MODULE__{age_limit: age_limit, current_age: age_limit}
   end
 
   IO.puts "======================================= NEXT start adding an f_throb action"
@@ -36,7 +36,7 @@ defmodule Throb do
   def starting(opts) when is_list(opts) do
     opts 
     |> Opts.replace_keys(on_pulse: :f_note_pulse)
-    |> Opts.copy(:current_lifespan, from_existing: :starting_lifespan)
+    |> Opts.copy(:current_age, from_existing: :age_limit)
     |> then(& struct(__MODULE__, &1))
   end
 
@@ -47,8 +47,8 @@ defmodule Throb do
       do: s_throb.f_throb.(s_throb, n)
 
   def count_down(s_throb, n \\ 1) do
-    mutated = Map.update!(s_throb, :current_lifespan, & &1-n)
-    if mutated.current_lifespan <= 0,
+    mutated = Map.update!(s_throb, :current_age, & &1-n)
+    if mutated.current_age <= 0,
          do: {:stop, mutated},
          else: {:continue, mutated}
   end
@@ -59,8 +59,8 @@ defmodule Throb do
       do: s_throb
 
   def pulse_increases_lifespan(s_throb, _cluster_calced_value) do
-    next_lifespan = capped_at(s_throb.starting_lifespan, s_throb.current_lifespan + 1)
-    Map.put(s_throb, :current_lifespan, next_lifespan)
+    next_lifespan = capped_at(s_throb.age_limit, s_throb.current_age + 1)
+    Map.put(s_throb, :current_age, next_lifespan)
   end
 
   defp capped_at(cap, proposed_value) do

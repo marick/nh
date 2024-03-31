@@ -8,7 +8,7 @@ defmodule CircularProcess.State do
   the fields that are new:
   
   - throb          - Controls the aging of this cluster and its eventual exit.
-                     Initialized from Shape.Circular.starting_lifespan.
+                     Initialized from Shape.Circular.age_limit.
   - previously     - The part of the state the `calc` function can channged.
                      Initialized from Shape.Circular.initial_value.
   """
@@ -32,8 +32,8 @@ defmodule CircularProcess.State do
   }
   end
 
-  deflens l_current_lifespan(), do: in_throb(:current_lifespan)
-  deflens l_starting_lifespan(), do: in_throb(:starting_lifespan)
+  deflens l_current_age(), do: in_throb(:current_age)
+  deflens l_age_limit(), do: in_throb(:age_limit)
   
   private do
     def in_throb(key), do: l_throb() |> Lens.key(key)
@@ -75,8 +75,8 @@ defmodule CircularProcess do
 
   # Test support
 
-  def handle_call(:current_lifespan, _from, s_process_state) do
-    lifespan = deeply_get_only(s_process_state, :l_current_lifespan)
+  def handle_call(:current_age, _from, s_process_state) do
+    lifespan = deeply_get_only(s_process_state, :l_current_age)
     continue(s_process_state, returning: lifespan)
   end
 end

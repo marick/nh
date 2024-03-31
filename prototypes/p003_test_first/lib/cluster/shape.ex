@@ -16,8 +16,8 @@ defmodule Shape.Circular do
   end
   
   def new(opts \\ []) do
-    Keyword.pop(opts, :starting_lifespan)
-    case Keyword.pop(opts, :starting_lifespan) do
+    Keyword.pop(opts, :age_limit)
+    case Keyword.pop(opts, :age_limit) do
       {nil, _} -> 
         struct(__MODULE__, opts)
       {lifespan, remainder} ->
