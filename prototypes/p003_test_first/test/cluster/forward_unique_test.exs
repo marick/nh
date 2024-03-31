@@ -28,7 +28,7 @@ defmodule Cluster.ForwardUniqueTest do
   @tag :test_uses_sleep
   test "a cluster can age out and start over" do
     alias Cluster.Throb
-    throb = Throb.starting(age_limit: 2, on_pulse: &Throb.pulse_increases_lifespan/2)
+    throb = Throb.counting_down_from(2, on_pulse: &Throb.pulse_increases_lifespan/2)
     first = forward_unique(:first, throb: throb)
     
     p_switchboard =

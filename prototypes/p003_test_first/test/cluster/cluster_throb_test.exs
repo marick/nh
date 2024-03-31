@@ -6,86 +6,114 @@ defmodule Cluster.ThrobTest do
   alias Cluster.Throb, as: UT
   alias AppAnimal.Duration
 
-  describe "creation" do
-    test "with only defaults" do
-      %UT{}
-      |> assert_fields(current_age: Duration.frequent_glance,
-                       age_limit: Duration.frequent_glance,
-                       f_note_pulse: &UT.pulse_does_nothing/2)
-    end
-    
+  describe "setting up a countdown" do
     test "with just a duration" do
-      UT.starting(Duration.quanta(5))
+      UT.counting_down_from(Duration.quanta(5))
       |> assert_fields(current_age: Duration.quanta(5),
-                       age_limit: Duration.quanta(5),
-                       f_note_pulse: &UT.pulse_does_nothing/2)
+                       max_age: Duration.quanta(5),
+                       f_throb: &UT.count_down/2,
+                       f_note_pulse: &UT.pulse_does_nothing/2,
+                       f_before_stopping: &Function.identity/1)
     end
     
-    test "with just a function" do
-      UT.starting(on_pulse: &UT.pulse_increases_lifespan/2)
-      |> assert_fields(current_age: Duration.frequent_glance,
-                       age_limit: Duration.frequent_glance,
-                       f_note_pulse: &UT.pulse_increases_lifespan/2)
+    test "with a different `on_pulse` value" do
+      UT.counting_down_from(Duration.quanta(5), on_pulse: &UT.pulse_increases_lifespan/2)
+      |> assert_fields(current_age: Duration.quanta(5),
+                       max_age: Duration.quanta(5),
+                       f_throb: &UT.count_down/2,
+                       f_note_pulse: &UT.pulse_increases_lifespan/2,
+                       f_before_stopping: &Function.identity/1)
     end
 
-    test "with both arguments" do
-      UT.starting(age_limit: 5, on_pulse: &UT.pulse_increases_lifespan/2)
-      |> assert_fields(current_age: 5,
-                       age_limit: 5,
-                       f_note_pulse: &UT.pulse_increases_lifespan/2)
-    end
+    test "can also add a before_stopping: value" do
+      one_argument_function = fn _ -> 5 end
+      UT.counting_down_from(Duration.quanta(5),
+                            on_pulse: &UT.pulse_increases_lifespan/2,
+                            before_stopping: one_argument_function)
+      |> assert_fields(current_age: Duration.quanta(5),
+                       max_age: Duration.quanta(5),
+                       f_throb: &UT.count_down/2,
+                       f_note_pulse: &UT.pulse_increases_lifespan/2,
+                       f_before_stopping: one_argument_function)
+    end    
   end
 
-  describe "how counting down works" do
+  describe "setting up a count-up" do
+    test "with just a duration" do
+      UT.counting_up_to(Duration.quanta(1))
+      |> assert_fields(current_age: Duration.quanta(0),
+                       max_age: Duration.quanta(1),
+                       f_throb: &UT.count_up/2,
+                       f_note_pulse: &UT.pulse_does_nothing/2,
+                       f_before_stopping: &Function.identity/1)
+    end
     
+    test "with a different `on_pulse` value" do
+      UT.counting_up_to(Duration.quanta(5), on_pulse: &UT.pulse_zeroes_lifespan/2)
+      |> assert_fields(current_age: Duration.quanta(0),
+                       max_age: Duration.quanta(5),
+                       f_throb: &UT.count_up/2,
+                       f_note_pulse: &UT.pulse_zeroes_lifespan/2,
+                       f_before_stopping: &Function.identity/1)
+    end
+
+    test "with an `before_stopping` value" do
+      one_argument_function = fn _ -> 5 end
+      UT.counting_up_to(Duration.quanta(5), on_pulse: &UT.pulse_zeroes_lifespan/2,
+                                            before_stopping: one_argument_function)
+      |> assert_fields(current_age: Duration.quanta(0),
+                       max_age: Duration.quanta(5),
+                       f_throb: &UT.count_up/2,
+                       f_note_pulse: &UT.pulse_zeroes_lifespan/2,
+                       f_before_stopping: one_argument_function)
+    end
+
   end
 
-  describe "simply running down: default behavior" do
+  describe "counting down behavior" do
     test "a throb runs it down a bit" do
-      logic = UT.starting(2)
-      assert {:continue, new_logic} = UT.count_down(logic)
+      throb = UT.counting_down_from(2)
+      assert {:continue, new_throb} = UT.count_down(throb)
 
-      assert_field(new_logic, current_age: 1)
+      assert_field(new_throb, current_age: 1)
     end
 
     test "stop when zero is hit" do
-      logic = UT.starting(1)
-      assert {:stop, new_logic} = UT.count_down(logic)
+      throb = UT.counting_down_from(1)
+      assert {:stop, new_throb} = UT.count_down(throb)
 
-      assert_field(new_logic, current_age: 0)
+      assert_field(new_throb, current_age: 0)
     end
     
     test "can pack multiple count_downs together for testing" do
-      logic = UT.starting(5)
-      assert {:stop, new_logic} = UT.count_down(logic, 5)
+      throb = UT.counting_down_from(5)
+      assert {:stop, new_throb} = UT.count_down(throb, 5)
 
-      assert_field(new_logic, current_age: 0)
+      assert_field(new_throb, current_age: 0)
     end
     
     test "a pulse does not make a difference" do
-      logic = UT.starting(1)
-      assert logic == UT.note_pulse(logic, :irrelevant_calculated_value)
+      throb = UT.counting_down_from(1)
+      assert throb == UT.note_pulse(throb, :irrelevant_calculated_value)
     end
-  end
 
-  describe "pulses increase the lifespan" do
-    test "a pulse bumps the current lifespan by one" do
-      s_calc = UT.starting(age_limit: 2, on_pulse: &UT.pulse_increases_lifespan/2)
+    test "but a pulse *can* bump the current age by one" do
+      throb = UT.counting_down_from(2, on_pulse: &UT.pulse_increases_lifespan/2)
 
-      {:continue, s_calc} = UT.count_down(s_calc)   # take it below starting value
-      assert_field(s_calc, current_age: 1)
+      {:continue, throb} = UT.count_down(throb)   # take it below the starting value
+      assert_field(throb, current_age: 1)
         
-      UT.note_pulse(s_calc, :irrelevant_calculated_value)
+      UT.note_pulse(throb, :irrelevant_calculated_value)
       |> assert_field(current_age: 2)
     end
 
-    test "but it does not go beyond the max" do
-      s_calc = UT.starting(age_limit: 2, on_pulse: &UT.pulse_increases_lifespan/2)
+    test "but it will not go beyond the max" do
+      throb = UT.counting_down_from(2, on_pulse: &UT.pulse_increases_lifespan/2)
 
-      {:continue, s_calc} = UT.count_down(s_calc)   # take it below starting value
-      assert_field(s_calc, current_age: 1)
+      {:continue, throb} = UT.count_down(throb)   # take it below the starting value
+      assert_field(throb, current_age: 1)
 
-      s_calc
+      throb
       |> UT.note_pulse(:irrelevant_calculated_value)
       |> UT.note_pulse(:irrelevant_calculated_value)
       |> UT.note_pulse(:irrelevant_calculated_value)
@@ -93,4 +121,59 @@ defmodule Cluster.ThrobTest do
       |> assert_field(current_age: 2)
     end
   end
+
+
+  describe "counting UP behavior" do
+    test "a throb runs it up a bit" do
+      throb = UT.counting_up_to(2)
+      assert {:continue, new_throb} = UT.count_up(throb)
+
+      assert_field(new_throb, current_age: 1)
+    end
+
+    test "stop when maximum age is hit" do
+      throb = UT.counting_up_to(1)
+      assert_field(throb, current_age: 0)
+      assert {:stop, new_throb} = UT.count_up(throb)
+
+      assert_field(new_throb, current_age: 1)
+    end
+    
+    test "can pack multiple count_downs together for testing" do
+      throb = UT.counting_up_to(5)
+      assert {:stop, new_throb} = UT.count_up(throb, 5)
+
+      assert_field(new_throb, current_age: 5)
+    end
+    
+    test "a pulse does not make a difference" do
+      throb = UT.counting_up_to(1)
+      assert throb == UT.note_pulse(throb, :irrelevant_calculated_value)
+    end
+
+    test "but a pulse *can* bump the current age back to zero" do
+      throb = UT.counting_up_to(2, on_pulse: &UT.pulse_zeroes_lifespan/2)
+
+      {:continue, throb} = UT.count_up(throb)   # take it above zero
+      assert_field(throb, current_age: 1)
+        
+      UT.note_pulse(throb, :irrelevant_calculated_value)
+      |> assert_field(current_age: 0)
+    end
+
+    # test "but it will not go beyond the max" do
+    #   throb = UT.counting_down_from(2, on_pulse: &UT.pulse_increases_lifespan/2)
+
+    #   {:continue, throb} = UT.count_down(throb)   # take it below the starting value
+    #   assert_field(throb, current_age: 1)
+
+    #   throb
+    #   |> UT.note_pulse(:irrelevant_calculated_value)
+    #   |> UT.note_pulse(:irrelevant_calculated_value)
+    #   |> UT.note_pulse(:irrelevant_calculated_value)
+    #   |> UT.note_pulse(:irrelevant_calculated_value)
+    #   |> assert_field(current_age: 2)
+    # end
+  end
+  
 end

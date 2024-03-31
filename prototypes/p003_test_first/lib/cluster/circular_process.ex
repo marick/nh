@@ -8,7 +8,7 @@ defmodule CircularProcess.State do
   the fields that are new:
   
   - throb          - Controls the aging of this cluster and its eventual exit.
-                     Initialized from Shape.Circular.age_limit.
+                     Initialized from Shape.Circular.max_age.
   - previously     - The part of the state the `calc` function can channged.
                      Initialized from Shape.Circular.initial_value.
   """
@@ -33,7 +33,7 @@ defmodule CircularProcess.State do
   end
 
   deflens l_current_age(), do: in_throb(:current_age)
-  deflens l_age_limit(), do: in_throb(:age_limit)
+  deflens l_max_age(), do: in_throb(:max_age)
   
   private do
     def in_throb(key), do: l_throb() |> Lens.key(key)
@@ -68,7 +68,7 @@ defmodule CircularProcess do
       :continue ->
         AppAnimal.GenServer.continue(next_process_state)
       :stop ->
-        s_process_state.throb.f_exit_action.(s_process_state.previously)
+        s_process_state.throb.f_before_stopping.(s_process_state.previously)
         AppAnimal.GenServer.stop(next_process_state)
     end
   end

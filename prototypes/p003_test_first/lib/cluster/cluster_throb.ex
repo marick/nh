@@ -17,28 +17,30 @@ defmodule Throb do
   typedstruct enforce: true do
     plugin TypedStructLens, prefix: :l_
 
-    field :current_age,       integer,       default: Duration.frequent_glance
-    field :age_limit, integer,       default: Duration.frequent_glance
-    field :f_note_pulse,      pulse_handler, default: &__MODULE__.pulse_does_nothing/2
-    field :f_throb,           throb_handler, default: &__MODULE__.count_down/2
-    field :f_exit_action,     (Cluster.t -> :none), default: &Function.identity/1
+    field :current_age,       Duration.t,           required: true
+    field :max_age,           Duration.t,           required: true
+    field :f_throb,           throb_handler,        required: true
+    field :f_note_pulse,      pulse_handler,        default: &__MODULE__.pulse_does_nothing/2
+    field :f_before_stopping, (Cluster.t -> :none), default: &Function.identity/1
   end
 
-  @doc """
-  Create the structure with a given age_limit (the most common case)
-  """
-  def starting(age_limit) when is_integer(age_limit) do
-    %__MODULE__{age_limit: age_limit, current_age: age_limit}
+  ### Init
+
+  def counting_down_from(max_age, opts \\ []) do
+    new_opts =
+      [current_age: max_age, max_age: max_age, f_throb: &__MODULE__.count_down/2] ++
+      Opts.replace_keys(opts, on_pulse: :f_note_pulse, before_stopping: :f_before_stopping)
+    struct(__MODULE__, new_opts)
   end
 
-  IO.puts "======================================= NEXT start adding an f_throb action"
-
-  def starting(opts) when is_list(opts) do
-    opts 
-    |> Opts.replace_keys(on_pulse: :f_note_pulse)
-    |> Opts.copy(:current_age, from_existing: :age_limit)
-    |> then(& struct(__MODULE__, &1))
+  def counting_up_to(max_age, opts \\ []) do
+    new_opts =
+      [current_age: 0, max_age: max_age, f_throb: &__MODULE__.count_up/2] ++
+      Opts.replace_keys(opts, on_pulse: :f_note_pulse, before_stopping: :f_before_stopping)
+    struct(__MODULE__, new_opts)
   end
+  
+  ### API
 
   def note_pulse(s_throb, cluster_calced),
       do: s_throb.f_note_pulse.(s_throb, cluster_calced)
@@ -53,14 +55,25 @@ defmodule Throb do
          else: {:continue, mutated}
   end
 
+  def count_up(s_throb, n \\ 1) do
+    mutated = Map.update!(s_throb, :current_age, & &1+n)
+    if mutated.current_age >= s_throb.max_age,
+         do: {:stop, mutated},
+         else: {:continue, mutated}
+  end
+
   # Various values for `f_note_pulse`
 
   def pulse_does_nothing(s_throb, _cluster_calced_value),
       do: s_throb
 
   def pulse_increases_lifespan(s_throb, _cluster_calced_value) do
-    next_lifespan = capped_at(s_throb.age_limit, s_throb.current_age + 1)
+    next_lifespan = capped_at(s_throb.max_age, s_throb.current_age + 1)
     Map.put(s_throb, :current_age, next_lifespan)
+  end
+
+  def pulse_zeroes_lifespan(s_throb, _cluster_calced_value) do
+    Map.put(s_throb, :current_age, 0)
   end
 
   defp capped_at(cap, proposed_value) do

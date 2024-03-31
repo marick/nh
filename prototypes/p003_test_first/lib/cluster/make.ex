@@ -88,7 +88,8 @@ defmodule Cluster.Make do
       # No pulse value can accidentally be equal to a new ref.
       |> Keyword.put_new(:initial_value, :erlang.make_ref()) 
       |> Keyword.put_new(:throb,
-                         Throb.starting(on_pulse: &Throb.pulse_increases_lifespan/2))
+                         Throb.counting_down_from(Duration.frequent_glance,
+                                                  on_pulse: &Throb.pulse_increases_lifespan/2))
     
     f = fn pulse_data, previously ->
       if pulse_data == previously,

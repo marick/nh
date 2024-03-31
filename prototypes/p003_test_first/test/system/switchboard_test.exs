@@ -58,7 +58,7 @@ defmodule System.SwitchboardTest do
 
   @tag :test_uses_sleep
   test "what happens when a circular cluster 'ages out'" do
-    first = circular(:first, fn _pulse -> self() end, age_limit: 2)
+    first = circular(:first, fn _pulse -> self() end, max_age: 2)
 
     a =
       trace([first, to_test()])

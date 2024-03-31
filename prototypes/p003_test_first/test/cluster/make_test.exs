@@ -20,12 +20,12 @@ defmodule Cluster.MakeTest do
     
     test "optional arguments go into the shape" do
       cluster = UT.circular(:example, & &1+1,
-                            throb: Throb.starting(Duration.seconds(10)),
+                            throb: Throb.counting_down_from(Duration.seconds(10)),
                             initial_value: [])
 
 
       assert cluster.shape.initial_value == []
-      assert cluster.shape.throb.age_limit == Duration.seconds(10)
+      assert cluster.shape.throb.max_age == Duration.seconds(10)
       assert cluster.shape.throb.f_note_pulse == &Throb.pulse_does_nothing/2
     end
   end

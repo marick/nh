@@ -7,22 +7,25 @@ alias Cluster.Shape
 defmodule Shape.Circular do
   use TypedStruct
   alias Cluster.Throb
+  alias AppAnimal.Duration
 
   typedstruct enforce: true do
     plugin TypedStructLens, prefix: :l_
 
-    field :throb,         Cluster.Throb.t, default: %Cluster.Throb{}
-    field :initial_value, any,             default: %{}
+    field :throb,         Cluster.Throb.t,
+                          default: Cluster.Throb.counting_down_from(Duration.frequent_glance)
+    field :initial_value, any,
+                          default: %{}
   end
   
   def new(opts \\ []) do
-    Keyword.pop(opts, :age_limit)
-    case Keyword.pop(opts, :age_limit) do
+    Keyword.pop(opts, :max_age)
+    case Keyword.pop(opts, :max_age) do
       {nil, _} -> 
         struct(__MODULE__, opts)
       {lifespan, remainder} ->
-        Keyword.put(remainder, :throb, Throb.starting(lifespan))
-        struct(__MODULE__, Keyword.put(remainder, :throb, Throb.starting(lifespan)))
+        Keyword.put(remainder, :throb, Throb.counting_down_from(lifespan))
+        struct(__MODULE__, Keyword.put(remainder, :throb, Throb.counting_down_from(lifespan)))
     end
   end
 end

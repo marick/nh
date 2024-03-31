@@ -1,6 +1,8 @@
 alias AppAnimal.Duration
 
 defmodule Duration do
+  @type t :: integer
+  
   def quantum(), do: 100 # milliseconds
   def quanta(n), do: n * quantum()
 

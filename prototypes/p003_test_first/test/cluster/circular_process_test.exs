@@ -15,7 +15,7 @@ defmodule Cluster.CircularProcessTest do
       |> assert_fields(calc: cluster.calc,
                        previously: %{})
 
-      assert state.throb == Throb.starting(Duration.frequent_glance)
+      assert state.throb == Throb.counting_down_from(Duration.frequent_glance)
     end
 
     test "with a given starting value" do
@@ -83,7 +83,7 @@ defmodule Cluster.CircularProcessTest do
     test "an ordinary call to `throb`" do
       state = circular(:example, & &1+1) |> UT.State.from_cluster
       age = deeply_get_only(state, :l_current_age)
-      assert age == deeply_get_only(state, :l_age_limit)
+      assert age == deeply_get_only(state, :l_max_age)
       assert age > 2
       
       assert {:noreply, next_state} = UT.handle_cast([throb: 2], state)
