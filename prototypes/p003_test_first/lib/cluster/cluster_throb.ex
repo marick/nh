@@ -5,14 +5,19 @@ defmodule Throb do
   @moduledoc """
   Captures the handling of throbbing by a circular cluster.
 
-  Periodic throb messages decrease the cluster's lifespan.
-  Optionally, each pulse increases the lifespan. 
+  Periodic throb messages will either increase or decrease the
+  cluster's lifespan. The process stops when it hits a limit value
+  (`max_age` or zero).
+
+  Optionally, each pulse can affect the lifespan. Typically, receipt of
+  pulses makes the cluster live longer. So in the absence of pulses, the
+  cluster will eventually "age out". 
   """
   use AppAnimal
   use TypedStruct
 
-  @type pulse_handler :: (Throb.t, any -> Throb.t)
   @type throb_handler :: (Throb.t, integer -> Throb.t)
+  @type pulse_handler :: (Throb.t, any -> Throb.t)
   
   typedstruct enforce: true do
     plugin TypedStructLens, prefix: :l_
@@ -26,6 +31,17 @@ defmodule Throb do
 
   ### Init
 
+  @doc """
+  Create a cluster that counts down from a `max_age` and signals that
+  the process is to stop when it hits zero.
+
+  ## Options:
+
+    * `:on_pulse` - a function that takes a `Throb` and the new state of the process and
+      adjusts the `current_age`.
+    * `before_stopping` - a function that takes the new state of the process. It will typically
+      send a pulse downstream.
+  """
   def counting_down_from(max_age, opts \\ []) do
     new_opts =
       [current_age: max_age, max_age: max_age, f_throb: &__MODULE__.count_down/2] ++
@@ -33,6 +49,11 @@ defmodule Throb do
     struct(__MODULE__, new_opts)
   end
 
+  @doc """
+  Same as `counting_down_from/2`, except that it counts up from zero.
+
+  The `before_stopping` function is called when the age hits `max_age`.
+  """
   def counting_up_to(max_age, opts \\ []) do
     new_opts =
       [current_age: 0, max_age: max_age, f_throb: &__MODULE__.count_up/2] ++
@@ -48,6 +69,8 @@ defmodule Throb do
   def throb(s_throb, n \\ 1),
       do: s_throb.f_throb.(s_throb, n)
 
+  ## Functions that handle throbbing.
+  
   def count_down(s_throb, n \\ 1) do
     mutated = Map.update!(s_throb, :current_age, & &1-n)
     if mutated.current_age <= 0,
@@ -62,7 +85,7 @@ defmodule Throb do
          else: {:continue, mutated}
   end
 
-  # Various values for `f_note_pulse`
+  # Functions that handle pulses.
 
   def pulse_does_nothing(s_throb, _cluster_calced_value),
       do: s_throb
