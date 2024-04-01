@@ -161,19 +161,19 @@ defmodule Cluster.ThrobTest do
       |> assert_field(current_age: 0)
     end
 
-    # test "but it will not go beyond the max" do
-    #   throb = UT.counting_down_from(2, on_pulse: &UT.pulse_increases_lifespan/2)
+    test "later pulses do nothing" do
+      throb = UT.counting_up_to(2, on_pulse: &UT.pulse_zeroes_lifespan/2)
 
-    #   {:continue, throb} = UT.count_down(throb)   # take it below the starting value
-    #   assert_field(throb, current_age: 1)
+      {:continue, throb} = UT.count_up(throb)   # take it below the starting value
+      assert_field(throb, current_age: 1)
 
-    #   throb
-    #   |> UT.note_pulse(:irrelevant_calculated_value)
-    #   |> UT.note_pulse(:irrelevant_calculated_value)
-    #   |> UT.note_pulse(:irrelevant_calculated_value)
-    #   |> UT.note_pulse(:irrelevant_calculated_value)
-    #   |> assert_field(current_age: 2)
-    # end
+      throb
+      |> UT.note_pulse(:irrelevant_calculated_value)
+      |> UT.note_pulse(:irrelevant_calculated_value)
+      |> UT.note_pulse(:irrelevant_calculated_value)
+      |> UT.note_pulse(:irrelevant_calculated_value)
+      |> assert_field(current_age: 0)
+    end
   end
   
 end
