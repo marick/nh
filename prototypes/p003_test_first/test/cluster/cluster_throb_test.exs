@@ -13,7 +13,7 @@ defmodule Cluster.ThrobTest do
                        max_age: Duration.quanta(5),
                        f_throb: &UT.count_down/2,
                        f_note_pulse: &UT.pulse_does_nothing/2,
-                       f_before_stopping: &Function.identity/1)
+                       f_before_stopping: &UT.stop_silently/2)
     end
     
     test "with a different `on_pulse` value" do
@@ -22,19 +22,18 @@ defmodule Cluster.ThrobTest do
                        max_age: Duration.quanta(5),
                        f_throb: &UT.count_down/2,
                        f_note_pulse: &UT.pulse_increases_lifespan/2,
-                       f_before_stopping: &Function.identity/1)
+                       f_before_stopping: &UT.stop_silently/2)
     end
 
     test "can also add a before_stopping: value" do
-      one_argument_function = fn _ -> 5 end
       UT.counting_down_from(Duration.quanta(5),
                             on_pulse: &UT.pulse_increases_lifespan/2,
-                            before_stopping: one_argument_function)
+                            before_stopping: &UT.pulse_current_value/2)
       |> assert_fields(current_age: Duration.quanta(5),
                        max_age: Duration.quanta(5),
                        f_throb: &UT.count_down/2,
                        f_note_pulse: &UT.pulse_increases_lifespan/2,
-                       f_before_stopping: one_argument_function)
+                       f_before_stopping: &UT.pulse_current_value/2)
     end    
   end
 
@@ -45,7 +44,7 @@ defmodule Cluster.ThrobTest do
                        max_age: Duration.quanta(1),
                        f_throb: &UT.count_up/2,
                        f_note_pulse: &UT.pulse_does_nothing/2,
-                       f_before_stopping: &Function.identity/1)
+                       f_before_stopping: &UT.stop_silently/2)
     end
     
     test "with a different `on_pulse` value" do
@@ -54,18 +53,17 @@ defmodule Cluster.ThrobTest do
                        max_age: Duration.quanta(5),
                        f_throb: &UT.count_up/2,
                        f_note_pulse: &UT.pulse_zeroes_lifespan/2,
-                       f_before_stopping: &Function.identity/1)
+                       f_before_stopping: &UT.stop_silently/2)
     end
 
     test "with an `before_stopping` value" do
-      one_argument_function = fn _ -> 5 end
       UT.counting_up_to(Duration.quanta(5), on_pulse: &UT.pulse_zeroes_lifespan/2,
-                                            before_stopping: one_argument_function)
+                                            before_stopping: &UT.pulse_current_value/2)
       |> assert_fields(current_age: Duration.quanta(0),
                        max_age: Duration.quanta(5),
                        f_throb: &UT.count_up/2,
                        f_note_pulse: &UT.pulse_zeroes_lifespan/2,
-                       f_before_stopping: one_argument_function)
+                       f_before_stopping: &UT.pulse_current_value/2)
     end
 
   end

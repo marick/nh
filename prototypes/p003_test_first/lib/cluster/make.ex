@@ -99,6 +99,21 @@ defmodule Cluster.Make do
     circular(name, f, opts) |> labeled(:forward_unique)
   end
 
+  def delay(name, duration) do
+    alias Cluster.Throb
+
+    throb = Throb.counting_up_to(duration,
+                                 on_pulse: &Throb.pulse_zeroes_lifespan/2,
+                                 before_stopping: &Throb.pulse_current_value/2)
+
+    f_stash_pulse_data = fn pulse_data, _previously ->
+      {:no_pulse, pulse_data}
+    end
+
+    circular(name, f_stash_pulse_data, throb: throb)
+  end
+  
+
 
   private do
     def labeled(cluster, label), do: Map.put(cluster, :label, label)

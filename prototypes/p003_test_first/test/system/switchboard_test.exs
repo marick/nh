@@ -9,7 +9,7 @@ defmodule System.SwitchboardTest do
   ## The switchboard is mostly tested via the different kinds of clusters.
 
   test "the switchboard has a log" do
-    IO.puts("=== #{Pretty.Module.minimal(__MODULE__)} (around line #{__ENV__.line}) " <>
+    IO.puts("\n=== #{Pretty.Module.minimal(__MODULE__)} (around line #{__ENV__.line}) " <>
               "prints log entries.")
     IO.puts("=== By doing so, I hope to catch cases where log printing breaks.")
 

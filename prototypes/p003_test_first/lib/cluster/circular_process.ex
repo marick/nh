@@ -50,7 +50,9 @@ defmodule CircularProcess do
   end
 
   def handle_cast([handle_pulse: small_data], s_process_state) do
-    result = Calc.run(s_process_state.calc, on: small_data, with_state: s_process_state.previously)
+    result = Calc.run(s_process_state.calc,
+                      on: small_data,
+                      with_state: s_process_state.previously)
 
     Calc.maybe_pulse(result, & Cluster.start_pulse_on_its_way(s_process_state, &1))
     
@@ -68,7 +70,8 @@ defmodule CircularProcess do
       :continue ->
         AppAnimal.GenServer.continue(next_process_state)
       :stop ->
-        s_process_state.throb.f_before_stopping.(s_process_state.previously)
+        s_process_state.throb.f_before_stopping.(s_process_state.f_outward,
+                                                 s_process_state.previously)
         AppAnimal.GenServer.stop(next_process_state)
     end
   end

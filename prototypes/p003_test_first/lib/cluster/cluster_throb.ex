@@ -26,7 +26,7 @@ defmodule Throb do
     field :max_age,           Duration.t,           required: true
     field :f_throb,           throb_handler,        required: true
     field :f_note_pulse,      pulse_handler,        default: &__MODULE__.pulse_does_nothing/2
-    field :f_before_stopping, (Cluster.t -> :none), default: &Function.identity/1
+    field :f_before_stopping, (Cluster.t -> :none), default: &__MODULE__.stop_silently/2
   end
 
   ### Init
@@ -103,5 +103,16 @@ defmodule Throb do
     if proposed_value < cap,
        do: proposed_value,
        else: cap
+  end
+
+
+  # Functions that handle stopping
+
+  def stop_silently(_f_pulse_sender, _pulse_value) do
+    :no_return_value
+  end
+
+  def pulse_current_value(f_pulse_sender, pulse_value) do
+    f_pulse_sender.(pulse_value)
   end
 end

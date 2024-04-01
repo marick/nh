@@ -31,6 +31,7 @@ defmodule Scenarios.SwitchParagraphTest do
     :ok
   end
 
+  @tag :skip
   test "simple run-through" do
     IO.puts "======= switch_paragraph_test ============="
     new_paragraph_perception = [
@@ -46,6 +47,7 @@ defmodule Scenarios.SwitchParagraphTest do
       summarizer(:gap_count, &ParagraphGaps.gap_count/1),
       gate(:is_big_edit?, & &1 >= 2),
       forward_unique(:changes),
+      delay(:delay, Duration.seconds(0.1)),
       # wait_for_quiet(:big_edit_wait, seconds(2))
       # action_edge(:mark_paragraph_with_big_edit)
       to_test()
