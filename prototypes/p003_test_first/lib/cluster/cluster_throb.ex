@@ -1,4 +1,4 @@
-alias AppAnimal.Cluster
+alias AppAnimal.{Cluster,System}
 alias Cluster.Throb
 
 defmodule Throb do
@@ -15,6 +15,7 @@ defmodule Throb do
   """
   use AppAnimal
   use TypedStruct
+  alias System.Pulse
 
   @type throb_handler :: (Throb.t, integer -> Throb.t)
   @type pulse_handler :: (Throb.t, any -> Throb.t)
@@ -113,6 +114,6 @@ defmodule Throb do
   end
 
   def pulse_current_value(f_pulse_sender, pulse_value) do
-    f_pulse_sender.(pulse_value)
+    f_pulse_sender.(Pulse.new(pulse_value))
   end
 end

@@ -140,11 +140,6 @@ defmodule System.Switchboard do
                   s_switchboard)
     end
 
-    def handle_cast({:distribute_pulse, carrying: pulse_data, from: source_name},
-                    s_switchboard) do
-      handle_cast({:distribute_pulse, carrying: Pulse.new(pulse_data), from: source_name}, s_switchboard)
-    end
-
     def handle_cast({:distribute_pulse, carrying: %Pulse{} = pulse, to: destination_names},
                     s_switchboard) do
       s_switchboard
