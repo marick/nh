@@ -12,7 +12,7 @@ defmodule System.AffordanceLand do
   use AppAnimal
   use AppAnimal.GenServer
   use TypedStruct
-  alias System.{ActivityLogger,Switchboard}
+  alias System.{ActivityLogger,Switchboard,Pulse}
 
   typedstruct do
     field :p_switchboard, pid
@@ -38,6 +38,10 @@ defmodule System.AffordanceLand do
   runs_in_receiver do
     def init(opts) do
       {:ok, struct(__MODULE__, opts)}
+    end
+
+    def handle_cast([:produce_this_affordance, {name, %Pulse{} = pulse}], s_affordances) do
+      handle_cast([:produce_this_affordance, {name, pulse.data}], s_affordances)
     end
 
     def handle_cast([:produce_this_affordance, {name, data}], s_affordances) do

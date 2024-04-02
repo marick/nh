@@ -1,4 +1,6 @@
-defmodule AppAnimal.System.ActivityLogger do
+alias AppAnimal.System
+
+defmodule System.ActivityLogger do
   use AppAnimal
   use AppAnimal.GenServer
   require CircularBuffer

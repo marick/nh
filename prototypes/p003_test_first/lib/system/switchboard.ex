@@ -20,8 +20,7 @@ defmodule System.Switchboard do
   use AppAnimal
   use AppAnimal.GenServer
   use TypedStruct
-  alias System.ActivityLogger
-  alias System.Network
+  alias System.{ActivityLogger,Network,Pulse}
   alias AppAnimal.Duration
 
   typedstruct do
@@ -122,14 +121,19 @@ defmodule System.Switchboard do
       |> continue(returning: :ok)
     end
 
-    def handle_call([forward: message, to: circular_cluster_name],
+    def handle_call([forward: pulse_data, to: circular_cluster_name],
                     _from, s_switchboard) do
       pid = deeply_get_only(s_switchboard.network, Network.l_pid_named(circular_cluster_name))
-      result = GenServer.call(pid, message)
+      result = GenServer.call(pid, pulse_data)
       continue(s_switchboard, returning: result)
     end
     
     @impl GenServer
+    def handle_cast({:distribute_pulse, carrying: %Pulse{} = pulse, from: source_name},
+                    s_switchboard) do
+      handle_cast({:distribute_pulse, carrying: pulse.data, from: source_name}, s_switchboard)
+    end
+
     def handle_cast({:distribute_pulse, carrying: pulse_data, from: source_name},
                     s_switchboard) do
       source = deeply_get_only(s_switchboard, l_cluster_named(source_name))
@@ -140,6 +144,11 @@ defmodule System.Switchboard do
                   s_switchboard)
     end
 
+    def handle_cast({:distribute_pulse, carrying: %Pulse{} = pulse, to: destination_names},
+                    s_switchboard) do
+      handle_cast({:distribute_pulse, carrying: pulse.data, to: destination_names}, s_switchboard)
+    end
+    
     def handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names},
                     s_switchboard) do
       s_switchboard

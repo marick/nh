@@ -5,7 +5,7 @@ defmodule ClusterCase do
   """
   use AppAnimal
   alias AppAnimal.{System, Cluster}
-  alias System.{Switchboard,AffordanceLand}
+  alias System.{Switchboard,AffordanceLand,Pulse}
   alias Cluster.Shape
   alias ExUnit.Assertions
 
@@ -42,13 +42,17 @@ defmodule ClusterCase do
 
   @doc "Send the pulse from the test as if it came from a network cluster."
   def send_test_pulse(p_switchboard, to: destination_name, carrying: pulse_data) do
+    pulse = Pulse.new(pulse_data)
     Switchboard.cast__distribute_pulse(p_switchboard,
-                                       carrying: pulse_data, to: [destination_name])
+                                       carrying: pulse,
+                                       to: [destination_name])
   end
 
-  def produce_affordance(p_affordances, [{_name, _data}] = arg),
-      do: AffordanceLand.cast__produce_affordance(p_affordances, arg)
-
+  def produce_affordance(p_affordances, [{name, data}]) do
+    pulse = Pulse.new(data)
+    AffordanceLand.cast__produce_affordance(p_affordances, [{name, pulse}])
+  end
+  
   @doc """
   Script AffordanceLand to respond to a given action with a given affordance+data.
 
