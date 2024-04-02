@@ -1,4 +1,4 @@
-alias AppAnimal.Cluster
+alias AppAnimal.{Cluster,System}
 alias Cluster.Calc
 
 defmodule Calc do
@@ -43,38 +43,58 @@ defmodule Calc do
   any other value        - the value is sent in a pulse, but the state is left unchanged.        
 
   """
-
-  def run(calc, on: pulse_data, with_state: previously) when is_function(calc, 1) do
-    case calc.(pulse_data) do 
+  alias System.Pulse
+  
+  def run(calc, on: %Pulse{} = pulse, with_state: previously) when is_function(calc, 1) do
+    case calc.(pulse.data) do 
       :no_pulse ->
         {:no_pulse, previously}
       result -> 
-        {:pulse, result, previously}
+        {:pulse, Pulse.new(result), previously}
     end
   end
 
-  def run(calc, on: pulse_data, with_state: previously) when is_function(calc, 2) do
-    case calc.(pulse_data, previously) do
-      {:pulse, _pulse_data, _next_previously} = verbatim ->
-        verbatim
+  # MUST DELETE
+  def run(calc, on: pulse_data, with_state: previously) when is_function(calc, 1) do
+    run(calc, on: Pulse.new(pulse_data), with_state: previously)
+  end
+
+
+  # --- 
+
+  def run(calc, on: %Pulse{} = pulse, with_state: previously) when is_function(calc, 2) do
+    case calc.(pulse.data, previously) do
+      {:pulse, pulse_data, next_previously} ->
+        {:pulse, Pulse.new(pulse_data), next_previously}
       {:no_pulse, _next_previously} = verbatim ->
         verbatim
       :no_pulse ->
         {:no_pulse, previously}
       singleton_result ->
-        {:pulse, singleton_result, previously}
+        {:pulse, Pulse.new(singleton_result), previously}
     end
   end
 
-  def run(calc, on: pulse_data) do
-    case calc.(pulse_data) do
+  # MUST DELETE
+  def run(calc, on: pulse_data, with_state: previously) when is_function(calc, 2) do
+    run(calc, on: Pulse.new(pulse_data), with_state: previously)
+  end  
+
+  # ---
+  def run(calc, on: %Pulse{} = pulse) do
+    case calc.(pulse.data) do
       :no_pulse ->
         {:no_pulse}
       singleton_result ->
-        {:pulse, singleton_result}
+        {:pulse, Pulse.new(singleton_result)}
     end
   end
 
+  # MUST DELETE
+  def run(calc, on: pulse_data) do
+    run(calc, on: Pulse.new(pulse_data))
+  end
+  
   #
 
   @doc "Use `f_send_pulse` to send pulse data iff the `tuple` argument so indicates."

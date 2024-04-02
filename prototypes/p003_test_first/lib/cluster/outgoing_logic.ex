@@ -21,8 +21,8 @@ defmodule OutgoingLogic do
   def mkfn_pulse_direction(Switchboard, name) do
     f_pid_taker = 
       fn pid ->
-        fn pulse_data ->
-          Switchboard.cast__distribute_pulse(pid, carrying: pulse_data, from: name)
+        fn pulse ->
+          Switchboard.cast__distribute_pulse(pid, carrying: pulse, from: name)
         end
       end
     {Switchboard, f_pid_taker}
@@ -31,7 +31,7 @@ defmodule OutgoingLogic do
   def mkfn_pulse_direction(AffordanceLand) do
     f_pid_taker = 
       fn pid ->
-        fn pulse_data -> 
+        fn pulse_data ->
           GenServer.cast(pid, [:take_action, pulse_data])
         end
       end

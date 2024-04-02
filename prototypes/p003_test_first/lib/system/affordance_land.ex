@@ -8,6 +8,11 @@ defmodule System.AffordanceLand do
 
   It is rudimentarily scriptable, so that a test can tell it how to
   respond to an action.
+
+
+  Note that incoming actions are *not* Pulses, for no particularly good reasons.
+  Affordances are, however, sent as Pulses, though they should probably be a different
+  type.
   """
   use AppAnimal
   use AppAnimal.GenServer
@@ -46,6 +51,7 @@ defmodule System.AffordanceLand do
       continue(s_affordances)
     end
 
+    # MUST DELETE
     def handle_cast([:produce_this_affordance, {name, pulse_data}], s_affordances) do
       handle_cast([:produce_this_affordance, {name, Pulse.new(pulse_data)}], s_affordances)
     end
@@ -57,7 +63,26 @@ defmodule System.AffordanceLand do
       |> Map.update!(:programmed_responses, & append_programmed_responses(&1, responses))
       |> continue()
     end
+
+    # --
     
+    # MUST DELETE
+    def handle_cast([:take_action, %Pulse{data: [{name, data}]}], s_affordances) do
+      {responses, remaining_programmed_responses} =
+        Keyword.pop_first(s_affordances.programmed_responses, name)
+      
+      if responses == nil,
+         do: IO.puts("==== SAY, there is no programmed response for #{name}. Test error.")
+      
+      ActivityLogger.log_action_received(s_affordances.p_logger, name, data)
+      for response <- responses do
+        handle_cast([:produce_this_affordance, response], s_affordances)
+      end
+      
+      %{s_affordances | programmed_responses: remaining_programmed_responses}
+      |> continue()
+    end
+
     def handle_cast([:take_action, [{name, data}]], s_affordances) do
       {responses, remaining_programmed_responses} =
         Keyword.pop_first(s_affordances.programmed_responses, name)
@@ -73,6 +98,8 @@ defmodule System.AffordanceLand do
       %{s_affordances | programmed_responses: remaining_programmed_responses}
       |> continue()
     end
+
+    
     
     private do
       def append_programmed_responses(keywords, new) do

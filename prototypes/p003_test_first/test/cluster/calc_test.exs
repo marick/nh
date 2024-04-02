@@ -1,13 +1,15 @@
-alias AppAnimal.Cluster
+alias AppAnimal.{Cluster,System}
 
 defmodule Cluster.CalcTest do
   use ExUnit.Case, async: true
   alias Cluster.Calc
+  alias System.Pulse
 
   describe "handling of within-process calculation: arity 1 functions" do 
     test "an arity-one function does not get nor change the state" do
       f = fn x -> x+1 end
-      assert Calc.run(f, on: 1, with_state: "unchanged") == {:pulse, 2, "unchanged"}
+      actual = Calc.run(f, on: Pulse.new(1), with_state: "unchanged")
+      assert actual == {:pulse, Pulse.new(2), "unchanged"}
     end
 
     test "an arity-one function *may* return `:no_pulse`" do
@@ -22,7 +24,7 @@ defmodule Cluster.CalcTest do
         {:pulse, pulse_data+1, [pulse_data | state] }
       end
       
-      assert Calc.run(f, on: 1, with_state: []) == {:pulse, 2, [1]}
+      assert Calc.run(f, on: Pulse.new(1), with_state: []) == {:pulse, Pulse.new(2), [1]}
     end
     
     test "it may also return a :no_pulse and a next state" do
@@ -42,7 +44,7 @@ defmodule Cluster.CalcTest do
         pulse_data + state + 3
       end
       
-      assert Calc.run(f, on: 1, with_state: 2) == {:pulse, 6, 2}
+      assert Calc.run(f, on: Pulse.new(1), with_state: 2) == {:pulse, Pulse.new(6), 2}
     end
   end
   
@@ -50,7 +52,7 @@ defmodule Cluster.CalcTest do
     test "a plain return turns into a :pulse tuple" do
       f = fn _ -> {:some_random, :tuple} end
 
-      assert Calc.run(f, on: 1) == {:pulse, {:some_random, :tuple}}
+      assert Calc.run(f, on: Pulse.new(1)) == {:pulse, Pulse.new({:some_random, :tuple})}
     end
 
     test "a plain :no_pulse turns into a singleton tuple" do

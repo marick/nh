@@ -21,8 +21,13 @@ defmodule ClusterCase do
   """
   def to_test(name \\ :endpoint) do
     p_test = self()
-    f_send_to_test = fn pulse_data ->
-      send(p_test, [pulse_data, from: name])
+    f_send_to_test =
+      fn
+        %Pulse{} = pulse ->
+          send(p_test, [pulse.data, from: name])
+        pulse_data -> 
+          send(p_test, [pulse_data, from: name])
+        
     end
       
     %Cluster{name: name,
