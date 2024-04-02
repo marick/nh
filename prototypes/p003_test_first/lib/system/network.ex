@@ -1,4 +1,5 @@
-alias AppAnimal.System.Network
+alias AppAnimal.System
+alias System.Network
 
 defmodule Network do
   @moduledoc """
@@ -20,6 +21,7 @@ defmodule Network do
   alias Network.Throb
   use AppAnimal
   use TypedStruct
+  alias System.Pulse
 
   typedstruct do
     plugin TypedStructLens, prefix: :l_
@@ -63,8 +65,10 @@ defmodule Network do
 
   Yeah, this naming is not great.  
   """
-  def deliver_pulse(network, names, pulse_data) do
+  def deliver_pulse(network, names, %Pulse{} = pulse) do
     alias Cluster.Shape
+
+    pulse_data = pulse.data
     
     all_throbbing = Throb.start_throbbing(network, names)
     for name <- names do
@@ -79,6 +83,11 @@ defmodule Network do
     end
     all_throbbing
   end
+
+  def deliver_pulse(network, names, pulse_data) do
+    deliver_pulse(network, names, Pulse.new(pulse_data))
+  end
+  
 
   private do 
     def send_pulse_into_genserver(pid, pulse_data) do

@@ -41,14 +41,16 @@ defmodule System.AffordanceLand do
     end
 
     def handle_cast([:produce_this_affordance, {name, %Pulse{} = pulse}], s_affordances) do
-      handle_cast([:produce_this_affordance, {name, pulse.data}], s_affordances)
-    end
-
-    def handle_cast([:produce_this_affordance, {name, data}], s_affordances) do
       Switchboard.cast__distribute_pulse(s_affordances.p_switchboard,
-                                         carrying: data, to: [name])
+                                         carrying: pulse, to: [name])
       continue(s_affordances)
     end
+
+    def handle_cast([:produce_this_affordance, {name, pulse_data}], s_affordances) do
+      handle_cast([:produce_this_affordance, {name, Pulse.new(pulse_data)}], s_affordances)
+    end
+
+    
 
     def handle_cast([script: responses], s_affordances) do
       s_affordances

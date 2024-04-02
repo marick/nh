@@ -131,31 +131,26 @@ defmodule System.Switchboard do
     @impl GenServer
     def handle_cast({:distribute_pulse, carrying: %Pulse{} = pulse, from: source_name},
                     s_switchboard) do
-      handle_cast({:distribute_pulse, carrying: pulse.data, from: source_name}, s_switchboard)
+      source = deeply_get_only(s_switchboard, l_cluster_named(source_name))
+      destination_names = source.downstream
+      ActivityLogger.log_pulse_sent(s_switchboard.p_logger, source.label,
+                                    source.name, pulse.data)
+      handle_cast({:distribute_pulse, carrying: pulse, to: destination_names},
+                  s_switchboard)
     end
 
     def handle_cast({:distribute_pulse, carrying: pulse_data, from: source_name},
                     s_switchboard) do
-      source = deeply_get_only(s_switchboard, l_cluster_named(source_name))
-      destination_names = source.downstream
-      ActivityLogger.log_pulse_sent(s_switchboard.p_logger, source.label,
-                                    source.name, pulse_data)
-      handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names},
-                  s_switchboard)
+      handle_cast({:distribute_pulse, carrying: Pulse.new(pulse_data), from: source_name}, s_switchboard)
     end
 
     def handle_cast({:distribute_pulse, carrying: %Pulse{} = pulse, to: destination_names},
                     s_switchboard) do
-      handle_cast({:distribute_pulse, carrying: pulse.data, to: destination_names}, s_switchboard)
-    end
-    
-    def handle_cast({:distribute_pulse, carrying: pulse_data, to: destination_names},
-                    s_switchboard) do
       s_switchboard
-      |> within_network(& Network.deliver_pulse(&1, destination_names, pulse_data))
+      |> within_network(& Network.deliver_pulse(&1, destination_names, pulse))
       |> continue
     end
-
+    
     @impl GenServer
     def handle_info(:time_to_throb, s_switchboard) do
       Network.Throb.time_to_throb(s_switchboard.network)
