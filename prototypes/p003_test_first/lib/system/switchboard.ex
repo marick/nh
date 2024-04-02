@@ -121,11 +121,10 @@ defmodule System.Switchboard do
       |> continue(returning: :ok)
     end
 
-    # MUST CHANGE
-    def handle_call([forward: pulse_data, to: circular_cluster_name],
+    def handle_call([forward: getter_name, to: circular_cluster_name],
                     _from, s_switchboard) do
       pid = deeply_get_only(s_switchboard.network, Network.l_pid_named(circular_cluster_name))
-      result = GenServer.call(pid, pulse_data)
+      result = GenServer.call(pid, getter_name)
       continue(s_switchboard, returning: result)
     end
     
