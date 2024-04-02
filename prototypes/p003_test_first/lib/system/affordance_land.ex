@@ -45,9 +45,9 @@ defmodule System.AffordanceLand do
       {:ok, struct(__MODULE__, opts)}
     end
 
-    def handle_cast([:produce_this_affordance, {name, %Pulse{} = pulse}], s_affordances) do
+    def handle_cast([:produce_this_affordance, {name, pulse_data}], s_affordances) do
       Switchboard.cast__distribute_pulse(s_affordances.p_switchboard,
-                                         carrying: pulse, to: [name])
+                                         carrying: Pulse.new(pulse_data), to: [name])
       continue(s_affordances)
     end
 
@@ -57,8 +57,6 @@ defmodule System.AffordanceLand do
       |> continue()
     end
 
-    # --
-    
     def handle_cast([:take_action, [{name, data}]], s_affordances) do
       {responses, remaining_programmed_responses} =
         Keyword.pop_first(s_affordances.programmed_responses, name)
@@ -68,7 +66,7 @@ defmodule System.AffordanceLand do
       
       ActivityLogger.log_action_received(s_affordances.p_logger, name, data)
       for {cluster_name, pulse_data} <- responses do
-        handle_cast([:produce_this_affordance, {cluster_name, Pulse.new(pulse_data)}],
+        handle_cast([:produce_this_affordance, {cluster_name, pulse_data}],
                     s_affordances)
       end
       
@@ -76,7 +74,6 @@ defmodule System.AffordanceLand do
       |> continue()
     end
 
-    
     
     private do
       def append_programmed_responses(keywords, new) do
