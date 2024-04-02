@@ -16,7 +16,7 @@ defmodule OutgoingLogic do
      around separately from the function that sends to it.
   """
 
-  alias AppAnimal.System.{Switchboard, AffordanceLand}
+  alias AppAnimal.System.{Switchboard, AffordanceLand, Pulse}
 
   def mkfn_pulse_direction(Switchboard, name) do
     f_pid_taker = 
@@ -31,7 +31,11 @@ defmodule OutgoingLogic do
   def mkfn_pulse_direction(AffordanceLand) do
     f_pid_taker = 
       fn pid ->
-        fn pulse_data ->
+        fn %Pulse{data: pulse_data} ->
+          # Pulses into affordance land are not wrapped in Pulses.
+          # The idea is that Affordance Land shouldn't be talked about in terms
+          # of neural pulses. Alternately, the pulse is received by motor neurons
+          # that converts it into actions.
           GenServer.cast(pid, [:take_action, pulse_data])
         end
       end

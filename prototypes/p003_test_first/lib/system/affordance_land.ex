@@ -66,23 +66,6 @@ defmodule System.AffordanceLand do
 
     # --
     
-    # MUST DELETE
-    def handle_cast([:take_action, %Pulse{data: [{name, data}]}], s_affordances) do
-      {responses, remaining_programmed_responses} =
-        Keyword.pop_first(s_affordances.programmed_responses, name)
-      
-      if responses == nil,
-         do: IO.puts("==== SAY, there is no programmed response for #{name}. Test error.")
-      
-      ActivityLogger.log_action_received(s_affordances.p_logger, name, data)
-      for response <- responses do
-        handle_cast([:produce_this_affordance, response], s_affordances)
-      end
-      
-      %{s_affordances | programmed_responses: remaining_programmed_responses}
-      |> continue()
-    end
-
     def handle_cast([:take_action, [{name, data}]], s_affordances) do
       {responses, remaining_programmed_responses} =
         Keyword.pop_first(s_affordances.programmed_responses, name)
