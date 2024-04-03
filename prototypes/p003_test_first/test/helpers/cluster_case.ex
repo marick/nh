@@ -9,7 +9,38 @@ defmodule ClusterCase do
   alias Cluster.Shape
   alias ExUnit.Assertions
 
-  # About the network
+  # How the test starts things off
+
+  @doc """
+  Send the pulse from the test as if it came from a network cluster.
+
+  You can also use this to send a pulse to a PerceptionEdge as if it
+  came from AffordanceLand, though `produce_affordance` is preferable
+  because it actually involves `AffordanceLand` code.
+
+  Example:
+      send_test_pulse(p_switchboard, to: :first, carrying: 1)
+  """
+  def send_test_pulse(p_switchboard, to: destination_name, carrying: pulse_data) do
+    pulse = Pulse.new(pulse_data)
+    Switchboard.cast__distribute_pulse(p_switchboard,
+                                       carrying: pulse,
+                                       to: [destination_name])
+  end
+
+  @doc """
+  Cause `AffordanceLand` to send a pulse to the given `PerceptionEdge`.
+  
+  Example:
+      produce_affordance(p_affordances, for: cluster_name, carrying: data)
+  """
+
+  def produce_affordance(p_affordances, [{name, data}]) do
+    pulse = Pulse.new(data)
+    AffordanceLand.cast__produce_affordance(p_affordances, [{name, pulse}])
+  end
+  
+
 
   @doc """
   Create a pseudo-cluster that will relay a pulse to the current test.
@@ -22,13 +53,9 @@ defmodule ClusterCase do
   def to_test(name \\ :endpoint) do
     p_test = self()
     f_send_to_test =
-      fn
-        %Pulse{} = pulse ->
-          send(p_test, [pulse.data, from: name])
-        pulse_data -> 
-          send(p_test, [pulse_data, from: name])
-        
-    end
+      fn %Pulse{} = pulse ->
+        send(p_test, [pulse.data, from: name])
+      end
       
     %Cluster{name: name,
              label: :test_endpoint,
@@ -45,19 +72,6 @@ defmodule ClusterCase do
     end
   end
 
-  @doc "Send the pulse from the test as if it came from a network cluster."
-  def send_test_pulse(p_switchboard, to: destination_name, carrying: pulse_data) do
-    pulse = Pulse.new(pulse_data)
-    Switchboard.cast__distribute_pulse(p_switchboard,
-                                       carrying: pulse,
-                                       to: [destination_name])
-  end
-
-  def produce_affordance(p_affordances, [{name, data}]) do
-    pulse = Pulse.new(data)
-    AffordanceLand.cast__produce_affordance(p_affordances, [{name, pulse}])
-  end
-  
   @doc """
   Script AffordanceLand to respond to a given action with a given affordance+data.
 

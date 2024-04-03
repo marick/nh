@@ -44,3 +44,16 @@ or a bad idea that's a habit. Given that I don't have a refactoring
 IDE, it makes my ever-present name changes slightly less annoying and
 less of a sprawling commit.
 
+### The System.Pulse structure
+
+The Switchboard and the individual clusters communicate with
+`System.Pulse` structures. For convenience, the test support functions
+in `ClusterCase` create and decode those structures so that tests can
+be written in terms of raw data. There are (will be) exceptions in the
+case of Pulses of non-`normal` type.
+
+When it comes to Affordance Land:
+
+* actions sent *into* it from ActionEdges are not wrapped in `Pulse`.
+* actions sent *from* it to PerceptionEdges *are* wrapped in a `Pulse`.
+
