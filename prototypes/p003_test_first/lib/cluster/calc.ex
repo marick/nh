@@ -54,14 +54,6 @@ defmodule Calc do
     end
   end
 
-  # MUST DELETE
-  def run(calc, on: pulse_data, with_state: previously) when is_function(calc, 1) do
-    run(calc, on: Pulse.new(pulse_data), with_state: previously)
-  end
-
-
-  # --- 
-
   def run(calc, on: %Pulse{} = pulse, with_state: previously) when is_function(calc, 2) do
     case calc.(pulse.data, previously) do
       {:pulse, pulse_data, next_previously} ->

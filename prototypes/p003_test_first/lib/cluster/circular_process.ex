@@ -18,6 +18,7 @@ defmodule CircularProcess.State do
   typedstruct do
     plugin TypedStructLens, prefix: :l_
 
+    field :name, atom, required: true   # This is useful for debugging
     field :throb, Cluster.Throb.t
     field :calc, fun
     field :f_outward, fun
@@ -25,7 +26,8 @@ defmodule CircularProcess.State do
   end
     
   def from_cluster(s_cluster) do
-    %__MODULE__{calc: s_cluster.calc,
+    %__MODULE__{name: s_cluster.name,
+                calc: s_cluster.calc,
                 f_outward: s_cluster.f_outward,
                 throb: s_cluster.shape.throb,
                 previously: s_cluster.shape.initial_value

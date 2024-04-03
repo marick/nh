@@ -68,37 +68,30 @@ defmodule Network do
   def deliver_pulse(network, names, %Pulse{} = pulse) do
     alias Cluster.Shape
 
-    pulse_data = pulse.data
-    
     all_throbbing = Throb.start_throbbing(network, names)
     for name <- names do
       cluster = all_throbbing.clusters_by_name[name]
       case cluster.shape do
         %Shape.Circular{} ->
           p_process = all_throbbing.throbbers_by_name[name]
-          send_pulse_into_genserver(p_process, pulse_data)
+          send_pulse_into_genserver(p_process, pulse)
         %Shape.Linear{} ->
-          send_pulse_into_task(cluster, pulse_data)
+          send_pulse_into_task(cluster, pulse)
       end
     end
     all_throbbing
   end
 
-  def deliver_pulse(network, names, pulse_data) do
-    deliver_pulse(network, names, Pulse.new(pulse_data))
-  end
-  
-
   private do 
-    def send_pulse_into_genserver(pid, pulse_data) do
-      GenServer.cast(pid, [handle_pulse: pulse_data])
+    def send_pulse_into_genserver(pid, %Pulse{} = pulse) do
+      GenServer.cast(pid, [handle_pulse: pulse])
     end
     
-    def send_pulse_into_task(s_cluster, pulse_data) do
+    def send_pulse_into_task(s_cluster, pulse) do
       alias Cluster.Calc
       
       Task.start(fn ->
-        Calc.run(s_cluster.calc, on: pulse_data)
+        Calc.run(s_cluster.calc, on: pulse.data)
         |> Calc.maybe_pulse(& Cluster.start_pulse_on_its_way(s_cluster, &1))
         :there_is_no_return_value
       end)

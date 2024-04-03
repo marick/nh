@@ -14,7 +14,7 @@ defmodule Cluster.CalcTest do
 
     test "an arity-one function *may* return `:no_pulse`" do
       f = fn _ -> :no_pulse end
-      assert Calc.run(f, on: 1, with_state: "unchanged") == {:no_pulse, "unchanged"}
+      assert Calc.run(f, on: Pulse.new(1), with_state: "unchanged") == {:no_pulse, "unchanged"}
     end
   end
 
@@ -30,13 +30,13 @@ defmodule Cluster.CalcTest do
     test "it may also return a :no_pulse and a next state" do
       f = fn _, _ -> {:no_pulse, "next state"} end
       
-      assert Calc.run(f, on: 1, with_state: 2) == {:no_pulse, "next state"}
+      assert Calc.run(f, on: Pulse.new(1), with_state: 2) == {:no_pulse, "next state"}
     end
     
     test "or just a plain :no_pulse" do
       f = fn _, _ -> :no_pulse end
       
-      assert Calc.run(f, on: 1, with_state: "unchanged") == {:no_pulse, "unchanged"}
+      assert Calc.run(f, on: Pulse.new(1), with_state: "unchanged") == {:no_pulse, "unchanged"}
     end
     
     test "without one of the two magic atoms returned, it's interpreted as the pulse value" do
@@ -58,7 +58,7 @@ defmodule Cluster.CalcTest do
     test "a plain :no_pulse turns into a singleton tuple" do
       f = fn _ -> :no_pulse end
 
-      assert Calc.run(f, on: 1) == {:no_pulse}
+      assert Calc.run(f, on: Pulse.new(1)) == {:no_pulse}
     end
   end
 
