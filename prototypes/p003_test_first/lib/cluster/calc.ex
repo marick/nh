@@ -67,12 +67,6 @@ defmodule Calc do
     end
   end
 
-  # MUST DELETE
-  def run(calc, on: pulse_data, with_state: previously) when is_function(calc, 2) do
-    run(calc, on: Pulse.new(pulse_data), with_state: previously)
-  end  
-
-  # ---
   def run(calc, on: %Pulse{} = pulse) do
     case calc.(pulse.data) do
       :no_pulse ->
@@ -82,11 +76,6 @@ defmodule Calc do
     end
   end
 
-  # MUST DELETE
-  def run(calc, on: pulse_data) do
-    run(calc, on: Pulse.new(pulse_data))
-  end
-  
   #
 
   @doc "Use `f_send_pulse` to send pulse data iff the `tuple` argument so indicates."

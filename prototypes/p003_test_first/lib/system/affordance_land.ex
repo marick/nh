@@ -63,7 +63,7 @@ defmodule System.AffordanceLand do
       
       if responses == nil,
          do: IO.puts("==== SAY, there is no programmed response for #{name}. Test error.")
-      
+
       ActivityLogger.log_action_received(s_affordances.p_logger, name, data)
       for {cluster_name, pulse_data} <- responses do
         handle_cast([:produce_this_affordance, {cluster_name, pulse_data}],
