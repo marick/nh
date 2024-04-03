@@ -30,30 +30,37 @@ defmodule Network do
     field :throbbers_by_name, %{atom => pid}, default: %{}
   end
 
+  @doc false
   deflens l_clusters,
           do: l_clusters_by_name() |> Lens.map_values()
   
+  @doc false
   deflens l_cluster_named(name),
           do: l_clusters_by_name() |> Lens.key!(name)
 
+  @doc false
   deflens l_pid_named(name),
           do: l_throbbers_by_name() |> Lens.key!(name)
 
+  @doc false
   deflens l_downstream_of(name),
           do: l_cluster_named(name) |> Lens.key!(:downstream)
 
+  @doc false
   deflens l_irrelevant_names,
           do: l_clusters() |> Cluster.l_never_throbs |> Lens.key!(:name)
 
-  def new(cluster_map_or_keyword) do
-    %__MODULE__{clusters_by_name: cluster_map_or_keyword |> Enum.into(%{})}
+  
+  def new(cluster_map_or_keywords) do
+    %__MODULE__{clusters_by_name: cluster_map_or_keywords |> Enum.into(%{})}
   end
 
   @doc """
-
   Send a pulse to a mixture of "throbbing" and linear
-  clusters. Throbbing clusters are what are elsewhere called
-  "circular" clusters, just to emphasize that they receive timer
+  clusters.
+
+  Throbbing clusters are what are elsewhere called "circular"
+  clusters, here called that to emphasize that they receive timer
   pulses. (Possibly a bad naming.)
 
   A linear cluster is always ready to asynchronously accept a pulse

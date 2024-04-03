@@ -42,7 +42,6 @@ defmodule System.Switchboard do
     def start_link(%__MODULE__{} = s_switchboard),
         do: GenServer.start_link(__MODULE__, s_switchboard)
 
-
     @doc """
     Connect each cluster to whichever system process handles its outgoing messages.
 
@@ -72,13 +71,13 @@ defmodule System.Switchboard do
     
     """
     def cast__distribute_pulse(p_switchboard, one_of_two_keyword_lists)
-    def cast__distribute_pulse(p_switchboard, carrying: pulse_data, from: source_name),
+    def cast__distribute_pulse(p_switchboard, carrying: %Pulse{} = pulse, from: source_name),
         do: GenServer.cast(p_switchboard,
-                           {:distribute_pulse, carrying: pulse_data, from: source_name})
+                           {:distribute_pulse, carrying: pulse, from: source_name})
 
-    def cast__distribute_pulse(p_switchboard, carrying: pulse_data, to: destination_names),
+    def cast__distribute_pulse(p_switchboard, carrying: %Pulse{} = pulse, to: destination_names),
         do: GenServer.cast(p_switchboard,
-                           {:distribute_pulse, carrying: pulse_data, to: destination_names})
+                           {:distribute_pulse, carrying: pulse, to: destination_names})
 
     @doc """
     Document the `handle_info` that throbs all active processes.
@@ -121,6 +120,7 @@ defmodule System.Switchboard do
       |> continue(returning: :ok)
     end
 
+    # This is used for testing as a way to get internal values of clusters.
     def handle_call([forward: getter_name, to: circular_cluster_name],
                     _from, s_switchboard) do
       pid = deeply_get_only(s_switchboard.network, Network.l_pid_named(circular_cluster_name))

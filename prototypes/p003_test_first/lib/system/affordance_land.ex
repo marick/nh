@@ -33,7 +33,9 @@ defmodule System.AffordanceLand do
     end
 
     @doc """
-    Given a name/data pair, send that affordance into the network.
+    Given a name/pulse pair, send that affordance to the given name.
+
+    Affordances have the same name as the PerceptionEdge that receives them. 
     """
     def cast__produce_spontaneous_affordance(p_affordances, named: name, pulse: pulse),
         do: GenServer.cast(p_affordances, {:produce_this_affordance, name, pulse})
