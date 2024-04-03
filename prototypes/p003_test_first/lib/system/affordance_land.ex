@@ -35,8 +35,8 @@ defmodule System.AffordanceLand do
     @doc """
     Given a name/data pair, send that affordance into the network.
     """
-    def cast__produce_affordance(p_affordances, [{name, data}]),
-        do: GenServer.cast(p_affordances, [:produce_this_affordance, {name, data}])
+    def cast__produce_spontaneous_affordance(p_affordances, named: name, pulse: pulse),
+        do: GenServer.cast(p_affordances, {:produce_this_affordance, name, pulse})
     
   end
 
@@ -45,9 +45,11 @@ defmodule System.AffordanceLand do
       {:ok, struct(__MODULE__, opts)}
     end
 
-    def handle_cast([:produce_this_affordance, {name, pulse_data}], s_affordances) do
+    def handle_cast({:produce_this_affordance, affordance_name, %Pulse{} = pulse},
+                    s_affordances) do
+      cluster_name = affordance_name # this is for documentation
       Switchboard.cast__distribute_pulse(s_affordances.p_switchboard,
-                                         carrying: Pulse.new(pulse_data), to: [name])
+                                         carrying: pulse, to: [cluster_name])
       continue(s_affordances)
     end
 
@@ -66,7 +68,8 @@ defmodule System.AffordanceLand do
 
       ActivityLogger.log_action_received(s_affordances.p_logger, name, data)
       for {cluster_name, pulse_data} <- responses do
-        handle_cast([:produce_this_affordance, {cluster_name, pulse_data}],
+        pulse = Pulse.new(pulse_data)
+        handle_cast({:produce_this_affordance, cluster_name, pulse},
                     s_affordances)
       end
       

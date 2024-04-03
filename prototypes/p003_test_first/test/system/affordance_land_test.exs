@@ -1,12 +1,14 @@
 defmodule AppAnimal.System.AffordanceLandTest do
   use ClusterCase, async: true
   alias System.AffordanceLand, as: UT
+  alias System.Pulse
 
   def given(trace_or_network), do: AppAnimal.affordances(trace_or_network)
 
   test "a 'self-generated' affordance" do
     given([perception_edge(:big_paragraph_change), to_test()])
-    |> UT.cast__produce_affordance(big_paragraph_change: :no_data)
+    |> UT.cast__produce_spontaneous_affordance(named: :big_paragraph_change, 
+                                               pulse: Pulse.new(:no_data))
 
     assert_test_receives(:no_data)
   end

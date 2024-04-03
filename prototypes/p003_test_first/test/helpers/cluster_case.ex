@@ -15,7 +15,7 @@ defmodule ClusterCase do
   Send the pulse from the test as if it came from a network cluster.
 
   You can also use this to send a pulse to a PerceptionEdge as if it
-  came from AffordanceLand, though `produce_affordance` is preferable
+  came from AffordanceLand, though `spontaneous_affordance` is preferable
   because it actually involves `AffordanceLand` code.
 
   Example:
@@ -32,14 +32,23 @@ defmodule ClusterCase do
   Cause `AffordanceLand` to send a pulse to the given `PerceptionEdge`.
   
   Example:
-      produce_affordance(p_affordances, for: cluster_name, carrying: data)
+      spontaneous_affordance(p_affordances, named: affordance_name, carrying: data)
+
+  The affordance will be delivered to the cluster with the same name as the affordance,
+  with the given data wrapped in a `Pulse`. The `carrying` argument may be omitted,
+  in which case some innocuous, to-be-ignored data is sent.
   """
 
-  def produce_affordance(p_affordances, [{name, data}]) do
-    pulse = Pulse.new(data)
-    AffordanceLand.cast__produce_affordance(p_affordances, [{name, pulse}])
+  def spontaneous_affordance(p_affordances, named: name),
+      do: spontaneous_affordance(p_affordances, named: name, carrying: :no_pulse_data)
+
+  def spontaneous_affordance(p_affordances, named: name, carrying: pulse_data) do
+    pulse = Pulse.new(pulse_data)
+    AffordanceLand.cast__produce_spontaneous_affordance(p_affordances,
+                                                        named: name,
+                                                        pulse: pulse)
   end
-  
+
 
 
   @doc """

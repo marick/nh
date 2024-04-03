@@ -57,3 +57,17 @@ When it comes to Affordance Land:
 * actions sent *into* it from ActionEdges are not wrapped in `Pulse`.
 * actions sent *from* it to PerceptionEdges *are* wrapped in a `Pulse`.
 
+### Affordances and their names
+
+An affordance has a name, which is the same as the name of the
+`PerceptionEdge` that receives it. The name is used to hook the two
+together. That is, whereas cluster-to-cluster communication happens by:
+
+1. starting at the sending cluster,
+2. looking up the "downstream" clusters, and
+3. sending the same Pulse to each of them.
+
+... Affordance Land to cluster communication happens by sending a
+pulse to the cluster with the same name as the affordance.
+
+
