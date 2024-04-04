@@ -100,13 +100,37 @@ defmodule Cluster.CalcTest do
       assert Calc.run(f, on: Pulse.new(1)) == {:pulse, Pulse.new({:some_random, :tuple})}
     end
 
+    test "can take a special pulse" do
+      f = fn %Pulse{type: :special} = pulse -> {:tuple, pulse.data} end
+
+      result = Calc.run(f, on: Pulse.new(:special, 1))
+      assert result == {:pulse, Pulse.new({:tuple, 1})}
+    end
+
+    test "can return a special or an explicit :default pulse" do
+      f = fn
+        %Pulse{type: :special} = pulse -> {:tuple, pulse.data}
+        %Pulse{type: :return_default} = pulse -> Pulse.new(pulse.data + 1) 
+        arg -> Pulse.new(:upgrade, arg * arg)
+      end
+
+      result = Calc.run(f, on: Pulse.new(:special, 1))
+      assert result == {:pulse, Pulse.new({:tuple, 1})}
+
+      result = Calc.run(f, on: Pulse.new(:return_default, 1))
+      assert result == {:pulse, Pulse.new(2)}
+
+      result = Calc.run(f, on: Pulse.new(20))
+      assert result == {:pulse, Pulse.new(:upgrade, 400)}
+    end
+ 
     test "a plain :no_pulse turns into a singleton tuple" do
       f = fn _ -> :no_pulse end
-
+      
       assert Calc.run(f, on: Pulse.new(1)) == {:no_pulse}
     end
   end
-
+  
   test "maybe_pulse" do
     Calc.maybe_pulse({:no_pulse}, & Process.exit(self(), {:crash, &1}))
     Calc.maybe_pulse({:no_pulse, :state}, & Process.exit(self(), {:crash, &1}))

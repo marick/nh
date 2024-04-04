@@ -65,16 +65,12 @@ defmodule Calc do
       do: run_2(calc, on: pulse, with_state: previously)
 
 
+  def run(calc, on: %Pulse{type: :default} = pulse),
+      do: run_nostate(calc, on: pulse.data)
   
-  def run(calc, on: %Pulse{} = pulse) do
-    case calc.(pulse.data) do
-      :no_pulse ->
-        {:no_pulse}
-      singleton_result ->
-        {:pulse, Pulse.new(singleton_result)}
-    end
-  end
-
+  def run(calc, on: %Pulse{} = pulse),
+      do: run_nostate(calc, on: pulse)
+  
   private do
     def run_1(calc, on: argument, with_state: previously) do
       case calc.(argument) do 
@@ -87,7 +83,7 @@ defmodule Calc do
       end
     end
 
-    def run_2(calc, on: argument, with_state: previously) when is_function(calc, 2) do
+    def run_2(calc, on: argument, with_state: previously) do
       case calc.(argument, previously) do
         {:pulse, %Pulse{} = result, next_previously} ->
           {:pulse, result, next_previously}
@@ -101,9 +97,21 @@ defmodule Calc do
           {:pulse, Pulse.new(singleton_result), previously}
       end
     end
+
+    def run_nostate(calc, on: argument) do
+      case calc.(argument) do
+        :no_pulse ->
+          {:no_pulse}
+        %Pulse{} = pulse ->
+          {:pulse, pulse}
+        singleton_result ->
+          {:pulse, Pulse.new(singleton_result)}
+      end
+    end
+
   end
 
-  #
+  ####
 
   @doc "Use `f_send_pulse` to send pulse data iff the `tuple` argument so indicates."
   def maybe_pulse(tuple, f_send_pulse) when is_tuple(tuple) do
