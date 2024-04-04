@@ -16,6 +16,33 @@ defmodule Cluster.CalcTest do
       f = fn _ -> :no_pulse end
       assert Calc.run(f, on: Pulse.new(1), with_state: "unchanged") == {:no_pulse, "unchanged"}
     end
+
+    test "a non-default pulse gets passed whole to the calc function" do
+      # a plain value returned produces a :default pulse.
+      f = fn
+        %Pulse{type: :special, data: data} ->
+          data <> data
+        default_data ->
+          default_data + 1
+      end
+
+      special_to_default = Calc.run(f, on: Pulse.new(:special, "data"), with_state: "unchanged")
+      assert special_to_default == {:pulse, Pulse.new("datadata"), "unchanged"}
+
+      # Note that the function is dual-purpsose
+      default_to_default = Calc.run(f, on: Pulse.new(5), with_state: "unchanged")
+      assert default_to_default == {:pulse, Pulse.new(6), "unchanged"}
+    end
+
+    test "a non-default pulse may also be the return value" do
+      f = fn
+        %Pulse{type: :special, data: data} ->
+          Pulse.new(:special_return, data <> data)
+      end
+
+      special_to_default = Calc.run(f, on: Pulse.new(:special, "data"), with_state: "unchanged")
+      assert special_to_default == {:pulse, Pulse.new(:special_return, "datadata"), "unchanged"}
+    end
   end
 
   describe "within-process calculation: arity 2 functions" do

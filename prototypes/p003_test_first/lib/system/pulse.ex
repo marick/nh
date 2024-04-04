@@ -10,7 +10,7 @@ defmodule System.Pulse do
     field :data, any,  required: true
   end
 
-  def new(pulse_data) do
-    %__MODULE__{data: pulse_data}
-  end
+  def new(pulse_data), do: %__MODULE__{data: pulse_data}
+
+  def new(type, pulse_data), do: %__MODULE__{type: type, data: pulse_data}
 end

@@ -43,16 +43,17 @@ defmodule Calc do
   any other value        - the value is sent in a pulse, but the state is left unchanged.        
 
   """
+  use AppAnimal
   alias System.Pulse
-  
-  def run(calc, on: %Pulse{} = pulse, with_state: previously) when is_function(calc, 1) do
-    case calc.(pulse.data) do 
-      :no_pulse ->
-        {:no_pulse, previously}
-      result -> 
-        {:pulse, Pulse.new(result), previously}
-    end
-  end
+
+
+  def run(calc, on: %Pulse{type: :default} = pulse,
+                with_state: previously) when is_function(calc, 1),
+      do: run_1(calc, on: pulse.data, with_state: previously)
+
+  def run(calc, on: %Pulse{} = pulse,
+                with_state: previously) when is_function(calc, 1),
+      do: run_1(calc, on: pulse, with_state: previously)
 
   def run(calc, on: %Pulse{} = pulse, with_state: previously) when is_function(calc, 2) do
     case calc.(pulse.data, previously) do
@@ -73,6 +74,19 @@ defmodule Calc do
         {:no_pulse}
       singleton_result ->
         {:pulse, Pulse.new(singleton_result)}
+    end
+  end
+
+  private do
+    defp run_1(calc, on: argument, with_state: previously) do
+      case calc.(argument) do 
+        :no_pulse ->
+          {:no_pulse, previously}
+        %Pulse{} = pulse ->
+          {:pulse, pulse, previously}
+        result -> 
+          {:pulse, Pulse.new(result), previously}
+      end
     end
   end
 
