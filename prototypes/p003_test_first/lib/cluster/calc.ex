@@ -48,26 +48,24 @@ defmodule Calc do
 
 
   def run(calc, on: %Pulse{type: :default} = pulse,
-                with_state: previously) when is_function(calc, 1),
+                with_state: previously)                         when is_function(calc, 1),
       do: run_1(calc, on: pulse.data, with_state: previously)
 
   def run(calc, on: %Pulse{} = pulse,
-                with_state: previously) when is_function(calc, 1),
+                with_state: previously)                         when is_function(calc, 1),
       do: run_1(calc, on: pulse, with_state: previously)
 
-  def run(calc, on: %Pulse{} = pulse, with_state: previously) when is_function(calc, 2) do
-    case calc.(pulse.data, previously) do
-      {:pulse, pulse_data, next_previously} ->
-        {:pulse, Pulse.new(pulse_data), next_previously}
-      {:no_pulse, _next_previously} = verbatim ->
-        verbatim
-      :no_pulse ->
-        {:no_pulse, previously}
-      singleton_result ->
-        {:pulse, Pulse.new(singleton_result), previously}
-    end
-  end
+  
+  def run(calc, on: %Pulse{type: :default} = pulse,
+                with_state: previously)                         when is_function(calc, 2),
+      do: run_2(calc, on: pulse.data, with_state: previously)
 
+  def run(calc, on: %Pulse{} = pulse,
+                with_state: previously)                         when is_function(calc, 2),
+      do: run_2(calc, on: pulse, with_state: previously)
+
+
+  
   def run(calc, on: %Pulse{} = pulse) do
     case calc.(pulse.data) do
       :no_pulse ->
@@ -78,7 +76,7 @@ defmodule Calc do
   end
 
   private do
-    defp run_1(calc, on: argument, with_state: previously) do
+    def run_1(calc, on: argument, with_state: previously) do
       case calc.(argument) do 
         :no_pulse ->
           {:no_pulse, previously}
@@ -86,6 +84,21 @@ defmodule Calc do
           {:pulse, pulse, previously}
         result -> 
           {:pulse, Pulse.new(result), previously}
+      end
+    end
+
+    def run_2(calc, on: argument, with_state: previously) when is_function(calc, 2) do
+      case calc.(argument, previously) do
+        {:pulse, %Pulse{} = result, next_previously} ->
+          {:pulse, result, next_previously}
+        {:pulse, result, next_previously} ->
+          {:pulse, Pulse.new(result), next_previously}
+        {:no_pulse, _next_previously} = verbatim ->
+          verbatim
+        :no_pulse ->
+          {:no_pulse, previously}
+        singleton_result ->
+          {:pulse, Pulse.new(singleton_result), previously}
       end
     end
   end

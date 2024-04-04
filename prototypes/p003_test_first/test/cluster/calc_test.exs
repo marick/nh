@@ -54,7 +54,25 @@ defmodule Cluster.CalcTest do
       assert Calc.run(f, on: Pulse.new(1), with_state: []) == {:pulse, Pulse.new(2), [1]}
     end
     
-    test "it may also return a :no_pulse and a next state" do
+    test "a non-default pulse type takes the whole pulse argument" do
+      f = fn %Pulse{type: :special, data:  pulse_data}, state ->
+        {:pulse, pulse_data+1, [pulse_data | state] }
+      end
+
+      actual = Calc.run(f, on: Pulse.new(:special, 1), with_state: [])
+      assert actual == {:pulse, Pulse.new(2), [1]}
+    end
+    
+    test "a pulse return value is passed verbatim" do
+      f = fn %Pulse{type: :special, data:  pulse_data}, state ->
+        {:pulse, Pulse.new(:different, pulse_data+1), [pulse_data | state] }
+      end
+
+      actual = Calc.run(f, on: Pulse.new(:special, 1), with_state: [])
+      assert actual == {:pulse, Pulse.new(:different, 2), [1]}
+    end
+    
+    test "function may also return a :no_pulse and a next state" do
       f = fn _, _ -> {:no_pulse, "next state"} end
       
       assert Calc.run(f, on: Pulse.new(1), with_state: 2) == {:no_pulse, "next state"}
