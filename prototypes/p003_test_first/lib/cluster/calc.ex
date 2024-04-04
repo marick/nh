@@ -46,68 +46,54 @@ defmodule Calc do
   use AppAnimal
   alias System.Pulse
 
-  def run(calc, on: %Pulse{} = pulse, with_state: previously) do
-    which_handler =
-      case arity(calc) do
-        1 -> :run_without_changing_state
-        2 -> :run_perhaps_changing_state
-      end
-        
-    arg = pulse_or_pulse_data(pulse)
-    run_with_given_result_handler(which_handler,      [calc, arg, previously])
+  def run(calc, on: %Pulse{} = pulse, with_state: previously) when is_function(calc, 1) do
+    pulse_or_pulse_data(pulse)
+    |> calc.()
+    |> assemble_result(previously,    :state_does_not_change)
   end
-  
-  def run(calc, on: %Pulse{} = pulse) do
-    arg = pulse_or_pulse_data(pulse)
-    run_with_given_result_handler(:run_task_function, [calc, arg])
+
+  def run(calc, on: %Pulse{} = pulse, with_state: previously) when is_function(calc, 2) do
+    pulse_or_pulse_data(pulse)
+    |> calc.(previously)
+    |> assemble_result(previously,    :state_may_change)
+  end
+
+  def run(calc, on: %Pulse{} = pulse                        ) when is_function(calc, 1) do
+    pulse_or_pulse_data(pulse)
+    |> calc.()
+    |> assemble_result(               :there_is_no_state)
   end
   
   private do
     def pulse_or_pulse_data(%Pulse{type: :default} = pulse), do: pulse.data
     def pulse_or_pulse_data(%Pulse{              } = pulse), do: pulse
 
-    def arity(f), do: :erlang.fun_info(f)[:arity]    
-
-    def run_with_given_result_handler(handler, arglist), 
-        do: apply(__MODULE__, handler, arglist)
-    
-    def run_without_changing_state(calc, argument, previously) do
-      case calc.(argument) do 
-        :no_pulse ->
-          {:no_pulse, previously}
-        %Pulse{} = pulse ->
-          {:pulse, pulse, previously}
-        result -> 
-          {:pulse, Pulse.new(result), previously}
+    def assemble_result(calc_result, previous_state, :state_does_not_change) do
+      case calc_result do 
+        :no_pulse        -> {:no_pulse,                       previous_state}
+        %Pulse{} = pulse -> {:pulse,    pulse,                previous_state}
+        raw_data         -> {:pulse,    Pulse.new(raw_data),  previous_state}
       end
     end
 
-    def run_perhaps_changing_state(calc, argument, previously) do
-      case calc.(argument, previously) do
-        {:pulse, %Pulse{} = result, next_previously} ->
-          {:pulse, result, next_previously}
-        {:pulse, result, next_previously} ->
-          {:pulse, Pulse.new(result), next_previously}
-        {:no_pulse, _next_previously} = verbatim ->
-          verbatim
-        :no_pulse ->
-          {:no_pulse, previously}
-        singleton_result ->
-          {:pulse, Pulse.new(singleton_result), previously}
+    def assemble_result(calc_result, previous_state, :state_may_change) do
+      case calc_result do
+         :no_pulse              ->  {:no_pulse, previous_state}
+        {:no_pulse, next_state} ->  {:no_pulse, next_state}
+        
+        {:pulse, %Pulse{} = pulse, next_state} -> {:pulse, pulse,               next_state}
+        {:pulse, raw_data,         next_state} -> {:pulse, Pulse.new(raw_data), next_state}
+                 raw_data                      -> {:pulse, Pulse.new(raw_data), previous_state}
       end
     end
 
-    def run_task_function(calc, argument) do
-      case calc.(argument) do
-        :no_pulse ->
-          {:no_pulse}
-        %Pulse{} = pulse ->
-          {:pulse, pulse}
-        singleton_result ->
-          {:pulse, Pulse.new(singleton_result)}
+    def assemble_result(calc_result,                 :there_is_no_state) do 
+      case calc_result do
+        :no_pulse        -> {:no_pulse}
+        %Pulse{} = pulse -> {:pulse, pulse}
+        raw_data         -> {:pulse, Pulse.new(raw_data)}
       end
     end
-
   end
 
   ####
