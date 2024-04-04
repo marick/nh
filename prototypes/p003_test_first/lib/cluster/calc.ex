@@ -46,33 +46,32 @@ defmodule Calc do
   use AppAnimal
   alias System.Pulse
 
-
-  def run(calc, on: %Pulse{type: :default} = pulse,
-                with_state: previously)                         when is_function(calc, 1),
-      do: run_1(calc, on: pulse.data, with_state: previously)
-
-  def run(calc, on: %Pulse{} = pulse,
-                with_state: previously)                         when is_function(calc, 1),
-      do: run_1(calc, on: pulse, with_state: previously)
-
+  def run(calc, on: %Pulse{} = pulse, with_state: previously) do
+    which_handler =
+      case arity(calc) do
+        1 -> :run_without_changing_state
+        2 -> :run_perhaps_changing_state
+      end
+        
+    arg = pulse_or_pulse_data(pulse)
+    run_with_given_result_handler(which_handler,      [calc, arg, previously])
+  end
   
-  def run(calc, on: %Pulse{type: :default} = pulse,
-                with_state: previously)                         when is_function(calc, 2),
-      do: run_2(calc, on: pulse.data, with_state: previously)
-
-  def run(calc, on: %Pulse{} = pulse,
-                with_state: previously)                         when is_function(calc, 2),
-      do: run_2(calc, on: pulse, with_state: previously)
-
-
-  def run(calc, on: %Pulse{type: :default} = pulse),
-      do: run_nostate(calc, on: pulse.data)
-  
-  def run(calc, on: %Pulse{} = pulse),
-      do: run_nostate(calc, on: pulse)
+  def run(calc, on: %Pulse{} = pulse) do
+    arg = pulse_or_pulse_data(pulse)
+    run_with_given_result_handler(:run_task_function, [calc, arg])
+  end
   
   private do
-    def run_1(calc, on: argument, with_state: previously) do
+    def pulse_or_pulse_data(%Pulse{type: :default} = pulse), do: pulse.data
+    def pulse_or_pulse_data(%Pulse{              } = pulse), do: pulse
+
+    def arity(f), do: :erlang.fun_info(f)[:arity]    
+
+    def run_with_given_result_handler(handler, arglist), 
+        do: apply(__MODULE__, handler, arglist)
+    
+    def run_without_changing_state(calc, argument, previously) do
       case calc.(argument) do 
         :no_pulse ->
           {:no_pulse, previously}
@@ -83,7 +82,7 @@ defmodule Calc do
       end
     end
 
-    def run_2(calc, on: argument, with_state: previously) do
+    def run_perhaps_changing_state(calc, argument, previously) do
       case calc.(argument, previously) do
         {:pulse, %Pulse{} = result, next_previously} ->
           {:pulse, result, next_previously}
@@ -98,7 +97,7 @@ defmodule Calc do
       end
     end
 
-    def run_nostate(calc, on: argument) do
+    def run_task_function(calc, argument) do
       case calc.(argument) do
         :no_pulse ->
           {:no_pulse}
