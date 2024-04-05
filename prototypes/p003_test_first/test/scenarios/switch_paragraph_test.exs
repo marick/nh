@@ -34,21 +34,21 @@ defmodule Scenarios.SwitchParagraphTest do
   test "simple run-through" do
     IO.puts "======= switch_paragraph_test ============="
     new_paragraph_perception = [
-      perception_edge(:notice_new_paragraph),
-      action_edge(:focus_on_paragraph),
+      :notice_new_paragraph |> perception_edge,
+      :focus_on_paragraph   |> action_edge,
     ]
 
     and_now_paragraph_text = affords(paragraph_text: "para\n\npara\n\npara")
 
     response_to_paragraph_text = [
-      perception_edge(:paragraph_text),
-      summarizer(:paragraph_structure, &ParagraphGaps.summarize/1),
-      summarizer(:gap_count, &ParagraphGaps.gap_count/1),
-      gate(:is_big_edit?, & &1 >= 2),
-      forward_unique(:changes),
-      delay(:delay, Duration.seconds(0.1)),
-      # wait_for_quiet(:big_edit_wait, seconds(2))
-      # action_edge(:mark_paragraph_with_big_edit)
+      :paragraph_text          |> perception_edge,
+      :paragraph_structure     |> summarizer(&ParagraphGaps.summarize/1),
+      :gap_count               |> summarizer(&ParagraphGaps.gap_count/1),
+      :is_big_edit?            |> gate(& &1 >= 2),
+      :ignore_same_edit_status |> forward_unique,
+      :wait_for_edit_to_stop   |> delay(Duration.seconds(0.1)),
+      # :big_edit_wait |> wait_for_quiet(seconds(2))
+      # :mark_paragraph_with_big_edit |> action_edge
       to_test()
     ]
 
@@ -65,4 +65,10 @@ defmodule Scenarios.SwitchParagraphTest do
     # assert_test_receives(2)
     # ActivityLogger.get_log(a.p_logger)
   end
+
+  test "simple run-through" do
+    new_paragraph_perception = [
+      
+  end
+
 end
