@@ -38,8 +38,6 @@ defmodule Scenarios.SwitchParagraphTest do
       :focus_on_paragraph   |> action_edge,
     ]
 
-    and_now_paragraph_text = affords(paragraph_text: "para\n\npara\n\npara")
-
     response_to_paragraph_text = [
       :paragraph_text          |> perception_edge,
       :paragraph_structure     |> summarizer(&ParagraphGaps.summarize/1),
@@ -57,7 +55,9 @@ defmodule Scenarios.SwitchParagraphTest do
       |> trace(response_to_paragraph_text)
       |> AppAnimal.enliven
 
-    script(a.p_affordances, focus_on_paragraph: and_now_paragraph_text)
+    a.p_affordances
+    |> respond_to_action(:focus_on_paragraph,
+                         by_sending_cluster(:paragraph_text, "para\n\npara\n\npara"))
 
     ActivityLogger.spill_log_to_terminal(a.p_logger)
     spontaneous_affordance(a.p_affordances, named: :notice_new_paragraph)

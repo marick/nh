@@ -45,7 +45,7 @@ defmodule CannedResponse do
   end
 
   def new(downstream, %Pulse{} = pulse),
-      do: %{downstream: downstream, pulse: pulse}
+      do: %__MODULE__{downstream: downstream, pulse: pulse}
   def new(downstream, data),
       do: new(downstream, Pulse.new(data))
 end

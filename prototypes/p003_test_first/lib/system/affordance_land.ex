@@ -17,12 +17,13 @@ defmodule System.AffordanceLand do
   use AppAnimal
   use AppAnimal.GenServer
   use TypedStruct
-  alias System.{ActivityLogger,Switchboard,Pulse}
+  alias System.{ActivityLogger,Switchboard,Pulse,CannedResponse}
 
   typedstruct do
     field :p_switchboard, pid
     field :p_logger, pid
     field :programmed_responses, list, default: []
+    field :canned_responses, list, default: []
   end
 
   runs_in_sender do
@@ -55,30 +56,36 @@ defmodule System.AffordanceLand do
       continue(s_affordances)
     end
 
-    def handle_cast([script: responses], s_affordances) do
+    def handle_cast({:respond_to, action_name, canned_responses},
+                    s_affordances) do
       s_affordances
-      |> Map.update!(:programmed_responses, & append_programmed_responses(&1, responses))
+      |> Map.update!(:canned_responses, & &1 ++ [{action_name, canned_responses}])
       |> continue()
     end
 
     def handle_cast([:take_action, [{name, data}]], s_affordances) do
-      {responses, remaining_programmed_responses} =
-        Keyword.pop_first(s_affordances.programmed_responses, name)
+      {responses, remaining_canned_responses} =
+        Keyword.pop_first(s_affordances.canned_responses, name)
       
       if responses == nil,
-         do: IO.puts("==== SAY, there is no programmed response for #{name}. Test error.")
+         do: IO.puts("==== SAY, there is no canned response for #{name}. Test error.")
 
       ActivityLogger.log_action_received(s_affordances.p_logger, name, data)
-      for {cluster_name, pulse_data} <- responses do
-        pulse = Pulse.new(pulse_data)
-        handle_cast({:produce_this_affordance, cluster_name, pulse},
+      for %CannedResponse{} = response <- responses do
+        handle_cast({:produce_this_affordance, response.downstream, response.pulse},
                     s_affordances)
       end
       
-      %{s_affordances | programmed_responses: remaining_programmed_responses}
+      %{s_affordances | canned_responses: remaining_canned_responses}
       |> continue()
     end
 
+    def handle_cast(arg, s_affordances) do
+      IO.puts("==========The following is not a valid cast to AffordanceLand.")
+      dbg arg
+      Process.sleep(200)  # don't let later failures squelch the output
+      continue(s_affordances)
+    end
     
     private do
       def append_programmed_responses(keywords, new) do

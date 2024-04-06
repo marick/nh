@@ -15,29 +15,10 @@ defmodule AppAnimal.System.AffordanceLandTest do
 
   test "programming a response to an affordance request" do
     given([perception_edge(:current_paragraph_text), to_test()])
-    |> script(
-      response_to(:focus_on_paragraph, affords(current_paragraph_text: "para\n"))
-    )
+    |> respond_to_action(:focus_on_paragraph,
+                         by_sending_cluster(:current_paragraph_text, "para\n"))
     |> take_action(focus_on_paragraph: :no_data)
 
     assert_test_receives("para\n")
-  end
-
-  describe "utilities" do
-    test "constructing a script" do
-      mutable = %{programmed_responses: []}
-      script = [
-        response_to(:focus_on_paragraph, affords(affordance: :data)),
-        response_to(:other, [affords(other: "more data"),
-                             affords(also: "this")])
-      ]
-
-      {:noreply, mutated} = UT.handle_cast([script: script], mutable)
-      assert mutated.programmed_responses ==
-               [focus_on_paragraph: [{:affordance, :data}],
-                other:              [{:other, "more data"},
-                                     {:also, "this"}]
-               ]
-    end
   end
 end

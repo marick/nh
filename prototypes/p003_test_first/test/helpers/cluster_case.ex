@@ -5,7 +5,7 @@ defmodule ClusterCase do
   """
   use AppAnimal
   alias AppAnimal.{System, Cluster}
-  alias System.{Switchboard,AffordanceLand,Pulse}
+  alias System.{Switchboard,AffordanceLand,Pulse,CannedResponse}
   alias Cluster.Shape
   alias ExUnit.Assertions
 
@@ -86,22 +86,25 @@ defmodule ClusterCase do
 
   Typically:
 
-      |> script(
-           response_to(:focus_on_paragraph, affords(paragraph_text: "some text")))
-      |> take_action(focus_on_paragraph: :no_data)
+      p_affordances
+      |> respond_to_action(:focus_on_paragraph,
+                           by_sending_cluster(:paragraph_text, "some text"))
+
+
+      # later
+      take_action(p_affordances, focus_on_paragraph: :no_data)
 
   """
-  def script(pid, {_action_name, {_affordance_name, _affordance_data}} = singleton), 
-      do: script(pid, [singleton])
+
+  ### Note that this needs only a small tweak to allow multiple canned responses (sending
+  ### to different clusters) for a single action.
   
-  def script(pid, list) do
-    GenServer.cast(pid, [script: list])
-    pid
+  def respond_to_action(p_affordances, action_name, %CannedResponse{} = canned_response) do
+    GenServer.cast(p_affordances, {:respond_to, action_name, [canned_response]})
+    p_affordances
   end
 
-  def affords([{name, data}]), do: {name, data}
-  def response_to(action, response), do: {action, response}
-
+  def by_sending_cluster(downstream, data), do: CannedResponse.new(downstream, data)
 
   @doc """
   Cast a message representing an action to AffordanceLand from a test.

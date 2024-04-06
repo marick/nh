@@ -15,8 +15,8 @@ defmodule AppAnimal.Cluster.PerceptionEdgeTest do
     a = AppAnimal.enliven(network)
 
     a.p_affordances
-    |> script(
-      response_to(:focus_on_paragraph, affords(paragraph_text: "some text")))
+    |> respond_to_action(:focus_on_paragraph,
+                         by_sending_cluster(:paragraph_text, "some text"))
     |> take_action(focus_on_paragraph: :no_data)
 
     assert_test_receives("some textsome text")

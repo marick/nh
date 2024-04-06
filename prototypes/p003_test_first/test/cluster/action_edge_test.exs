@@ -7,13 +7,14 @@ defmodule AppAnimal.Cluster.ActionEdgeTest do
       trace([action_edge(:focus_on_new_paragraph)])
       |> trace([perception_edge(:paragraph_text), to_test()])
       |> AppAnimal.enliven()
-    
-    script(a.p_affordances, 
-           focus_on_new_paragraph: [paragraph_text: "some text"])
+
+    a.p_affordances
+    |> respond_to_action(:focus_on_new_paragraph,
+                         by_sending_cluster(:paragraph_text, "some text"))
 
     send_test_pulse(a.p_switchboard,
                     to: :focus_on_new_paragraph, carrying: :nothing)
-    
+
     assert_test_receives("some text")
 
     [first, second] = ActivityLogger.get_log(a.p_logger)
