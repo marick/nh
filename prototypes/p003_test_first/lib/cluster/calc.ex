@@ -4,44 +4,61 @@ alias Cluster.Calc
 defmodule Calc do
   @moduledoc """
 
-  Each cluster surrounds a function. It's convenient to describe linear and
-  circular clusters separately.
+  `Calc` is responsible for calling a clusters "calc" function and
+  normalizing or "assembling" the result.
 
-  ### Linear clusters (tasks)
+  ### Inputs
 
-  The function must take a single argument. The canonical two return values are
+  The function may take one or two arguments.
 
-  For linear clusters:
-  `{:no_pulse}`           - there is to be no outgoing pulse
-  `{:pulse, pulse_data}`  - the data is to be sent on.
+  In the one argument case, the argument is the `Pulse` the cluster
+  just received. However, a `Pulse` of `:default` type has its `data`
+  field extracted and sent in instead of the complete pulse. That
+  means a simple cluster can use a function like `& &1+1` instead of
+  having to unwrap the data itself.
 
-  As a convenience, these two kinds of result are translated into one of the above:
+  In the two-argument form, the first argument is the pulse, as
+  described above (including unwrapping the `:default` case). The
+  second argument is the value of the `previously` field in a
+  `CircularProcess.State`. Note that this is not the entirety of the
+  state.
 
-  `:no_pulse`             - `{:no_pulse}`
-  any other result        - `{:pulse, pulse_data}`
+  Since a linear cluster has no persistent state, it may not use the
+  two-argument form. A circular cluster may use either form. The
+  one-argument form is useful for a circular cluster when the state
+  has no effect on the calculation and is not to be changed by it.
 
-  ### Circular clusters
-
-  The function may take either one or two argumnets. If one, it's the
-  pulse data. If two, the second argument is the current value of the
-  mutable state (*not* an entire cluster structure).
-
-  For a single-argument function, the mutable state is left
-  unchanged. These are the two kinds of return value:
-
-  `:no_pulse`            - there is to be no outgoing pulse
-  any other result       - the data is to be sent on.
-
-  For a two-argument function, the two canonical return values are:
-
-  `{:pulse, pulse_data, next_state}`  - the data is to be sent on and the state updated.
-  `{:no_pulse,          next_state}`  - the cluster produces no pulse, but the state is updated.
+  ### Assembling the result
   
-  For convenience, the following two forms are also used:
+  In the case of a one-argument function, the two canonical return
+  values are:
 
-  `:no_pulse`            - there is no pulse and the state is left unchanged
-  any other value        - the value is sent in a pulse, but the state is left unchanged.        
+  `:no_pulse`             - there is to be no outgoing pulse
+  `{:pulse, Pulse.t}`     - the pulse is to be sent downstream.
 
+  As a convenience, if the second tuple argument is *not* of type
+  `Pulse.t`, it is converted into a pulse of the `:default` type.
+
+  A two-argument function is more complicated because both an outgoing
+  pulse and changed state may be involved. `:no_pulse` is used to
+  indicate that there will be no pulse sent. There are two cases:
+
+  :no_pulse              - no outgoing pulse, and the state is unchanged.
+  {:no_pulse, any}       - no outgoing pulse, and the state is changed.
+
+  When there is to be a pulse, the canonical case is:
+
+  {:pulse, Pulse.t, any} - the pulse is to be sent on and the state is
+                           to be changed.
+
+  As in the one-argument case, if the second argument is not a
+  `Pulse.t`, it is converted into an argument of a pulse of `:default`
+  type.
+
+  It is also valid to return a single value (Pulse.t or something else).
+  That signals that a pulse is to be sent but the state is to be left
+  unchanged. 
+  
   """
   use AppAnimal
   alias System.Pulse

@@ -51,9 +51,9 @@ defmodule CircularProcess do
     ok(starting_state)
   end
 
-  def handle_cast([handle_pulse: small_data], s_process_state) do
+  def handle_cast([handle_pulse: pulse], s_process_state) do
     result = Calc.run(s_process_state.calc,
-                      on: small_data,
+                      on: pulse,
                       with_state: s_process_state.previously)
 
     Calc.maybe_pulse(result, & Cluster.start_pulse_on_its_way(s_process_state, &1))

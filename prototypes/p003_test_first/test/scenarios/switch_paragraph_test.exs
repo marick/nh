@@ -65,10 +65,4 @@ defmodule Scenarios.SwitchParagraphTest do
     # assert_test_receives(2)
     # ActivityLogger.get_log(a.p_logger)
   end
-
-  test "simple run-through" do
-    new_paragraph_perception = [
-      
-  end
-
 end
