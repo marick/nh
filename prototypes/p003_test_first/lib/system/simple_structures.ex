@@ -77,8 +77,7 @@ defmodule Router do
   
   def cast_via(s_router, %Action{} = action) do
     pid = pid_for(s_router, action)
-    call = [:take_action, [{action.type, action.data}]]
-    GenServer.cast(pid, call)
+    GenServer.cast(pid, {:take_action, action})
   end
   
 end

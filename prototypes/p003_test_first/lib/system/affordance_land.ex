@@ -17,7 +17,7 @@ defmodule System.AffordanceLand do
   use AppAnimal
   use AppAnimal.GenServer
   use TypedStruct
-  alias System.{ActivityLogger,Switchboard,Pulse,CannedResponse}
+  alias System.{ActivityLogger,Switchboard,Pulse,CannedResponse,Action}
 
   typedstruct do
     field :p_switchboard, pid
@@ -63,14 +63,14 @@ defmodule System.AffordanceLand do
       |> continue()
     end
 
-    def handle_cast([:take_action, [{name, data}]], s_affordances) do
+    def handle_cast({:take_action, %Action{} = action}, s_affordances) do
       {responses, remaining_canned_responses} =
-        Keyword.pop_first(s_affordances.canned_responses, name)
+        Keyword.pop_first(s_affordances.canned_responses, action.type)
       
       if responses == nil,
-         do: IO.puts("==== SAY, there is no canned response for #{name}. Test error.")
+         do: IO.puts("==== SAY, there is no canned response for #{action.type}. Test error.")
 
-      ActivityLogger.log_action_received(s_affordances.p_logger, name, data)
+      ActivityLogger.log_action_received(s_affordances.p_logger, action.type, action.data)
       for %CannedResponse{} = response <- responses do
         handle_cast({:produce_this_affordance, response.downstream, response.pulse},
                     s_affordances)

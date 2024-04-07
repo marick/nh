@@ -118,8 +118,10 @@ defmodule ClusterCase do
 
   Behaves the same way as an `action_edge` cluster.
   """
-  def take_action(pid, [{_name, _data}] = action),
-      do: GenServer.cast(pid, [:take_action, action])
+  def take_action(pid, [{type, data}]) do
+    action = System.Action.new(type, data)
+    GenServer.cast(pid, {:take_action, action})
+  end
 
   @doc """
   Used by tests to synchronously access one active process's internal state.

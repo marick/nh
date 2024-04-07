@@ -41,7 +41,6 @@ defmodule System.SimpleStructuresTest do
       assert actual == expected
     end
 
-    @tag :skip
     test "sending an action" do
       router = UT.new(%{Action =>  self()})
 
