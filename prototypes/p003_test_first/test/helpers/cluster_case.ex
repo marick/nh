@@ -59,17 +59,24 @@ defmodule ClusterCase do
   By default, the cluster is named `:endpoint`. If you use `to_test` more
   when making the network, you'll probably want to give a different name.
   """
+
+  IO.puts "#{__ENV__.file} remove f_send_to_test"
   def to_test(name \\ :endpoint) do
     p_test = self()
     f_send_to_test =
       fn %Pulse{} = pulse ->
         send(p_test, [pulse.data, from: name])
       end
+
+    kludge_a_calc = fn arg ->
+      send(p_test, [arg, from: name])
+      :no_pulse
+    end
       
     %Cluster{name: name,
              label: :test_endpoint,
              shape: Shape.Linear.new,
-             calc: &Function.identity/1,
+             calc: kludge_a_calc,
              f_outward: f_send_to_test}
   end
 

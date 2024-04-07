@@ -81,8 +81,16 @@ defmodule Cluster do
     {s_cluster.name, pid}
   end
 
-  IO.puts "#{__ENV__.file} delete start_pulse_on_its_way"
-  def start_pulse_on_its_way(s_cluster, pulse_data) do
-    s_cluster.f_outward.(pulse_data)
+  def start_pulse_on_its_way(s_cluster, %System.Pulse{} = pulse) do
+    router = s_cluster.router
+    System.Router.cast_via(router, pulse, from: s_cluster.name)
+#    s_cluster.f_outward.(pulse_data)
   end
+
+
+  def start_pulse_on_its_way(s_cluster, %System.Action{} = action) do
+    router = s_cluster.router
+    System.Router.cast_via(router, action)
+  end
+
 end

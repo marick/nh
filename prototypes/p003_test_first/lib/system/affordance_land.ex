@@ -80,6 +80,7 @@ defmodule System.AffordanceLand do
       |> continue()
     end
 
+    # This catches incorrect arguments; that is, bugs.
     def handle_cast(arg, s_affordances) do
       IO.puts("==========The following is not a valid cast to AffordanceLand.")
       dbg arg

@@ -15,7 +15,7 @@ defmodule AppAnimal.Cluster.ActionEdgeTest do
     send_test_pulse(a.p_switchboard,
                     to: :focus_on_new_paragraph, carrying: :nothing)
 
-    assert_test_receives("some text")
+    assert_test_receives("some text") 
 
     [first, second] = ActivityLogger.get_log(a.p_logger)
     assert_fields(first, name: :focus_on_new_paragraph)

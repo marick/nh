@@ -61,7 +61,7 @@ defmodule Calc do
   
   """
   use AppAnimal
-  alias System.Pulse
+  alias System.{Pulse,Action}
 
   def run(calc, on: %Pulse{} = pulse, with_state: previously) when is_function(calc, 1) do
     pulse_or_pulse_data(pulse)
@@ -104,10 +104,13 @@ defmodule Calc do
       end
     end
 
-    def assemble_result(calc_result,                 :there_is_no_state) do 
+    IO.puts("#{__ENV__.file} no_pulse is probably a bad name now")
+
+    def assemble_result(calc_result,                 :there_is_no_state) do
       case calc_result do
         :no_pulse        -> {:no_pulse}
         %Pulse{} = pulse -> {:pulse, pulse}
+        %Action{} = action -> {:pulse, action}
         raw_data         -> {:pulse, Pulse.new(raw_data)}
       end
     end
