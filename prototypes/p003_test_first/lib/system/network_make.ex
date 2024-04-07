@@ -23,7 +23,7 @@ defmodule Network.Make do
     trace(network, [existing | trace])
   end
 
-  def link_clusters_to_architecture(network,  p_switchboard, p_affordances) do
+  def link_clusters_to_architecture(network,  %System.Router{} = router, p_switchboard, p_affordances) do
     mkfn_final =
       fn so_far ->
         case so_far do
@@ -37,9 +37,14 @@ defmodule Network.Make do
       end
 
     l_f_outward = Network.l_clusters() |> Cluster.l_f_outward()
+    l_router = Network.l_clusters() |> Cluster.l_router()
     
     deeply_map(network, l_f_outward, mkfn_final)
+    |> deeply_put(l_router, router)
   end
+
+  IO.puts "#{__ENV__.file} remove l_f_outward and mkfn_functions"
+
 
 
   private do 

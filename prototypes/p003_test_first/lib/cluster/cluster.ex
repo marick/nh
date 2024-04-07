@@ -1,4 +1,4 @@
-alias AppAnimal.Cluster
+alias AppAnimal.{Cluster, System}
 
 defmodule Cluster do
 
@@ -61,6 +61,7 @@ defmodule Cluster do
     field :f_outward, fun
     
     # Set when compiled into a network
+    field :router, System.Router.t
     field :downstream, [atom], default: []
   end
 
@@ -80,6 +81,7 @@ defmodule Cluster do
     {s_cluster.name, pid}
   end
 
+  IO.puts "#{__ENV__.file} delete start_pulse_on_its_way"
   def start_pulse_on_its_way(s_cluster, pulse_data) do
     s_cluster.f_outward.(pulse_data)
   end

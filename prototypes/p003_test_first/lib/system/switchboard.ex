@@ -109,12 +109,18 @@ defmodule System.Switchboard do
       ok(s_switchboard)
     end
 
+    IO.puts "#{__ENV__.file} remove explicit passing of p_switchboard, etc."
+
+
     @impl GenServer
     def handle_call({:link_clusters_to_architecture, p_switchboard, p_affordances},
                     _from, s_switchboard) do
 
+      router = System.Router.new(%{
+                 System.Action => p_affordances,
+                 System.Pulse => p_switchboard})
       s_switchboard
-      |> within_network(& Network.Make.link_clusters_to_architecture(&1,
+      |> within_network(& Network.Make.link_clusters_to_architecture(&1, router,
                                                                      p_switchboard,
                                                                      p_affordances))
       |> continue(returning: :ok)

@@ -1,4 +1,4 @@
-alias AppAnimal.Cluster
+alias AppAnimal.{Cluster,System}
 alias Cluster.CircularProcess
 
 defmodule CircularProcess.State do
@@ -23,14 +23,18 @@ defmodule CircularProcess.State do
     field :calc, fun
     field :f_outward, fun
     field :previously, any
+    field :router, System.Router.t
   end
+
+  IO.puts "#{__ENV__.file} remove f_outward"
     
   def from_cluster(s_cluster) do
     %__MODULE__{name: s_cluster.name,
                 calc: s_cluster.calc,
                 f_outward: s_cluster.f_outward,
                 throb: s_cluster.shape.throb,
-                previously: s_cluster.shape.initial_value
+                previously: s_cluster.shape.initial_value,
+                router: s_cluster.router
   }
   end
 
@@ -51,7 +55,7 @@ defmodule CircularProcess do
     ok(starting_state)
   end
 
-  def handle_cast([handle_pulse: pulse], s_process_state) do
+  def handle_cast([handle_pulse: %System.Pulse{} = pulse], s_process_state) do
     result = Calc.run(s_process_state.calc,
                       on: pulse,
                       with_state: s_process_state.previously)
