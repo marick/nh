@@ -70,6 +70,11 @@ defmodule Router do
     Switchboard.cast__distribute_pulse(pid, carrying: pulse, to: destinations)
   end
   
+  def cast_via(s_router, %Pulse{} = pulse, from: source) do
+    pid = pid_for(s_router, pulse)
+    Switchboard.cast__distribute_pulse(pid, carrying: pulse, from: source)
+  end
+  
   def cast_via(s_router, %Action{} = action) do
     pid = pid_for(s_router, action)
     GenServer.cast(pid, {:take_action, action})

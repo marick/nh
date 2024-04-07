@@ -19,7 +19,7 @@ defmodule System.SimpleStructuresTest do
 
     def as_cast_delivers(data), do: {:"$gen_cast", data}
 
-    test "sending a pulse" do
+    test "sending a pulse TO" do
       router = UT.new(%{Pulse =>  self()})
 
       pulse = Pulse.new("data")
@@ -27,6 +27,17 @@ defmodule System.SimpleStructuresTest do
 
       actual = assert_receive(_)
       expected = as_cast_delivers({:distribute_pulse, carrying: pulse, to: [:some_cluster_name]})
+      assert actual == expected
+    end
+
+    test "sending a pulse FROM" do
+      router = UT.new(%{Pulse =>  self()})
+
+      pulse = Pulse.new("data")
+      UT.cast_via(router, pulse, from: :some_cluster_name)
+
+      actual = assert_receive(_)
+      expected = as_cast_delivers({:distribute_pulse, carrying: pulse, from: :some_cluster_name})
       assert actual == expected
     end
 
