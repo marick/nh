@@ -11,10 +11,10 @@ defmodule Cluster.Make do
   also change the `label`.
 
   Both linear and circular clusters can send their outgoing pulses to other clusters
-  or to `AffordanceLand` (external reality). You use `OutgoingLogic.mkfn_pulse_direction`
-  to choose.
+  or to `AffordanceLand` (external reality). The destination depends on whether it's
+  a `Pulse` or `Action` being sent.
 
-  Most every cluster created will have a function specified. Return values for linear
+  Every cluster created will have a `calc` function specified. Return values for linear
   clusters are trivial: either a value or :no_pulse. But circular clusters can use
   some convenience functions to avoid having to code up the right tuple.
   """
