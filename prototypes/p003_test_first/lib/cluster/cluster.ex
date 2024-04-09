@@ -6,7 +6,7 @@ defmodule Cluster do
   This represents a linear or circular cluster as represented within a network
   of connected processes.
 
-  This function violates that "initialize every field at `new` time guideline
+  This module violates the "initialize every field at `new`-time" guideline
   in two ways.
 
   1. Network construction is vaguely graphical. Even though a particular cluster
@@ -20,7 +20,7 @@ defmodule Cluster do
              |> Network.trace(linear(..3..), popular, linear(..4..))
 
      Because of that, it's not known at creation time that `popular` is upstream
-     of both `..2..` and `..4..`. Practically, this means that a clusters
+     of both `..2..` and `..4..`. Practically, this means that a cluster's
      `downstream` field is built up as the network is constructed.
 
   2. When a process sends a pulse downstream, it goes to either the `Switchboard` or
@@ -29,17 +29,7 @@ defmodule Cluster do
      is circular, *something* has to be updated after creation. It was perhaps a mistake
      to make it the cluster. Oh well.)
 
-     This affects the `f_outward` function, which is used to send a pulse downstream. It
-     seems cleanest for that function to be created in two stages. In the first stage,
-     `f_outward` is bound to a function that takes a pid. When later called with either
-     the Switchboard or AffordanceLand pid, `f_outward` creates a new function that
-     sends appropriately to that pid. That function is then bound to the `f_outward`
-     field. 
-     
-     This is not entirely pleasing.
-
-     (`f_outward`` is also used to send pulses to a currently-running test,
-     but in that case the pid is known before the cluster is created.)  
+     The cluster is updated by installing a `System.Router` value.
   """
 
   
@@ -58,7 +48,6 @@ defmodule Cluster do
     # The main axes of variation
     field :shape, Shape.Circular.t | Shape.Linear.t
     field :calc, fun
-    field :f_outward, fun
     
     # Set when compiled into a network
     field :router, System.Router.t
@@ -84,7 +73,6 @@ defmodule Cluster do
   def start_pulse_on_its_way(s_cluster, %System.Pulse{} = pulse) do
     router = s_cluster.router
     System.Router.cast_via(router, pulse, from: s_cluster.name)
-#    s_cluster.f_outward.(pulse_data)
   end
 
 

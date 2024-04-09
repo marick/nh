@@ -1,4 +1,4 @@
-alias AppAnimal.Cluster
+alias AppAnimal.{Cluster,System}
 
 defmodule Cluster.Make do
   @moduledoc """
@@ -21,8 +21,6 @@ defmodule Cluster.Make do
   
   use AppAnimal
   alias Cluster.Shape.{Circular, Linear}
-  alias AppAnimal.System.{AffordanceLand, Switchboard, Action}
-  alias Cluster.OutgoingLogic
 
   # Circular clusters
 
@@ -31,8 +29,7 @@ defmodule Cluster.Make do
            name: name,
            label: :circular_cluster,
            shape: Circular.new(opts),
-           calc: calc,
-           f_outward: OutgoingLogic.mkfn_pulse_direction(Switchboard, name))
+           calc: calc)
   end
 
 
@@ -43,13 +40,10 @@ defmodule Cluster.Make do
   
   # Linear Clusters
 
-  IO.puts("#{__ENV__.file} delete uses of f_outward")
-
   def linear(name, calc \\ &Function.identity/1) do
     %Cluster{name: name, label: :linear_cluster,
              shape: Linear.new,
-             calc: calc,
-             f_outward: OutgoingLogic.mkfn_pulse_direction(Switchboard, name)
+             calc: calc
     }
   end
 
@@ -60,14 +54,14 @@ defmodule Cluster.Make do
   end
 
   def action_edge(name) do
-    cast = fn arg ->
+    alias System.Action
+    
+    wrap_in_this_clusters_action = fn arg ->
       Action.new(name, arg)
     end
-                           
     
     linear(name, & [{name, &1}])
-    |> Map.put(:calc, cast)
-    |> Map.put(:f_outward, OutgoingLogic.mkfn_pulse_direction(AffordanceLand))
+    |> Map.put(:calc, wrap_in_this_clusters_action)
     |> labeled(:action_edge)
   end
 

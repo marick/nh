@@ -8,7 +8,6 @@ defmodule Network.Make do
   `enliven` them.
   """
   use AppAnimal
-  alias System.{AffordanceLand, Switchboard}
   
   def trace(network \\ %Network{}, clusters) do
     old = network.clusters_by_name
@@ -23,29 +22,11 @@ defmodule Network.Make do
     trace(network, [existing | trace])
   end
 
-  def link_clusters_to_architecture(network,  %System.Router{} = router, _p_switchboard, _p_affordances) do
-    mkfn_final =
-      fn so_far ->
-        case so_far do
-          {Switchboard, _f_maker} ->
-            &Function.identity/1
-          {AffordanceLand, _f_maker} ->
-            &Function.identity/1
-          already_made when is_function(already_made, 1) ->
-            already_made
-        end
-      end
-
-    l_f_outward = Network.l_clusters() |> Cluster.l_f_outward()
+  def link_clusters_to_architecture(network,  %System.Router{} = router) do
     l_router = Network.l_clusters() |> Cluster.l_router()
     
-    deeply_map(network, l_f_outward, mkfn_final)
-    |> deeply_put(l_router, router)
+    deeply_put(network, l_router, router)
   end
-
-  IO.puts "#{__ENV__.file} remove l_f_outward and mkfn_functions"
-
-
 
   private do 
     # I don't use lenses for this because it's too fiddly and non-obvious

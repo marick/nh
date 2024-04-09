@@ -60,14 +60,13 @@ defmodule ClusterCase do
   when making the network, you'll probably want to give a different name.
   """
 
-  IO.puts "#{__ENV__.file} remove f_send_to_test"
   def to_test(name \\ :endpoint) do
     p_test = self()
-    f_send_to_test =
-      fn %Pulse{} = pulse ->
-        send(p_test, [pulse.data, from: name])
-      end
 
+    # Normally, a pulse is sent *after* calculation. Here, we have the
+    # cluster not calculate anything but just send to the test pid.
+    # That's because the `System.Router` only knows how to do GenServer-type
+    # casting.
     kludge_a_calc = fn arg ->
       send(p_test, [arg, from: name])
       :no_pulse
@@ -76,8 +75,7 @@ defmodule ClusterCase do
     %Cluster{name: name,
              label: :test_endpoint,
              shape: Shape.Linear.new,
-             calc: kludge_a_calc,
-             f_outward: f_send_to_test}
+             calc: kludge_a_calc}
   end
 
   @doc "Receive a pulse from a `to_test` node"

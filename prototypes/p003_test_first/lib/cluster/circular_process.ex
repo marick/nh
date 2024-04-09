@@ -21,17 +21,13 @@ defmodule CircularProcess.State do
     field :name, atom, required: true   # This is useful for debugging
     field :throb, Cluster.Throb.t
     field :calc, fun
-    field :f_outward, fun
     field :previously, any
     field :router, System.Router.t
   end
 
-  IO.puts "#{__ENV__.file} remove f_outward"
-    
   def from_cluster(s_cluster) do
     %__MODULE__{name: s_cluster.name,
                 calc: s_cluster.calc,
-                f_outward: s_cluster.f_outward,
                 throb: s_cluster.shape.throb,
                 previously: s_cluster.shape.initial_value,
                 router: s_cluster.router
