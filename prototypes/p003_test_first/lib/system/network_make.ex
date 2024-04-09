@@ -23,14 +23,14 @@ defmodule Network.Make do
     trace(network, [existing | trace])
   end
 
-  def link_clusters_to_architecture(network,  %System.Router{} = router, p_switchboard, p_affordances) do
+  def link_clusters_to_architecture(network,  %System.Router{} = router, _p_switchboard, _p_affordances) do
     mkfn_final =
       fn so_far ->
         case so_far do
-          {Switchboard, f_maker} ->
-            f_maker.(p_switchboard)
-          {AffordanceLand, f_maker} ->
-            f_maker.(p_affordances)
+          {Switchboard, _f_maker} ->
+            &Function.identity/1
+          {AffordanceLand, _f_maker} ->
+            &Function.identity/1
           already_made when is_function(already_made, 1) ->
             already_made
         end

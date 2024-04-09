@@ -76,8 +76,7 @@ defmodule CircularProcess do
       :continue ->
         AppAnimal.GenServer.continue(next_process_state)
       :stop ->
-        s_process_state.throb.f_before_stopping.(s_process_state.f_outward,
-                                                 s_process_state.previously)
+        s_process_state.throb.f_before_stopping.(s_process_state, s_process_state.previously)
         AppAnimal.GenServer.stop(next_process_state)
     end
   end

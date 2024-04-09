@@ -109,11 +109,11 @@ defmodule Throb do
 
   # Functions that handle stopping
 
-  def stop_silently(_f_pulse_sender, _pulse_value) do
+  def stop_silently(_s_process_state, _pulse_value) do
     :no_return_value
   end
 
-  def pulse_current_value(f_pulse_sender, pulse_value) do
-    f_pulse_sender.(Pulse.new(pulse_value))
+  def pulse_current_value(s_process_state, pulse_value) do
+    Cluster.start_pulse_on_its_way(s_process_state, Pulse.new(pulse_value))
   end
 end
