@@ -43,20 +43,6 @@ defmodule System.Switchboard do
         do: GenServer.start_link(__MODULE__, s_switchboard)
 
     @doc """
-    Connect each cluster to whichever system process handles its outgoing messages.
-
-    This is done by instructing each cluster to construct an
-    appropriate sending function that goes to either the `Switchboard`
-    or `AffordanceLand`.
-
-    Note that this is synchronous, appropriate at app-animal startup.
-    """
-    def call__link_clusters_to_architecture(p_switchboard, p_affordances) do
-      GenServer.call(p_switchboard,
-                     {:link_clusters_to_architecture, p_switchboard, p_affordances})
-    end
-
-    @doc """
     Send a pulse to a set of clusters.
 
     There are two variants. You can say the pulse comes *from:* a cluster, in which
@@ -110,17 +96,12 @@ defmodule System.Switchboard do
     end
 
     @impl GenServer
-    def handle_call({:link_clusters_to_architecture, p_switchboard, p_affordances},
-                    _from, s_switchboard) do
-
-      router = System.Router.new(%{
-                 System.Action => p_affordances,
-                 System.Pulse => p_switchboard})
+    def handle_call([accept_network: network], _from, s_switchboard) do
       s_switchboard
-      |> within_network(& Network.Make.link_clusters_to_architecture(&1, router))
+      |> Map.put(:network, network)
       |> continue(returning: :ok)
     end
-
+    
     # This is used for testing as a way to get internal values of clusters.
     def handle_call([forward: getter_name, to: circular_cluster_name],
                     _from, s_switchboard) do
@@ -128,7 +109,7 @@ defmodule System.Switchboard do
       result = GenServer.call(pid, getter_name)
       continue(s_switchboard, returning: result)
     end
-    
+
     @impl GenServer
     def handle_cast({:distribute_pulse, carrying: %Pulse{} = pulse, from: source_name},
                     s_switchboard) do

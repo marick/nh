@@ -22,7 +22,7 @@ defmodule Network.Make do
     trace(network, [existing | trace])
   end
 
-  def link_clusters_to_architecture(network,  %System.Router{} = router) do
+  def put_routers(network, %System.Router{} = router) do
     l_router = Network.l_clusters() |> Cluster.l_router()
     
     deeply_put(network, l_router, router)

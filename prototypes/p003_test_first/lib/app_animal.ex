@@ -23,14 +23,18 @@ defmodule AppAnimal do
     {:ok, p_logger} = ActivityLogger.start_link
     switchboard_struct = struct(Switchboard,
                                 Keyword.merge(switchboard_options,
-                                              network: network,
                                               p_logger: p_logger))
     p_switchboard = compatibly_start_link(Switchboard, switchboard_struct)
     p_affordances = compatibly_start_link(AffordanceLand,
                                             %{p_switchboard: p_switchboard,
                                               p_logger: p_logger})
 
-    Switchboard.call__link_clusters_to_architecture(p_switchboard, p_affordances)
+    router = System.Router.new(%{
+                 System.Action => p_affordances,
+                 System.Pulse => p_switchboard})
+
+    Network.Make.put_routers(network, router)
+    |> then(& GenServer.call(p_switchboard, accept_network: &1))
 
     %__MODULE__{
       p_switchboard: p_switchboard,
