@@ -9,7 +9,7 @@ defmodule Calc do
 
   ### Inputs
 
-  The function may take one or two arguments.
+  The `calc` function may take one or two arguments.
 
   In the one argument case, the argument is the `Pulse` the cluster
   just received. However, a `Pulse` of `:default` type has its `data`
@@ -30,34 +30,38 @@ defmodule Calc do
 
   ### Assembling the result
   
-  In the case of a one-argument function, the two canonical return
-  values are:
+  A one-argument function should return one of these values:
 
-  `:no_pulse`             - there is to be no outgoing pulse
-  `{:pulse, Pulse.t}`     - the pulse is to be sent downstream.
+  `:no_result`  - there is to be no outgoing pulse or action
+  `Pulse.t`     - the result is to be sent downstream.
+  `Action.t`    - the result is to be sent downstream.
 
-  As a convenience, if the second tuple argument is *not* of type
-  `Pulse.t`, it is converted into a pulse of the `:default` type.
+  As a convenience, any other value is wrapped in a :default Pulse.
 
-  A two-argument function is more complicated because both an outgoing
-  pulse and changed state may be involved. `:no_pulse` is used to
-  indicate that there will be no pulse sent. There are two cases:
+  A two-argument function is more complicated because both outgoing
+  data and changed state may be involved. `:no_result` is used to
+  indicate that there will be no pulse or action sent. There are two
+  cases:
 
-  :no_pulse              - no outgoing pulse, and the state is unchanged.
-  {:no_pulse, any}       - no outgoing pulse, and the state is changed.
+  :no_result              - no outgoing pulse, and the state is unchanged.
+  {:no_result, any}       - no outgoing pulse, and the state is changed.
 
-  When there is to be a pulse, the canonical case is:
+  When there is to be a pulse, the canonical cases are:
 
-  {:pulse, Pulse.t, any} - the pulse is to be sent on and the state is
-                           to be changed.
+  {:useful_result, Pulse.t,  any} - the pulse is to be sent and the state is
+                                    to be changed.
+  {:useful_result, Action.t, any} - the pulse is to be sent and the state is
+                                    to be changed.
 
   As in the one-argument case, if the second argument is not a
-  `Pulse.t`, it is converted into an argument of a pulse of `:default`
-  type.
+  `Pulse.t` or `Action.t`, it is converted into a pulse
+  of `:default` type:
 
-  It is also valid to return a single value (Pulse.t or something else).
-  That signals that a pulse is to be sent but the state is to be left
-  unchanged. 
+  {:useful_result, any, any}     - {:useful_result, Pulse.new(any), any}
+
+  It is also valid to return a single value (Pulse.t, `Action.t`, or
+  something else).  That signals that a pulse is to be sent but the
+  state is to be left unchanged.
   
   """
   use AppAnimal
@@ -81,55 +85,66 @@ defmodule Calc do
     |> assemble_result(               :there_is_no_state)
   end
   
-  private do
-    def pulse_or_pulse_data(%Pulse{type: :default} = pulse), do: pulse.data
-    def pulse_or_pulse_data(%Pulse{              } = pulse), do: pulse
-
-    def assemble_result(calc_result, previous_state, :state_does_not_change) do
-      case calc_result do 
-        :no_pulse        -> {:no_pulse,                       previous_state}
-        %Pulse{} = pulse -> {:pulse,    pulse,                previous_state}
-        raw_data         -> {:pulse,    Pulse.new(raw_data),  previous_state}
-      end
-    end
-
-    def assemble_result(calc_result, previous_state, :state_may_change) do
-      case calc_result do
-         :no_pulse              ->  {:no_pulse, previous_state}
-        {:no_pulse, next_state} ->  {:no_pulse, next_state}
-        
-        {:pulse, %Pulse{} = pulse, next_state} -> {:pulse, pulse,               next_state}
-        {:pulse, raw_data,         next_state} -> {:pulse, Pulse.new(raw_data), next_state}
-                 raw_data                      -> {:pulse, Pulse.new(raw_data), previous_state}
-      end
-    end
-
-    IO.puts("#{__ENV__.file} no_pulse is probably a bad name now")
-
-    def assemble_result(calc_result,                 :there_is_no_state) do
-      case calc_result do
-        :no_pulse        -> {:no_pulse}
-        %Pulse{} = pulse -> {:pulse, pulse}
-        %Action{} = action -> {:pulse, action}
-        raw_data         -> {:pulse, Pulse.new(raw_data)}
-      end
-    end
-  end
-
   ####
 
   @doc "Use `f_send_pulse` to send pulse data iff the `tuple` argument so indicates."
   def maybe_pulse(tuple, f_send_pulse) when is_tuple(tuple) do
     case elem(tuple, 0) do
-      :no_pulse ->
+      :no_result ->
         :do_nothing
-      :pulse -> 
+      :useful_result -> 
         pulse_data = elem(tuple, 1)
         f_send_pulse.(pulse_data)
     end
     tuple
   end
 
-  def next_state({:pulse, _pulse_data, next_state}), do: next_state
-  def next_state({:no_pulse, next_state}), do: next_state
+  def next_state({:useful_result, _pulse_data, next_state}), do: next_state
+  def next_state({:no_result, next_state}), do: next_state
+
+
+  private do
+    def pulse_or_pulse_data(%Pulse{type: :default} = pulse), do: pulse.data
+    def pulse_or_pulse_data(%Pulse{              } = pulse), do: pulse
+
+    def assemble_result(calc_result,                 :there_is_no_state) do
+      case calc_result do
+        :no_result         -> {:no_result}
+        %Pulse{} = pulse   -> {:useful_result, pulse}
+        %Action{} = action -> {:useful_result, action}
+        raw_data           -> {:useful_result, Pulse.new(raw_data)}
+      end
+    end
+
+    def assemble_result(calc_result, previous_state, :state_does_not_change) do
+      case calc_result do 
+        :no_result         -> {:no_result,                            previous_state}
+        %Pulse{} = pulse   -> {:useful_result,  pulse,                previous_state}
+        %Action{} = action -> {:useful_result,  action,               previous_state}
+        raw_data           -> {:useful_result,  Pulse.new(raw_data),  previous_state}
+      end
+    end
+
+    def assemble_result(calc_result, previous_state, :state_may_change) do
+      case calc_result do
+         :no_result              ->  {:no_result, previous_state}
+        {:no_result, next_state} ->  {:no_result, next_state}
+        
+        {:useful_result,            %Pulse{} = pulse, next_state} ->
+        {:useful_result,                       pulse, next_state}
+        
+        {:useful_result,            %Action{} = action, next_state} ->
+        {:useful_result,                        action, next_state}
+        
+        {:useful_result,           raw_data,  next_state} ->
+        {:useful_result, Pulse.new(raw_data), next_state}
+
+        %Pulse{} = pulse   ->  {:useful_result, pulse,                previous_state}
+        %Action{} = action ->  {:useful_result, action,               previous_state}
+        raw_data           ->  {:useful_result, Pulse.new(raw_data),  previous_state}
+      end
+    end
+
+  end
+
 end

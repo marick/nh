@@ -2,20 +2,76 @@ alias AppAnimal.{Cluster,System}
 
 defmodule Cluster.CalcTest do
   use ExUnit.Case, async: true
-  alias Cluster.Calc
-  alias System.Pulse
+  alias Cluster.Calc, as: UT
+  alias System.{Pulse,Action}
+  import FlowAssertions.TabularA
 
-  describe "handling of within-process calculation: arity 1 functions" do 
+  test "default pulses (only) are unwrapped" do
+    becomes = run_and_assert(&UT.pulse_or_pulse_data/1)
+
+    Pulse.new(1) |> becomes.(1)
+    Pulse.new(:default, 1) |> becomes.(1)
+    Pulse.new(:other, 1) |> becomes.(Pulse.new(:other, 1))
+  end
+
+
+  test "assembling a one-argument function's results (linear case)" do
+    becomes = run_and_assert(& UT.assemble_result &1, :there_is_no_state)
+
+    :no_result        |> becomes.({:no_result})
+    Pulse.new(5)      |> becomes.({:useful_result, Pulse.new(5)})
+    Action.new(:name) |> becomes.({:useful_result, Action.new(:name)})
+
+    # For convenience, a non-pulse, non-action result is wrapped as a default Pulse.
+    5                 |> becomes.({:useful_result, Pulse.new(5)})
+  end
+
+  test "assembling a one-argument function's results (circular/stateful case)" do
+    becomes = run_and_assert(& UT.assemble_result &1, "previous state", :state_does_not_change)
+
+    # Function return values are as above.
+
+    :no_result        |> becomes.({:no_result, "previous state"})
+    Pulse.new(5)      |> becomes.({:useful_result, Pulse.new(5), "previous state"})
+    Action.new(:name) |> becomes.({:useful_result, Action.new(:name), "previous state"})
+
+    # For convenience, a non-pulse, non-action result is wrapped as a default Pulse.
+    5                 |> becomes.({:useful_result, Pulse.new(5), "previous state"})
+  end
+
+
+  test "assembling a TWO-argument function's results (circular/stateful case)" do
+    becomes = run_and_assert(& UT.assemble_result &1, "unchanged", :state_may_change)
+
+    :no_result            |> becomes.({:no_result, "unchanged"})
+    {:no_result, "new"}   |> becomes.({:no_result, "new"})
+
+    {:useful_result, Pulse.new(5),  "new"} |> becomes.({:useful_result, Pulse.new(5),  "new"})
+    {:useful_result, Action.new(5), "new"} |> becomes.({:useful_result, Action.new(5), "new"})
+
+    # Convenience cases
+    {:useful_result, 5,  "new"}  |> becomes.({:useful_result, Pulse.new(5),       "new"})
+
+           Pulse.new(5)          |> becomes.({:useful_result, Pulse.new(5),        "unchanged"})
+          Action.new(:name)      |> becomes.({:useful_result, Action.new(:name),   "unchanged"})
+                     {:ok, 5}    |> becomes.({:useful_result, Pulse.new({:ok, 5}), "unchanged"})
+  end
+
+
+
+  
+  describe "examples of putting it all together" do 
     test "an arity-one function does not get nor change the state" do
       f = fn x -> x+1 end
-      actual = Calc.run(f, on: Pulse.new(1), with_state: "unchanged")
-      assert actual == {:pulse, Pulse.new(2), "unchanged"}
+      actual = UT.run(f, on: Pulse.new(1), with_state: "unchanged")
+      assert actual == {:useful_result, Pulse.new(2), "unchanged"}
     end
 
-    test "an arity-one function *may* return `:no_pulse`" do
-      f = fn _ -> :no_pulse end
-      assert Calc.run(f, on: Pulse.new(1), with_state: "unchanged") == {:no_pulse, "unchanged"}
+    test "an arity-one function *may* return `:no_result`" do
+      f = fn _ -> :no_result end
+      assert UT.run(f, on: Pulse.new(1), with_state: "unchanged") == {:no_result, "unchanged"}
     end
+
 
     test "a non-default pulse gets passed whole to the calc function" do
       # a plain value returned produces a :default pulse.
@@ -26,62 +82,42 @@ defmodule Cluster.CalcTest do
           default_data + 1
       end
 
-      special_to_default = Calc.run(f, on: Pulse.new(:special, "data"), with_state: "unchanged")
-      assert special_to_default == {:pulse, Pulse.new("datadata"), "unchanged"}
+      special_to_default = UT.run(f, on: Pulse.new(:special, "data"), with_state: "unchanged")
+      assert special_to_default == {:useful_result, Pulse.new("datadata"), "unchanged"}
 
-      # Note that the function is dual-purpsose
-      default_to_default = Calc.run(f, on: Pulse.new(5), with_state: "unchanged")
-      assert default_to_default == {:pulse, Pulse.new(6), "unchanged"}
+      # Note that the function is dual-purpose: `:default` pulses are unwrapped
+      default_to_default = UT.run(f, on: Pulse.new(5), with_state: "unchanged")
+      assert default_to_default == {:useful_result, Pulse.new(6), "unchanged"}
     end
-
-    test "a non-default pulse may also be the return value" do
-      f = fn
-        %Pulse{type: :special, data: data} ->
-          Pulse.new(:special_return, data <> data)
-      end
-
-      special_to_default = Calc.run(f, on: Pulse.new(:special, "data"), with_state: "unchanged")
-      assert special_to_default == {:pulse, Pulse.new(:special_return, "datadata"), "unchanged"}
-    end
-  end
-
-  describe "within-process calculation: arity 2 functions" do
+    
     test "an arity-two function may return both pulse data and a next state" do
       f = fn pulse_data, state ->
-        {:pulse, pulse_data+1, [pulse_data | state] }
+        {:useful_result, pulse_data+1, [pulse_data | state] }
       end
       
-      assert Calc.run(f, on: Pulse.new(1), with_state: []) == {:pulse, Pulse.new(2), [1]}
+      assert UT.run(f, on: Pulse.new(1), with_state: []) == {:useful_result, Pulse.new(2), [1]}
     end
-    
-    test "a non-default pulse type takes the whole pulse argument" do
-      f = fn %Pulse{type: :special, data:  pulse_data}, state ->
-        {:pulse, pulse_data+1, [pulse_data | state] }
-      end
 
-      actual = Calc.run(f, on: Pulse.new(:special, 1), with_state: [])
-      assert actual == {:pulse, Pulse.new(2), [1]}
-    end
-    
+
     test "a pulse return value is passed verbatim" do
       f = fn %Pulse{type: :special, data:  pulse_data}, state ->
-        {:pulse, Pulse.new(:different, pulse_data+1), [pulse_data | state] }
+        {:useful_result, Pulse.new(:different, pulse_data+1), [pulse_data | state] }
       end
 
-      actual = Calc.run(f, on: Pulse.new(:special, 1), with_state: [])
-      assert actual == {:pulse, Pulse.new(:different, 2), [1]}
+      actual = UT.run(f, on: Pulse.new(:special, 1), with_state: [])
+      assert actual == {:useful_result, Pulse.new(:different, 2), [1]}
+    end
+
+    test "function may also return a :no_result and a next state" do
+      f = fn _, _ -> {:no_result, "next state"} end
+      
+      assert UT.run(f, on: Pulse.new(1), with_state: 2) == {:no_result, "next state"}
     end
     
-    test "function may also return a :no_pulse and a next state" do
-      f = fn _, _ -> {:no_pulse, "next state"} end
+    test "or just a plain :no_result" do
+      f = fn _, _ -> :no_result end
       
-      assert Calc.run(f, on: Pulse.new(1), with_state: 2) == {:no_pulse, "next state"}
-    end
-    
-    test "or just a plain :no_pulse" do
-      f = fn _, _ -> :no_pulse end
-      
-      assert Calc.run(f, on: Pulse.new(1), with_state: "unchanged") == {:no_pulse, "unchanged"}
+      assert UT.run(f, on: Pulse.new(1), with_state: "unchanged") == {:no_result, "unchanged"}
     end
     
     test "without one of the two magic atoms returned, it's interpreted as the pulse value" do
@@ -89,61 +125,23 @@ defmodule Cluster.CalcTest do
         pulse_data + state + 3
       end
       
-      assert Calc.run(f, on: Pulse.new(1), with_state: 2) == {:pulse, Pulse.new(6), 2}
-    end
-  end
-  
-  describe "a task calculation" do
-    test "a plain return turns into a :pulse tuple" do
-      f = fn _ -> {:some_random, :tuple} end
-
-      assert Calc.run(f, on: Pulse.new(1)) == {:pulse, Pulse.new({:some_random, :tuple})}
-    end
-
-    test "can take a special pulse" do
-      f = fn %Pulse{type: :special} = pulse -> {:tuple, pulse.data} end
-
-      result = Calc.run(f, on: Pulse.new(:special, 1))
-      assert result == {:pulse, Pulse.new({:tuple, 1})}
-    end
-
-    test "can return a special or an explicit :default pulse" do
-      f = fn
-        %Pulse{type: :special} = pulse -> {:tuple, pulse.data}
-        %Pulse{type: :return_default} = pulse -> Pulse.new(pulse.data + 1) 
-        arg -> Pulse.new(:upgrade, arg * arg)
-      end
-
-      result = Calc.run(f, on: Pulse.new(:special, 1))
-      assert result == {:pulse, Pulse.new({:tuple, 1})}
-
-      result = Calc.run(f, on: Pulse.new(:return_default, 1))
-      assert result == {:pulse, Pulse.new(2)}
-
-      result = Calc.run(f, on: Pulse.new(20))
-      assert result == {:pulse, Pulse.new(:upgrade, 400)}
-    end
- 
-    test "a plain :no_pulse turns into a singleton tuple" do
-      f = fn _ -> :no_pulse end
-      
-      assert Calc.run(f, on: Pulse.new(1)) == {:no_pulse}
+      assert UT.run(f, on: Pulse.new(1), with_state: 2) == {:useful_result, Pulse.new(6), 2}
     end
   end
   
   test "maybe_pulse" do
-    Calc.maybe_pulse({:no_pulse}, & Process.exit(self(), {:crash, &1}))
-    Calc.maybe_pulse({:no_pulse, :state}, & Process.exit(self(), {:crash, &1}))
+    UT.maybe_pulse({:no_result}, & Process.exit(self(), {:crash, &1}))
+    UT.maybe_pulse({:no_result, :state}, & Process.exit(self(), {:crash, &1}))
 
-    assert Calc.maybe_pulse({:pulse, 5}, &(send self(), &1)) == {:pulse, 5}
+    assert UT.maybe_pulse({:useful_result, 5}, &(send self(), &1)) == {:useful_result, 5}
     assert_receive(5)
 
-    assert Calc.maybe_pulse({:pulse, 5, "state"}, &(send self(), &1)) == {:pulse, 5, "state"}
+    assert UT.maybe_pulse({:useful_result, 5, "state"}, &(send self(), &1)) == {:useful_result, 5, "state"}
     assert_receive(5)
   end
 
   test "next_state" do
-    assert Calc.next_state({:pulse, "retval", "state"}) == "state"
-    assert Calc.next_state({:no_pulse, "state"}) == "state"
+    assert UT.next_state({:useful_result, "retval", "state"}) == "state"
+    assert UT.next_state({:no_result, "state"}) == "state"
   end
 end

@@ -15,8 +15,9 @@ defmodule Cluster.Make do
   a `Pulse` or `Action` being sent.
 
   Every cluster created will have a `calc` function specified. Return values for linear
-  clusters are trivial: either a value or :no_pulse. But circular clusters can use
-  some convenience functions to avoid having to code up the right tuple.
+  clusters are trivial: either a value or :no_result. But circular clusters can use
+  some convenience functions to avoid having to code up the right tuple. See
+  Cluster.Calc for more about return values.
   """
   
   use AppAnimal
@@ -32,10 +33,9 @@ defmodule Cluster.Make do
            calc: calc)
   end
 
-
-  def pulse(pulse_data, next_state), do: {:pulse, pulse_data, next_state}
-  def no_pulse(next_state), do: {:no_pulse, next_state}
-  def pulse_and_save(data), do: {:pulse, data, data}
+  def no_pulse(next_state),          do: {:no_result, next_state}
+  def pulse(pulse_data, next_state), do: {:useful_result, pulse_data, next_state}
+  def pulse_and_save(data),          do: {:useful_result, data, data}
 
   
   # Linear Clusters
@@ -76,7 +76,7 @@ defmodule Cluster.Make do
     f = fn pulse_data ->
       if predicate.(pulse_data),
          do: pulse_data,
-         else: :no_pulse
+         else: :no_result
     end
 
     linear(name, f) |> labeled(:gate)
@@ -85,20 +85,23 @@ defmodule Cluster.Make do
 
   def forward_unique(name, opts \\ []) do
     alias Cluster.Throb
+
+    effectively_a_uuid = :erlang.make_ref()
+    
+    throb = Throb.counting_down_from(Duration.frequent_glance,
+                                     on_pulse: &Throb.pulse_increases_lifespan/2)
     opts =
       opts
-      # No pulse value can accidentally be equal to a new ref.
-      |> Keyword.put_new(:initial_value, :erlang.make_ref()) 
-      |> Keyword.put_new(:throb,
-                         Throb.counting_down_from(Duration.frequent_glance,
-                                                  on_pulse: &Throb.pulse_increases_lifespan/2))
+      |> Keyword.put_new(:initial_value, effectively_a_uuid) 
+      |> Keyword.put_new(:throb, throb)
     
-    f = fn pulse_data, previously ->
+    
+    calc = fn pulse_data, previously ->
       if pulse_data == previously,
-         do: :no_pulse,
-         else: {:pulse, pulse_data, pulse_data}
+         do: :no_result,
+         else: pulse_and_save(pulse_data)
     end
-    circular(name, f, opts) |> labeled(:forward_unique)
+    circular(name, calc, opts) |> labeled(:forward_unique)
   end
 
   def delay(name, duration) do
@@ -107,15 +110,13 @@ defmodule Cluster.Make do
     throb = Throb.counting_up_to(duration,
                                  on_pulse: &Throb.pulse_zeroes_lifespan/2,
                                  before_stopping: &Throb.pulse_current_value/2)
-
+    
     f_stash_pulse_data = fn pulse_data, _previously ->
-      {:no_pulse, pulse_data}
+      {:no_result, pulse_data}
     end
-
+    
     circular(name, f_stash_pulse_data, throb: throb)
   end
-  
-
 
   private do
     def labeled(cluster, label), do: Map.put(cluster, :label, label)

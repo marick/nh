@@ -24,7 +24,7 @@ defmodule AppAnimal.Cluster.LinearClusterTest do
     end
 
     test "choosing not to pulse" do
-      calc = fn _ -> :no_pulse end
+      calc = fn _ -> :no_result end
 
       given(trace([linear(:first, calc), to_test()]))
       |> send_test_pulse(to: :first, carrying: 3)

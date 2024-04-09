@@ -69,7 +69,7 @@ defmodule ClusterCase do
     # casting.
     kludge_a_calc = fn arg ->
       send(p_test, [arg, from: name])
-      :no_pulse
+      :no_result
     end
       
     %Cluster{name: name,
