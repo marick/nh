@@ -1,5 +1,5 @@
 alias AppAnimal.System
-alias System.{Pulse, Action, CannedResponse,Router}
+alias System.{Pulse, Action, CannedResponse}
 
 defmodule Pulse do
   use TypedStruct
@@ -51,33 +51,3 @@ defmodule CannedResponse do
       do: new(downstream, Pulse.new(data))
 end
 
-defmodule Router do
-  use TypedStruct
-  alias System.Switchboard
-
-  typedstruct do
-    field :map, %{atom => pid}, required: true
-  end
-
-  def new(map), do: %__MODULE__{map: map}
-
-  def pid_for(s_router, some_struct) do
-    s_router.map[some_struct.__struct__]
-  end
-
-  def cast_via(s_router, %Pulse{} = pulse, to: destinations) do
-    pid = pid_for(s_router, pulse)
-    Switchboard.cast__distribute_pulse(pid, carrying: pulse, to: destinations)
-  end
-  
-  def cast_via(s_router, %Pulse{} = pulse, from: source) do
-    pid = pid_for(s_router, pulse)
-    Switchboard.cast__distribute_pulse(pid, carrying: pulse, from: source)
-  end
-  
-  def cast_via(s_router, %Action{} = action) do
-    pid = pid_for(s_router, action)
-    GenServer.cast(pid, {:take_action, action})
-  end
-  
-end
