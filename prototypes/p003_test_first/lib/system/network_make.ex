@@ -1,5 +1,5 @@
 alias AppAnimal.System
-alias AppAnimal.System.Network
+alias System.Network
 
 defmodule Network.Make do
   @moduledoc """
@@ -20,12 +20,6 @@ defmodule Network.Make do
   def extend(network, at: name, with: trace) do
     existing = deeply_get_only(network, Network.l_cluster_named(name))
     trace(network, [existing | trace])
-  end
-
-  def put_routers(network, %System.Router{} = router) do
-    l_router = Network.l_clusters() |> Cluster.l_router()
-    
-    deeply_put(network, l_router, router)
   end
 
   private do 

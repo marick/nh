@@ -33,7 +33,7 @@ defmodule AppAnimal do
                  System.Action => p_affordances,
                  System.Pulse => p_switchboard})
 
-    Network.Make.put_routers(network, router)
+    Network.put_routers(network, router)
     |> then(& GenServer.call(p_switchboard, accept_network: &1))
 
     %__MODULE__{

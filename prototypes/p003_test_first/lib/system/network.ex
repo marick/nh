@@ -39,10 +39,6 @@ defmodule Network do
           do: l_clusters_by_name() |> Lens.key!(name)
 
   @doc false
-  deflens l_pid_named(name),
-          do: l_throbbers_by_name() |> Lens.key!(name)
-
-  @doc false
   deflens l_downstream_of(name),
           do: l_cluster_named(name) |> Lens.key!(:downstream)
 
@@ -52,6 +48,16 @@ defmodule Network do
 
   def new(cluster_map_or_keywords) do
     %__MODULE__{clusters_by_name: cluster_map_or_keywords |> Enum.into(%{})}
+  end
+
+  def put_routers(network, %System.Router{} = router) do
+    l_router = l_clusters() |> Cluster.l_router()
+    
+    deeply_put(network, l_router, router)
+  end
+
+  def name_to_pid(network, name) do
+    deeply_get_only(network, l_throbbers_by_name() |> Lens.key!(name))
   end
 
   @doc """
