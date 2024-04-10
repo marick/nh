@@ -23,7 +23,7 @@ defmodule Network.Throb do
     throbbing_names(network)
     |> Enum.map(& network.clusters_by_name[&1])
   end
-R
+
   # Working with clusters
   @doc "Cause all active clusters to throb."
   def start_throbbing(network, names) do

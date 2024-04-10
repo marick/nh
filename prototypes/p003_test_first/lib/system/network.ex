@@ -50,7 +50,6 @@ defmodule Network do
   deflens l_irrelevant_names,
           do: l_clusters() |> Cluster.l_never_throbs |> Lens.key!(:name)
 
-  
   def new(cluster_map_or_keywords) do
     %__MODULE__{clusters_by_name: cluster_map_or_keywords |> Enum.into(%{})}
   end

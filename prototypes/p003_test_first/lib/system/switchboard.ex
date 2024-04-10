@@ -1,5 +1,5 @@
 alias AppAnimal.System
-alias AppAnimal.System.Network
+alias System.Network
 
 
 defmodule System.Switchboard do
