@@ -105,8 +105,7 @@ defmodule System.Switchboard do
     # This is used for testing as a way to get internal values of clusters.
     def handle_call([forward: getter_name, to: circular_cluster_name],
                     _from, s_switchboard) do
-      pid = Network.name_to_pid(s_switchboard.network, circular_cluster_name)
-      result = GenServer.call(pid, getter_name)
+      result = Network.get_from_cluster(s_switchboard.network, circular_cluster_name, getter_name)
       continue(s_switchboard, returning: result)
     end
 

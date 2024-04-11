@@ -28,6 +28,7 @@ defmodule Network do
 
     field :clusters_by_name, %{atom => Cluster.t}, default: %{}
     field :throbbers_by_name, %{atom => pid}, default: %{}
+    field :p_circular_clusters, pid, required: true
   end
 
   @doc false
@@ -47,7 +48,9 @@ defmodule Network do
           do: l_clusters() |> Cluster.l_never_throbs |> Lens.key!(:name)
 
   def new(cluster_map_or_keywords) do
-    %__MODULE__{clusters_by_name: cluster_map_or_keywords |> Enum.into(%{})}
+    clusters = cluster_map_or_keywords |> Enum.into(%{})
+    {:ok, p_circular_clusters} = GenServer.start_link(Network.CircularClusters, [])
+    %__MODULE__{clusters_by_name: clusters, p_circular_clusters: p_circular_clusters}
   end
 
   def put_routers(network, %System.Router{} = router) do
@@ -58,6 +61,11 @@ defmodule Network do
 
   def name_to_pid(network, name) do
     deeply_get_only(network, l_throbbers_by_name() |> Lens.key!(name))
+  end
+
+  def get_from_cluster(network, circular_cluster_name, getter_name) do
+    pid = Network.name_to_pid(network, circular_cluster_name)
+    GenServer.call(pid, getter_name)
   end
 
   @doc """
