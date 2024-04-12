@@ -85,7 +85,6 @@ defmodule System.Switchboard do
     """
     def info__down(_p_switchboard, {:DOWN, _, :process, _pid, :normal}),
         do:  :DO_NOT_CALL_FOR_DOCUMENTATION_ONLY
-
   end
 
   runs_in_receiver do 

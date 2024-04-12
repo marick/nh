@@ -8,9 +8,7 @@ defmodule Network.CircularClustersTest do
   alias System.Pulse
 
   describe "construction of a throbber" do 
-  
     test "A throbber is initialized with a set of *circular* clusters" do
-
       original = circular(:will_throb)
       pid = start_link_supervised!({UT, [original]})
       
@@ -22,13 +20,12 @@ defmodule Network.CircularClustersTest do
   end
 
   @tag :test_uses_sleep
-  test "sending a pulse" do
+  test "the life cycle of a cluster, from the point of view of the network" do
     p_test = self()
     kludge_a_calc = fn arg ->
       send(p_test, {self(), arg})
       :no_result
     end
-
   
     original = circular(:original, kludge_a_calc)
     unused = circular(:unused)
@@ -48,19 +45,15 @@ defmodule Network.CircularClustersTest do
     Process.exit(p_cluster, :some_non_normal_value)
     Process.sleep(10)
     assert [] == UT.throbbing_pids(p_ut)
-
   end
-  
-  #   test "dropping pids from the list of ones throbbing", %{network: original} do
-  #     # in response to such a pid going idle
-  #     network = UT.start_throbbing(original, [:will_throb])
-  #     assert [pid] = UT.throbbing_pids(network)
 
-  #     network
-  #     |> UT.pid_has_aged_out(pid)
-  #     |> UT.throbbing_pids()
-  #     |> assert_equals([])
-  #   end
-  # end
-  
+  test "the UT sends throb messages" do
+    p_ut = start_link_supervised!({UT, {[], throb_interval: 10}})
+    UT.throb_to_test(p_ut, name: :irrelevant, pid: self())
+
+    Process.sleep(40)
+    assert {:"$gen_cast", [throb: 1]} == assert_receive(_)
+    assert {:"$gen_cast", [throb: 1]} == assert_receive(_)
+    assert {:"$gen_cast", [throb: 1]} == assert_receive(_)
+  end
 end
