@@ -88,16 +88,21 @@ defmodule Network do
   def deliver_pulse(network, names, %Pulse{} = pulse) do
     alias Cluster.Shape
 
-    all_throbbing = Throb.start_throbbing(network, names)
-    for name <- names do
+    {circular_names, linear_names} = 
+      Enum.split_with(names, fn name ->
+        (network.clusters_by_name[name].shape.__struct__ == Shape.Circular)
+      end)
+    
+    all_throbbing = Throb.start_throbbing(network, circular_names)
+    
+    for name <- circular_names do
+      p_process = all_throbbing.throbbers_by_name[name]
+      send_pulse_into_genserver(p_process, pulse)
+    end
+    
+    for name <- linear_names do
       cluster = all_throbbing.clusters_by_name[name]
-      case cluster.shape do
-        %Shape.Circular{} ->
-          p_process = all_throbbing.throbbers_by_name[name]
-          send_pulse_into_genserver(p_process, pulse)
-        %Shape.Linear{} ->
-          send_pulse_into_task(cluster, pulse)
-      end
+      send_pulse_into_task(cluster, pulse)
     end
     all_throbbing
   end
