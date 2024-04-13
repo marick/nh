@@ -1,7 +1,6 @@
-alias AppAnimal.System
-alias System.Network
+alias AppAnimal.Network
 
-defmodule Network.Make do
+defmodule Network.ClusterMap do
   @moduledoc """
   Functions for, first, creating a `Network` and, next, linking all the
   clusters in the network into the larger `AppAnimal`, which will then

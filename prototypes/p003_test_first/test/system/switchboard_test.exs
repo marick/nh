@@ -1,10 +1,10 @@
-alias AppAnimal.{System, Network}
+alias AppAnimal.System
 
 
 defmodule System.SwitchboardTest do
   use ClusterCase, async: true
   alias System.ActivityLogger
-  alias Cluster.Make
+  alias Cluster.Make, as: UT
   
   ## The switchboard is mostly tested via the different kinds of clusters.
 
@@ -13,8 +13,8 @@ defmodule System.SwitchboardTest do
               "prints log entries.")
     IO.puts("=== By doing so, I hope to catch cases where log printing breaks.")
 
-    trace = [Make.circular(:first, & &1+1),
-             Make.linear(:second, & &1+1),
+    trace = [UT.circular(:first, & &1+1),
+             UT.linear(:second, & &1+1),
              to_test()]
     a = AppAnimal.enliven(trace)
 

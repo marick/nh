@@ -144,7 +144,7 @@ defmodule ClusterCase do
       import AppAnimal.ActivityLogAssertions
       use FlowAssertions
       import Cluster.Make
-      import Network.Make
+      import AppAnimal.Network.ClusterMap
       alias AppAnimal.Duration
     end
   end

@@ -3,7 +3,7 @@ defmodule AppAnimal do
   alias System.{Switchboard, AffordanceLand, Network, ActivityLogger}
   use AppAnimal.Extras.TestAwareProcessStarter
   use TypedStruct
-  alias Network.Make
+  alias AppAnimal.Network.ClusterMap
 
   typedstruct do
     plugin TypedStructLens, prefix: :l_
@@ -16,7 +16,7 @@ defmodule AppAnimal do
   def enliven(trace_or_network, options \\ [])
 
   def enliven(trace, options)               when is_list(trace) do
-    Make.trace(trace) |> enliven(options)
+    ClusterMap.trace(trace) |> enliven(options)
   end
 
   def enliven(cluster_map, switchboard_options) when is_map(cluster_map) do

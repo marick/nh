@@ -1,10 +1,10 @@
-alias AppAnimal.System.Network
+alias AppAnimal.Network
 
-defmodule Network.MakeTest do
+defmodule Network.ClusterMapTest do
   use ClusterCase, async: true
   # Although `trace` and similar functions are provided, module-prefix-free, from
   # ClusterCase, I'll qualify them to make it clearer what's being tested.
-  alias Network.Make, as: UT
+  alias AppAnimal.Network.ClusterMap, as: UT
 
 
   defp named(names) when is_list(names),
