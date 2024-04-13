@@ -3,7 +3,7 @@ AppAnimal.System
 defmodule System.RouterTest do
   use ClusterCase, async: true
   alias System.Router, as: UT
-  alias System.{Pulse,Action}
+  alias System.{Pulse,Action,Delay}
 
   describe "system router" do
     test "creation" do
@@ -49,6 +49,19 @@ defmodule System.RouterTest do
 
       actual = assert_receive(_)
       expected = as_cast_delivers({:take_action, action})
+      assert actual == expected
+    end
+
+    test "sending a delay" do
+      p_timer = start_link_supervised!(Network.Timer)
+      
+      router = UT.new(%{Delay => p_timer})
+
+      action = Delay.new(3, "some data")
+      UT.cast_via(router, action)
+
+      actual = assert_receive(_)
+      expected = as_cast_delivers(Pulse.new("some data"))
       assert actual == expected
     end
   end

@@ -1,9 +1,9 @@
-alias AppAnimal.System
+alias AppAnimal.{System,Network}
 
 defmodule System.Router do
   use AppAnimal
   use TypedStruct
-  alias System.{Switchboard,Pulse,Action}
+  alias System.{Switchboard,Pulse,Action,Delay}
 
   typedstruct do
     field :map, %{atom => pid}, required: true
@@ -24,6 +24,11 @@ defmodule System.Router do
   def cast_via(s_router, %Action{} = action) do
     pid = pid_for(s_router, action)
     GenServer.cast(pid, {:take_action, action})
+  end
+
+  def cast_via(s_router, %Delay{} = delay) do
+    pid = pid_for(s_router, delay)
+    Network.Timer.cast(pid, delay.pulse, after: delay.delay)
   end
 
   private do 

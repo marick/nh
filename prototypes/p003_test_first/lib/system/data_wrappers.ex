@@ -1,5 +1,5 @@
 alias AppAnimal.System
-alias System.{Pulse, Action, CannedResponse}
+alias System.{Pulse, Action, CannedResponse, Delay}
 
 defmodule Pulse do
   use TypedStruct
@@ -51,3 +51,15 @@ defmodule CannedResponse do
       do: new(downstream, Pulse.new(data))
 end
 
+defmodule Delay do
+  use TypedStruct
+
+  typedstruct do
+    field :delay, Duration.t, required: true
+    field :pulse, Pulse.t,    required: true
+  end
+
+  def new(delay, %Pulse{} = pulse),
+      do: %__MODULE__{delay: delay, pulse: pulse}
+  def new(delay, pulse_data), do: new(delay, Pulse.new(pulse_data))
+end

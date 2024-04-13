@@ -34,7 +34,8 @@ defmodule AppAnimal do
 
     router = System.Router.new(%{
                  System.Action => p_affordances,
-                 System.Pulse => p_switchboard})
+                 System.Pulse => p_switchboard,
+                 System.Delay => p_timer})
 
     network =
       cluster_map
