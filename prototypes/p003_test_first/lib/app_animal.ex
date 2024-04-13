@@ -1,4 +1,4 @@
-alias AppAnimal.{System,Network,Cluster}
+alias AppAnimal.{System,Network,Cluster,Duration}
 
 defmodule AppAnimal do
   alias System.{Switchboard, AffordanceLand, ActivityLogger}
@@ -43,6 +43,10 @@ defmodule AppAnimal do
       |> Network.new(network_options)
 
     GenServer.call(p_switchboard, accept_network: network)
+    throb_interval = Keyword.get(network_options, :throb_interval, Duration.quantum())
+    Network.Timer.cast(p_timer, :time_to_throb,
+                       every: throb_interval,
+                       to: network.p_circular_clusters)
 
     %__MODULE__{
       p_switchboard: p_switchboard,

@@ -42,7 +42,7 @@ defmodule Network.CircularClusters do
         for c <- clusters, into: %{} do
           {c.name, CircularProcess.State.from_cluster(c)}
         end
-      schedule_next_throb(throb_interval)
+#      schedule_next_throb(throb_interval)
       
       {:ok, %__MODULE__{name_to_cluster: indexed, throb_interval: throb_interval}}
     end
@@ -57,6 +57,11 @@ defmodule Network.CircularClusters do
         GenServer.cast(pid, [handle_pulse: pulse])
       end
       continue(s_mutated)
+    end
+
+    def handle_cast(:time_to_throb, s_state) do
+      throb(BiMap.values(s_state.name_to_pid))
+      continue(s_state)
     end
 
     def handle_info({:DOWN, _, :process, pid, _}, s_state) do

@@ -7,7 +7,7 @@ defmodule Network.TimerTest do
   test "repeating" do
     pid = start_link_supervised!(UT)
 
-    assert :ok == UT.cast(pid, "payload", every: 10)
+    assert :ok == UT.cast(pid, "payload", every: 10, to: self())
 
     assert_receive({:"$gen_cast", "payload"})
     assert_receive({:"$gen_cast", "payload"})
@@ -22,5 +22,4 @@ defmodule Network.TimerTest do
     assert_receive({:"$gen_cast", "payload"})
     refute_receive(_)
   end
-  
 end

@@ -9,14 +9,13 @@ defmodule Network.Timer do
       GenServer.start_link(__MODULE__, :ok)
     end
     
-    def cast(pid, payload, every: millis) do
-      GenServer.call(pid, {:cast_every, millis, payload})
+    def cast(self, payload, every: millis, to: destination_pid) do
+      GenServer.call(self, {:cast_every, millis, payload, destination_pid})
     end
     
-    def cast(pid, payload, after: millis) do
-      GenServer.call(pid, {:cast_after, millis, payload})
+    def cast(self, payload, after: millis) do
+      GenServer.call(self, {:cast_after, millis, payload})
     end
-    
   end
 
   runs_in_receiver do
@@ -26,8 +25,8 @@ defmodule Network.Timer do
     end
     
     @impl GenServer
-    def handle_call({:cast_every, millis, payload}, {on_behalf_of, _}, :ok) do
-      repeating(every: millis, sending: payload, to: on_behalf_of)
+    def handle_call({:cast_every, millis, payload, p_destination}, _from, :ok) do
+      repeating(every: millis, sending: payload, to: p_destination)
       continue(:ok, returning: :ok)
     end
 

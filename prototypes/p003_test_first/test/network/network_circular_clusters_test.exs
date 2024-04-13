@@ -45,14 +45,4 @@ defmodule Network.CircularClustersTest do
     Process.sleep(10)
     assert [] == UT.throbbing_pids(p_ut)
   end
-
-  test "the UT sends throb messages" do
-    p_ut = start_link_supervised!({UT, {[], throb_interval: 10}})
-    UT.throb_to_test(p_ut, name: :irrelevant, pid: self())
-
-    Process.sleep(40)
-    assert {:"$gen_cast", [throb: 1]} == assert_receive(_)
-    assert {:"$gen_cast", [throb: 1]} == assert_receive(_)
-    assert {:"$gen_cast", [throb: 1]} == assert_receive(_)
-  end
 end
