@@ -1,10 +1,11 @@
-alias AppAnimal.{System,Network}
+alias AppAnimal.{System,Network,Cluster}
 
 defmodule AppAnimal do
   alias System.{Switchboard, AffordanceLand, ActivityLogger}
   alias Network.ClusterMap
   use AppAnimal.Extras.TestAwareProcessStarter
   use TypedStruct
+  import AppAnimal.Extras.Kernel
 
   typedstruct do
     plugin TypedStructLens, prefix: :l_
@@ -34,9 +35,12 @@ defmodule AppAnimal do
                  System.Action => p_affordances,
                  System.Pulse => p_switchboard})
 
-    Network.new(cluster_map)
-    |> Network.put_routers(router)
-    |> then(& GenServer.call(p_switchboard, accept_network: &1))
+    network =
+      cluster_map
+      |> deeply_put(Lens.map_values |> Cluster.l_router, router)
+      |> Network.new
+
+    GenServer.call(p_switchboard, accept_network: network)
 
     %__MODULE__{
       p_switchboard: p_switchboard,

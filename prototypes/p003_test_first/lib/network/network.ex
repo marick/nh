@@ -60,12 +60,6 @@ defmodule Network do
     %__MODULE__{clusters_by_name: cluster_map, p_circular_clusters: p_circular_clusters}
   end
 
-  def put_routers(network, %System.Router{} = router) do
-    l_router = l_clusters() |> Cluster.l_router()
-    
-    deeply_put(network, l_router, router)
-  end
-
   def name_to_pid(network, name) do
     deeply_get_only(network, l_throbbers_by_name() |> Lens.key!(name))
   end
@@ -106,6 +100,10 @@ defmodule Network do
       p_process = all_throbbing.throbbers_by_name[name]
       send_pulse_into_genserver(p_process, pulse)
     end
+
+    # Network.CircularClusters.cast__distribute_pulse(network.p_circular_clusters,
+    #                                                 carrying: pulse,
+    #                                                 to: circular_names)
     
     for name <- linear_names do
       cluster = all_throbbing.clusters_by_name[name]
