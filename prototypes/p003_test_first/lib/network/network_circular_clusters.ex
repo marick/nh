@@ -36,17 +36,18 @@ defmodule Network.CircularClusters do
   end
 
   runs_in_receiver do 
-    def init({clusters, throb_interval: interval}) do
+    def init({clusters, opts}) do
+      throb_interval = Keyword.get(opts, :throb_interval, Duration.quantum())
       indexed =
         for c <- clusters, into: %{} do
           {c.name, CircularProcess.State.from_cluster(c)}
         end
-      schedule_next_throb(interval)
+      schedule_next_throb(throb_interval)
       
-      {:ok, %__MODULE__{name_to_cluster: indexed, throb_interval: interval}}
+      {:ok, %__MODULE__{name_to_cluster: indexed, throb_interval: throb_interval}}
     end
 
-    def init(clusters), do: init({clusters, throb_interval: Duration.quantum()})
+    def init(clusters), do: init({clusters, []})  # convenience for tests
 
     def handle_cast({:distribute_pulse, carrying: %Pulse{} = pulse, to: names}, s_state) do
       s_mutated = ensure_started(s_state, names)

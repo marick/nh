@@ -46,7 +46,7 @@ defmodule Network do
   deflens l_irrelevant_names,
           do: l_clusters() |> Cluster.l_never_throbs |> Lens.key!(:name)
 
-  def new(%{} = cluster_map) do
+  def new(%{} = cluster_map, opts \\ []) do
     alias Cluster.Shape
     
     circular_clusters =
@@ -56,7 +56,7 @@ defmodule Network do
       end)
 
     {:ok, p_circular_clusters} =
-      GenServer.start_link(Network.CircularClusters, circular_clusters)
+      Network.CircularClusters.start_link({circular_clusters, opts})
     %__MODULE__{clusters_by_name: cluster_map, p_circular_clusters: p_circular_clusters}
   end
 

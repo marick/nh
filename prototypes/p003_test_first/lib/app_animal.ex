@@ -21,10 +21,10 @@ defmodule AppAnimal do
     ClusterMap.trace(trace) |> enliven(options)
   end
 
-  def enliven(cluster_map, switchboard_options) when is_map(cluster_map) do
+  def enliven(cluster_map, network_options) when is_map(cluster_map) do
     {:ok, p_logger} = ActivityLogger.start_link
     switchboard_struct = struct(Switchboard,
-                                Keyword.merge(switchboard_options,
+                                Keyword.merge(network_options,   # DELETE ME
                                               p_logger: p_logger))
     p_switchboard = compatibly_start_link(Switchboard, switchboard_struct)
     p_affordances = compatibly_start_link(AffordanceLand,
@@ -38,7 +38,7 @@ defmodule AppAnimal do
     network =
       cluster_map
       |> deeply_put(Lens.map_values |> Cluster.l_router, router)
-      |> Network.new
+      |> Network.new(network_options)
 
     GenServer.call(p_switchboard, accept_network: network)
 
