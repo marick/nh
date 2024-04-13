@@ -19,7 +19,7 @@ defmodule AppAnimal do
     Make.trace(trace) |> enliven(options)
   end
 
-  def enliven(network, switchboard_options) when is_map(network) do
+  def enliven(cluster_map, switchboard_options) when is_map(cluster_map) do
     {:ok, p_logger} = ActivityLogger.start_link
     switchboard_struct = struct(Switchboard,
                                 Keyword.merge(switchboard_options,
@@ -33,7 +33,8 @@ defmodule AppAnimal do
                  System.Action => p_affordances,
                  System.Pulse => p_switchboard})
 
-    Network.put_routers(network, router)
+    Network.new(cluster_map)
+    |> Network.put_routers(router)
     |> then(& GenServer.call(p_switchboard, accept_network: &1))
 
     %__MODULE__{
