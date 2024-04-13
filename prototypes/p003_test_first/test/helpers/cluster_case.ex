@@ -142,7 +142,7 @@ defmodule ClusterCase do
   Instruct all throbbing clusters to take a throb.
   """
   def throb_all_active(pids),
-      do: send(pids.p_circular_clusters, :time_to_throb)
+      do: GenServer.cast(pids.p_circular_clusters, :time_to_throb)
 
   defmacro __using__(opts) do
     quote do

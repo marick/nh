@@ -36,18 +36,13 @@ defmodule Network.CircularClusters do
   end
 
   runs_in_receiver do 
-    def init({clusters, opts}) do
-      throb_interval = Keyword.get(opts, :throb_interval, Duration.quantum())
+    def init(clusters) do
       indexed =
         for c <- clusters, into: %{} do
           {c.name, CircularProcess.State.from_cluster(c)}
         end
-#      schedule_next_throb(throb_interval)
-      
-      {:ok, %__MODULE__{name_to_cluster: indexed, throb_interval: throb_interval}}
+      {:ok, %__MODULE__{name_to_cluster: indexed}}
     end
-
-    def init(clusters), do: init({clusters, []})  # convenience for tests
 
     def handle_cast({:distribute_pulse, carrying: %Pulse{} = pulse, to: names}, s_state) do
       s_mutated = ensure_started(s_state, names)
@@ -69,12 +64,6 @@ defmodule Network.CircularClusters do
       |> BiMap.delete_value(pid)
       |> then(& Map.put(s_state, :name_to_pid, &1))
       |> continue
-    end
-
-    def handle_info(:time_to_throb, s_state) do
-      throb(BiMap.values(s_state.name_to_pid))
-      schedule_next_throb(s_state.throb_interval)
-      continue(s_state)
     end
 
     # This is used for testing as a way to get internal values of clusters.
@@ -132,10 +121,6 @@ defmodule Network.CircularClusters do
         
         new_bimap = Enum.reduce(names, s_state.name_to_pid, reducer)
         %{s_state | name_to_pid: new_bimap}
-      end
-      
-      def schedule_next_throb(pulse_delay) do
-        Process.send_after(self(), :time_to_throb, pulse_delay)
       end
       
       def throb(pids) do

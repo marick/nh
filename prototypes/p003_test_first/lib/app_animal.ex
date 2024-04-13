@@ -40,7 +40,7 @@ defmodule AppAnimal do
     network =
       cluster_map
       |> deeply_put(Lens.map_values |> Cluster.l_router, router)
-      |> Network.new(network_options)
+      |> Network.new
 
     GenServer.call(p_switchboard, accept_network: network)
     throb_interval = Keyword.get(network_options, :throb_interval, Duration.quantum())
