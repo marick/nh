@@ -4,7 +4,7 @@ defmodule Network.ClusterMapTest do
   use ClusterCase, async: true
   # Although `trace` and similar functions are provided, module-prefix-free, from
   # ClusterCase, I'll qualify them to make it clearer what's being tested.
-  alias AppAnimal.Network.ClusterMap, as: UT
+  alias Network.ClusterMap, as: UT
 
 
   defp named(names) when is_list(names),

@@ -1,5 +1,4 @@
-alias AppAnimal.System
-alias System.Network
+alias AppAnimal.{Network,System}
 
 defmodule Network do
   @moduledoc """

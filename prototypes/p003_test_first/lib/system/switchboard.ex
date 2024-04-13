@@ -1,6 +1,4 @@
-alias AppAnimal.System
-alias System.Network
-
+alias AppAnimal.{System,Network}
 
 defmodule System.Switchboard do
   @moduledoc """
@@ -20,7 +18,7 @@ defmodule System.Switchboard do
   use AppAnimal
   use AppAnimal.GenServer
   use TypedStruct
-  alias System.{ActivityLogger,Network,Pulse}
+  alias System.{ActivityLogger,Pulse}
   alias AppAnimal.Duration
 
   typedstruct do

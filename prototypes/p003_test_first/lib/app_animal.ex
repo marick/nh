@@ -1,9 +1,10 @@
+alias AppAnimal.{System,Network}
+
 defmodule AppAnimal do
-  alias AppAnimal.System
-  alias System.{Switchboard, AffordanceLand, Network, ActivityLogger}
+  alias System.{Switchboard, AffordanceLand, ActivityLogger}
+  alias Network.ClusterMap
   use AppAnimal.Extras.TestAwareProcessStarter
   use TypedStruct
-  alias AppAnimal.Network.ClusterMap
 
   typedstruct do
     plugin TypedStructLens, prefix: :l_

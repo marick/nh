@@ -1,4 +1,3 @@
-alias AppAnimal.System.Network
 alias AppAnimal.Network
 
 defmodule Network.ThrobTest do

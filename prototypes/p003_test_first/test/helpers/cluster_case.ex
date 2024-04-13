@@ -135,16 +135,15 @@ defmodule ClusterCase do
     quote do
       use ExUnit.Case, unquote(opts)
       use AppAnimal
-      alias AppAnimal.System
+      alias AppAnimal.{System,Network}
       alias System.Switchboard
       alias System.AffordanceLand
-      alias System.Network
       alias System.ActivityLogger
       import ClusterCase
       import AppAnimal.ActivityLogAssertions
       use FlowAssertions
       import Cluster.Make
-      import AppAnimal.Network.ClusterMap
+      import Network.ClusterMap
       alias AppAnimal.Duration
     end
   end

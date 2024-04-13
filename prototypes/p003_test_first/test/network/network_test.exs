@@ -2,7 +2,7 @@ alias AppAnimal.Network
 
 defmodule Network.NetworkTest do
   use ClusterCase, async: true
-  alias System.Network, as: UT
+  alias Network, as: UT
   
   defp named(names) when is_list(names),
        do: Enum.map(names, &named/1)
