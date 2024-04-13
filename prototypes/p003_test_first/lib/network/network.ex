@@ -1,4 +1,4 @@
-alias AppAnimal.{Network,System}
+alias AppAnimal.{Network,System,Cluster}
 
 defmodule Network do
   @moduledoc """
@@ -46,10 +46,18 @@ defmodule Network do
   deflens l_irrelevant_names,
           do: l_clusters() |> Cluster.l_never_throbs |> Lens.key!(:name)
 
-  def new(cluster_map_or_keywords) do
-    clusters = cluster_map_or_keywords |> Enum.into(%{})
-    {:ok, p_circular_clusters} = GenServer.start_link(Network.CircularClusters, [])
-    %__MODULE__{clusters_by_name: clusters, p_circular_clusters: p_circular_clusters}
+  def new(%{} = cluster_map) do
+    alias Cluster.Shape
+    
+    circular_clusters =
+      Map.values(cluster_map)
+      |> Enum.filter(fn cluster ->
+        cluster.shape.__struct__ == Shape.Circular
+      end)
+
+    {:ok, p_circular_clusters} =
+      GenServer.start_link(Network.CircularClusters, circular_clusters)
+    %__MODULE__{clusters_by_name: cluster_map, p_circular_clusters: p_circular_clusters}
   end
 
   def put_routers(network, %System.Router{} = router) do
