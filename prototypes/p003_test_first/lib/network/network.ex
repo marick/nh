@@ -59,14 +59,14 @@ defmodule Network do
     %__MODULE__{clusters_by_name: cluster_map, p_circular_clusters: p_circular_clusters}
   end
 
-  def name_to_pid(network, name) do
-    deeply_get_only(network, l_throbbers_by_name() |> Lens.key!(name))
-  end
+  def name_to_pid(network, name),
+      do: deeply_get_only(network, l_throbbers_by_name() |> Lens.key!(name))
 
-  def get_from_cluster(network, circular_cluster_name, getter_name) do
-    pid = Network.name_to_pid(network, circular_cluster_name)
-    GenServer.call(pid, getter_name)
-  end
+  def name_to_cluster(network, name),
+      do: network.clusters_by_name[name]
+
+  def downstream_of(network, name),
+      do: name_to_cluster(network, name).downstream
 
   @doc """
   Send a pulse to a mixture of "throbbing" and linear
@@ -92,13 +92,6 @@ defmodule Network do
       Enum.split_with(names, fn name ->
         (network.clusters_by_name[name].shape.__struct__ == Shape.Circular)
       end)
-    
-    # all_throbbing = Throb.start_throbbing(network, circular_names)
-    
-    # for name <- circular_names do
-    #   p_process = all_throbbing.throbbers_by_name[name]
-    #   send_pulse_into_genserver(p_process, pulse)
-    # end
 
     Network.CircularClusters.cast__distribute_pulse(network.p_circular_clusters,
                                                     carrying: pulse,
@@ -108,7 +101,7 @@ defmodule Network do
       cluster = network.clusters_by_name[name]
       send_pulse_into_task(cluster, pulse)
     end
-    network
+    :no_return_value
   end
 
   private do 
