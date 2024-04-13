@@ -72,6 +72,14 @@ defmodule Network.CircularClusters do
       continue(s_state)
     end
 
+    # This is used for testing as a way to get internal values of clusters.
+    def handle_call([forward: getter_name, to: name], _from, s_state) do
+      result = 
+        BiMap.get(s_state.name_to_pid, name)
+        |> GenServer.call(getter_name)
+      continue(s_state, returning: result)
+    end
+
     def handle_call(:names, _from, s_state) do
       keys = Map.keys(s_state.name_to_cluster)
       continue(s_state, returning: keys)

@@ -21,6 +21,10 @@ defmodule ClusterCase do
   Example:
       send_test_pulse(p_switchboard, to: :first, carrying: 1)
   """
+  def send_test_pulse(%AppAnimal{} = pids, to: destination_name, carrying: pulse_data) do
+    send_test_pulse(pids.p_switchboard, to: destination_name, carrying: pulse_data)
+  end
+
   def send_test_pulse(p_switchboard, to: destination_name, carrying: pulse_data) do
     pulse = Pulse.new(pulse_data)
     Switchboard.cast__distribute_pulse(p_switchboard,
@@ -28,6 +32,9 @@ defmodule ClusterCase do
                                        to: [destination_name])
   end
 
+
+
+  
   @doc """
   Cause `AffordanceLand` to send a pulse to the given `PerceptionEdge`.
   
@@ -123,13 +130,19 @@ defmodule ClusterCase do
 
   @doc """
   Used by tests to synchronously access one active process's internal state.
-  """
-  def peek_at(p_switchboard, internal_state_name, of: cluster_name),
-      do: GenServer.call(p_switchboard, forward: internal_state_name, to: cluster_name)
 
-  @doc ""
-  def throb_all_active(p_switchboard),
-      do: send(p_switchboard, :time_to_throb)
+  This applies only to throbbing clusters, since only they have state. Note also that
+  the process better be running
+  """
+  def peek_at(%AppAnimal{} = pids, internal_state_name, of: cluster_name),
+      do: GenServer.call(pids.p_circular_clusters,
+                         forward: internal_state_name, to: cluster_name)
+
+  @doc """
+  Instruct all throbbing clusters to take a throb.
+  """
+  def throb_all_active(pids),
+      do: send(pids.p_circular_clusters, :time_to_throb)
 
   defmacro __using__(opts) do
     quote do

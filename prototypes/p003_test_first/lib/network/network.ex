@@ -17,7 +17,6 @@ defmodule Network do
 
   """
   
-  alias Network.Throb
   use AppAnimal
   use TypedStruct
   alias System.Pulse
@@ -94,22 +93,22 @@ defmodule Network do
         (network.clusters_by_name[name].shape.__struct__ == Shape.Circular)
       end)
     
-    all_throbbing = Throb.start_throbbing(network, circular_names)
+    # all_throbbing = Throb.start_throbbing(network, circular_names)
     
-    for name <- circular_names do
-      p_process = all_throbbing.throbbers_by_name[name]
-      send_pulse_into_genserver(p_process, pulse)
-    end
+    # for name <- circular_names do
+    #   p_process = all_throbbing.throbbers_by_name[name]
+    #   send_pulse_into_genserver(p_process, pulse)
+    # end
 
-    # Network.CircularClusters.cast__distribute_pulse(network.p_circular_clusters,
-    #                                                 carrying: pulse,
-    #                                                 to: circular_names)
+    Network.CircularClusters.cast__distribute_pulse(network.p_circular_clusters,
+                                                    carrying: pulse,
+                                                    to: circular_names)
     
     for name <- linear_names do
-      cluster = all_throbbing.clusters_by_name[name]
+      cluster = network.clusters_by_name[name]
       send_pulse_into_task(cluster, pulse)
     end
-    all_throbbing
+    network
   end
 
   private do 

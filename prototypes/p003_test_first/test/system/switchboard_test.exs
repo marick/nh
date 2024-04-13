@@ -60,24 +60,24 @@ defmodule System.SwitchboardTest do
   test "what happens when a circular cluster 'ages out'" do
     first = circular(:first, fn _pulse -> self() end, max_age: 2)
 
-    a =
+    pids =
       trace([first, to_test()])
       |> AppAnimal.enliven(throb_interval: Duration.foreverish()) 
     
-    send_test_pulse(a.p_switchboard, to: :first, carrying: :irrelevant)
-    assert_test_receives(pid)
+    send_test_pulse(pids, to: :first, carrying: :irrelevant)
+    first_pid = assert_test_receives(_)
 
-    send(a.p_switchboard, :time_to_throb)
-    send_test_pulse(a.p_switchboard, to: :first, carrying: :irrelevant)
-    assert_test_receives(^pid)
+    throb_all_active(pids)
+    send_test_pulse(pids, to: :first, carrying: :irrelevant)
+    assert_test_receives(^first_pid)
 
-    send(a.p_switchboard, :time_to_throb)
+    throb_all_active(pids)
     # Need to make sure there's time to handle the "down" message, else the pulse will
     # be lost. The app_animal must tolerate dropped messages.
     Process.sleep(100)  
-    send_test_pulse(a.p_switchboard, to: :first, carrying: :irrelevant)
+    send_test_pulse(pids, to: :first, carrying: :irrelevant)
 
     another_pid = assert_test_receives(_)
-    refute another_pid == pid
+    refute another_pid == first_pid
   end
 end

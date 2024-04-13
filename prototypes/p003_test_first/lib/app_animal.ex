@@ -10,9 +10,10 @@ defmodule AppAnimal do
   typedstruct do
     plugin TypedStructLens, prefix: :l_
 
-    field :p_switchboard, pid, required: true
-    field :p_affordances, pid, required: true
-    field :p_logger,      pid, required: true
+    field :p_switchboard,       pid, required: true
+    field :p_affordances,       pid, required: true
+    field :p_logger,            pid, required: true
+    field :p_circular_clusters, pid, required: true
   end
 
   def enliven(trace_or_network, options \\ [])
@@ -45,6 +46,7 @@ defmodule AppAnimal do
     %__MODULE__{
       p_switchboard: p_switchboard,
       p_affordances: p_affordances,
+      p_circular_clusters: network.p_circular_clusters,
       p_logger: p_logger
     }
   end
