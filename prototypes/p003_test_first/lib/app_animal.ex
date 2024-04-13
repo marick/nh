@@ -2,7 +2,7 @@ alias AppAnimal.{System,Network,Cluster}
 
 defmodule AppAnimal do
   alias System.{Switchboard, AffordanceLand, ActivityLogger}
-  alias Network.ClusterMap
+  alias Network.{ClusterMap,Timer}
   use AppAnimal.Extras.TestAwareProcessStarter
   use TypedStruct
   import AppAnimal.Extras.Kernel
@@ -14,6 +14,7 @@ defmodule AppAnimal do
     field :p_affordances,       pid, required: true
     field :p_logger,            pid, required: true
     field :p_circular_clusters, pid, required: true
+    field :p_timer,             pid, required: true
   end
 
   def enliven(trace_or_network, options \\ [])
@@ -24,13 +25,12 @@ defmodule AppAnimal do
 
   def enliven(cluster_map, network_options) when is_map(cluster_map) do
     {:ok, p_logger} = ActivityLogger.start_link
-    switchboard_struct = struct(Switchboard,
-                                Keyword.merge(network_options,   # DELETE ME
-                                              p_logger: p_logger))
+    switchboard_struct = struct(Switchboard, p_logger: p_logger)
     p_switchboard = compatibly_start_link(Switchboard, switchboard_struct)
     p_affordances = compatibly_start_link(AffordanceLand,
                                             %{p_switchboard: p_switchboard,
                                               p_logger: p_logger})
+    p_timer = compatibly_start_link(Timer, :ok)
 
     router = System.Router.new(%{
                  System.Action => p_affordances,
@@ -47,7 +47,8 @@ defmodule AppAnimal do
       p_switchboard: p_switchboard,
       p_affordances: p_affordances,
       p_circular_clusters: network.p_circular_clusters,
-      p_logger: p_logger
+      p_logger: p_logger,
+      p_timer: p_timer
     }
   end
 
