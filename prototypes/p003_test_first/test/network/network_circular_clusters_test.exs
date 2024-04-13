@@ -1,5 +1,4 @@
-alias AppAnimal.{System,Cluster}
-alias System.Network
+alias AppAnimal.{System,Cluster,Network}
 
 defmodule Network.CircularClustersTest do
   use ClusterCase, async: true

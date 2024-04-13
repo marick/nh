@@ -1,4 +1,6 @@
-defmodule AppAnimal.System.NetworkTest do
+alias AppAnimal.Network
+
+defmodule Network.NetworkTest do
   use ClusterCase, async: true
   alias System.Network, as: UT
   

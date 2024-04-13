@@ -1,4 +1,5 @@
 alias AppAnimal.System.Network
+alias AppAnimal.Network
 
 defmodule Network.ThrobTest do
   use ClusterCase, async: true
