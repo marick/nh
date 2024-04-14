@@ -37,9 +37,6 @@ defmodule Network do
     %__MODULE__{clusters_by_name: cluster_map, p_circular_clusters: p_circular_clusters}
   end
 
-  def name_to_pid(network, name),
-      do: network.throbbers_by_name[name]
-
   def name_to_cluster(network, name),
       do: network.clusters_by_name[name]
 
