@@ -16,15 +16,10 @@ defmodule System.Switchboard do
   alias System.{ActivityLogger,Pulse}
 
   typedstruct do
-    plugin TypedStructLens, prefix: :l_
-
     field :network,         Network.t
     field :p_logger, ActivityLogger.t, default: ActivityLogger.start_link |> okval
   end
 
-  @doc false
-  def l_cluster_named(name), do: l_network() |> Network.l_cluster_named(name)
-  
   runs_in_sender do
     # I'd rather not have this layer of indirection, but it's needed for tests to use
     # start_supervised.

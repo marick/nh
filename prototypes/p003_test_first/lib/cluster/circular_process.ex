@@ -47,6 +47,7 @@ defmodule CircularProcess do
   use AppAnimal.GenServer
   alias Cluster.Calc
 
+  @impl GenServer
   def init(starting_state) do
     ok(starting_state)
   end
@@ -64,6 +65,7 @@ defmodule CircularProcess do
     |> continue
   end
 
+  @impl GenServer
   def handle_cast([throb: n], s_process_state) do
     {action, next_throb} = Cluster.Throb.throb(s_process_state.throb, n)
 
@@ -79,6 +81,7 @@ defmodule CircularProcess do
 
   # Test support
 
+  @impl GenServer
   def handle_call(:current_age, _from, s_process_state) do
     lifespan = deeply_get_only(s_process_state, :l_current_age)
     continue(s_process_state, returning: lifespan)

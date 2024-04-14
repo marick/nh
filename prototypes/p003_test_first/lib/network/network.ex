@@ -22,36 +22,16 @@ defmodule Network do
   alias System.Pulse
 
   typedstruct do
-    plugin TypedStructLens, prefix: :l_
-
     field :clusters_by_name, %{atom => Cluster.t}, default: %{}
     field :throbbers_by_name, %{atom => pid}, default: %{}
     field :p_circular_clusters, pid, required: true
   end
 
-  @doc false
-  deflens l_clusters,
-          do: l_clusters_by_name() |> Lens.map_values()
-  
-  @doc false
-  deflens l_cluster_named(name),
-          do: l_clusters_by_name() |> Lens.key!(name)
-
-  @doc false
-  deflens l_downstream_of(name),
-          do: l_cluster_named(name) |> Lens.key!(:downstream)
-
-  @doc false
-  deflens l_irrelevant_names,
-          do: l_clusters() |> Cluster.l_never_throbs |> Lens.key!(:name)
-
   def new(%{} = cluster_map) do
-    alias Cluster.Shape
-    
     circular_clusters =
       Map.values(cluster_map)
       |> Enum.filter(fn cluster ->
-        cluster.shape.__struct__ == Shape.Circular
+        cluster.shape.__struct__ == Cluster.Shape.Circular
       end)
 
     {:ok, p_circular_clusters} =
@@ -60,7 +40,7 @@ defmodule Network do
   end
 
   def name_to_pid(network, name),
-      do: deeply_get_only(network, l_throbbers_by_name() |> Lens.key!(name))
+      do: network.throbbers_by_name[name]
 
   def name_to_cluster(network, name),
       do: network.clusters_by_name[name]
@@ -105,10 +85,6 @@ defmodule Network do
   end
 
   private do 
-    def send_pulse_into_genserver(pid, %Pulse{} = pulse) do
-      GenServer.cast(pid, [handle_pulse: pulse])
-    end
-    
     def send_pulse_into_task(s_cluster, pulse) do
       alias Cluster.Calc
 

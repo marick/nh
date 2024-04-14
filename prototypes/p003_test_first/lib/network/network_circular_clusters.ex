@@ -36,6 +36,7 @@ defmodule Network.CircularClusters do
   end
 
   runs_in_receiver do 
+    @impl GenServer
     def init(clusters) do
       indexed =
         for c <- clusters, into: %{} do
@@ -44,6 +45,7 @@ defmodule Network.CircularClusters do
       {:ok, %__MODULE__{name_to_cluster: indexed}}
     end
 
+    @impl GenServer
     def handle_cast({:distribute_pulse, carrying: %Pulse{} = pulse, to: names}, s_state) do
       s_mutated = ensure_started(s_state, names)
 
@@ -59,6 +61,7 @@ defmodule Network.CircularClusters do
       continue(s_state)
     end
 
+    @impl GenServer
     def handle_info({:DOWN, _, :process, pid, _}, s_state) do
       s_state.name_to_pid
       |> BiMap.delete_value(pid)
@@ -67,6 +70,7 @@ defmodule Network.CircularClusters do
     end
 
     # This is used for testing as a way to get internal values of clusters.
+    @impl GenServer
     def handle_call([forward: getter_name, to: name], _from, s_state) do
       result = 
         BiMap.get(s_state.name_to_pid, name)
