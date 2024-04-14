@@ -2,9 +2,8 @@ alias AppAnimal.Network
 
 defmodule Network.ClusterMap do
   @moduledoc """
-  Functions for, first, creating a `Network` and, next, linking all the
-  clusters in the network into the larger `AppAnimal`, which will then
-  `enliven` them.
+  Functions for, first, arranging clusters by name, then augmenting them with
+  their "downstream" values. Used to create an `AppAnimal.Network`. 
   """
   use AppAnimal
   

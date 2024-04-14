@@ -1,10 +1,23 @@
 alias AppAnimal.{Network,System}
 
 defmodule Network.CircularClusters do
+  @moduledoc """
+  The portion of a `Network` that changes state as circular clusters
+  are started and stop.
+
+  This keeps track of the lifespan of throbbing clusters. It also sends messages
+  to them. This hides knowledge of lifespans inside this module.
+
+  This module stores all the circular clusters known in the `Network`, not just the
+  ones that are actively throbbing. It stores them in a whittled-down form, not including
+  fields irrelevant to this module's purpose.
+
+  Linear and Circular clusters really want to inherit from some Cluster supertype, but
+  I don't see how to represent that in a non-cringy way.
+  """
   use AppAnimal
   use AppAnimal.GenServer
   use TypedStruct
-
   alias Cluster.CircularProcess
   alias System.Pulse
 

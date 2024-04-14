@@ -30,9 +30,7 @@ defmodule Network do
   def new(%{} = cluster_map) do
     circular_clusters =
       Map.values(cluster_map)
-      |> Enum.filter(fn cluster ->
-        cluster.shape.__struct__ == Cluster.Shape.Circular
-      end)
+      |> Enum.filter(&Cluster.can_throb?/1)
 
     {:ok, p_circular_clusters} =
       Network.CircularClusters.start_link(circular_clusters)
@@ -66,17 +64,14 @@ defmodule Network do
   Yeah, this naming is not great.  
   """
   def deliver_pulse(network, names, %Pulse{} = pulse) do
-    alias Cluster.Shape
-
     {circular_names, linear_names} = 
       Enum.split_with(names, fn name ->
-        (network.clusters_by_name[name].shape.__struct__ == Shape.Circular)
+        Cluster.can_throb?(network.clusters_by_name[name])
       end)
 
     Network.CircularClusters.cast__distribute_pulse(network.p_circular_clusters,
                                                     carrying: pulse,
                                                     to: circular_names)
-    
     for name <- linear_names do
       cluster = network.clusters_by_name[name]
       send_pulse_into_task(cluster, pulse)
