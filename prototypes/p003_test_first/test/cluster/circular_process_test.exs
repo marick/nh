@@ -7,7 +7,6 @@ defmodule Cluster.CircularProcessTest do
 
   describe "initialization" do 
     test "with default starting value" do
-
       cluster = circular(:example, & &1+1)
       state = UT.State.from_cluster(cluster)
 

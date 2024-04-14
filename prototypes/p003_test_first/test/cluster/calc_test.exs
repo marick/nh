@@ -56,9 +56,6 @@ defmodule Cluster.CalcTest do
           Action.new(:name)      |> becomes.({:useful_result, Action.new(:name),   "unchanged"})
                      {:ok, 5}    |> becomes.({:useful_result, Pulse.new({:ok, 5}), "unchanged"})
   end
-
-
-
   
   describe "examples of putting it all together" do 
     test "an arity-one function does not get nor change the state" do
