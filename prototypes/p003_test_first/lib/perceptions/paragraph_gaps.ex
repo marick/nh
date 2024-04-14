@@ -1,6 +1,6 @@
-alias AppAnimal.Calc
+alias AppAnimal.Perceptions
 
-defmodule Calc.ParagraphGaps do
+defmodule Perceptions.ParagraphGaps do
   use AppAnimal
   
   def describe_summary(summary),

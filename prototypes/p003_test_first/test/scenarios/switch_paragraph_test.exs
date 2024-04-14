@@ -4,7 +4,7 @@ alias AppAnimal.Scenarios
 defmodule Scenarios.SwitchParagraphTest do
   use ClusterCase, async: true
   import AppAnimal.Cluster.Make
-  alias AppAnimal.Calc.ParagraphGaps
+  alias AppAnimal.Perceptions.ParagraphGaps
 
   setup do
     # Pieces

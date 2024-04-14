@@ -1,8 +1,8 @@
-alias AppAnimal.Calc
+alias AppAnimal.Perceptions
 
-defmodule Calc.ParagraphGapsTest do
+defmodule Perceptions.ParagraphGapsTest do
   use ExUnit.Case, async: true
-  alias Calc.ParagraphGaps, as: UT
+  alias Perceptions.ParagraphGaps, as: UT
   import FlowAssertions.TabularA
   import FlowAssertions.MiscA
 
@@ -10,8 +10,7 @@ defmodule Calc.ParagraphGapsTest do
     test "decomposition into text and gaps" do
       becomes = run_and_assert(&UT.decompose/1)
 
-      # Two or more newlines is a gap
-      "abc"             |> becomes.(["abc"])
+      # Two or more newlines is a gapg      "abc"             |> becomes.(["abc"])
       "abc\n    def"	|> becomes.(["abc\n    def"])
       "abc\n\n  def"	|> becomes.(["abc", "\n\n", "  def"])
       "abc\n\n\ndef"	|> becomes.(["abc", "\n\n\n", "def"])
