@@ -4,10 +4,15 @@ defmodule ClusterCase do
   the Switchboard, and AffordanceLand.
   """
   use AppAnimal
-  alias AppAnimal.{System, Cluster}
+  alias AppAnimal.{System, Cluster, Network}
   alias System.{Switchboard,AffordanceLand,Pulse,CannedResponse}
   alias Cluster.Shape
   alias ExUnit.Assertions
+  import Network.ClusterMap
+
+  def enliven(trace_list, opts \\ []) when is_list(trace_list) do
+    trace(trace_list) |> AppAnimal.enliven(opts)
+  end
 
   # How the test starts things off
 
@@ -111,6 +116,10 @@ defmodule ClusterCase do
   ### Note that this needs only a small tweak to allow multiple canned responses (sending
   ### to different clusters) for a single action.
   
+  def respond_to_action(%AppAnimal{} = pids, action_name, canned_response) do
+    respond_to_action(pids.p_affordances, action_name, canned_response)
+  end
+
   def respond_to_action(p_affordances, action_name, %CannedResponse{} = canned_response) do
     GenServer.cast(p_affordances, {:respond_to, action_name, [canned_response]})
     p_affordances
@@ -123,9 +132,12 @@ defmodule ClusterCase do
 
   Behaves the same way as an `action_edge` cluster.
   """
-  def take_action(pid, [{type, data}]) do
+  def take_action(%AppAnimal{} = aa, arg),
+      do: take_action(aa.p_affordances, arg)
+
+  def take_action(p_affordances, [{type, data}]) do
     action = System.Action.new(type, data)
-    GenServer.cast(pid, {:take_action, action})
+    GenServer.cast(p_affordances, {:take_action, action})
   end
 
   @doc """
