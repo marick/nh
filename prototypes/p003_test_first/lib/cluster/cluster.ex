@@ -31,7 +31,6 @@ defmodule Cluster do
 
      The cluster is updated by installing a `System.Router` value.
   """
-
   
   use AppAnimal
   use TypedStruct
