@@ -22,13 +22,14 @@ defmodule Network do
   alias System.Pulse
 
   typedstruct enforce: true do
-    field :clusters_by_name, %{atom => Cluster.t}, default: %{}
-    field :downstreams_by_name, %{atom => MapSet.t(atom)}
     field :ids_by_name, %{atom => Cluster.Identification.t}, default: %{}
-    field :throbbers_by_name, %{atom => pid}, default: %{}
-    field :p_circular_clusters, pid
-    field :linear_names, MapSet.t(atom)
+    field :downstreams_by_name, %{atom => MapSet.t(atom)}
+
     field :circular_names, MapSet.t(atom)
+    field :p_circular_clusters, pid
+
+    field :clusters_by_name, %{atom => Cluster.t}, default: %{}
+    field :linear_names, MapSet.t(atom)
   end
 
   def new(%{} = cluster_map) do
