@@ -12,7 +12,7 @@ defmodule Cluster.MakeTest do
       cluster = UT.circular(:example, & &1+1)
 
       assert_fields(cluster, name: :example,
-                             label: :circular_cluster,
+                             label: :circular,
                              shape: Cluster.Shape.Circular.new)
       assert cluster.calc.(1) == 2
     end

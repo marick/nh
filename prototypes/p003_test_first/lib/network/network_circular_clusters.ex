@@ -90,11 +90,6 @@ defmodule Network.CircularClusters do
       continue(s_state, returning: result)
     end
 
-    def handle_call(:names, _from, s_state) do
-      keys = Map.keys(s_state.name_to_cluster)
-      continue(s_state, returning: keys)
-    end
-
     def handle_call(:clusters, _from, s_state) do
       values = Map.values(s_state.name_to_cluster)
       continue(s_state, returning: values)

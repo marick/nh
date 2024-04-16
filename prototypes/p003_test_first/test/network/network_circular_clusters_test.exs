@@ -11,7 +11,6 @@ defmodule Network.CircularClustersTest do
       original = circular(:will_throb)
       pid = start_link_supervised!({UT, [original]})
       
-      assert [:will_throb] == UT.names(pid)
       assert [CircularProcess.State.from_cluster(original)] == UT.clusters(pid)
       assert [] == UT.throbbing_names(pid)
       assert [] == UT.throbbing_pids(pid)

@@ -66,10 +66,9 @@ defmodule System.Switchboard do
     @impl GenServer
     def handle_cast({:distribute_pulse, carrying: %Pulse{} = pulse, from: source_name},
                     s_switchboard) do
-      source = Network.name_to_cluster(s_switchboard.network, source_name)
+      source = Network.full_identification(s_switchboard.network, source_name)
+      ActivityLogger.log_pulse_sent(s_switchboard.p_logger, source, pulse)
       destination_names = Network.downstream_of(s_switchboard.network, source_name)
-      ActivityLogger.log_pulse_sent(s_switchboard.p_logger, source.label,
-                                    source.name, pulse.data)
       handle_cast({:distribute_pulse, carrying: pulse, to: destination_names},
                   s_switchboard)
     end

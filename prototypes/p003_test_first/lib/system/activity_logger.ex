@@ -48,8 +48,8 @@ defmodule System.ActivityLogger do
       GenServer.cast(pid, [also_to_terminal: false])
     end
 
-    def log_pulse_sent(pid, label, name, pulse_data) do
-      entry = %PulseSent{cluster_label: label, name: name, pulse_data: pulse_data}
+    def log_pulse_sent(pid, source, pulse) do
+      entry = %PulseSent{cluster_label: source.label, name: source.name, pulse_data: pulse.data}
       GenServer.cast(pid, [log: entry])
     end
 

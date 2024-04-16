@@ -37,11 +37,11 @@ defmodule Network do
     %__MODULE__{clusters_by_name: cluster_map, p_circular_clusters: p_circular_clusters}
   end
 
-  def name_to_cluster(network, name),
-      do: network.clusters_by_name[name]
+  def full_identification(network, name),
+      do: network.clusters_by_name[name] |> Cluster.Identification.new
 
   def downstream_of(network, name),
-      do: name_to_cluster(network, name).downstream
+      do: network.clusters_by_name[name].downstream
 
   @doc """
   Send a pulse to a mixture of "throbbing" and linear

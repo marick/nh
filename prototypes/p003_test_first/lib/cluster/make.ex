@@ -28,7 +28,7 @@ defmodule Cluster.Make do
   def circular(name, calc \\ &Function.identity/1, opts \\ []) do
     struct(Cluster,
            name: name,
-           label: :circular_cluster,
+           label: :circular,
            shape: Circular.new(opts),
            calc: calc)
   end
@@ -41,7 +41,7 @@ defmodule Cluster.Make do
   # Linear Clusters
 
   def linear(name, calc \\ &Function.identity/1) do
-    %Cluster{name: name, label: :linear_cluster,
+    %Cluster{name: name, label: :linear,
              shape: Linear.new,
              calc: calc
     }
