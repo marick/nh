@@ -21,10 +21,10 @@ defmodule Network do
   use TypedStruct
   alias System.Pulse
 
-  typedstruct do
+  typedstruct enforce: true do
     field :clusters_by_name, %{atom => Cluster.t}, default: %{}
     field :throbbers_by_name, %{atom => pid}, default: %{}
-    field :p_circular_clusters, pid, required: true
+    field :p_circular_clusters, pid
   end
 
   def new(%{} = cluster_map) do

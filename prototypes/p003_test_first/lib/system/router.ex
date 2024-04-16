@@ -5,8 +5,8 @@ defmodule System.Router do
   use TypedStruct
   alias System.{Switchboard,Pulse,Action,Delay}
 
-  typedstruct do
-    field :map, %{atom => pid}, required: true
+  typedstruct enforce: true do
+    field :map, %{atom => pid}
   end
 
   def new(map), do: %__MODULE__{map: map}

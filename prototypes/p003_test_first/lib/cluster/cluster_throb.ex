@@ -23,9 +23,9 @@ defmodule Throb do
   typedstruct enforce: true do
     plugin TypedStructLens
 
-    field :current_age,       Duration.t,           required: true
-    field :max_age,           Duration.t,           required: true
-    field :f_throb,           throb_handler,        required: true
+    field :current_age,       Duration.t
+    field :max_age,           Duration.t
+    field :f_throb,           throb_handler
     field :f_note_pulse,      pulse_handler,        default: &__MODULE__.pulse_does_nothing/2
     field :f_before_stopping, (Cluster.t -> :none), default: &__MODULE__.stop_silently/2
   end

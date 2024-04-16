@@ -21,10 +21,9 @@ defmodule Network.CircularClusters do
   alias Cluster.CircularProcess
   alias System.Pulse
 
-  typedstruct do
+  typedstruct enforce: true do
     field :name_to_pid, BiMap.t(atom, pid), default: BiMap.new
-    field :name_to_cluster, %{atom => CircularProcess.State.t}, required: true
-    field :throb_interval, integer, required: true
+    field :name_to_cluster, %{atom => CircularProcess.State.t}
   end 
   
   runs_in_sender do 

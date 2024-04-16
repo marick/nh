@@ -15,10 +15,10 @@ defmodule CircularProcess.State do
   use AppAnimal
   use TypedStruct
 
-  typedstruct do
+  typedstruct enforce: true do
     plugin TypedStructLens
 
-    field :name, atom, required: true   # This is useful for debugging
+    field :name, atom  # This is useful for debugging
     field :throb, Cluster.Throb.t
     field :calc, fun
     field :previously, any

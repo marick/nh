@@ -7,14 +7,14 @@ defmodule AppAnimal do
   use AppAnimal.Extras.TestAwareProcessStarter
   use TypedStruct
 
-  typedstruct do
+  typedstruct enforce: true do
     plugin TypedStructLens
 
-    field :p_switchboard,       pid, required: true
-    field :p_affordances,       pid, required: true
-    field :p_logger,            pid, required: true
-    field :p_circular_clusters, pid, required: true
-    field :p_timer,             pid, required: true
+    field :p_switchboard,       pid
+    field :p_affordances,       pid
+    field :p_logger,            pid
+    field :p_circular_clusters, pid
+    field :p_timer,             pid
   end
 
   def enliven(trace_or_network, options \\ [])

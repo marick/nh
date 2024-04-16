@@ -4,9 +4,9 @@ alias System.{Pulse, Action, CannedResponse, Delay}
 defmodule Pulse do
   use TypedStruct
 
-  typedstruct do
+  typedstruct enforce: true do
     field :type, atom, default: :default
-    field :data, any,  required: true
+    field :data, any
   end
 
   def new(pulse_data), do: %__MODULE__{data: pulse_data}
@@ -24,8 +24,8 @@ defmodule Action do
   """
   use TypedStruct
 
-  typedstruct do
-    field :type, atom, required: true
+  typedstruct enforce: true do
+    field :type, atom
     field :data, any,  default: :action_takes_no_data
   end
 
@@ -40,9 +40,9 @@ defmodule CannedResponse do
   """
   use TypedStruct
 
-  typedstruct do
-    field :downstream, atom, required: true
-    field :pulse, Pulse.t,   required: true
+  typedstruct enforce: true do
+    field :downstream, atom
+    field :pulse, Pulse.t  
   end
 
   def new(downstream, %Pulse{} = pulse),
@@ -54,9 +54,9 @@ end
 defmodule Delay do
   use TypedStruct
 
-  typedstruct do
-    field :delay, Duration.t, required: true
-    field :pulse, Pulse.t,    required: true
+  typedstruct enforce: true do
+    field :delay, Duration.t
+    field :pulse, Pulse.t
   end
 
   def new(delay, %Pulse{} = pulse),
