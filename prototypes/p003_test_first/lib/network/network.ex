@@ -23,33 +23,41 @@ defmodule Network do
 
   typedstruct enforce: true do
     field :clusters_by_name, %{atom => Cluster.t}, default: %{}
+    field :downstreams_by_name, %{atom => MapSet.t(atom)}
     field :ids_by_name, %{atom => Cluster.Identification.t}, default: %{}
     field :throbbers_by_name, %{atom => pid}, default: %{}
     field :p_circular_clusters, pid
+    field :linear_names, MapSet.t(atom)
+    field :circular_names, MapSet.t(atom)
   end
 
   def new(%{} = cluster_map) do
     clusters = Map.values(cluster_map)
-    
-    circular_clusters =
-      Enum.filter(clusters, &Cluster.can_throb?/1)
+    {circular_clusters, linear_clusters}  =
+      Enum.split_with(clusters, &Cluster.can_throb?/1)
 
     {:ok, p_circular_clusters} =
       Network.CircularClusters.start_link(circular_clusters)
 
     ids_by_name =
       for c <- clusters, into: %{}, do: {c.name, Cluster.Identification.new(c)}
+
+    downstreams_by_name =
+      for c <- clusters, into: %{},
+                         do: {c.name, MapSet.new(c.downstream)}
     
     %__MODULE__{clusters_by_name: cluster_map,
                 p_circular_clusters: p_circular_clusters,
-                ids_by_name: ids_by_name
+                ids_by_name: ids_by_name,
+                downstreams_by_name: downstreams_by_name,
+                circular_names: MapSet.new(for c <- circular_clusters, do: c.name),
+                linear_names: MapSet.new(for c <- linear_clusters, do: c.name)
     }
   end
 
   def full_identification(network, name), do: Map.fetch!(network.ids_by_name, name)
 
-  def downstream_of(network, name),
-      do: network.clusters_by_name[name].downstream
+  def downstream_of(network, name), do: Map.fetch!(network.downstreams_by_name, name)
 
   @doc """
   Send a pulse to a mixture of "throbbing" and linear
@@ -69,10 +77,8 @@ defmodule Network do
   Yeah, this naming is not great.  
   """
   def deliver_pulse(network, names, %Pulse{} = pulse) do
-    {circular_names, linear_names} = 
-      Enum.split_with(names, fn name ->
-        Cluster.can_throb?(network.clusters_by_name[name])
-      end)
+    {circular_names, linear_names} =
+      split_targets(network, names)
 
     Network.CircularClusters.cast__distribute_pulse(network.p_circular_clusters,
                                                     carrying: pulse,
@@ -84,7 +90,15 @@ defmodule Network do
     :no_return_value
   end
 
-  private do 
+  private do
+    def split_targets(network, given) do 
+      given_set = MapSet.new(given)
+
+      {}
+      |> Tuple.append(MapSet.intersection(network.circular_names, given_set))
+      |> Tuple.append(MapSet.intersection(network.linear_names,   given_set))
+    end
+    
     def send_pulse_into_task(s_cluster, pulse) do
       alias Cluster.Calc
 
