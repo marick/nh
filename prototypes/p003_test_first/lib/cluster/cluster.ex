@@ -38,7 +38,7 @@ defmodule Cluster do
   alias Cluster.Shape
 
   typedstruct do
-    plugin TypedStructLens, prefix: :l_
+    plugin TypedStructLens
 
     # Set first thing
     field :label, atom    # only for human readability
@@ -53,7 +53,7 @@ defmodule Cluster do
     field :downstream, [atom], default: []
   end
 
-  deflens l_never_throbs(), do: Lens.filter(& can_throb?(&1) == false)
+  deflens never_throbs(), do: Lens.filter(& can_throb?(&1) == false)
 
   def can_throb?(s_cluster) do
     case s_cluster.shape do

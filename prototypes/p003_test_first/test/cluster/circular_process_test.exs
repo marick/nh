@@ -81,22 +81,22 @@ defmodule Cluster.CircularProcessTest do
   describe "counting down via throbbing" do
     test "an ordinary call to `throb`" do
       state = circular(:example, & &1+1) |> UT.State.from_cluster
-      age = deeply_get_only(state, :l_current_age)
-      assert age == deeply_get_only(state, :l_max_age)
+      age = A.get_only(state, :current_age)
+      assert age == A.get_only(state, :max_age)
       assert age > 2
       
       assert {:noreply, next_state} = UT.handle_cast([throb: 2], state)
       
-      assert deeply_get_only(next_state, :l_current_age) ==
-               deeply_get_only(state, :l_current_age) - 2
+      assert A.get_only(next_state, :current_age) ==
+               A.get_only(state, :current_age) - 2
     end
     
     test "decreasing down to zero" do
       state = circular(:example, & &1+1) |> UT.State.from_cluster
-      age = deeply_get_only(state, :l_current_age)
+      age = A.get_only(state, :current_age)
 
       assert {:stop, :normal, next_state} = UT.handle_cast([throb: age], state)
-      assert deeply_get_only(next_state, :l_current_age) == 0
+      assert A.get_only(next_state, :current_age) == 0
     end
   end
 end

@@ -10,7 +10,7 @@ defmodule Shape.Circular do
   alias AppAnimal.Duration
 
   typedstruct enforce: true do
-    plugin TypedStructLens, prefix: :l_
+    plugin TypedStructLens
 
     field :throb,         Cluster.Throb.t,
                           default: Cluster.Throb.counting_down_from(Duration.frequent_glance)

@@ -3,12 +3,12 @@ alias AppAnimal.{System,Network,Cluster,Duration}
 defmodule AppAnimal do
   alias System.{Switchboard, AffordanceLand, ActivityLogger}
   alias Network.{ClusterMap,Timer}
+  alias AppAnimal.Extras.DepthAgnostic, as: A
   use AppAnimal.Extras.TestAwareProcessStarter
   use TypedStruct
-  import AppAnimal.Extras.Kernel
 
   typedstruct do
-    plugin TypedStructLens, prefix: :l_
+    plugin TypedStructLens
 
     field :p_switchboard,       pid, required: true
     field :p_affordances,       pid, required: true
@@ -39,7 +39,7 @@ defmodule AppAnimal do
 
     network =
       cluster_map
-      |> deeply_put(Lens.map_values |> Cluster.l_router, router)
+      |> A.put(Lens.map_values |> Cluster.router, router)
       |> Network.new
 
     GenServer.call(p_switchboard, accept_network: network)
@@ -67,6 +67,7 @@ defmodule AppAnimal do
       alias AppAnimal.Pretty
       import AppAnimal.Extras.Tuples
       import AppAnimal.Extras.Kernel
+      alias AppAnimal.Extras.DepthAgnostic, as: A
       alias AppAnimal.Cluster
       import Lens.Macros
       alias AppAnimal.Duration

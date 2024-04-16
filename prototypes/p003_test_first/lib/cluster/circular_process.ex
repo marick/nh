@@ -16,7 +16,7 @@ defmodule CircularProcess.State do
   use TypedStruct
 
   typedstruct do
-    plugin TypedStructLens, prefix: :l_
+    plugin TypedStructLens
 
     field :name, atom, required: true   # This is useful for debugging
     field :throb, Cluster.Throb.t
@@ -34,11 +34,11 @@ defmodule CircularProcess.State do
   }
   end
 
-  deflens l_current_age(), do: in_throb(:current_age)
-  deflens l_max_age(), do: in_throb(:max_age)
+  deflens current_age(), do: in_throb(:current_age)
+  deflens max_age(), do: in_throb(:max_age)
   
   private do
-    def in_throb(key), do: l_throb() |> Lens.key(key)
+    def in_throb(key), do: Lens.key(:throb) |> Lens.key(key)
   end
 end
 
@@ -60,7 +60,7 @@ defmodule CircularProcess do
     Calc.maybe_pulse(result, & Cluster.start_pulse_on_its_way(s_process_state, &1))
     
     s_process_state
-    |> deeply_put(:l_previously, Calc.next_state(result))
+    |> A.put(:previously, Calc.next_state(result))
     |> Map.update!(:throb, &Cluster.Throb.note_pulse(&1, result))
     |> continue
   end
@@ -83,7 +83,7 @@ defmodule CircularProcess do
 
   @impl GenServer
   def handle_call(:current_age, _from, s_process_state) do
-    lifespan = deeply_get_only(s_process_state, :l_current_age)
+    lifespan = A.get_only(s_process_state, :current_age)
     continue(s_process_state, returning: lifespan)
   end
 end

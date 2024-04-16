@@ -21,7 +21,7 @@ defmodule Throb do
   @type pulse_handler :: (Throb.t, any -> Throb.t)
   
   typedstruct enforce: true do
-    plugin TypedStructLens, prefix: :l_
+    plugin TypedStructLens
 
     field :current_age,       Duration.t,           required: true
     field :max_age,           Duration.t,           required: true
