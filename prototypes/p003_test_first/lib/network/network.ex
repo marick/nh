@@ -23,22 +23,30 @@ defmodule Network do
 
   typedstruct enforce: true do
     field :clusters_by_name, %{atom => Cluster.t}, default: %{}
+    field :ids_by_name, %{atom => Cluster.Identification.t}, default: %{}
     field :throbbers_by_name, %{atom => pid}, default: %{}
     field :p_circular_clusters, pid
   end
 
   def new(%{} = cluster_map) do
+    clusters = Map.values(cluster_map)
+    
     circular_clusters =
-      Map.values(cluster_map)
-      |> Enum.filter(&Cluster.can_throb?/1)
+      Enum.filter(clusters, &Cluster.can_throb?/1)
 
     {:ok, p_circular_clusters} =
       Network.CircularClusters.start_link(circular_clusters)
-    %__MODULE__{clusters_by_name: cluster_map, p_circular_clusters: p_circular_clusters}
+
+    ids_by_name =
+      for c <- clusters, into: %{}, do: {c.name, Cluster.Identification.new(c)}
+    
+    %__MODULE__{clusters_by_name: cluster_map,
+                p_circular_clusters: p_circular_clusters,
+                ids_by_name: ids_by_name
+    }
   end
 
-  def full_identification(network, name),
-      do: network.clusters_by_name[name] |> Cluster.Identification.new
+  def full_identification(network, name), do: Map.fetch!(network.ids_by_name, name)
 
   def downstream_of(network, name),
       do: network.clusters_by_name[name].downstream
