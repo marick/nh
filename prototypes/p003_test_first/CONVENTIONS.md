@@ -1,6 +1,6 @@
 ### Suffixes
 
-A particular struct, such as `CircularProcess`, may be referred to
+A particular struct, such as `Cluster.Circular`, may be referred to
 both as the struct itself and a pid that names a process that uses the
 struct as its mutable state. Because I kept confusing the two, I
 established this convention that structures should be named

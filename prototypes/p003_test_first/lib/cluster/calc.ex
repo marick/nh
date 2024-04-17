@@ -20,7 +20,7 @@ defmodule Calc do
   In the two-argument form, the first argument is the pulse, as
   described above (including unwrapping the `:default` case). The
   second argument is the value of the `previously` field in a
-  `CircularProcess.State`. Note that this is not the entirety of the
+  `Cluster.Circular`. Note that this is not the entirety of the
   state.
 
   Since a linear cluster has no persistent state, it may not use the

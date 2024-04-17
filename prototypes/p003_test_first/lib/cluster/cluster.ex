@@ -63,8 +63,8 @@ defmodule Cluster do
   end
   
   def start_throbbing(s_cluster) do
-    starting_state = Cluster.CircularProcess.State.from_cluster(s_cluster)
-    {:ok, pid} = GenServer.start(Cluster.CircularProcess, starting_state)
+    starting_state = Cluster.Circular.new(s_cluster)
+    {:ok, pid} = GenServer.start(Cluster.Process, starting_state)
     Process.monitor(pid)
     {s_cluster.name, pid}
   end

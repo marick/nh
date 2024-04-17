@@ -1,54 +1,12 @@
 alias AppAnimal.{Cluster,System}
-alias Cluster.CircularProcess
 
-defmodule CircularProcess.State do
-  @moduledoc """
-
-  Those parts of a `Cluster` that are relevant to the operation of this gensym. Here are
-  the fields that are new:
-  
-  - throb          - Controls the aging of this cluster and its eventual exit.
-                     Initialized from Shape.Circular.max_age.
-  - previously     - The part of the state the `calc` function can channged.
-                     Initialized from Shape.Circular.initial_value.
-  """
-  use AppAnimal
-  use TypedStruct
-
-  typedstruct enforce: true do
-    plugin TypedStructLens
-
-    field :name, atom  # This is useful for debugging
-    field :throb, Cluster.Throb.t
-    field :calc, fun
-    field :previously, any
-    field :router, System.Router.t
-  end
-
-  def from_cluster(s_cluster) do
-    %__MODULE__{name: s_cluster.name,
-                calc: s_cluster.calc,
-                throb: s_cluster.shape.throb,
-                previously: s_cluster.shape.initial_value,
-                router: s_cluster.router
-  }
-  end
-
-  deflens current_age(), do: in_throb(:current_age)
-  deflens max_age(), do: in_throb(:max_age)
-  
-  private do
-    def in_throb(key), do: Lens.key(:throb) |> Lens.key(key)
-  end
-end
-
-defmodule CircularProcess do
+defmodule Cluster.Process do
   use AppAnimal
   use AppAnimal.GenServer
   alias Cluster.Calc
 
   @impl GenServer
-  def init(starting_state) do
+  def init(%Cluster.Circular{} = starting_state) do
     ok(starting_state)
   end
 

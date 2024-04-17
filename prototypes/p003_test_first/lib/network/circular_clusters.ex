@@ -1,4 +1,4 @@
-alias AppAnimal.{Network,System}
+alias AppAnimal.{Network,System,Cluster}
 
 defmodule Network.CircularClusters do
   @moduledoc """
@@ -18,12 +18,11 @@ defmodule Network.CircularClusters do
   use AppAnimal
   use AppAnimal.GenServer
   use TypedStruct
-  alias Cluster.CircularProcess
   alias System.Pulse
 
   typedstruct enforce: true do
     field :name_to_pid, BiMap.t(atom, pid), default: BiMap.new
-    field :name_to_cluster, %{atom => CircularProcess.State.t}
+    field :name_to_cluster, %{atom => Cluster.Circular.t}
   end 
   
   runs_in_sender do 
@@ -52,7 +51,7 @@ defmodule Network.CircularClusters do
     def init(clusters) do
       indexed =
         for c <- clusters, into: %{} do
-          {c.name, CircularProcess.State.from_cluster(c)}
+          {c.name, Cluster.Circular.new(c)}
         end
       {:ok, %__MODULE__{name_to_cluster: indexed}}
     end
@@ -124,7 +123,7 @@ defmodule Network.CircularClusters do
             bimap
           else
             cluster = Map.get(s_state.name_to_cluster, name)
-            {:ok, pid} = GenServer.start(Cluster.CircularProcess, cluster)
+            {:ok, pid} = GenServer.start(Cluster.Process, cluster)
             Process.monitor(pid)
             BiMap.put(bimap, name, pid)
           end

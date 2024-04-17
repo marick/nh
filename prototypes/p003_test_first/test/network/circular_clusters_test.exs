@@ -3,7 +3,6 @@ alias AppAnimal.{System,Cluster,Network}
 defmodule Network.CircularClustersTest do
   use ClusterCase, async: true
   alias Network.CircularClusters, as: UT
-  alias Cluster.CircularProcess
   alias System.Pulse
 
   describe "construction of a throbber" do 
@@ -11,7 +10,7 @@ defmodule Network.CircularClustersTest do
       original = circular(:will_throb)
       pid = start_link_supervised!({UT, [original]})
       
-      assert [CircularProcess.State.from_cluster(original)] == UT.clusters(pid)
+      assert [Cluster.Circular.new(original)] == UT.clusters(pid)
       assert [] == UT.throbbing_names(pid)
       assert [] == UT.throbbing_pids(pid)
     end
