@@ -38,7 +38,7 @@ defmodule Network do
       Enum.split_with(clusters, &Cluster.can_throb?/1)
 
     {:ok, p_circular_clusters} =
-      Network.CircularClusters.start_link(circular_clusters)
+      Network.CircularSubnet.start_link(circular_clusters)
 
     ids_by_name =
       for c <- clusters, into: %{}, do: {c.name, Cluster.Identification.new(c)}
@@ -81,7 +81,7 @@ defmodule Network do
     {circular_names, linear_names} =
       split_targets(network, names)
 
-    Network.CircularClusters.cast__distribute_pulse(network.p_circular_clusters,
+    Network.CircularSubnet.cast__distribute_pulse(network.p_circular_clusters,
                                                     carrying: pulse,
                                                     to: circular_names)
     for name <- linear_names do

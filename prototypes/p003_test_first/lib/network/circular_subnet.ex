@@ -1,6 +1,6 @@
 alias AppAnimal.{Network,System,Cluster}
 
-defmodule Network.CircularClusters do
+defmodule Network.CircularSubnet do
   @moduledoc """
   The portion of a `Network` that changes state as circular clusters
   are started and stop.

@@ -1,8 +1,8 @@
 alias AppAnimal.{System,Cluster,Network}
 
-defmodule Network.CircularClustersTest do
+defmodule Network.CircularSubnetTest do
   use ClusterCase, async: true
-  alias Network.CircularClusters, as: UT
+  alias Network.CircularSubnet, as: UT
   alias System.Pulse
 
   describe "construction of a throbber" do 
