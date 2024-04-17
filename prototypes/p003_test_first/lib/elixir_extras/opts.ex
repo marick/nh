@@ -26,4 +26,8 @@ defmodule AppAnimal.Extras.Opts do
         opts
     end
   end
+
+  def required!(opts, keys) when is_list(keys) do
+    for k <- keys, do: Keyword.fetch!(opts, k)
+  end
 end

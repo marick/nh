@@ -28,6 +28,7 @@ defmodule Network do
     field :circular_names, MapSet.t(atom)
     field :p_circular_clusters, pid
 
+    field :linear_clusters, Network.LinearSubnet.t
     field :clusters_by_name, %{atom => Cluster.t}, default: %{}
     field :linear_names, MapSet.t(atom)
   end
@@ -52,7 +53,8 @@ defmodule Network do
                 ids_by_name: ids_by_name,
                 downstreams_by_name: downstreams_by_name,
                 circular_names: MapSet.new(for c <- circular_clusters, do: c.name),
-                linear_names: MapSet.new(for c <- linear_clusters, do: c.name)
+                linear_names: MapSet.new(for c <- linear_clusters, do: c.name),
+                linear_clusters: Network.LinearSubnet.new(linear_clusters)
     }
   end
 
@@ -82,12 +84,11 @@ defmodule Network do
       split_targets(network, names)
 
     Network.CircularSubnet.cast__distribute_pulse(network.p_circular_clusters,
-                                                    carrying: pulse,
-                                                    to: circular_names)
-    for name <- linear_names do
-      cluster = network.clusters_by_name[name]
-      send_pulse_into_task(cluster, pulse)
-    end
+                                                  carrying: pulse,
+                                                  to: circular_names)
+    Network.LinearSubnet.distribute_pulse(network.linear_clusters,
+                                         carrying: pulse,
+                                         to: linear_names)
     :no_return_value
   end
 
@@ -98,16 +99,6 @@ defmodule Network do
       {}
       |> Tuple.append(MapSet.intersection(network.circular_names, given_set))
       |> Tuple.append(MapSet.intersection(network.linear_names,   given_set))
-    end
-    
-    def send_pulse_into_task(s_cluster, pulse) do
-      alias Cluster.Calc
-
-      Task.start(fn ->
-        Calc.run(s_cluster.calc, on: pulse)
-        |> Calc.maybe_pulse(& Cluster.start_pulse_on_its_way(s_cluster, &1))
-        :there_is_no_return_value
-      end)
     end
   end
 end
