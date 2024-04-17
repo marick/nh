@@ -22,7 +22,7 @@ defmodule Network do
   alias System.Pulse
 
   typedstruct enforce: true do
-    field :ids_by_name, %{atom => Cluster.Identification.t}, default: %{}
+    field :name_to_id, %{atom => Cluster.Identification.t}, default: %{}
     field :downstreams_by_name, %{atom => MapSet.t(atom)}
 
     field :circular_names, MapSet.t(atom)
@@ -40,7 +40,7 @@ defmodule Network do
     {:ok, p_circular_clusters} =
       Network.CircularSubnet.start_link(circular_clusters)
 
-    ids_by_name =
+    name_to_id =
       for c <- clusters, into: %{}, do: {c.name, Cluster.Identification.new(c)}
 
     downstreams_by_name =
@@ -48,7 +48,7 @@ defmodule Network do
                          do: {c.name, MapSet.new(c.downstream)}
     
     %__MODULE__{p_circular_clusters: p_circular_clusters,
-                ids_by_name: ids_by_name,
+                name_to_id: name_to_id,
                 downstreams_by_name: downstreams_by_name,
                 circular_names: MapSet.new(for c <- circular_clusters, do: c.name),
                 linear_names: MapSet.new(for c <- linear_clusters, do: c.name),
@@ -56,7 +56,7 @@ defmodule Network do
     }
   end
 
-  def full_identification(network, name), do: Map.fetch!(network.ids_by_name, name)
+  def full_identification(network, name), do: Map.fetch!(network.name_to_id, name)
 
   def downstream_of(network, name), do: Map.fetch!(network.downstreams_by_name, name)
 
