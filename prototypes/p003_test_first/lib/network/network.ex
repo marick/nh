@@ -28,9 +28,8 @@ defmodule Network do
     field :circular_names, MapSet.t(atom)
     field :p_circular_clusters, pid
 
-    field :linear_clusters, Network.LinearSubnet.t
-    field :clusters_by_name, %{atom => Cluster.t}, default: %{}
     field :linear_names, MapSet.t(atom)
+    field :linear_clusters, Network.LinearSubnet.t
   end
 
   def new(%{} = cluster_map) do
@@ -48,8 +47,7 @@ defmodule Network do
       for c <- clusters, into: %{},
                          do: {c.name, MapSet.new(c.downstream)}
     
-    %__MODULE__{clusters_by_name: cluster_map,
-                p_circular_clusters: p_circular_clusters,
+    %__MODULE__{p_circular_clusters: p_circular_clusters,
                 ids_by_name: ids_by_name,
                 downstreams_by_name: downstreams_by_name,
                 circular_names: MapSet.new(for c <- circular_clusters, do: c.name),
