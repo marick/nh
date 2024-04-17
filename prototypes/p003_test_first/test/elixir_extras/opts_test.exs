@@ -34,4 +34,35 @@ defmodule Extras.OptsTest do
       assert actual == [a: 3, b: 4]
     end
   end
+
+  describe "required!" do
+    test "fetches N keys" do 
+      assert UT.required!([a: 2, b: 3], [:a, :b]) == [2, 3]
+    end
+
+    test "key must be present" do
+      try do
+        UT.required!([a: 2], [:a, :b])
+        flunk("missing exception")
+      rescue
+        error ->
+          assert_struct_named(error, KeyError)
+          assert error.message == "keyword argument :b is missing"
+      end
+    end
+
+    test "extra keys are not allowed" do
+      try do
+        UT.required!([a: 2, b: 2], [:a])
+        flunk("missing exception")
+      rescue
+        error ->
+          IO.inspect error
+          assert_struct_named(error, KeyError)
+          assert error.message == "extra keyword arguments: [:b]"
+      end
+    end
+
+  end
+
 end
