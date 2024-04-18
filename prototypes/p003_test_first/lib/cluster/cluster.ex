@@ -80,15 +80,3 @@ defmodule Cluster do
   end
 end
 
-defmodule Cluster.Identification do
-  use TypedStruct
-  
-  typedstruct enforce: true do
-    
-    field :label, atom
-    field :name,  atom
-  end
-  
-  def new(cluster), do: struct(__MODULE__, Map.from_struct(cluster))
-end
-
