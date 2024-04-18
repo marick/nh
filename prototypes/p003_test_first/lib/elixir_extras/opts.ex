@@ -49,4 +49,19 @@ defmodule AppAnimal.Extras.Opts do
     
     Enum.reverse(reversed_values)
   end
+
+  def add_missing!(opts, replacements) do
+    already_existing = 
+      Keyword.keys(replacements)
+      |> Enum.filter(& Keyword.has_key?(opts, &1))
+
+    unless already_existing == [],
+           do: raise(KeyError, term: opts,
+                               message: "keys #{inspect already_existing} are already present")
+
+    add_if_missing(opts, replacements)
+  end
+
+  def add_if_missing(opts, possible_replacements),
+      do: Keyword.merge(possible_replacements, opts)
 end

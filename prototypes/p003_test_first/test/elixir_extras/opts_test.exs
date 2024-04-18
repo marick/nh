@@ -57,12 +57,36 @@ defmodule Extras.OptsTest do
         flunk("missing exception")
       rescue
         error ->
-          IO.inspect error
           assert_struct_named(error, KeyError)
           assert error.message == "extra keyword arguments: [:b]"
       end
     end
-
   end
 
+  describe "add_missing!" do
+    test "augment an option list" do
+      UT.add_missing!([a: 1, z: 444], b: 2, c: 3)
+      |> assert_good_enough(in_any_order [a: 1, z: 444, b: 2, c: 3])
+    end
+      
+    test "it better actually *be* missing" do
+      try do 
+        UT.add_missing!([a: 1], b: 2, a: 3)
+        flunk("unreached")
+      rescue
+        error ->
+          error 
+          |> assert_struct_named(KeyError)
+          |> assert_fields(term: [a: 1],
+                           message: "keys [:a] are already present")
+      end
+    end
+  end
+
+  describe "add_if_missing" do
+    test "default if needed" do
+      UT.add_if_missing([a: 1, z: 444], a: "ignored", b: 3)
+      |> assert_good_enough(in_any_order [a: 1, b: 3, z: 444])
+    end
+  end
 end
