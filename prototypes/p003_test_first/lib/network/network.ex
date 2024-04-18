@@ -32,6 +32,8 @@ defmodule Network do
     field :linear_clusters, Network.LinearSubnet.t
   end
 
+  def empty(), do: new(%{})
+
   def new(%{} = cluster_map) do
     clusters = Map.values(cluster_map)
     {circular_clusters, linear_clusters}  =
