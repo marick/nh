@@ -12,6 +12,7 @@ defmodule Cluster.Linear do
     field :router, System.Router.t
   end
 
-  def new(s_struct), do: struct(__MODULE__, Map.from_struct(s_struct))
+  def new(struct) when is_struct(struct), do: new(Map.from_struct(struct))
+  def new(%{} = pairs), do: struct(__MODULE__, pairs)
 end
 

@@ -32,6 +32,12 @@ defmodule Throb do
 
   ### Init
 
+  def default() do
+    counting_down_from(Duration.frequent_glance,
+                       on_pulse: &Throb.pulse_increases_lifespan/2)
+  end
+  
+
   @doc """
   Create a cluster that counts down from a `max_age` and signals that
   the process is to stop when it hits zero.

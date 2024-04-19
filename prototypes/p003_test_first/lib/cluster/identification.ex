@@ -10,6 +10,7 @@ defmodule Cluster.Identification do
   end
 
   def new(struct) when is_struct(struct), do: new(Map.from_struct(struct))
-  def new(%{} = pairs), do: struct(__MODULE__, pairs)
+  def new(pairs), do: struct(__MODULE__, pairs)
+  def new(name, label), do: new(name: name, label: label)
 end
 

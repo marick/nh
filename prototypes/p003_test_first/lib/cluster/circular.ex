@@ -18,6 +18,7 @@ defmodule Cluster.Circular do
     plugin TypedStructLens
 
     field :name, atom  # This is useful for debugging
+    field :id, Cluster.Identification.t, default: "default value is temporary"
     field :throb, Cluster.Throb.t
     field :calc, fun
     field :previously, any
@@ -37,7 +38,7 @@ defmodule Cluster.Circular do
   deflens max_age(), do: in_throb(:max_age)
   
   private do
-    def in_throb(key), do: Lens.key(:throb) |> Lens.key(key)
+    def in_throb(key), do: throb() |> Lens.key(key)
   end
 end
 
