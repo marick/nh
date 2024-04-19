@@ -80,13 +80,7 @@ defmodule System.AffordanceLand do
       |> continue()
     end
 
-    # This catches incorrect arguments; that is, bugs.
-    def handle_cast(arg, s_affordances) do
-      IO.puts("==========The following is not a valid cast to AffordanceLand.")
-      dbg arg
-      Process.sleep(200)  # don't let later failures squelch the output
-      continue(s_affordances)
-    end
+    unexpected_cast()
     
     private do
       def append_programmed_responses(keywords, new) do

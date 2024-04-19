@@ -72,6 +72,8 @@ defmodule Network.CircularSubnet do
       continue(s_state)
     end
 
+    unexpected_cast()
+
     @impl GenServer
     def handle_info({:DOWN, _, :process, pid, _}, s_state) do
       s_state.name_to_pid
@@ -111,10 +113,7 @@ defmodule Network.CircularSubnet do
       |> continue(returning: :ok)
     end
 
-    def handle_call(arg, _from, s_state) do
-      dbg arg
-      continue(s_state)
-    end
+    unexpected_call()
 
     private do
       def ensure_started(s_state, names) do
