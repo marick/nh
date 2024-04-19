@@ -15,11 +15,39 @@ defmodule Building.PartsTest do
                        calc: &Function.identity/1,
                        previously: %{})
     end
+      
+    test "name and options" do 
+      UT.circular(:name, previously: 3)
+      |> assert_fields(name: :name,
+                       id: Cluster.Identification.new(:name, :circular),
+                       throb: Cluster.Throb.default,
+                       calc: &Function.identity/1,
+      
+                       previously: 3)
+    end
+        
+    test "name and calc" do
+      f = & &1+1
+      UT.circular(:rounder, f)
+      |> assert_fields(name: :rounder,
+                       id: Cluster.Identification.new(:rounder, :circular),
+                       throb: Cluster.Throb.default,
+                       calc: f,
+                       previously: %{})
+    end
         
       
-    # UT.circular(:name, & &1+1)
-    # UT.circular(:name, x: 1, y: 2)
-    # UT.circular(:name, & &1+1, x: 1, y: 2)
+    test "name, calc, and options" do
+      alias AppAnimal.Duration
+      f = & &1+1
+      throb = Cluster.Throb.counting_down_from(Duration.quanta(3))
+      UT.circular(:rounder, f, throb: throb, previously: 5)
+      |> assert_fields(name: :rounder,
+                       id: Cluster.Identification.new(:rounder, :circular),
+                       throb: throb,
+                       calc: f,
+                       previously: 5)
+    end
   end
   
 
