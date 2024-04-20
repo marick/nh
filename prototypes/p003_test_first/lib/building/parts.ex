@@ -24,4 +24,14 @@ defmodule Building.Parts do
       do: circular(name, &Function.identity/1, opts)
 
   def circular(name), do: circular(name, [])
+
+  ##
+
+  def linear(name, calc) when is_function(calc) do
+    struct(Cluster.Linear, name: name,
+                           calc: calc,
+                           id: Cluster.Identification.new(name, :linear))
+  end
+
+  def linear(name), do: linear(name, &Function.identity/1)
 end

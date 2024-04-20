@@ -50,6 +50,23 @@ defmodule Building.PartsTest do
     end
   end
   
+  describe "variants of linear creation" do
+    test "only a name is specified" do 
+      UT.linear(:name)
+      |> assert_fields(name: :name,
+                       id: Cluster.Identification.new(:name, :linear),
+                       calc: &Function.identity/1)
+    end
+      
+    test "can also add a calc function" do
+      f = & &1 + 1
+      UT.linear(:name, f)
+      |> assert_fields(name: :name,
+                       id: Cluster.Identification.new(:name, :linear),
+                       calc: f)
+    end
+      
+  end
 
 end
 

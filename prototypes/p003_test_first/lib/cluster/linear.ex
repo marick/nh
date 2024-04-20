@@ -8,6 +8,7 @@ defmodule Cluster.Linear do
     plugin TypedStructLens
 
     field :name, atom  # This is useful for debugging
+    field :id, Cluster.Identification.t, default: "default value is temporary"
     field :calc, fun
     field :router, System.Router.t
   end
