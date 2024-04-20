@@ -1,8 +1,8 @@
 alias AppAnimal.Building
 
-defmodule Building.WholeTest do
+defmodule Building.Whole.ProcessTest do
   use ClusterCase, async: true
-  alias Building.Whole, as: UT
+  alias Building.Whole.Process, as: UT
   alias Building.Parts, as: P
 
   test "beginning" do

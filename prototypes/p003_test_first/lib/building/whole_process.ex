@@ -1,10 +1,11 @@
 alias AppAnimal.{Building,Network}
+alias Building.Whole
 
-defmodule Building.Whole do
+defmodule Whole.Process do
 
   use AppAnimal
   use AppAnimal.GenServer
-  alias Building.Whole.Helpers, as: H
+  alias Building.Whole.Guts, as: Guts
 
   runs_in_sender do 
     def start_link(_), do: GenServer.start_link(__MODULE__, Network.empty)
@@ -21,7 +22,7 @@ defmodule Building.Whole do
         do: continue(s_network, returning: s_network)
 
     def handle_call({:apply, fun_name, rest_args}, _from, s_network) do
-      mutated = apply(H, fun_name, [s_network | rest_args])
+      mutated = apply(Guts, fun_name, [s_network | rest_args])
       continue(mutated, returning: :ok)
     end
 
