@@ -21,6 +21,8 @@ defmodule Network.CircularSubnet do
   alias System.Pulse
 
   typedstruct enforce: true do
+    plugin TypedStructLens
+    
     field :name_to_pid, BiMap.t(atom, pid), default: BiMap.new
     field :name_to_cluster, %{atom => Cluster.Circular.t}
   end 
@@ -32,6 +34,10 @@ defmodule Network.CircularSubnet do
 
     def cast__distribute_pulse(pid, carrying: %Pulse{} = pulse, to: destination_names),
         do: GenServer.cast(pid, {:distribute_pulse, carrying: pulse, to: destination_names})
+
+
+    def call__add_cluster(pid, cluster), do: GenServer.call(pid, [add: cluster])
+   
     
     private do 
       # For tests
@@ -113,6 +119,15 @@ defmodule Network.CircularSubnet do
       |> continue(returning: :ok)
     end
 
+
+    def handle_call([add: %Cluster.Circular{} = cluster], _from, s_state) do
+      precondition Map.has_key?(s_state, :name_to_cluster)
+
+      s_state
+      |> A.put(name_to_cluster() |> Lens.key(cluster.name), cluster)
+      |> continue(returning: :ok)
+    end
+    
     unexpected_call()
 
     private do

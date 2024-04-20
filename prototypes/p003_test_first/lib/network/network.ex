@@ -22,6 +22,8 @@ defmodule Network do
   alias System.Pulse
 
   typedstruct enforce: true do
+    plugin TypedStructLens
+    
     field :name_to_id, %{atom => Cluster.Identification.t}, default: %{}
     field :downstreams_by_name, %{atom => MapSet.t(atom)}
 

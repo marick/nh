@@ -1,0 +1,67 @@
+alias AppAnimal.{Building.Whole, Network, Cluster}
+
+defmodule Whole.Helpers do
+  use AppAnimal
+
+  def trace(%Network{} = s_network, clusters) do
+    s_network
+    |> unordered(clusters)
+    |> add_to_downstreams(clusters)
+  end
+
+  def unordered(%Network{} = s_network, clusters) do
+    Enum.reduce(clusters, s_network, fn cluster, acc ->
+      acc
+      |> add_cluster(cluster)
+      |> add_to_name_set(cluster)
+      |> add_to_id_map(cluster)
+    end)
+  end
+
+  def add_to_downstreams(%Network{} = s_network, clusters) do
+    names = names_from(clusters)
+    mutated =
+      s_network.downstreams_by_name
+      |> downstream_ensure_keys(names)
+      |> downstream_add_values(Enum.chunk_every(names, 2, 1, :discard))
+    %{s_network | downstreams_by_name: mutated}
+  end
+  
+  private do
+
+    # parts
+
+    def add_cluster(s_network, %Cluster.Circular{} = cluster) do
+      pid = s_network.p_circular_clusters
+      Network.CircularSubnet.call__add_cluster(pid, cluster)
+      s_network
+    end
+
+    def add_to_name_set(s_network, %Cluster.Circular{} = cluster) do
+      Map.update!(s_network, :circular_names, & MapSet.put(&1, cluster.name))
+    end
+
+    def add_to_id_map(s_network, %Cluster.Circular{} = cluster) do
+      A.put(s_network, Network.name_to_id() |> Lens.key(cluster.name), cluster.id)
+    end
+
+    def names_from(clusters) do
+      mapper = fn cluster -> cluster.name end
+      Enum.map(clusters, mapper)
+    end
+
+    def downstream_ensure_keys(name_to_names, upstream_names) do
+      Enum.reduce(upstream_names, name_to_names, fn name, acc ->
+        Map.put_new(acc, name, MapSet.new)
+      end)
+    end
+
+    def downstream_add_values(name_to_names, []), do: name_to_names
+    
+    def downstream_add_values(name_to_names, [[upstream, downstream] | rest]) do
+      name_to_names
+      |> Map.update!(upstream, & MapSet.put(&1, downstream))
+      |> downstream_add_values(rest)
+    end
+  end
+end
