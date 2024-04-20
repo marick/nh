@@ -37,18 +37,35 @@ defmodule Whole.Guts do
       s_network
     end
 
+    def add_cluster(s_network, %Cluster.Linear{} = cluster) do
+      lens = Network.linear_clusters() |> Network.LinearSubnet.cluster_named(cluster.name)
+      A.put(s_network, lens, cluster)
+    end
+
+    #
+
     def add_to_name_set(s_network, %Cluster.Circular{} = cluster) do
       Map.update!(s_network, :circular_names, & MapSet.put(&1, cluster.name))
     end
 
-    def add_to_id_map(s_network, %Cluster.Circular{} = cluster) do
+    def add_to_name_set(s_network, %Cluster.Linear{} = cluster) do
+      Map.update!(s_network, :linear_names, & MapSet.put(&1, cluster.name))
+    end
+
+    #
+
+    def add_to_id_map(s_network, cluster) when is_struct(cluster) do
       A.put(s_network, Network.name_to_id() |> Lens.key(cluster.name), cluster.id)
     end
+
+    # 
 
     def names_from(clusters) do
       mapper = fn cluster -> cluster.name end
       Enum.map(clusters, mapper)
     end
+
+    #
 
     def downstream_ensure_keys(name_to_names, upstream_names) do
       Enum.reduce(upstream_names, name_to_names, fn name, acc ->

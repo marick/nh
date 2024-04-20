@@ -9,6 +9,8 @@ defmodule Network.LinearSubnet do
     field :name_to_cluster, %{atom => Cluster.t}
   end
 
+  deflens cluster_named(name), do: Lens.key(:name_to_cluster) |> Lens.key(name)
+
   def new(clusters) do
     cluster_map =
       for c <- clusters, into: %{}, do: {c.name, Cluster.Linear.new(c)}

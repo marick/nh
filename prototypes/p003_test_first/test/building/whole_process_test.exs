@@ -56,6 +56,32 @@ defmodule Building.Whole.ProcessTest do
       assert Network.downstream_of(network, :first) == MapSet.new([:second])
       assert Network.downstream_of(network, :second) == MapSet.new([])
     end
+
+    test "linear clusters work too" do
+      m = start_link_supervised!(UT)
+      first = P.linear(:first)
+      second = P.circular(:second)
+
+      UT.trace(m, [first, second])
+
+      network = UT.network(m)
+
+      Network.CircularSubnet.clusters(network.p_circular_clusters)
+      |> assert_equals([second])
+
+      assert A.get_only(network.linear_clusters,
+                        Network.LinearSubnet.cluster_named(:first)) == first
+
+      assert network.circular_names == MapSet.new([:second])
+      assert network.linear_names == MapSet.new([:first])
+
+      network.name_to_id
+      |> assert_fields(first: first.id, second: second.id)
+
+      # downstream
+      assert Network.downstream_of(network, :first) == MapSet.new([:second])
+      assert Network.downstream_of(network, :second) == MapSet.new([])
+    end
   end
 end
 
