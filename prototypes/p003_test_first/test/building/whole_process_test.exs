@@ -11,7 +11,7 @@ defmodule Building.Whole.ProcessTest do
     %{linear_clusters: linears, p_circular_clusters: p_circular} = network = UT.network(m)
 
     assert_fields(network, name_to_id: %{},
-                           downstreams_by_name: %{},
+                           name_to_downstreams: %{},
                            circular_names: MapSet.new,
                            linear_names: MapSet.new)
     assert is_pid(p_circular)
@@ -37,7 +37,7 @@ defmodule Building.Whole.ProcessTest do
       |> assert_fields(first: first.id, second: second.id)
 
       # Does not change downstream relationships
-      assert network.downstreams_by_name == %{}
+      assert network.name_to_downstreams == %{}
     end
 
     test "traces also update 'downstream' relationships" do

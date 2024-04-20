@@ -71,3 +71,7 @@ together. That is, whereas cluster-to-cluster communication happens by:
 pulse to the cluster with the same name as the affordance.
 
 
+### Map names
+
+Use `x_to_y`. That's somewhat like the definition of a function as a
+*map* from a domain to a range.

@@ -21,10 +21,10 @@ defmodule Whole.Guts do
   def add_to_downstreams(%Network{} = s_network, clusters) do
     names = names_from(clusters)
     mutated =
-      s_network.downstreams_by_name
+      s_network.name_to_downstreams
       |> downstream_ensure_keys(names)
       |> downstream_add_values(Enum.chunk_every(names, 2, 1, :discard))
-    %{s_network | downstreams_by_name: mutated}
+    %{s_network | name_to_downstreams: mutated}
   end
   
   private do
