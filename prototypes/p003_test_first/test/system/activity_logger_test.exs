@@ -4,7 +4,7 @@ defmodule System.ActivityLoggerTest do
   use ClusterCase, async: true
   alias System.ActivityLogger, as: UT
   alias System.Pulse
-  
+
   test "basic operations" do
     pid = start_link_supervised!({UT,100})
     UT.log_pulse_sent(pid, circular(:a_name), Pulse.new("pulse data"))
@@ -34,5 +34,5 @@ defmodule System.ActivityLoggerTest do
     # Just checking that calls are correct
     UT.silence_terminal_log(pid)
   end
-  
+
 end

@@ -7,7 +7,7 @@ defmodule AppAnimal.Extras.Opts do
     case Keyword.pop_first(opts, maybe_present, :no_such_value) do
       {:no_such_value, _} ->
         opts
-      {value, new_opts} -> 
+      {value, new_opts} ->
         Keyword.put(new_opts, replacement, value)
     end
   end
@@ -20,7 +20,7 @@ defmodule AppAnimal.Extras.Opts do
 
   def copy(opts, new_key, from_existing: old_key) do
     case Keyword.fetch(opts, old_key) do
-      {:ok, value} -> 
+      {:ok, value} ->
         Keyword.put_new(opts, new_key, value)
       :error ->
         opts
@@ -31,13 +31,13 @@ defmodule AppAnimal.Extras.Opts do
     reducer = fn key, {values, opts} ->
       case Keyword.pop_first(opts, key) do
         {nil, _} ->
-          raise(KeyError, term: original_opts, key: key, 
+          raise(KeyError, term: original_opts, key: key,
                           message: "keyword argument #{inspect key} is missing")
         {value, next_opts} ->
           {[value | values], next_opts}
       end
     end
-    
+
     {reversed_values, remaining_opts} =
       Enum.reduce(keys, {[], original_opts}, reducer)
 
@@ -46,12 +46,12 @@ defmodule AppAnimal.Extras.Opts do
       raise(KeyError, term: extra_keys,
                       message: "extra keyword arguments: #{inspect extra_keys}")
     end
-    
+
     Enum.reverse(reversed_values)
   end
 
   def add_missing!(opts, replacements) do
-    already_existing = 
+    already_existing =
       Keyword.keys(replacements)
       |> Enum.filter(& Keyword.has_key?(opts, &1))
 
@@ -80,7 +80,7 @@ defmodule AppAnimal.Extras.Opts do
      returns a keyword list with `:derived` linked to the value. (Note that,
      in typical use, the option list is visible inside `f`.
   4. Order is not guaranteed.
-  5. The source key/value pair is *not* removed. 
+  5. The source key/value pair is *not* removed.
   """
   def create(opts, derived, positional) do
     [source, f] = required!(positional, [:if_present, :with])

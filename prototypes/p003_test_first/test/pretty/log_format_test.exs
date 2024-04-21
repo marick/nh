@@ -10,4 +10,3 @@ defmodule AppAnimal.Pretty.LogFormatTest do
     ["abc\n\ndef", [                  ]] |> returns.("abc\n\ndef")
   end
 end
-

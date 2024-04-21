@@ -11,13 +11,13 @@ defmodule Perceptions.ParagraphGapsTest do
       becomes = run_and_assert(&UT.decompose/1)
 
       # Two or more newlines is a gapg      "abc"             |> becomes.(["abc"])
-      "abc\n    def"	|> becomes.(["abc\n    def"])
-      "abc\n\n  def"	|> becomes.(["abc", "\n\n", "  def"])
-      "abc\n\n\ndef"	|> becomes.(["abc", "\n\n\n", "def"])
+      "abc\n    def"    |> becomes.(["abc\n    def"])
+      "abc\n\n  def"    |> becomes.(["abc", "\n\n", "  def"])
+      "abc\n\n\ndef"    |> becomes.(["abc", "\n\n\n", "def"])
 
       # Newlines at start or end.
-      "abc\n\ndef\n"	|> becomes.(["abc", "\n\n", "def\n"])
-      "\nab"           |> becomes.(["\nab"])
+      "abc\n\ndef\n"    |> becomes.(["abc", "\n\n", "def\n"])
+      "\nab"            |> becomes.(["\nab"])
       "\n\nabc"         |> becomes.(["\n\n", "abc"])
       "abc\n\n"         |> becomes.(["abc", "\n\n"])
 
@@ -40,7 +40,7 @@ defmodule Perceptions.ParagraphGapsTest do
       ["\nabc", "a\nb", "def\n"] |> becomes.([:text, :text, :text])
 
       # The everpresent boundary case
-      [] |> becomes.([])                         
+      [] |> becomes.([])
     end
 
     test "ranges" do
@@ -88,4 +88,3 @@ defmodule Perceptions.ParagraphGapsTest do
     |> assert_equals(0)
   end
 end
-

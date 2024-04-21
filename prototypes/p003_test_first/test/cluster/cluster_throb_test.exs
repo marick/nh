@@ -15,7 +15,7 @@ defmodule Cluster.ThrobTest do
                        f_note_pulse: &UT.pulse_does_nothing/2,
                        f_before_stopping: &UT.stop_silently/2)
     end
-    
+
     test "with a different `on_pulse` value" do
       UT.counting_down_from(Duration.quanta(5), on_pulse: &UT.pulse_increases_lifespan/2)
       |> assert_fields(current_age: Duration.quanta(5),
@@ -34,7 +34,7 @@ defmodule Cluster.ThrobTest do
                        f_throb: &UT.count_down/2,
                        f_note_pulse: &UT.pulse_increases_lifespan/2,
                        f_before_stopping: &UT.pulse_current_value/2)
-    end    
+    end
   end
 
   describe "setting up a count-up" do
@@ -46,7 +46,7 @@ defmodule Cluster.ThrobTest do
                        f_note_pulse: &UT.pulse_does_nothing/2,
                        f_before_stopping: &UT.stop_silently/2)
     end
-    
+
     test "with a different `on_pulse` value" do
       UT.counting_up_to(Duration.quanta(5), on_pulse: &UT.pulse_zeroes_lifespan/2)
       |> assert_fields(current_age: Duration.quanta(0),
@@ -82,14 +82,14 @@ defmodule Cluster.ThrobTest do
 
       assert_field(new_throb, current_age: 0)
     end
-    
+
     test "can pack multiple count_downs together for testing" do
       throb = UT.counting_down_from(5)
       assert {:stop, new_throb} = UT.count_down(throb, 5)
 
       assert_field(new_throb, current_age: 0)
     end
-    
+
     test "a pulse does not make a difference" do
       throb = UT.counting_down_from(1)
       assert throb == UT.note_pulse(throb, :irrelevant_calculated_value)
@@ -100,7 +100,7 @@ defmodule Cluster.ThrobTest do
 
       {:continue, throb} = UT.count_down(throb)   # take it below the starting value
       assert_field(throb, current_age: 1)
-        
+
       UT.note_pulse(throb, :irrelevant_calculated_value)
       |> assert_field(current_age: 2)
     end
@@ -136,14 +136,14 @@ defmodule Cluster.ThrobTest do
 
       assert_field(new_throb, current_age: 1)
     end
-    
+
     test "can pack multiple count_downs together for testing" do
       throb = UT.counting_up_to(5)
       assert {:stop, new_throb} = UT.count_up(throb, 5)
 
       assert_field(new_throb, current_age: 5)
     end
-    
+
     test "a pulse does not make a difference" do
       throb = UT.counting_up_to(1)
       assert throb == UT.note_pulse(throb, :irrelevant_calculated_value)
@@ -154,7 +154,7 @@ defmodule Cluster.ThrobTest do
 
       {:continue, throb} = UT.count_up(throb)   # take it above zero
       assert_field(throb, current_age: 1)
-        
+
       UT.note_pulse(throb, :irrelevant_calculated_value)
       |> assert_field(current_age: 0)
     end
@@ -173,5 +173,5 @@ defmodule Cluster.ThrobTest do
       |> assert_field(current_age: 0)
     end
   end
-  
+
 end

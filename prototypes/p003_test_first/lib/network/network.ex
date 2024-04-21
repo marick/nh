@@ -16,14 +16,14 @@ defmodule Network do
   sort of asynchronous action as starting a Task.
 
   """
-  
+
   use AppAnimal
   use TypedStruct
   alias System.Pulse
 
   typedstruct enforce: true do
     plugin TypedStructLens
-    
+
     field :name_to_id, %{atom => Cluster.Identification.t}, default: %{}
     field :name_to_downstreams, %{atom => MapSet.t(atom)}
 
@@ -50,7 +50,7 @@ defmodule Network do
     name_to_downstreams =
       for c <- clusters, into: %{},
                          do: {c.name, MapSet.new(c.downstream)}
-    
+
     %__MODULE__{p_circular_clusters: p_circular_clusters,
                 name_to_id: name_to_id,
                 name_to_downstreams: name_to_downstreams,
@@ -79,7 +79,7 @@ defmodule Network do
   pulse is just `cast` in its direction. If not, it has to be started before the
   pulse can be `cast` at it.
 
-  Yeah, this naming is not great.  
+  Yeah, this naming is not great.
   """
   def deliver_pulse(network, names, %Pulse{} = pulse) do
     {circular_names, linear_names} =
@@ -95,7 +95,7 @@ defmodule Network do
   end
 
   private do
-    def split_targets(network, given) do 
+    def split_targets(network, given) do
       given_set = MapSet.new(given)
 
       {}

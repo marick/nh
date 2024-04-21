@@ -10,7 +10,7 @@ defmodule ActivityLogAssertionsTest do
   describe "element comparison" do
     test "success cases" do
       actual = PulseSent.new(:a_label, :a_name, "data")
-      
+
       UT.assert_log_entry(actual, PulseSent.new(:a_label, :a_name, "data"))
       UT.assert_log_entry(actual, [a_name: "data"])
       UT.assert_log_entry(actual, :a_name)
@@ -21,21 +21,21 @@ defmodule ActivityLogAssertionsTest do
 
       assertion_fails(
         "Assertion with == failed",
-        fn -> 
+        fn ->
           UT.assert_log_entry(actual, PulseSent.new(:a_typ, :a_name, "data"))
         end)
 
       assertion_fails(
         "Field `:name` has the wrong value",
         [left: :a_name, right: :a_ame],
-        fn -> 
+        fn ->
           UT.assert_log_entry(actual, [a_ame: "data"])
         end)
 
       assertion_fails(
         "Field `:pulse_data` has the wrong value",
         [left: "data", right: "dat"],
-        fn -> 
+        fn ->
           UT.assert_log_entry(actual, [a_name: "dat"])
         end)
     end
@@ -47,7 +47,7 @@ defmodule ActivityLogAssertionsTest do
       assertion_fails(
         "Field `:name` has the wrong value",
         [left: :name, right: :not_name],
-        fn -> 
+        fn ->
           UT.assert_log_entry(example, action_taken(:not_name))
         end)
     end
@@ -72,8 +72,8 @@ defmodule ActivityLogAssertionsTest do
 
     end
   end
-  
-  
+
+
   describe "assert_log_entries" do
     setup do
       [actual: [PulseSent.new(:a_label, :a_name, "a_data"),
@@ -131,6 +131,6 @@ defmodule ActivityLogAssertionsTest do
           UT.assert_causal_chain(actual, [:a_name, [c_name: "not c_data"]])
         end)
     end
-    
+
   end
 end

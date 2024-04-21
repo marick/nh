@@ -12,5 +12,5 @@ defmodule AppAnimal.DurationTestTest do
       assert UT.quanta(10) == 1000
     end
   end
-  
+
 end

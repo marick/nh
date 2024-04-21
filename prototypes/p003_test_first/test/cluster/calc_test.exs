@@ -56,8 +56,8 @@ defmodule Cluster.CalcTest do
           Action.new(:name)      |> becomes.({:useful_result, Action.new(:name),   "unchanged"})
                      {:ok, 5}    |> becomes.({:useful_result, Pulse.new({:ok, 5}), "unchanged"})
   end
-  
-  describe "examples of putting it all together" do 
+
+  describe "examples of putting it all together" do
     test "an arity-one function does not get nor change the state" do
       f = fn x -> x+1 end
       actual = UT.run(f, on: Pulse.new(1), with_state: "unchanged")
@@ -86,12 +86,12 @@ defmodule Cluster.CalcTest do
       default_to_default = UT.run(f, on: Pulse.new(5), with_state: "unchanged")
       assert default_to_default == {:useful_result, Pulse.new(6), "unchanged"}
     end
-    
+
     test "an arity-two function may return both pulse data and a next state" do
       f = fn pulse_data, state ->
         {:useful_result, pulse_data+1, [pulse_data | state] }
       end
-      
+
       assert UT.run(f, on: Pulse.new(1), with_state: []) == {:useful_result, Pulse.new(2), [1]}
     end
 
@@ -107,25 +107,25 @@ defmodule Cluster.CalcTest do
 
     test "function may also return a :no_result and a next state" do
       f = fn _, _ -> {:no_result, "next state"} end
-      
+
       assert UT.run(f, on: Pulse.new(1), with_state: 2) == {:no_result, "next state"}
     end
-    
+
     test "or just a plain :no_result" do
       f = fn _, _ -> :no_result end
-      
+
       assert UT.run(f, on: Pulse.new(1), with_state: "unchanged") == {:no_result, "unchanged"}
     end
-    
+
     test "without one of the two magic atoms returned, it's interpreted as the pulse value" do
       f = fn pulse_data, state ->
         pulse_data + state + 3
       end
-      
+
       assert UT.run(f, on: Pulse.new(1), with_state: 2) == {:useful_result, Pulse.new(6), 2}
     end
   end
-  
+
   test "maybe_pulse" do
     UT.maybe_pulse({:no_result}, & Process.exit(self(), {:crash, &1}))
     UT.maybe_pulse({:no_result, :state}, & Process.exit(self(), {:crash, &1}))

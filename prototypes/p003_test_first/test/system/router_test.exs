@@ -54,7 +54,7 @@ defmodule System.RouterTest do
 
     test "sending a delay" do
       p_timer = start_link_supervised!(Network.Timer)
-      
+
       router = UT.new(%{Delay => p_timer})
 
       action = Delay.new(3, "some data")

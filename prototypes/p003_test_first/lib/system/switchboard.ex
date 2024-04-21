@@ -9,7 +9,7 @@ defmodule System.Switchboard do
   maintains any mutable state, so it could be a plain module. However, I might want to
   play "chaos monkey" games - dropping pulses and so on - so I won't bother changing it.
   """
-  
+
   use AppAnimal
   use AppAnimal.GenServer
   use TypedStruct
@@ -38,7 +38,7 @@ defmodule System.Switchboard do
     Examples:
         cast__distribute_pulse(p_switchboard, carrying: pulse_data, from: source_name)
         cast__distribute_pulse(p_switchboard, carrying: pulse_data, to: destination_names)
-    
+
     """
     def cast__distribute_pulse(p_switchboard, one_of_two_keyword_lists)
     def cast__distribute_pulse(p_switchboard, carrying: %Pulse{} = pulse, from: source_name),
@@ -50,7 +50,7 @@ defmodule System.Switchboard do
                            {:distribute_pulse, carrying: pulse, to: destination_names})
   end
 
-  runs_in_receiver do 
+  runs_in_receiver do
     @impl GenServer
     def init(s_switchboard) do
       ok(s_switchboard)
@@ -62,7 +62,7 @@ defmodule System.Switchboard do
       |> Map.put(:network, network)
       |> continue(returning: :ok)
     end
-    
+
     @impl GenServer
     def handle_cast({:distribute_pulse, carrying: %Pulse{} = pulse, from: source_name},
                     s_switchboard) do
@@ -76,7 +76,7 @@ defmodule System.Switchboard do
     def handle_cast({:distribute_pulse, carrying: %Pulse{} = pulse, to: destination_names},
                     s_switchboard) do
 
-      Network.deliver_pulse(s_switchboard.network, destination_names, pulse)  
+      Network.deliver_pulse(s_switchboard.network, destination_names, pulse)
       continue(s_switchboard)
     end
   end

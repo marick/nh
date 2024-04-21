@@ -2,8 +2,8 @@ defmodule AppAnimal.ActivityLogAssertions do
   @moduledoc """
   Some fairly rudimentary assertions against the log. Perhaps more to come.
   """
-               
-  
+
+
   use AppAnimal
   use FlowAssertions
   use FlowAssertions.Define
@@ -22,7 +22,7 @@ defmodule AppAnimal.ActivityLogAssertions do
   A log is compared to a set of expected entries. An entry can signify an
   action received by AffordanceLand, or it can be a pulse sent by a cluster.
   A log entry that doesn't match the expected entry is skipped without causing the
-  assertion to fail. 
+  assertion to fail.
 
   Most entries will be pulses sent, so there is shorthand.
 
@@ -36,7 +36,7 @@ defmodule AppAnimal.ActivityLogAssertions do
        action_taken(:name)
        action_taken(:name, "data")
   """
-  
+
   def assert_causal_chain(_actuals, []), do: :ok
 
   def assert_causal_chain([], [e | _e_rest]) do
@@ -56,7 +56,7 @@ defmodule AppAnimal.ActivityLogAssertions do
   private do
     def entry_match?(%a_type{} = a, %other_type{} = other),
         do: a_type == other_type && a == other
-    
+
     def entry_match?(a, name) when is_atom(name),
         do: a.name == name
     def entry_match?(a, [{name, pulse_data}]),
@@ -85,30 +85,30 @@ defmodule AppAnimal.ActivityLogAssertions do
   """
   def assert_log_entries(actuals, expecteds) do
     difference = length(actuals) - length(expecteds)
-    if difference < 0, 
+    if difference < 0,
        do: flunk("The right-hand side has #{-difference} extra value(s).")
-    if difference > 0, 
+    if difference > 0,
        do: flunk("The left-hand side has #{difference} extra value(s).")
 
     for {actual, expected} <- Enum.zip(actuals, expecteds) do
       assert_log_entry(actual, expected)
     end
   end
-  
+
   # Assert_log_entry
-  
+
   def assert_log_entry(%PulseSent{} = actual, %PulseSent{} = expected_desc) do
     assert_same_map(actual, expected_desc)
   end
-  
+
   def assert_log_entry(%PulseSent{} = actual, [{name, pulse_data}]) do
     assert_fields(actual, name: name, pulse_data: pulse_data)
   end
-  
+
   def assert_log_entry(%PulseSent{} = actual, name) when is_atom(name) do
     assert_field(actual, name: name)
   end
-  
+
   def assert_log_entry(%ActionReceived{} = actual, %ActionReceived{name: name}) do
     assert_field(actual, name: name)
   end

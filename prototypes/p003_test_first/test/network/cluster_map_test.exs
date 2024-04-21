@@ -17,13 +17,13 @@ defmodule Network.ClusterMapTest do
       {one.name, one.downstream}
     end
   end
-  
+
   defp assert_connections(cluster_map, field_descriptions) do
     cluster_map
     |> downstreams
     |> assert_fields(field_descriptions)
   end
-  
+
   describe "building a network (basics)" do
     test "singleton" do
       first = linear(:first)
@@ -44,7 +44,7 @@ defmodule Network.ClusterMapTest do
     end
   end
 
-  describe "handling of duplicates" do 
+  describe "handling of duplicates" do
     test "new value does not overwrite an existing one" do
       first = linear(:first, & &1+1000)
       new_first = linear(:first, &Function.identity/1)
@@ -77,7 +77,7 @@ defmodule Network.ClusterMapTest do
   end
 
 
-  describe "helpers" do 
+  describe "helpers" do
     test "add_only_new_clusters" do
       add_only_new_clusters(%{}, [%{name: :one, value: "original"},
                                      %{name: :two},
@@ -85,7 +85,7 @@ defmodule Network.ClusterMapTest do
       |> assert_equals(%{one: %{name: :one, value: "original"},
                          two: %{name: :two}})
     end
-    
+
     test "add_only_new_clusters works when the duplicate comes in a different call" do
       original = %{one: %{name: :one, value: "original"}}
       add_only_new_clusters(original, [ %{name: :two},
@@ -93,14 +93,14 @@ defmodule Network.ClusterMapTest do
       |> assert_equals(%{one: %{name: :one, value: "original"},
                          two: %{name: :two}})
     end
-    
+
     test "add_downstream" do
       trace = [first, second, third] = Enum.map([:first, :second, :third], &named/1)
-      
+
       network =
         add_only_new_clusters(%{}, trace)
         |> add_downstream([[first, second], [second, third]])
-      
+
       assert network.first.downstream == [:second]
       assert network.second.downstream == [:third]
       assert network.third.downstream == []

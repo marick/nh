@@ -5,7 +5,7 @@ defmodule Cluster.Circular do
 
   Those parts of a `Cluster` that are relevant to the operation of this gensym. Here are
   the fields that are new:
-  
+
   - throb          - Controls the aging of this cluster and its eventual exit.
                      Initialized from Shape.Circular.max_age.
   - previously     - The part of the state the `calc` function can channged.
@@ -36,9 +36,8 @@ defmodule Cluster.Circular do
 
   deflens current_age(), do: in_throb(:current_age)
   deflens max_age(), do: in_throb(:max_age)
-  
+
   private do
     def in_throb(key), do: throb() |> Lens.key(key)
   end
 end
-

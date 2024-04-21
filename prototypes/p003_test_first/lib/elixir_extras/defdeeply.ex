@@ -1,4 +1,4 @@
-defmodule AppAnimal.Extras.DefDeeply do 
+defmodule AppAnimal.Extras.DefDeeply do
   @moduledoc """
   `defdeeply` expands into two functions. Consider this:
 
@@ -49,7 +49,7 @@ defmodule AppAnimal.Extras.DefDeeply do
                       unquote(arg3))
       end
       def unquote(head), do: unquote(body)
-    end 
+    end
   end
 
   def defdeeply_2(head, body) do
@@ -71,6 +71,6 @@ defmodule AppAnimal.Extras.DefDeeply do
                                       unquote(lens))
     end
   end
-  
+
   def lookup_lens(s_struct, lens_name), do: apply(s_struct.__struct__, lens_name, [])
 end

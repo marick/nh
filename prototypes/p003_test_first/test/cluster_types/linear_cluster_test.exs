@@ -10,7 +10,7 @@ defmodule AppAnimal.Cluster.LinearClusterTest do
       assert_test_receives(2)
     end
   end
-  
+
   describe "handling of a calculation" do
     test "choosing to pulse" do
       function_that_causes_pulse = & &1+1

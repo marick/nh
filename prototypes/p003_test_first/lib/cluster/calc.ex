@@ -29,7 +29,7 @@ defmodule Calc do
   has no effect on the calculation and is not to be changed by it.
 
   ### Assembling the result
-  
+
   A one-argument function should return one of these values:
 
   `:no_result`  - there is to be no outgoing pulse or action
@@ -62,7 +62,7 @@ defmodule Calc do
   It is also valid to return a single value (Pulse.t, `Action.t`, or
   something else).  That signals that a pulse is to be sent but the
   state is to be left unchanged.
-  
+
   """
   use AppAnimal
   alias System.{Pulse,Action}
@@ -84,7 +84,7 @@ defmodule Calc do
     |> calc.()
     |> assemble_result(               :there_is_no_state)
   end
-  
+
   ####
 
   @doc "Use `f_send_pulse` to send pulse data iff the `tuple` argument so indicates."
@@ -92,7 +92,7 @@ defmodule Calc do
     case elem(tuple, 0) do
       :no_result ->
         :do_nothing
-      :useful_result -> 
+      :useful_result ->
         pulse_data = elem(tuple, 1)
         f_send_pulse.(pulse_data)
     end
@@ -117,7 +117,7 @@ defmodule Calc do
     end
 
     def assemble_result(calc_result, previous_state, :state_does_not_change) do
-      case calc_result do 
+      case calc_result do
         :no_result         -> {:no_result,                            previous_state}
         %Pulse{} = pulse   -> {:useful_result,  pulse,                previous_state}
         %Action{} = action -> {:useful_result,  action,               previous_state}
@@ -129,13 +129,13 @@ defmodule Calc do
       case calc_result do
          :no_result              ->  {:no_result, previous_state}
         {:no_result, next_state} ->  {:no_result, next_state}
-        
+
         {:useful_result,            %Pulse{} = pulse, next_state} ->
         {:useful_result,                       pulse, next_state}
-        
+
         {:useful_result,            %Action{} = action, next_state} ->
         {:useful_result,                        action, next_state}
-        
+
         {:useful_result,           raw_data,  next_state} ->
         {:useful_result, Pulse.new(raw_data), next_state}
 

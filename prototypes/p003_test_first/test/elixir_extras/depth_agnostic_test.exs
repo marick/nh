@@ -16,7 +16,7 @@ defmodule Extras.DepthAgnosticTest do
 
   deflens by_name(name), do: clusters() |> Lens.key!(name)
   deflens count, do: clusters() |> Lens.map_values() |> Lens.key!(:count)
-  
+
   describe "lens utilities" do
     test "all of them" do
       data = %__MODULE__{clusters: %{fred: %{count: 0},
@@ -26,7 +26,7 @@ defmodule Extras.DepthAgnosticTest do
 
 
       result = A.put(data, :count, "replace")
-      
+
       assert result == %__MODULE__{clusters: %{fred: %{count: "replace"},
                                                betty: %{count: "replace"},
                                                bambam: %{count: "replace"}}}
@@ -45,4 +45,3 @@ defmodule Extras.DepthAgnosticTest do
     end
   end
 end
-

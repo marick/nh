@@ -7,7 +7,7 @@ defmodule Building.PartsTest do
 
   describe "variants of circular creation" do
 
-    test "only a name is specified" do 
+    test "only a name is specified" do
       UT.circular(:name)
       |> assert_fields(name: :name,
                        id: Cluster.Identification.new(:name, :circular),
@@ -15,17 +15,17 @@ defmodule Building.PartsTest do
                        calc: &Function.identity/1,
                        previously: %{})
     end
-      
-    test "name and options" do 
+
+    test "name and options" do
       UT.circular(:name, previously: 3)
       |> assert_fields(name: :name,
                        id: Cluster.Identification.new(:name, :circular),
                        throb: Cluster.Throb.default,
                        calc: &Function.identity/1,
-      
+
                        previously: 3)
     end
-        
+
     test "name and calc" do
       f = & &1+1
       UT.circular(:rounder, f)
@@ -35,8 +35,8 @@ defmodule Building.PartsTest do
                        calc: f,
                        previously: %{})
     end
-        
-      
+
+
     test "name, calc, and options" do
       alias AppAnimal.Duration
       f = & &1+1
@@ -49,15 +49,15 @@ defmodule Building.PartsTest do
                        previously: 5)
     end
   end
-  
+
   describe "variants of linear creation" do
-    test "only a name is specified" do 
+    test "only a name is specified" do
       UT.linear(:name)
       |> assert_fields(name: :name,
                        id: Cluster.Identification.new(:name, :linear),
                        calc: &Function.identity/1)
     end
-      
+
     test "can also add a calc function" do
       f = & &1 + 1
       UT.linear(:name, f)
@@ -65,14 +65,14 @@ defmodule Building.PartsTest do
                        id: Cluster.Identification.new(:name, :linear),
                        calc: f)
     end
-      
+
     test ".. or options" do
       UT.linear(:name, label: :subtype)
       |> assert_fields(name: :name,
                        id: Cluster.Identification.new(:name, :subtype),
                        calc: &Function.identity/1)
     end
-      
+
     test ".. or both" do
       f = & &1+1
       UT.linear(:name, f, label: :subtype)
@@ -80,8 +80,7 @@ defmodule Building.PartsTest do
                        id: Cluster.Identification.new(:name, :subtype),
                        calc: f)
     end
-      
+
   end
 
 end
-

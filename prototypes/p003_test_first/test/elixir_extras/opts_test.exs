@@ -5,7 +5,7 @@ defmodule Extras.OptsTest do
   use FlowAssertions
   alias Extras.Opts, as: UT
 
-  describe "replace key" do 
+  describe "replace key" do
     test "key is present" do
       actual = UT.replace_key([a: 3, b: 4], :a, :z)
       assert actual == [z: 3, b: 4]
@@ -24,7 +24,7 @@ defmodule Extras.OptsTest do
   end
 
   describe "copy" do
-    test "when original exists" do 
+    test "when original exists" do
       actual = UT.copy([a: 3, b: 4], :c, from_existing: :a)
       assert_good_enough(actual, in_any_order([a: 3, b: 4, c: 3]))
     end
@@ -36,43 +36,43 @@ defmodule Extras.OptsTest do
   end
 
   describe "required!" do
-    test "fetches N keys" do 
+    test "fetches N keys" do
       assert UT.required!([a: 2, b: 3], [:a, :b]) == [2, 3]
     end
 
     test "key must be present" do
-      assert_raise(KeyError, "keyword argument :b is missing", fn -> 
+      assert_raise(KeyError, "keyword argument :b is missing", fn ->
         UT.required!([a: 2], [:a, :b])
       end)
     end
 
     test "extra keys are not allowed" do
-      assert_raise(KeyError, "extra keyword arguments: [:b]", fn -> 
+      assert_raise(KeyError, "extra keyword arguments: [:b]", fn ->
         UT.required!([a: 2, b: 2], [:a])
       end)
     end
   end
-  
+
   describe "add_missing!" do
     test "augment an option list" do
       UT.add_missing!([a: 1, z: 444], b: 2, c: 3)
       |> assert_good_enough(in_any_order [a: 1, z: 444, b: 2, c: 3])
     end
-    
+
     test "it better actually *be* missing" do
-      try do 
+      try do
         UT.add_missing!([a: 1], b: 2, a: 3)
         flunk("unreached")
       rescue
         error ->
-          error 
+          error
           |> assert_struct_named(KeyError)
           |> assert_fields(term: [a: 1],
                            message: "keys [:a] are already present")
       end
     end
   end
-  
+
   describe "add_if_missing" do
     test "default if needed" do
       UT.add_if_missing([a: 1, z: 444], a: "ignored", b: 3)

@@ -6,7 +6,7 @@ defmodule AppAnimal.GenServer do
       require AppAnimal.GenServer
       import AppAnimal.GenServer
       alias AppAnimal.Neural
-      alias AppAnimal.Cluster      
+      alias AppAnimal.Cluster
     end
   end
 
@@ -23,7 +23,7 @@ defmodule AppAnimal.GenServer do
   end
 
   # These provide a more pleasant error.
-  
+
   defmacro unexpected_call() do
     quote do
       def handle_call(arg, _from, state) do
@@ -41,7 +41,7 @@ defmodule AppAnimal.GenServer do
       end
     end
   end
-  
+
   # special names for my style of genserver. Allows pipelines.
   def continue(s_state),
       do: {:noreply, s_state}  # for `cast`
@@ -50,4 +50,3 @@ defmodule AppAnimal.GenServer do
 
   def stop(arg), do: {:stop, :normal, arg}
 end
-

@@ -11,7 +11,7 @@ defmodule Throb do
 
   Optionally, each pulse can affect the lifespan. Typically, receipt of
   pulses makes the cluster live longer. So in the absence of pulses, the
-  cluster will eventually "age out". 
+  cluster will eventually "age out".
   """
   use AppAnimal
   use TypedStruct
@@ -19,7 +19,7 @@ defmodule Throb do
 
   @type throb_handler :: (Throb.t, integer -> Throb.t)
   @type pulse_handler :: (Throb.t, any -> Throb.t)
-  
+
   typedstruct enforce: true do
     plugin TypedStructLens
 
@@ -36,7 +36,7 @@ defmodule Throb do
     counting_down_from(Duration.frequent_glance,
                        on_pulse: &Throb.pulse_increases_lifespan/2)
   end
-  
+
 
   @doc """
   Create a cluster that counts down from a `max_age` and signals that
@@ -67,7 +67,7 @@ defmodule Throb do
       Opts.replace_keys(opts, on_pulse: :f_note_pulse, before_stopping: :f_before_stopping)
     struct(__MODULE__, new_opts)
   end
-  
+
   ### API
 
   def note_pulse(s_throb, cluster_calced),
@@ -77,7 +77,7 @@ defmodule Throb do
       do: s_throb.f_throb.(s_throb, n)
 
   ## Functions that handle throbbing.
-  
+
   def count_down(s_throb, n \\ 1) do
     mutated = Map.update!(s_throb, :current_age, & &1-n)
     if mutated.current_age <= 0,

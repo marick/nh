@@ -19,7 +19,7 @@ defmodule Cluster.Make do
   some convenience functions to avoid having to code up the right tuple. See
   Cluster.Calc for more about return values.
   """
-  
+
   use AppAnimal
   alias Cluster.Shape.{Circular, Linear}
 
@@ -37,7 +37,7 @@ defmodule Cluster.Make do
   def pulse(pulse_data, next_state), do: {:useful_result, pulse_data, next_state}
   def pulse_and_save(data),          do: {:useful_result, data, data}
 
-  
+
   # Linear Clusters
 
   def linear(name, calc \\ &Function.identity/1) do
@@ -55,11 +55,11 @@ defmodule Cluster.Make do
 
   def action_edge(name) do
     alias System.Action
-    
+
     wrap_in_this_clusters_action = fn arg ->
       Action.new(name, arg)
     end
-    
+
     linear(name, & [{name, &1}])
     |> Map.put(:calc, wrap_in_this_clusters_action)
     |> labeled(:action_edge)
@@ -87,15 +87,15 @@ defmodule Cluster.Make do
     alias Cluster.Throb
 
     effectively_a_uuid = :erlang.make_ref()
-    
+
     throb = Throb.counting_down_from(Duration.frequent_glance,
                                      on_pulse: &Throb.pulse_increases_lifespan/2)
     opts =
       opts
-      |> Keyword.put_new(:initial_value, effectively_a_uuid) 
+      |> Keyword.put_new(:initial_value, effectively_a_uuid)
       |> Keyword.put_new(:throb, throb)
-    
-    
+
+
     calc = fn pulse_data, previously ->
       if pulse_data == previously,
          do: :no_result,
@@ -110,11 +110,11 @@ defmodule Cluster.Make do
     throb = Throb.counting_up_to(duration,
                                  on_pulse: &Throb.pulse_zeroes_lifespan/2,
                                  before_stopping: &Throb.pulse_current_value/2)
-    
+
     f_stash_pulse_data = fn pulse_data, _previously ->
       {:no_result, pulse_data}
     end
-    
+
     circular(name, f_stash_pulse_data, throb: throb)
   end
 

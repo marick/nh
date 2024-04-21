@@ -2,9 +2,9 @@ alias AppAnimal.Cluster
 
 defmodule Cluster.Identification do
   use TypedStruct
-  
+
   typedstruct enforce: true do
-    
+
     field :label, atom
     field :name,  atom
   end
@@ -13,4 +13,3 @@ defmodule Cluster.Identification do
   def new(pairs), do: struct(__MODULE__, pairs)
   def new(name, label), do: new(name: name, label: label)
 end
-

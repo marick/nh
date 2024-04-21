@@ -3,7 +3,7 @@ alias AppAnimal.System
 defmodule System.AffordanceLand do
   @moduledoc """
   Represents the document in a way that produces affordances and
-  accepts actions in the form of instructions to create an affordance. 
+  accepts actions in the form of instructions to create an affordance.
   See JARGON.md.
 
   It is rudimentarily scriptable, so that a test can tell it how to
@@ -36,11 +36,11 @@ defmodule System.AffordanceLand do
     @doc """
     Given a name/pulse pair, send that affordance to the given name.
 
-    Affordances have the same name as the PerceptionEdge that receives them. 
+    Affordances have the same name as the PerceptionEdge that receives them.
     """
     def cast__produce_spontaneous_affordance(p_affordances, named: name, pulse: pulse),
         do: GenServer.cast(p_affordances, {:produce_this_affordance, name, pulse})
-    
+
   end
 
   runs_in_receiver do
@@ -66,7 +66,7 @@ defmodule System.AffordanceLand do
     def handle_cast({:take_action, %Action{} = action}, s_affordances) do
       {responses, remaining_canned_responses} =
         Keyword.pop_first(s_affordances.canned_responses, action.type)
-      
+
       if responses == nil,
          do: IO.puts("==== SAY, there is no canned response for #{action.type}. Test error.")
 
@@ -75,22 +75,22 @@ defmodule System.AffordanceLand do
         handle_cast({:produce_this_affordance, response.downstream, response.pulse},
                     s_affordances)
       end
-      
+
       %{s_affordances | canned_responses: remaining_canned_responses}
       |> continue()
     end
 
     unexpected_cast()
-    
+
     private do
       def append_programmed_responses(keywords, new) do
         wrapped = Enum.map(new, &wrap/1)
         keywords ++ wrapped
       end
-      
+
       def wrap({action, responses}) do
         case responses do
-          _ when is_list(responses) -> 
+          _ when is_list(responses) ->
             {action, responses}
           _ ->
             {action, [responses]}

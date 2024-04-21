@@ -9,7 +9,7 @@ defmodule Cluster.DelayTest do
                    throb_interval: Duration.foreverish)
       [aa: aa]
     end
-      
+
     test "delay for some throbs", %{aa: aa} do
       send_test_pulse(aa, to: :first, carrying: "data")
       refute_receive("data")

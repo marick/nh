@@ -3,10 +3,10 @@ AppAnimal.Cluster
 defmodule Cluster.ForwardUniqueTest do
   use ClusterCase, async: true
 
-  describe "forward_unique" do 
+  describe "forward_unique" do
     test "only unique values pass through" do
       aa = enliven([forward_unique(:first), to_test()])
-    
+
       send_test_pulse(aa, to: :first, carrying: 1)
       assert_test_receives(1)
 
@@ -29,17 +29,17 @@ defmodule Cluster.ForwardUniqueTest do
 
       throb = Throb.counting_down_from(2, on_pulse: &Throb.pulse_increases_lifespan/2)
       first = forward_unique(:first, throb: throb)
-    
+
       aa = enliven([first, to_test()], throb_interval: Duration.foreverish)
 
       # Start at maximum
       send_test_pulse(aa, to: :first, carrying: "data")
       assert_test_receives("data")
-    
+
       # As usual, a repetition is not forwarded
       send_test_pulse(aa, to: :first, carrying: "data")
       refute_receive("data")
-    
+
       assert peek_at(aa, :current_age, of: :first) == 2
 
       # a normal, decrementing throb

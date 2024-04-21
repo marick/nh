@@ -1,10 +1,10 @@
 defmodule AppAnimal.Pretty.LogFormat do
   @moduledoc "Used to configure Logger. See root/config/config.exs"
-  
+
   alias AppAnimal.Pretty
   use Private
   alias AppAnimal.System.ActivityLogger
-  
+
   def format(_level, message, _timestamp, metadata) do
     message = format(message, metadata)
     source_description = format_name(metadata)
@@ -22,7 +22,7 @@ defmodule AppAnimal.Pretty.LogFormat do
   def module_format(module) do
     Pretty.Module.terse(module) |> Macro.underscore
   end
-  
+
   private do
 
     def format_name(metadata) do
@@ -44,7 +44,7 @@ defmodule AppAnimal.Pretty.LogFormat do
 
     def handle_newlines(message, metadata) do
       if Keyword.get(metadata, :newlines) == :visible do
-        String.replace(message, "\n", "\\n")  
+        String.replace(message, "\n", "\\n")
       else
         message
       end

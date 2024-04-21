@@ -4,15 +4,15 @@ defmodule Network.Timer do
   use AppAnimal
   use AppAnimal.GenServer
 
-  runs_in_sender do 
+  runs_in_sender do
     def start_link(_) do
       GenServer.start_link(__MODULE__, :ok)
     end
-    
+
     def cast(self, payload, every: millis, to: destination_pid) do
       GenServer.call(self, {:cast_every, millis, payload, destination_pid})
     end
-    
+
     def cast(self, payload, after: millis) do
       GenServer.call(self, {:cast_after, millis, payload})
     end
@@ -23,7 +23,7 @@ defmodule Network.Timer do
     def init(:ok) do
       ok(:ok)
     end
-    
+
     @impl GenServer
     def handle_call({:cast_every, millis, payload, p_destination}, _from, :ok) do
       repeating(every: millis, sending: payload, to: p_destination)
@@ -46,7 +46,7 @@ defmodule Network.Timer do
       GenServer.cast(pid, payload)
       continue(:ok)
     end
-    
+
     private do
       def repeating([every: millis, sending: _payload, to: _on_behalf_of] = opts) do
         Process.send_after(self(), opts, millis)

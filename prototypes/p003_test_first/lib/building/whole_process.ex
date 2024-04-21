@@ -7,9 +7,9 @@ defmodule Whole.Process do
   use AppAnimal.GenServer
   alias Building.Whole.Guts, as: Guts
 
-  runs_in_sender do 
+  runs_in_sender do
     def start_link(_), do: GenServer.start_link(__MODULE__, Network.empty)
-    
+
     def network(pid), do: GenServer.call(pid, :get_network)
     def trace(pid, list), do: GenServer.call(pid, {:apply, :trace, [list]})
     def unordered(pid, list), do: GenServer.call(pid, {:apply, :unordered, [list]})

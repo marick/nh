@@ -17,11 +17,11 @@ defmodule Shape.Circular do
     field :initial_value, any,
                           default: %{}
   end
-  
+
   def new(opts \\ []) do
     Keyword.pop(opts, :max_age)
     case Keyword.pop(opts, :max_age) do
-      {nil, _} -> 
+      {nil, _} ->
         struct(__MODULE__, opts)
       {lifespan, remainder} ->
         Keyword.put(remainder, :throb, Throb.counting_down_from(lifespan))
@@ -31,7 +31,7 @@ defmodule Shape.Circular do
 end
 
 defmodule Shape.Linear do
-  defstruct [] # This is just to create the type. 
-  
+  defstruct [] # This is just to create the type.
+
   def new(opts \\ []), do: struct(__MODULE__, opts)
 end

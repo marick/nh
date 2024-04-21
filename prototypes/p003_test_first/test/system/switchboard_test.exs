@@ -6,7 +6,7 @@ defmodule System.SwitchboardTest do
   alias System.ActivityLogger
   alias Building.Whole.Process, as: M
   alias Building.Parts, as: P
-  
+
   ## The switchboard is mostly tested via the different kinds of clusters.
 
   @tag :skip
@@ -27,13 +27,13 @@ defmodule System.SwitchboardTest do
     network = M.network(m)
 
     dbg network
-    
+
     # a = AppAnimal.enliven(trace)
 
     # ActivityLogger.spill_log_to_terminal(a.p_logger)
     # send_test_pulse(a.p_switchboard, to: :first, carrying: 0)
     # assert_test_receives(2)
-    
+
     # [first, second] = ActivityLogger.get_log(a.p_logger)
     # assert_fields(first, name: :first,
     #                      pulse_data: 1)
@@ -44,25 +44,25 @@ defmodule System.SwitchboardTest do
   def given(trace_or_network), do: AppAnimal.switchboard(trace_or_network)
 
   test "a circular trace" do
-    calc = 
+    calc =
       fn _pulse, mutable ->
-        mutated = 
+        mutated =
           %{mutable | pids: [self() | mutable.pids],
                       count: mutable.count - 1}
         if mutated.count >= 0,
            do: pulse(mutated.pids, mutated),
            else: no_pulse(mutated)
       end
-    
+
     first = circular(:first, calc, initial_value: %{pids: [], count: 3})
-    
-    network = 
+
+    network =
       trace([first, first])
       |> extend(at: :first, with: [to_test()])
-    
+
     given(network)
     |> send_test_pulse(to: :first, carrying: :nothing)
-    
+
     assert_test_receives([pid])
     assert_test_receives([^pid, ^pid])
     assert_test_receives([^pid, ^pid, ^pid])
@@ -74,8 +74,8 @@ defmodule System.SwitchboardTest do
 
     pids =
       trace([first, to_test()])
-      |> AppAnimal.enliven(throb_interval: Duration.foreverish()) 
-    
+      |> AppAnimal.enliven(throb_interval: Duration.foreverish())
+
     send_test_pulse(pids, to: :first, carrying: :irrelevant)
     first_pid = assert_test_receives(_)
 
@@ -86,7 +86,7 @@ defmodule System.SwitchboardTest do
     throb_all_active(pids)
     # Need to make sure there's time to handle the "down" message, else the pulse will
     # be lost. The app_animal must tolerate dropped messages.
-    Process.sleep(100)  
+    Process.sleep(100)
     send_test_pulse(pids, to: :first, carrying: :irrelevant)
 
     another_pid = assert_test_receives(_)

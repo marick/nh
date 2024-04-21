@@ -7,7 +7,7 @@ defmodule Cluster.MakeTest do
   alias AppAnimal.Duration
   alias Cluster.Throb
 
-  describe "making circular clusters with circular" do 
+  describe "making circular clusters with circular" do
     test "basic" do
       cluster = UT.circular(:example, & &1+1)
 
@@ -16,7 +16,7 @@ defmodule Cluster.MakeTest do
                              shape: Cluster.Shape.Circular.new)
       assert cluster.calc.(1) == 2
     end
-    
+
     test "optional arguments go into the shape" do
       cluster = UT.circular(:example, & &1+1,
                             throb: Throb.counting_down_from(Duration.seconds(10)),
@@ -41,7 +41,7 @@ defmodule Cluster.MakeTest do
       assert_fields(cluster, name: :example,
                              label: :summarizer,
                              shape: Cluster.Shape.Linear.new)
-      
+
       assert cluster.calc.("long") == 4
     end
 
@@ -51,9 +51,9 @@ defmodule Cluster.MakeTest do
       assert_fields(cluster, name: :example,
                              label: :gate,
                              shape: Cluster.Shape.Linear.new)
-      
+
       assert cluster.calc.(0) == :no_result
       assert cluster.calc.(1) == 1
-    end      
+    end
   end
 end

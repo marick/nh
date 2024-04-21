@@ -27,7 +27,7 @@ defmodule Network.LinearSubnet do
 
   def send_pulse_into_task(s_cluster, %Pulse{} = pulse) do
     alias Cluster.Calc
-    
+
     Task.start(fn ->
       Calc.run(s_cluster.calc, on: pulse)
       |> Calc.maybe_pulse(& Cluster.start_pulse_on_its_way(s_cluster, &1))

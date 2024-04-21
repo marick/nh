@@ -7,7 +7,7 @@ defmodule System.ActivityLogger do
 
 
   defstruct [:buffer, also_to_terminal: false]
-  
+
   defmodule PulseSent do
     @enforce_keys [:cluster_label, :name, :pulse_data]
     defstruct [:cluster_label, :name, :pulse_data]
@@ -23,7 +23,7 @@ defmodule System.ActivityLogger do
 
     def new(name, data \\ :no_data), do: %__MODULE__{name: name, pulse_data: data}
   end
-    
+
 
   # An earlier version of this module used
   #    Logger.put_process_level(self(), :debug)
@@ -33,13 +33,13 @@ defmodule System.ActivityLogger do
   # So instead of relying on each ActivityLogger being an independent process,
   # I have to mess around with state. Bah. As a result of its history, this is
   # probably the Wrong Thing.
-  
 
-  runs_in_sender do 
+
+  runs_in_sender do
     def start_link(buffer_size \\ 100) do
       GenServer.start_link(__MODULE__, buffer_size)
     end
-    
+
     def spill_log_to_terminal(pid) do
       GenServer.call(pid, [also_to_terminal: true])
     end
@@ -56,7 +56,7 @@ defmodule System.ActivityLogger do
     def log_action_received(pid, name, data) do
       entry = ActionReceived.new(name, data)
       GenServer.cast(pid, [log: entry])
-      
+
     end
 
     def get_log(pid) do
@@ -82,7 +82,7 @@ defmodule System.ActivityLogger do
     def handle_cast([log: entry], me) do
       if me.also_to_terminal,
          do: Logger.info(inspect(entry.pulse_data), pulse_entry: entry)
-      
+
       update_in(me.buffer, &(CircularBuffer.insert(&1, entry)))
       |> continue
     end

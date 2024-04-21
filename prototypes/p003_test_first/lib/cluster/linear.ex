@@ -16,4 +16,3 @@ defmodule Cluster.Linear do
   def new(struct) when is_struct(struct), do: new(Map.from_struct(struct))
   def new(%{} = pairs), do: struct(__MODULE__, pairs)
 end
-

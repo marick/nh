@@ -39,10 +39,10 @@ defmodule ClusterCase do
 
 
 
-  
+
   @doc """
   Cause `AffordanceLand` to send a pulse to the given `PerceptionEdge`.
-  
+
   Example:
       spontaneous_affordance(p_affordances, named: affordance_name, carrying: data)
 
@@ -92,7 +92,7 @@ defmodule ClusterCase do
 
   @doc "Receive a pulse from a `to_test` node"
   defmacro assert_test_receives(value, opts \\ [from: :endpoint]) do
-    quote do 
+    quote do
       [retval, from: _] = Assertions.assert_receive([unquote(value) | unquote(opts)])
       retval
     end
@@ -115,7 +115,7 @@ defmodule ClusterCase do
 
   ### Note that this needs only a small tweak to allow multiple canned responses (sending
   ### to different clusters) for a single action.
-  
+
   def respond_to_action(%AppAnimal{} = pids, action_name, canned_response) do
     respond_to_action(pids.p_affordances, action_name, canned_response)
   end

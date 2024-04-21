@@ -3,7 +3,7 @@ alias AppAnimal.{Building,Cluster}
 defmodule Building.Parts do
   use AppAnimal
   alias Cluster.Throb
-  
+
   def circular(name, calc, opts) when is_function(calc) and is_list(opts) do
     opts
     |> Opts.add_missing!(name: name, calc: calc)
@@ -13,7 +13,7 @@ defmodule Building.Parts do
                            previously: %{})
     |> Opts.add_missing!(router: :must_be_supplied_later)
     |> then(& struct(Cluster.Circular, &1))
-    
+
   end
 
   def circular(name, calc     ) when is_function(calc),
@@ -31,7 +31,7 @@ defmodule Building.Parts do
     |> Opts.create(       :id, if_present: :label,
                                with: & Cluster.Identification.new(name, &1))
     |> Opts.add_if_missing(id: Cluster.Identification.new(name, :linear))
-      
+
     |> then(& struct(Cluster.Linear, &1))
   end
 

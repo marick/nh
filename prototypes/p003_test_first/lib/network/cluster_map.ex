@@ -3,10 +3,10 @@ alias AppAnimal.Network
 defmodule Network.ClusterMap do
   @moduledoc """
   Functions for, first, arranging clusters by name, then augmenting them with
-  their "downstream" values. Used to create an `AppAnimal.Network`. 
+  their "downstream" values. Used to create an `AppAnimal.Network`.
   """
   use AppAnimal
-  
+
   def trace(cluster_map \\ %{}, clusters) do
     cluster_map
     |> add_only_new_clusters(clusters)
@@ -18,15 +18,15 @@ defmodule Network.ClusterMap do
     trace(cluster_map, [existing | trace])
   end
 
-  private do 
+  private do
     def add_only_new_clusters(cluster_map, trace) when is_list trace do
       Enum.reduce(trace, cluster_map, fn cluster, acc ->
         Map.put_new(acc, cluster.name, cluster)
       end)
     end
-    
+
     def add_downstream(cluster_map, []), do: cluster_map
-    
+
     def add_downstream(cluster_map, [[upstream, downstream] | rest]) do
       cluster_map
       |> update_in([upstream.name, Access.key(:downstream)], &([downstream.name | &1]))

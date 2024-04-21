@@ -26,7 +26,7 @@ defmodule Whole.Guts do
       |> downstream_add_values(Enum.chunk_every(names, 2, 1, :discard))
     %{s_network | name_to_downstreams: mutated}
   end
-  
+
   private do
 
     # parts
@@ -58,7 +58,7 @@ defmodule Whole.Guts do
       A.put(s_network, Network.name_to_id() |> Lens.key(cluster.name), cluster.id)
     end
 
-    # 
+    #
 
     def names_from(clusters) do
       mapper = fn cluster -> cluster.name end
@@ -74,7 +74,7 @@ defmodule Whole.Guts do
     end
 
     def downstream_add_values(name_to_names, []), do: name_to_names
-    
+
     def downstream_add_values(name_to_names, [[upstream, downstream] | rest]) do
       name_to_names
       |> Map.update!(upstream, & MapSet.put(&1, downstream))

@@ -22,12 +22,12 @@ defmodule Network.CircularSubnet do
 
   typedstruct enforce: true do
     plugin TypedStructLens
-    
+
     field :name_to_pid, BiMap.t(atom, pid), default: BiMap.new
     field :name_to_cluster, %{atom => Cluster.Circular.t}
-  end 
-  
-  runs_in_sender do 
+  end
+
+  runs_in_sender do
     def start_link(clusters_and_maybe_more) do
       GenServer.start_link(__MODULE__, clusters_and_maybe_more)
     end
@@ -37,9 +37,9 @@ defmodule Network.CircularSubnet do
 
 
     def call__add_cluster(pid, cluster), do: GenServer.call(pid, [add: cluster])
-   
-    
-    private do 
+
+
+    private do
       # For tests
       def names(pid), do: GenServer.call(pid, :names)
       def clusters(pid), do: GenServer.call(pid, :clusters)
@@ -52,7 +52,7 @@ defmodule Network.CircularSubnet do
     end
   end
 
-  runs_in_receiver do 
+  runs_in_receiver do
     @impl GenServer
     def init(clusters) do
       indexed =
@@ -91,7 +91,7 @@ defmodule Network.CircularSubnet do
     # This is used for testing as a way to get internal values of clusters.
     @impl GenServer
     def handle_call([forward: getter_name, to: name], _from, s_state) do
-      result = 
+      result =
         BiMap.get(s_state.name_to_pid, name)
         |> GenServer.call(getter_name)
       continue(s_state, returning: result)
@@ -127,7 +127,7 @@ defmodule Network.CircularSubnet do
       |> A.put(name_to_cluster() |> Lens.key(cluster.name), cluster)
       |> continue(returning: :ok)
     end
-    
+
     unexpected_call()
 
     private do
@@ -142,16 +142,15 @@ defmodule Network.CircularSubnet do
             BiMap.put(bimap, name, pid)
           end
         end
-        
+
         new_bimap = Enum.reduce(names, s_state.name_to_pid, reducer)
         %{s_state | name_to_pid: new_bimap}
       end
-      
+
       def throb(pids) do
-        for pid <- pids, 
+        for pid <- pids,
             do: GenServer.cast(pid, [throb: 1])
       end
     end
   end
 end
-

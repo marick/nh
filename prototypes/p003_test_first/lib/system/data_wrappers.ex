@@ -42,7 +42,7 @@ defmodule CannedResponse do
 
   typedstruct enforce: true do
     field :downstream, atom
-    field :pulse, Pulse.t  
+    field :pulse, Pulse.t
   end
 
   def new(downstream, %Pulse{} = pulse),

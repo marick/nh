@@ -16,7 +16,7 @@ defmodule Cluster.Process do
                       with_state: s_process_state.previously)
 
     Calc.maybe_pulse(result, & Cluster.start_pulse_on_its_way(s_process_state, &1))
-    
+
     s_process_state
     |> A.put(:previously, Calc.next_state(result))
     |> Map.update!(:throb, &Cluster.Throb.note_pulse(&1, result))

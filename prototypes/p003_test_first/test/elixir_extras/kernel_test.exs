@@ -6,4 +6,3 @@ defmodule Extras.KernelTest do
   # alias Extras.Kernel, as: UT
 
 end
-

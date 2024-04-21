@@ -15,7 +15,7 @@ defmodule Cluster do
 
            popular = circular_cluster(:popular)
 
-           network = 
+           network =
              Network.trace(linear(..1..), popular, linear(..2..))
              |> Network.trace(linear(..3..), popular, linear(..4..))
 
@@ -31,7 +31,7 @@ defmodule Cluster do
 
      The cluster is updated by installing a `System.Router` value.
   """
-  
+
   use AppAnimal
   use TypedStruct
   import Lens.Macros
@@ -43,11 +43,11 @@ defmodule Cluster do
     # Set first thing
     field :label, atom    # only for human readability
     field :name, atom
-    
+
     # The main axes of variation
     field :shape, Shape.Circular.t | Shape.Linear.t
     field :calc, fun
-    
+
     # Set when compiled into a network
     field :router, System.Router.t
     field :downstream, [atom], default: []
@@ -61,7 +61,7 @@ defmodule Cluster do
       %Shape.Linear{} -> false
     end
   end
-  
+
   def start_throbbing(s_cluster) do
     starting_state = Cluster.Circular.new(s_cluster)
     {:ok, pid} = GenServer.start(Cluster.Process, starting_state)
@@ -79,4 +79,3 @@ defmodule Cluster do
     System.Router.cast_via(router, action)
   end
 end
-
