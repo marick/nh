@@ -10,7 +10,7 @@ defmodule Cluster.Linear do
     field :name, atom  # This is useful for debugging
     field :id, Cluster.Identification.t, default: "default value is temporary"
     field :calc, fun
-    field :router, System.Router.t
+    field :router, System.Router.t, default: :installed_later
   end
 
   def new(struct) when is_struct(struct), do: new(Map.from_struct(struct))
