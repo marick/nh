@@ -7,7 +7,7 @@ defmodule AppAnimal do
   use AppAnimal.Extras.TestAwareProcessStarter
   use TypedStruct
 
-  typedstruct enforce: true do
+  typedstruct do
     plugin TypedStructLens
 
     field :p_switchboard,       pid
@@ -17,13 +17,39 @@ defmodule AppAnimal do
     field :p_timer,             pid
   end
 
-  def enliven(trace_or_network, options \\ [])
+  def enliven(trace_or_network, opts \\ [])
 
-  def enliven(trace, options)               when is_list(trace) do
-    ClusterMap.trace(trace) |> enliven(options)
+  def enliven(trace, opts)               when is_list(trace) do
+    ClusterMap.trace(trace) |> enliven(opts)
   end
 
-  def enliven(cluster_map, network_options) when is_map(cluster_map) do
+  def enliven(cluster_map, opts) when is_map(cluster_map) do
+    s = start_processes()
+
+    router = System.Router.new(%{
+                 System.Action => s.p_affordances,
+                 System.Pulse => s.p_switchboard,
+                 System.Delay => s.p_timer})
+
+    network =
+      cluster_map
+      |> A.put(Lens.map_values |> Cluster.router, router)
+      |> Network.new
+
+    finish_struct(s, network, opts)
+  end
+
+  def finish_struct(s, network, opts) do
+    GenServer.call(s.p_switchboard, accept_network: network)
+    throb_interval = Keyword.get(opts, :throb_interval, Duration.quantum())
+    Network.Timer.cast(s.p_timer, :time_to_throb,
+                       every: throb_interval,
+                       to: network.p_circular_clusters)
+
+    %{s | p_circular_clusters: network.p_circular_clusters}
+  end
+
+  def start_processes() do
     {:ok, p_logger} = ActivityLogger.start_link
     switchboard_struct = struct(Switchboard, p_logger: p_logger)
     p_switchboard = compatibly_start_link(Switchboard, switchboard_struct)
@@ -32,32 +58,14 @@ defmodule AppAnimal do
                                               p_logger: p_logger})
     p_timer = compatibly_start_link(Timer, :ok)
 
-    router = System.Router.new(%{
-                 System.Action => p_affordances,
-                 System.Pulse => p_switchboard,
-                 System.Delay => p_timer})
-
-    network =
-      cluster_map
-      |> A.put(Lens.map_values |> Cluster.router, router)
-      |> Network.new
-
-    GenServer.call(p_switchboard, accept_network: network)
-    throb_interval = Keyword.get(network_options, :throb_interval, Duration.quantum())
-    Network.Timer.cast(p_timer, :time_to_throb,
-                       every: throb_interval,
-                       to: network.p_circular_clusters)
-
-    %__MODULE__{
-      p_switchboard: p_switchboard,
-      p_affordances: p_affordances,
-      p_circular_clusters: network.p_circular_clusters,
-      p_logger: p_logger,
-      p_timer: p_timer
-    }
+    struct(__MODULE__, p_switchboard: p_switchboard,
+                       p_affordances: p_affordances,
+                       p_logger: p_logger,
+                       p_timer: p_timer)
   end
 
-  def switchboard(network, options \\ []), do: enliven(network, options).p_switchboard
+
+  def switchboard(network, opts \\ []), do: enliven(network, opts).p_switchboard
   def affordances(network), do: enliven(network).p_affordances
 
   defmacro __using__(_) do

@@ -18,17 +18,19 @@ defmodule System.SwitchboardTest do
 
     m = start_link_supervised!(M)
 
-    first = P.circular(:first, & &1+1) |> dbg
+    first = P.circular(:first, & &1+1)
 
-    M.trace m, [first,
-                P.linear(:second, & &1+1),
-                to_test()]
+    second = P.linear(:second, & &1+1)
 
-    network = M.network(m)
+    t = forward_to_test()
 
-    dbg network
+    M.trace(m, [first, second, t])
 
-    # a = AppAnimal.enliven(trace)
+    _network = M.network(m)
+
+    ActivityLogger # silence warning
+
+#    a = AppAnimal.enliven(network)
 
     # ActivityLogger.spill_log_to_terminal(a.p_logger)
     # send_test_pulse(a.p_switchboard, to: :first, carrying: 0)
