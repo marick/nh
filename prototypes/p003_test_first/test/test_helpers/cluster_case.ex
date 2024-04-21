@@ -83,7 +83,7 @@ defmodule ClusterCase do
       send(p_test, [arg, from: name])
       :no_result
     end
-      
+
     %Cluster{name: name,
              label: :test_endpoint,
              shape: Shape.Linear.new,

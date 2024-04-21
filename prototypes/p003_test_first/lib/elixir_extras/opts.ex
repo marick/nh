@@ -64,4 +64,32 @@ defmodule AppAnimal.Extras.Opts do
 
   def add_if_missing(opts, possible_replacements),
       do: Keyword.merge(possible_replacements, opts)
+
+
+  @doc """
+  Use a `source` key (and perhaps others) to derive a `derived` key"
+
+  Conventionally:
+
+       opts
+       |> create(:derived, if_present: :source, with: f)
+
+  1. If `:derived` is already present, the opts are left unchanged.
+  2. The same is true if the `source` is missing.
+  3. `f` takes the value of the `source` key and
+     returns a keyword list with `:derived` linked to the value. (Note that,
+     in typical use, the option list is visible inside `f`.
+  4. Order is not guaranteed.
+  5. The source key/value pair is *not* removed. 
+  """
+  def create(opts, derived, positional) do
+    [source, f] = required!(positional, [:if_present, :with])
+    case Keyword.fetch(opts, source) do
+      {:ok, source_value} ->
+        opts
+        |> Keyword.put_new(derived, f.(source_value))
+      :error ->
+        opts
+    end
+  end
 end

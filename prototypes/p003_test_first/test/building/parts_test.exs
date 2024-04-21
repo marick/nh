@@ -66,6 +66,21 @@ defmodule Building.PartsTest do
                        calc: f)
     end
       
+    test ".. or options" do
+      UT.linear(:name, label: :subtype)
+      |> assert_fields(name: :name,
+                       id: Cluster.Identification.new(:name, :subtype),
+                       calc: &Function.identity/1)
+    end
+      
+    test ".. or both" do
+      f = & &1+1
+      UT.linear(:name, f, label: :subtype)
+      |> assert_fields(name: :name,
+                       id: Cluster.Identification.new(:name, :subtype),
+                       calc: f)
+    end
+      
   end
 
 end
