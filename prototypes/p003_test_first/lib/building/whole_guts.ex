@@ -27,6 +27,13 @@ defmodule Whole.Guts do
     %{s_network | name_to_downstreams: mutated}
   end
 
+  def install_routers(%Network{} = s_network, router) do
+    Network.CircularSubnet.add_router_to_all(s_network.p_circular_clusters, router)
+
+    lens = Lens.key(:linear_clusters) |> Network.LinearSubnet.routers()
+    A.put(s_network, lens, router)
+  end
+
   private do
 
     # parts

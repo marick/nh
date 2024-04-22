@@ -40,6 +40,8 @@ defmodule Network.CircularSubnet do
 
     def add_router_to_all(pid, router), do: GenServer.call(pid, [add_router_to_all: router])
 
+    def router_for(pid, name), do: GenServer.call(pid, [router_for: name])
+
     private do
       # For tests
       def names(pid), do: GenServer.call(pid, :names)
@@ -111,6 +113,11 @@ defmodule Network.CircularSubnet do
     def handle_call(:throbbing_pids, _from, s_state) do
       values = BiMap.values(s_state.name_to_pid)
       continue(s_state, returning: values)
+    end
+
+    def handle_call([router_for: name], _from, s_state) do
+      cluster = s_state.name_to_cluster[name]
+      continue(s_state, returning: cluster.router)
     end
 
     def handle_call({:throb_to_test, name, pid}, _from, s_state) do

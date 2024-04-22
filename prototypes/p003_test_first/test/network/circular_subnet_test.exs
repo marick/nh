@@ -1,4 +1,4 @@
-alias AppAnimal.{System,Cluster,Network}
+alias AppAnimal.{System,Network}
 
 defmodule Network.CircularSubnetTest do
   use ClusterCase, async: true

@@ -64,6 +64,20 @@ defmodule Network do
 
   def downstream_of(network, name), do: Map.fetch!(network.name_to_downstreams, name)
 
+  def router_for(network, name) do
+    circular_case =
+      if MapSet.member?(network.circular_names, name),
+         do: Network.CircularSubnet.router_for(network.p_circular_clusters, name)
+
+    linear_case =
+      if MapSet.member?(network.linear_names, name) do
+        lens = Network.LinearSubnet.cluster_named(name)
+        A.get_only(network.linear_clusters, lens).router
+      end
+
+    circular_case || linear_case
+  end
+
   @doc """
   Send a pulse to a mixture of "throbbing" and linear
   clusters.

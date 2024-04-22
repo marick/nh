@@ -13,6 +13,7 @@ defmodule Whole.Process do
     def network(pid), do: GenServer.call(pid, :get_network)
     def trace(pid, list), do: GenServer.call(pid, {:apply, :trace, [list]})
     def unordered(pid, list), do: GenServer.call(pid, {:apply, :unordered, [list]})
+    def install_routers(pid, router), do: GenServer.call(pid, {:apply, :install_routers, [router]})
   end
 
   runs_in_receiver do

@@ -83,5 +83,18 @@ defmodule Building.Whole.ProcessTest do
       assert Network.downstream_of(network, :second) == MapSet.new([])
     end
   end
-end
 
+  test "installing the routers" do
+    m = start_link_supervised!(UT)
+    first = P.linear(:first)
+    second = P.circular(:second)
+
+    UT.trace(m, [first, second])
+    UT.install_routers(m, "this is a router")
+
+    network = UT.network(m)
+    Network.router_for(network, :first)
+    assert Network.router_for(network, :first) == "this is a router"
+    assert Network.router_for(network, :second) == "this is a router"
+  end
+end
