@@ -9,38 +9,30 @@ defmodule System.SwitchboardTest do
 
   ## The switchboard is mostly tested via the different kinds of clusters.
 
-  @tag :skip
   test "the switchboard has a log" do
     IO.puts("\n=== #{Pretty.Module.minimal(__MODULE__)} (around line #{__ENV__.line}) " <>
               "prints log entries.")
     IO.puts("=== By doing so, I hope to catch cases where log printing breaks.")
 
-
-    m = start_link_supervised!(M)
-
     first = P.circular(:first, & &1+1)
-
     second = P.linear(:second, & &1+1)
-
     t = forward_to_test()
 
-    M.trace(m, [first, second, t])
+    network_builder = start_link_supervised!(M)
 
-    _network = M.network(m)
+    M.trace(network_builder, [first, second, t])
 
-    ActivityLogger # silence warning
+    a = AppAnimal.add_network(network_builder)
 
-#    a = AppAnimal.enliven(network)
+    ActivityLogger.spill_log_to_terminal(a.p_logger)
+    send_test_pulse(a.p_switchboard, to: :first, carrying: 0)
+    assert_test_receives(2)
 
-    # ActivityLogger.spill_log_to_terminal(a.p_logger)
-    # send_test_pulse(a.p_switchboard, to: :first, carrying: 0)
-    # assert_test_receives(2)
-
-    # [first, second] = ActivityLogger.get_log(a.p_logger)
-    # assert_fields(first, name: :first,
-    #                      pulse_data: 1)
-    # assert_fields(second, name: :second,
-    #                       pulse_data: 2)
+    [first, second] = ActivityLogger.get_log(a.p_logger)
+    assert_fields(first, name: :first,
+                         pulse_data: 1)
+    assert_fields(second, name: :second,
+                          pulse_data: 2)
   end
 
   def given(trace_or_network), do: AppAnimal.switchboard(trace_or_network)

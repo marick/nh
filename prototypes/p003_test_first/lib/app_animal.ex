@@ -39,6 +39,25 @@ defmodule AppAnimal do
     finish_struct(s, network, opts)
   end
 
+
+  def add_network(p_network_builder, opts \\ []) when is_pid(p_network_builder) do
+    alias AppAnimal.Building.Whole.Process
+
+    s = start_processes()
+
+    router = System.Router.new(%{
+                 System.Action => s.p_affordances,
+                 System.Pulse => s.p_switchboard,
+                 System.Delay => s.p_timer})
+
+
+    Process.install_routers(p_network_builder, router)
+    network = Process.network(p_network_builder)
+
+    finish_struct(s, network, opts)
+  end
+
+
   def finish_struct(s, network, opts) do
     GenServer.call(s.p_switchboard, accept_network: network)
     throb_interval = Keyword.get(opts, :throb_interval, Duration.quantum())
