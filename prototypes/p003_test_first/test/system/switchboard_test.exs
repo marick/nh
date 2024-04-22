@@ -1,11 +1,9 @@
-alias AppAnimal.{System,Building}
+alias AppAnimal.System
 
 
 defmodule System.SwitchboardTest do
   use ClusterCase, async: true
   alias System.ActivityLogger
-  alias Building.Whole.Process, as: M
-  alias Building.Parts, as: P
 
   ## The switchboard is mostly tested via the different kinds of clusters.
 
@@ -14,30 +12,22 @@ defmodule System.SwitchboardTest do
               "prints log entries.")
     IO.puts("=== By doing so, I hope to catch cases where log printing breaks.")
 
-    first = P.circular(:first, & &1+1)
-    second = P.linear(:second, & &1+1)
-    t = forward_to_test()
-
-    network_builder = start_link_supervised!(M)
-
-    M.trace(network_builder, [first, second, t])
-
-    a = AppAnimal.add_network(network_builder)
+    a = animal [C.circular(:first, & &1+1),
+                C.linear(:second, & &1+1),
+                forward_to_test()]
 
     ActivityLogger.spill_log_to_terminal(a.p_logger)
-    send_test_pulse(a.p_switchboard, to: :first, carrying: 0)
+    send_test_pulse(a, to: :first, carrying: 0)
     assert_test_receives(2)
 
     [first, second] = ActivityLogger.get_log(a.p_logger)
-    assert_fields(first, name: :first,
-                         pulse_data: 1)
-    assert_fields(second, name: :second,
-                          pulse_data: 2)
+    assert_fields(first,  name: :first,  pulse_data: 1)
+    assert_fields(second, name: :second, pulse_data: 2)
   end
 
   def given(trace_or_network), do: AppAnimal.switchboard(trace_or_network)
 
-  test "a circular trace" do
+  test "a sequence of clusters with a loop (repeated clusters)" do
     calc =
       fn _pulse, mutable ->
         mutated =

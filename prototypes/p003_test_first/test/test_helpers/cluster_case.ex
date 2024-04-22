@@ -172,6 +172,18 @@ defmodule ClusterCase do
   def throb_all_active(pids),
       do: GenServer.cast(pids.p_circular_clusters, :time_to_throb)
 
+  def animal(trace) do
+    alias AppAnimal.Building.Whole.Process, as: M
+
+    network_builder = ExUnit.Callbacks.start_link_supervised!(M)
+    M.trace(network_builder, trace)
+    AppAnimal.add_network(network_builder)
+  end
+
+
+
+
+
   defmacro __using__(opts) do
     quote do
       use ExUnit.Case, unquote(opts)
@@ -186,6 +198,7 @@ defmodule ClusterCase do
       import Cluster.Make
       import Network.ClusterMap
       alias AppAnimal.Duration
+      alias AppAnimal.Building.Parts, as: C
     end
   end
 end
