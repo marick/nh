@@ -38,6 +38,7 @@ defmodule Network.CircularSubnet do
 
     def call__add_cluster(pid, cluster), do: GenServer.call(pid, [add: cluster])
 
+    def add_router_to_all(pid, router), do: GenServer.call(pid, [add_router_to_all: router])
 
     private do
       # For tests
@@ -57,7 +58,7 @@ defmodule Network.CircularSubnet do
     def init(clusters) do
       indexed =
         for c <- clusters, into: %{} do
-          {c.name, Cluster.Circular.new(c)}
+          {c.name, Cluster.Circular.new(c)}  # TODO: should use c itself when `Shape` goes away
         end
       {:ok, %__MODULE__{name_to_cluster: indexed}}
     end
@@ -125,6 +126,13 @@ defmodule Network.CircularSubnet do
 
       s_state
       |> A.put(name_to_cluster() |> Lens.key(cluster.name), cluster)
+      |> continue(returning: :ok)
+    end
+
+    def handle_call([add_router_to_all: router], _from, s_state) do
+      lens = Lens.key(:name_to_cluster) |> Lens.map_values() |> Cluster.Circular.router()
+      s_state
+      |> A.put(lens, router)
       |> continue(returning: :ok)
     end
 

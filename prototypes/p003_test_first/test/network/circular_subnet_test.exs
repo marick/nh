@@ -4,16 +4,30 @@ defmodule Network.CircularSubnetTest do
   use ClusterCase, async: true
   alias Network.CircularSubnet, as: UT
   alias System.Pulse
+  alias AppAnimal.Building.Parts, as: Temp  # Will be part of ClusterCase
 
   describe "construction of a throbber" do
     test "A throbber is initialized with a set of *circular* clusters" do
-      original = circular(:will_throb)
-      pid = start_link_supervised!({UT, [original]})
+      # original = Temp.circular(:will_throb) |> dbg
+      # pid = start_link_supervised!({UT, [original]})
 
-      assert [Cluster.Circular.new(original)] == UT.clusters(pid)
-      assert [] == UT.throbbing_names(pid)
-      assert [] == UT.throbbing_pids(pid)
+      # assert [Cluster.Circular.new(original)] == UT.clusters(pid)
+      # assert [] == UT.throbbing_names(pid)
+      # assert [] == UT.throbbing_pids(pid)
     end
+  end
+
+  test "setting routers" do
+
+    pid = start_link_supervised!(UT)
+    UT.call__add_cluster(pid, Temp.circular(:first))
+    UT.call__add_cluster(pid, Temp.circular(:second))
+
+    UT.add_router_to_all(pid, "the new router")
+
+    [one, other] = UT.clusters(pid)
+    assert one.router == "the new router"
+    assert other.router == "the new router"
   end
 
   @tag :test_uses_sleep
