@@ -10,12 +10,18 @@ defmodule NetworkBuilder.Guts do
   end
 
   def unordered(%Network{} = s_network, clusters) do
-    Enum.reduce(clusters, s_network, fn cluster, acc ->
-      acc
-      |> add_cluster(cluster)
-      |> add_to_name_set(cluster)
-      |> add_to_id_map(cluster)
-    end)
+    reducer =
+      fn
+        atom, acc when is_atom(atom) ->
+          acc
+        cluster, acc ->
+          acc
+          |> add_cluster(cluster)
+          |> add_to_name_set(cluster)
+          |> add_to_id_map(cluster)
+      end
+
+    Enum.reduce(clusters, s_network, reducer)
   end
 
   def add_to_downstreams(%Network{} = s_network, clusters) do
@@ -57,19 +63,6 @@ defmodule NetworkBuilder.Guts do
       end
     end
 
-    # def add_cluster(s_network, %Cluster.Circular{} = cluster) do
-    #   pid = s_network.p_circular_clusters
-    #   Network.CircularSubnet.call__add_cluster(pid, cluster)
-    #   s_network
-    # end
-
-    # def add_cluster(s_network, %Cluster.Linear{} = cluster) do
-    #   lens = Network.linear_clusters() |> Network.LinearSubnet.cluster_named(cluster.name)
-    #   A.put(s_network, lens, cluster)
-    # end
-
-    #
-
     def add_to_name_set(s_network, %Cluster.Circular{} = cluster) do
       Map.update!(s_network, :circular_names, & MapSet.put(&1, cluster.name))
     end
@@ -87,7 +80,13 @@ defmodule NetworkBuilder.Guts do
     #
 
     def names_from(clusters) do
-      mapper = fn cluster -> cluster.name end
+      mapper =
+        fn
+          atom when is_atom(atom) ->
+            atom
+          cluster ->
+            cluster.name
+        end
       Enum.map(clusters, mapper)
     end
 

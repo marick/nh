@@ -23,7 +23,6 @@ defmodule NetworkBuilder.GutsTest do
       end)
     end
 
-    @tag :skip
     test "the way to refer to an already-existing cluster is by its name" do
       original =
         Network.empty
@@ -38,8 +37,21 @@ defmodule NetworkBuilder.GutsTest do
 
       updated.name_to_downstreams
       |> assert_fields(first: MapSet.new([:two_a, :two_b]),
-                       second: MapSet.new,
-                       third: MapSet.new)
+                       two_a: MapSet.new,
+                       two_b: MapSet.new)
     end
+
+    @tag :skip
+    test "it is an error to refer to a cluster that hasn't been added" do
+      assert_raise(KeyError,
+                   "You referred to `:linear`, but there is no such cluster", fn ->
+        UT.trace(Network.empty, [C.linear(:linear)])
+      end)
+      assert_raise(KeyError,
+                   "You referred to `:circular`, but there is no such cluster", fn ->
+        UT.trace(Network.empty, [C.circular(:circular)])
+      end)
+    end
+
   end
 end
