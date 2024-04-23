@@ -80,7 +80,5 @@ defmodule Building.PartsTest do
                        id: Cluster.Identification.new(:name, :subtype),
                        calc: f)
     end
-
   end
-
 end
