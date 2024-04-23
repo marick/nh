@@ -60,16 +60,9 @@ defmodule Extras.OptsTest do
     end
 
     test "it better actually *be* missing" do
-      try do
+      assert_raise(KeyError, "keys [:a] are already present", fn ->
         UT.add_missing!([a: 1], b: 2, a: 3)
-        flunk("unreached")
-      rescue
-        error ->
-          error
-          |> assert_struct_named(KeyError)
-          |> assert_fields(term: [a: 1],
-                           message: "keys [:a] are already present")
-      end
+      end)
     end
   end
 
@@ -111,4 +104,29 @@ defmodule Extras.OptsTest do
       |> assert_good_enough(in_any_order(opts))
     end
   end
+
+  describe "raname outer to: inner" do
+    test "the internal key did not exist" do
+      opts = [outside: 3]
+      opts
+      |> UT.rename(:outside, to: :inside)
+      |> assert_equal(inside: 3)
+    end
+
+    test "the internal key incorrectly exists" do
+      opts = [inside: 1, outside: 3]
+      assert_raise(KeyError, "Keys `:inside` and `:outside` conflict", fn ->
+        UT.rename(opts, :outside, to: :inside)
+      end)
+    end
+
+    test "it's OK if the external key doesn't exist" do
+      opts = [inside: 3]
+      assert UT.rename(opts, :outside, to: :inside) == opts
+
+      assert UT.rename(opts, :outside, to: :something_else) == opts
+    end
+  end
+
+
 end
