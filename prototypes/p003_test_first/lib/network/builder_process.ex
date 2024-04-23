@@ -10,7 +10,10 @@ defmodule NetworkBuilder.Process do
     def start_link(_), do: GenServer.start_link(__MODULE__, Network.empty)
 
     def network(pid), do: GenServer.call(pid, :get_network)
-    def trace(pid, list), do: GenServer.call(pid, {:apply, :trace, [list]})
+    def trace(pid, list) do
+      GenServer.call(pid, {:apply, :trace, [list]})
+      pid
+    end
     def unordered(pid, list), do: GenServer.call(pid, {:apply, :unordered, [list]})
     def install_routers(pid, router), do: GenServer.call(pid, {:apply, :install_routers, [router]})
   end

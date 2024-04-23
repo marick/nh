@@ -172,17 +172,20 @@ defmodule ClusterCase do
   def throb_all_active(pids),
       do: GenServer.cast(pids.p_circular_clusters, :time_to_throb)
 
-  def animal(trace) do
-    alias AppAnimal.NetworkBuilder.Process, as: NB
 
-    network_builder = ExUnit.Callbacks.start_link_supervised!(NB)
-    NB.trace(network_builder, trace)
-    AppAnimal.add_network(network_builder)
+  def animal(callback) when is_function(callback, 1) do
+    alias AppAnimal.NetworkBuilder.Process, as: Builder
+
+    ExUnit.Callbacks.start_link_supervised!(Builder)
+    |> callback.()
+    |> AppAnimal.add_network
   end
 
+  def animal(trace) when is_list(trace) do
+    alias AppAnimal.NetworkBuilder.Process, as: Builder
 
-
-
+    animal& Builder.trace(&1, trace)
+  end
 
   defmacro __using__(opts) do
     quote do
