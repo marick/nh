@@ -6,6 +6,7 @@ defmodule ClusterBuilders do
 
   def circular(name, calc, opts) when is_function(calc) and is_list(opts) do
     opts
+    |> Opts.rename(:initial_value, to: :previously)
     |> Opts.add_missing!(name: name, calc: calc)
     |> Opts.add_missing!(id: Cluster.Identification.new(name, :circular))
     |> Opts.add_if_missing(label: :circular,

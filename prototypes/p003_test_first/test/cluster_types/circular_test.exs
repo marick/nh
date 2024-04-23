@@ -48,5 +48,14 @@ defmodule ClusterBuilders.CircularTest do
                        calc: f,
                        previously: 5)
     end
+
+    test "initial_value is a valid opts (a synonym for `previously`)" do
+      initial_value = %{pids: [], count: 5}
+      UT.circular(:first, initial_value: initial_value)
+      |> assert_fields(name: :first,
+                       id: Cluster.Identification.new(:first, :circular),
+                       calc: &Function.identity/1,
+                       previously: initial_value)
+    end
   end
 end
