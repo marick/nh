@@ -9,6 +9,7 @@ defmodule ClusterCase do
   alias Cluster.Shape
   alias ExUnit.Assertions
   import Network.ClusterMap
+  alias AppAnimal.ClusterBuilders, as: C
 
   def enliven(trace_list, opts \\ []) when is_list(trace_list) do
     trace(trace_list) |> AppAnimal.enliven(opts)
@@ -91,7 +92,6 @@ defmodule ClusterCase do
   end
 
   def forward_to_test(name \\ :endpoint) do
-    alias AppAnimal.Building.Parts
     p_test = self()
 
     # Normally, a pulse is sent *after* calculation. Here, we have the
@@ -103,7 +103,7 @@ defmodule ClusterCase do
       :no_result
     end
 
-    Parts.linear(name, kludge_a_calc, label: :test_endpoint)
+    C.linear(name, kludge_a_calc, label: :test_endpoint)
   end
 
   @doc "Receive a pulse from a `to_test` node"
@@ -173,10 +173,10 @@ defmodule ClusterCase do
       do: GenServer.cast(pids.p_circular_clusters, :time_to_throb)
 
   def animal(trace) do
-    alias AppAnimal.Building.Whole.Process, as: M
+    alias AppAnimal.NetworkBuilder.Process, as: NB
 
-    network_builder = ExUnit.Callbacks.start_link_supervised!(M)
-    M.trace(network_builder, trace)
+    network_builder = ExUnit.Callbacks.start_link_supervised!(NB)
+    NB.trace(network_builder, trace)
     AppAnimal.add_network(network_builder)
   end
 
@@ -198,7 +198,7 @@ defmodule ClusterCase do
       import Cluster.Make
       import Network.ClusterMap
       alias AppAnimal.Duration
-      alias AppAnimal.Building.Parts, as: C
+      alias AppAnimal.ClusterBuilders, as: C
     end
   end
 end

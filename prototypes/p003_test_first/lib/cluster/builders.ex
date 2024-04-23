@@ -1,6 +1,6 @@
-alias AppAnimal.{Building,Cluster}
+alias AppAnimal.ClusterBuilders
 
-defmodule Building.Parts do
+defmodule ClusterBuilders do
   use AppAnimal
   alias Cluster.Throb
 

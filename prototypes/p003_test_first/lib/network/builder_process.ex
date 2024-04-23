@@ -1,11 +1,10 @@
-alias AppAnimal.{Building,Network}
-alias Building.Whole
+alias AppAnimal.{Network,NetworkBuilder}
 
-defmodule Whole.Process do
+defmodule NetworkBuilder.Process do
 
   use AppAnimal
   use AppAnimal.GenServer
-  alias Building.Whole.Guts, as: Guts
+  alias NetworkBuilder.Guts, as: Guts
 
   runs_in_sender do
     def start_link(_), do: GenServer.start_link(__MODULE__, Network.empty)

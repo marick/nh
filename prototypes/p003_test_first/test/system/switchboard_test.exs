@@ -28,7 +28,9 @@ defmodule System.SwitchboardTest do
   def given(trace_or_network), do: AppAnimal.switchboard(trace_or_network)
 
   test "a sequence of clusters with a loop (repeated clusters)" do
-    calc =
+    n = 3
+
+    send_n_times =
       fn _pulse, mutable ->
         mutated =
           %{mutable | pids: [self() | mutable.pids],
@@ -38,7 +40,11 @@ defmodule System.SwitchboardTest do
            else: no_pulse(mutated)
       end
 
-    first = circular(:first, calc, initial_value: %{pids: [], count: 3})
+    first = circular(:first, send_n_times, initial_value: %{pids: [], count: n})
+
+
+    # _a = animal [first, first],
+    #             branch_at: :first, sends_to: forward_to_test()
 
     network =
       trace([first, first])

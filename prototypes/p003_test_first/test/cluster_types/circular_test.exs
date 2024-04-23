@@ -1,9 +1,9 @@
-alias AppAnimal.{Building,Cluster}
+alias AppAnimal.{ClusterBuilders,Cluster}
 
 defmodule Building.PartsTest do
   use ExUnit.Case, async: true
   use FlowAssertions
-  alias Building.Parts, as: UT
+  alias ClusterBuilders, as: UT
 
   describe "variants of circular creation" do
 

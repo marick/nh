@@ -1,10 +1,11 @@
-#alias AppAnimal.Building
+alias AppAnimal.NetworkBuilder
 
-defmodule Building.Whole.GutsTest do
+defmodule NetworkBuilder.GutsTest do
   use ClusterCase, async: true
-#  alias Building.Whole.Guts, as: UT
+  alias NetworkBuilder.Guts, as: UT
 
-  # test "adding routers" do
+  UT # silence warning
+  # test "" do
 
   # end
 end

@@ -41,7 +41,7 @@ defmodule AppAnimal do
 
 
   def add_network(p_network_builder, opts \\ []) when is_pid(p_network_builder) do
-    alias AppAnimal.Building.Whole.Process
+    alias AppAnimal.NetworkBuilder.Process, as: NB
 
     s = start_processes()
 
@@ -51,8 +51,8 @@ defmodule AppAnimal do
                  System.Delay => s.p_timer})
 
 
-    Process.install_routers(p_network_builder, router)
-    network = Process.network(p_network_builder)
+    NB.install_routers(p_network_builder, router)
+    network = NB.network(p_network_builder)
 
     finish_struct(s, network, opts)
   end

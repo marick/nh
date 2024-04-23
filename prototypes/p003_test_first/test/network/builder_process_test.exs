@@ -1,9 +1,8 @@
-alias AppAnimal.Building
+alias AppAnimal.{NetworkBuilder}
 
-defmodule Building.Whole.ProcessTest do
+defmodule NetworkBuilder.ProcessTest do
   use ClusterCase, async: true
-  alias Building.Whole.Process, as: UT
-  alias Building.Parts, as: P
+  alias NetworkBuilder.Process, as: UT
 
   test "beginning" do
     m = start_link_supervised!(UT)
@@ -21,8 +20,8 @@ defmodule Building.Whole.ProcessTest do
   describe "adding clusters" do
     test "unordered circular clusters" do
       m = start_link_supervised!(UT)
-      first = P.circular(:first)
-      second = P.circular(:second)
+      first = C.circular(:first)
+      second = C.circular(:second)
 
       UT.unordered(m, [first, second])
 
@@ -42,8 +41,8 @@ defmodule Building.Whole.ProcessTest do
 
     test "traces also update 'downstream' relationships" do
       m = start_link_supervised!(UT)
-      first = P.circular(:first)
-      second = P.circular(:second)
+      first = C.circular(:first)
+      second = C.circular(:second)
 
       UT.trace(m, [first, second])
 
@@ -59,8 +58,8 @@ defmodule Building.Whole.ProcessTest do
 
     test "linear clusters work too" do
       m = start_link_supervised!(UT)
-      first = P.linear(:first)
-      second = P.circular(:second)
+      first = C.linear(:first)
+      second = C.circular(:second)
 
       UT.trace(m, [first, second])
 
@@ -86,8 +85,8 @@ defmodule Building.Whole.ProcessTest do
 
   test "installing the routers" do
     m = start_link_supervised!(UT)
-    first = P.linear(:first)
-    second = P.circular(:second)
+    first = C.linear(:first)
+    second = C.circular(:second)
 
     UT.trace(m, [first, second])
     UT.install_routers(m, "this is a router")

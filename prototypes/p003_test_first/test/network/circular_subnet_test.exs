@@ -4,11 +4,10 @@ defmodule Network.CircularSubnetTest do
   use ClusterCase, async: true
   alias Network.CircularSubnet, as: UT
   alias System.Pulse
-  alias AppAnimal.Building.Parts, as: Temp  # Will be part of ClusterCase
 
   describe "construction of a throbber" do
     test "A throbber is initialized with a set of *circular* clusters" do
-      # original = Temp.circular(:will_throb) |> dbg
+      # original = C.circular(:will_throb) |> dbg
       # pid = start_link_supervised!({UT, [original]})
 
       # assert [Cluster.Circular.new(original)] == UT.clusters(pid)
@@ -20,8 +19,8 @@ defmodule Network.CircularSubnetTest do
   test "setting routers" do
 
     pid = start_link_supervised!(UT)
-    UT.call__add_cluster(pid, Temp.circular(:first))
-    UT.call__add_cluster(pid, Temp.circular(:second))
+    UT.call__add_cluster(pid, C.circular(:first))
+    UT.call__add_cluster(pid, C.circular(:second))
 
     UT.add_router_to_all(pid, "the new router")
 

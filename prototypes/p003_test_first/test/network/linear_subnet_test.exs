@@ -1,13 +1,12 @@
-alias AppAnimal.{Network,Building}
+alias AppAnimal.Network
 
 defmodule Network.LinearSubnetTest do
   use ClusterCase, async: true
   alias Network.LinearSubnet, as: UT
-  alias Building.Parts, as: M
 
   test "lens for setting router" do
     updated =
-      UT.new([M.linear(:first), M.linear(:second)])
+      UT.new([C.linear(:first), C.linear(:second)])
       |> A.put(:routers, "added router")
 
     assert A.get_all(updated, :routers) == ["added router", "added router"]

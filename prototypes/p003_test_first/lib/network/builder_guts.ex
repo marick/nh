@@ -1,6 +1,6 @@
-alias AppAnimal.{Building.Whole, Network, Cluster}
+alias AppAnimal.{Network,NetworkBuilder, Cluster}
 
-defmodule Whole.Guts do
+defmodule NetworkBuilder.Guts do
   use AppAnimal
 
   def trace(%Network{} = s_network, clusters) do
