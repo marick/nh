@@ -38,16 +38,35 @@ defmodule NetworkBuilder.Guts do
 
     # parts
 
-    def add_cluster(s_network, %Cluster.Circular{} = cluster) do
-      pid = s_network.p_circular_clusters
-      Network.CircularSubnet.call__add_cluster(pid, cluster)
-      s_network
+    def add_cluster(s_network, cluster) do
+      name = cluster.name
+      if MapSet.member?(s_network.circular_names, name) ||
+           MapSet.member?(s_network.linear_names, name) do
+        msg = "You attempted to add cluster `#{inspect name}`, which already exists"
+        raise KeyError, msg
+      end
+
+      case cluster do
+        %Cluster.Circular{} = _ ->
+          pid = s_network.p_circular_clusters
+          Network.CircularSubnet.call__add_cluster(pid, cluster)
+          s_network
+        %Cluster.Linear{} = _ ->
+          lens = Network.linear_clusters() |> Network.LinearSubnet.cluster_named(cluster.name)
+          A.put(s_network, lens, cluster)
+      end
     end
 
-    def add_cluster(s_network, %Cluster.Linear{} = cluster) do
-      lens = Network.linear_clusters() |> Network.LinearSubnet.cluster_named(cluster.name)
-      A.put(s_network, lens, cluster)
-    end
+    # def add_cluster(s_network, %Cluster.Circular{} = cluster) do
+    #   pid = s_network.p_circular_clusters
+    #   Network.CircularSubnet.call__add_cluster(pid, cluster)
+    #   s_network
+    # end
+
+    # def add_cluster(s_network, %Cluster.Linear{} = cluster) do
+    #   lens = Network.linear_clusters() |> Network.LinearSubnet.cluster_named(cluster.name)
+    #   A.put(s_network, lens, cluster)
+    # end
 
     #
 
