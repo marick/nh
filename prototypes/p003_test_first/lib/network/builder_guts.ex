@@ -13,7 +13,7 @@ defmodule NetworkBuilder.Guts do
     reducer =
       fn
         name, acc when is_atom(name) ->
-          unless existing_name?(s_network, name) do
+          unless existing_name?(acc, name) do
             msg = "You referred to `#{inspect name}`, but there is no such cluster"
             raise KeyError, msg
           end
