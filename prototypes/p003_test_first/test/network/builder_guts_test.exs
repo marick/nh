@@ -41,15 +41,14 @@ defmodule NetworkBuilder.GutsTest do
                        two_b: MapSet.new)
     end
 
-    @tag :skip
     test "it is an error to refer to a cluster that hasn't been added" do
       assert_raise(KeyError,
                    "You referred to `:linear`, but there is no such cluster", fn ->
-        UT.trace(Network.empty, [C.linear(:linear)])
+        UT.trace(Network.empty, [:linear])
       end)
       assert_raise(KeyError,
                    "You referred to `:circular`, but there is no such cluster", fn ->
-        UT.trace(Network.empty, [C.circular(:circular)])
+        UT.trace(Network.empty, [:circular])
       end)
     end
 

@@ -12,7 +12,11 @@ defmodule NetworkBuilder.Guts do
   def unordered(%Network{} = s_network, clusters) do
     reducer =
       fn
-        atom, acc when is_atom(atom) ->
+        name, acc when is_atom(name) ->
+          unless existing_name?(s_network, name) do
+            msg = "You referred to `#{inspect name}`, but there is no such cluster"
+            raise KeyError, msg
+          end
           acc
         cluster, acc ->
           acc
@@ -46,8 +50,7 @@ defmodule NetworkBuilder.Guts do
 
     def add_cluster(s_network, cluster) do
       name = cluster.name
-      if MapSet.member?(s_network.circular_names, name) ||
-           MapSet.member?(s_network.linear_names, name) do
+      if existing_name?(s_network, name) do
         msg = "You attempted to add cluster `#{inspect name}`, which already exists"
         raise KeyError, msg
       end
@@ -104,6 +107,11 @@ defmodule NetworkBuilder.Guts do
       name_to_names
       |> Map.update!(upstream, & MapSet.put(&1, downstream))
       |> downstream_add_values(rest)
+    end
+
+    def existing_name?(s_network, name) do
+      MapSet.member?(s_network.circular_names, name) ||
+        MapSet.member?(s_network.linear_names, name)
     end
   end
 end
