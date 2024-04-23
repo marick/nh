@@ -25,7 +25,6 @@ defmodule System.SwitchboardTest do
     assert_fields(second, name: :second, pulse_data: 2)
   end
 
-  def given(trace_or_network), do: AppAnimal.switchboard(trace_or_network)
 
   test "a sequence of clusters with a loop (repeated clusters)" do
     n = 3
@@ -40,18 +39,14 @@ defmodule System.SwitchboardTest do
            else: no_pulse(mutated)
       end
 
-    first = circular(:first, send_n_times, initial_value: %{pids: [], count: n})
+    first = C.circular(:first, send_n_times, initial_value: %{pids: [], count: n})
 
+    a = animal(fn builder ->
+      Add.trace(builder, [first, :first])
+      Add.trace(builder, [:first, forward_to_test()])
+    end)
 
-    # _a = animal [first, first],
-    #             branch_at: :first, sends_to: forward_to_test()
-
-    network =
-      trace([first, first])
-      |> extend(at: :first, with: [to_test()])
-
-    given(network)
-    |> send_test_pulse(to: :first, carrying: :nothing)
+    send_test_pulse(a, to: :first, carrying: :nothing)
 
     assert_test_receives([pid])
     assert_test_receives([^pid, ^pid])

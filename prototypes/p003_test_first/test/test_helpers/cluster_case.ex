@@ -202,6 +202,7 @@ defmodule ClusterCase do
       import Network.ClusterMap
       alias AppAnimal.Duration
       alias AppAnimal.ClusterBuilders, as: C
+      alias AppAnimal.NetworkBuilder.Process, as: Add
     end
   end
 end
