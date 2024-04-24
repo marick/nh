@@ -40,7 +40,7 @@ defmodule AppAnimal do
   end
 
 
-  def add_network(p_network_builder, opts \\ []) when is_pid(p_network_builder) do
+  def from_network(p_network_builder, opts \\ []) when is_pid(p_network_builder) do
     alias AppAnimal.NetworkBuilder.Process, as: NB
 
     s = start_processes()

@@ -28,6 +28,9 @@ defmodule NetworkBuilder.Guts do
     Enum.reduce(clusters, s_network, reducer)
   end
 
+  def cluster(%Network{} = s_network, cluster),
+      do: unordered(s_network, [cluster])
+
   def add_to_downstreams(%Network{} = s_network, clusters) do
     names = names_from(clusters)
     mutated =

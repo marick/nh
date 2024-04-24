@@ -44,4 +44,11 @@ defmodule ClusterBuilders do
 
   def linear(name), do: linear(name, &Function.identity/1)
 
+
+  ## Specializations
+
+  def perception_edge(name) do
+    linear(name, label: :perception_edge)
+  end
+
 end

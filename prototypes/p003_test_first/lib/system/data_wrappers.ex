@@ -9,9 +9,11 @@ defmodule Pulse do
     field :data, any
   end
 
+  def new(type, pulse_data), do: %__MODULE__{type: type, data: pulse_data}
+
   def new(pulse_data), do: %__MODULE__{data: pulse_data}
 
-  def new(type, pulse_data), do: %__MODULE__{type: type, data: pulse_data}
+  def new, do: new(:no_data)
 end
 
 

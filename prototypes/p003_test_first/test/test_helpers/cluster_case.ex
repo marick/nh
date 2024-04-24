@@ -178,7 +178,7 @@ defmodule ClusterCase do
 
     ExUnit.Callbacks.start_link_supervised!(Builder)
     |> callback.()
-    |> AppAnimal.add_network
+    |> AppAnimal.from_network
   end
 
   def animal(trace) when is_list(trace) do

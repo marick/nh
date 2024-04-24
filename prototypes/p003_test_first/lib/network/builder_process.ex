@@ -14,8 +14,22 @@ defmodule NetworkBuilder.Process do
       GenServer.call(pid, {:apply, :trace, [list]})
       pid
     end
-    def unordered(pid, list), do: GenServer.call(pid, {:apply, :unordered, [list]})
-    def install_routers(pid, router), do: GenServer.call(pid, {:apply, :install_routers, [router]})
+
+    def branch(pid, opts) do
+      [branch_point, trace] = Opts.required!(opts, [:at, :with])
+      trace(pid, [branch_point | trace])
+    end
+
+
+    def unordered(pid, list) when is_list(list) do
+      GenServer.call(pid, {:apply, :unordered, [list]})
+      pid
+    end
+
+    def cluster(pid, cluster) when is_struct(cluster),
+        do: unordered(pid, [cluster])
+    def install_routers(pid, router),
+        do: GenServer.call(pid, {:apply, :install_routers, [router]})
   end
 
   runs_in_receiver do
