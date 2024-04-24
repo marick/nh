@@ -192,9 +192,7 @@ defmodule ClusterCase do
       use ExUnit.Case, unquote(opts)
       use AppAnimal
       alias AppAnimal.{System,Network}
-      alias System.Switchboard
-      alias System.AffordanceLand
-      alias System.ActivityLogger
+      alias System.{Switchboard,AffordanceLand,ActivityLogger}
       import ClusterCase
       import AppAnimal.ActivityLogAssertions
       use FlowAssertions
