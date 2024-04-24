@@ -27,12 +27,22 @@ defmodule System.ActivityLoggerTest do
     assert c == %UT.PulseSent{cluster_label: :perception_edge, name: :c_name, pulse_data: 3}
   end
 
-  # The actual working of the terminal log is tested indirectly elsewhere
   test "there is a terminal log option" do
-    pid = start_link_supervised!({UT,100})
-    UT.spill_log_to_terminal(pid)
-    # Just checking that calls are correct
-    UT.silence_terminal_log(pid)
+    IO.puts("\n=== #{Pretty.Module.minimal(__MODULE__)} (around line #{__ENV__.line}) " <>
+              "prints log entries.")
+    IO.puts("=== By doing so, I hope to catch cases where log printing breaks.")
+
+    a = animal [C.circular(:first, & &1+1),
+                C.linear(:second, & &1+1),
+                forward_to_test()]
+
+    ActivityLogger.spill_log_to_terminal(a.p_logger)
+    send_test_pulse(a, to: :first, carrying: 0)
+    assert_test_receives(2)
+
+    [first, second] = ActivityLogger.get_log(a.p_logger)
+    assert_fields(first,  name: :first,  pulse_data: 1)
+    assert_fields(second, name: :second, pulse_data: 2)
   end
 
 end
