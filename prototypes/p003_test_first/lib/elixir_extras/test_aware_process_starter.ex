@@ -1,4 +1,6 @@
-defmodule AppAnimal.Extras.TestAwareProcessStarter do
+alias AppAnimal.Extras
+
+defmodule Extras.TestAwareProcessStarter do
   @moduledoc """
   In the test environment, start processes using `start_link_supervised`. Otherwise,
   start with `GenServer.start_link`.
