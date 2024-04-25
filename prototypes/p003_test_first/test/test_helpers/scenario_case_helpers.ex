@@ -11,7 +11,26 @@ defmodule ScenarioCase.Helpers do
   alias AppAnimal.ClusterBuilders, as: C
   alias ClusterCase.Helpers, as: LessGrotty
   use Extras.TestAwareProcessStarter
-#  import ExUnit.Callbacks
+
+  @network_builder :network_builder     # get warnings about typos
+  def network_builder(), do: Process.get(@network_builder)
+  def init_network_builder(v), do: Process.put(@network_builder, v)
+
+  @affordance_thunks :affordance_thunks
+  def init_affordance_thunks, do: Process.put(@affordance_thunks, [])
+  def affordance_thunks, do: Process.get(@affordance_thunks)
+  def append_affordance_thunk(thunk),
+      do: Process.put(@affordance_thunks,[thunk | affordance_thunks()])
+
+  @provocation_thunk :provocation_thunk
+  def init_provocation_thunk(thunk), do: Process.put(@provocation_thunk, thunk)
+  def provocation_thunk(), do: Process.get(@provocation_thunk)
+
+  @animal :animal
+  def init_animal(aa), do: Process.put(@animal, aa)
+  def animal(), do: Process.get(@animal)
+
+
 
   def forward_to_test(name \\ :endpoint) do
     p_test = self()
@@ -19,7 +38,7 @@ defmodule ScenarioCase.Helpers do
     # Normally, a pulse is sent *after* calculation. Here, we have the
     # cluster not calculate anything but just send to the test pid.
     # That's because the `System.Router` only knows how to do GenServer-type
-    # casting.
+    # casting, which is not compatible with `assert_receive`
     kludge_a_calc = fn arg ->
       send(p_test, [arg, from: name])
       :no_result
@@ -36,24 +55,9 @@ defmodule ScenarioCase.Helpers do
     end
   end
 
-  @doc """
-  Script AffordanceLand to respond to a given action with a given affordance+data.
-
-  Typically:
-
-      p_affordances
-      |> respond_to_action(:focus_on_paragraph,
-                           by_sending_cluster(:paragraph_text, "some text"))
-
-
-      # later
-      take_action(p_affordances, focus_on_paragraph: :no_data)
-
-  """
-
   def respond_to_action(action, canned_response) do
     f = fn aa -> LessGrotty.respond_to_action(aa, action, canned_response) end
-    Process.put(:affordance_land_thunks, [f | Process.get(:affordance_land_thunks)])
+    append_affordance_thunk(f)
   end
 
   def by_sending_cluster(downstream, data), do: CannedResponse.new(downstream, data)
@@ -64,42 +68,26 @@ defmodule ScenarioCase.Helpers do
   end
 
   def cluster(cluster) do
-    pid = Process.get(:p_network_builder)
-    NB.cluster(pid, cluster)
+    NB.cluster(network_builder(), cluster)
   end
 
   def branch(at: name, with: list) do
-    pid = Process.get(:p_network_builder)
-    NB.branch(pid, at: name, with: list)
+    NB.branch(network_builder(), at: name, with: list)
   end
 
-  def animal(callback) when is_function(callback, 1) do
-    ExUnit.Callbacks.start_link_supervised!(NB)
-    |> callback.()
-    |> AppAnimal.from_network
-  end
+  def provocation(thunk), do: init_provocation_thunk(thunk)
 
-  def animal(trace) when is_list(trace) do
-
-    animal& NB.trace(&1, trace)
-  end
-
-
-  def provocation(thunk) do
-    Process.put(:provocation_thunk, thunk)
-  end
-
-  defmacro scenario(do: body) do
+  defmacro configuration(do: body) do
     quote do
-      Process.put(:p_network_builder, compatibly_start_link(NB, :ok))
-      Process.put(:affordance_land_thunks, [])
+      init_network_builder compatibly_start_link(NB, :ok)
+      init_affordance_thunks()
       unquote(body)
-      aa = AppAnimal.from_network(Process.get(:p_network_builder))
-      for thunk <- Enum.reverse(Process.get(:affordance_land_thunks)) do
-        thunk.(aa)
+      animal = AppAnimal.from_network(network_builder())
+      for thunk <- affordance_thunks() do
+        thunk.(animal)
       end
-      Process.get(:provocation_thunk).(aa)
-      aa
+      provocation_thunk().(animal)
+      init_animal(animal)
     end
   end
 end
