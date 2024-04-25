@@ -19,6 +19,7 @@ defmodule System.TopologyTest do
            else: no_pulse(mutated)
       end
 
+
     first = C.circular(:first, send_n_times, initial_value: %{pids: [], count: n})
 
     a = animal(fn builder ->
