@@ -69,11 +69,11 @@ defmodule ClusterCase.Helpers do
 
   Catch the pulse with `assert_test_receives` (layered on `assert_receive`).
 
-  By default, the cluster is named `:endpoint`. If you use `to_test` more
+  By default, the cluster is named `:send_to_test`. If you use `to_test` more
   when making the network, you'll probably want to give a different name.
   """
 
-  def to_test(name \\ :endpoint) do
+  def to_test(name \\ :send_to_test) do
     p_test = self()
 
     # Normally, a pulse is sent *after* calculation. Here, we have the
@@ -91,7 +91,7 @@ defmodule ClusterCase.Helpers do
              calc: kludge_a_calc}
   end
 
-  def forward_to_test(name \\ :endpoint) do
+  def forward_to_test(name \\ :send_to_test) do
     p_test = self()
 
     # Normally, a pulse is sent *after* calculation. Here, we have the
@@ -107,7 +107,7 @@ defmodule ClusterCase.Helpers do
   end
 
   @doc "Receive a pulse from a `to_test` node"
-  defmacro assert_test_receives(value, opts \\ [from: :endpoint]) do
+  defmacro assert_test_receives(value, opts \\ [from: :send_to_test]) do
     quote do
       [retval, from: _] = Assertions.assert_receive([unquote(value) | unquote(opts)])
       retval

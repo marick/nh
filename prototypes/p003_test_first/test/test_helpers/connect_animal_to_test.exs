@@ -5,7 +5,7 @@ defmodule TestHelpers.ConnectAnimalToTest do
   alias AppAnimal.ClusterBuilders, as: C
   alias ExUnit.Assertions
 
-  def forward_to_test(name \\ :endpoint) do
+  def forward_to_test(name \\ :send_to_test) do
     p_test = self()
 
     # Normally, a pulse is sent *after* calculation. Here, we have the
@@ -21,7 +21,7 @@ defmodule TestHelpers.ConnectAnimalToTest do
   end
 
   @doc "Receive a pulse from a `to_test` node"
-  defmacro assert_test_receives(value, opts \\ [from: :endpoint]) do
+  defmacro assert_test_receives(value, opts \\ [from: :send_to_test]) do
     quote do
       [retval, from: _] = Assertions.assert_receive([unquote(value) | unquote(opts)])
       retval
