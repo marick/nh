@@ -51,6 +51,5 @@ defmodule NetworkBuilder.GutsTest do
         UT.trace(Network.empty, [:circular])
       end)
     end
-
   end
 end
