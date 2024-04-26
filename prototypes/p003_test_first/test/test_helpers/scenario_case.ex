@@ -1,6 +1,6 @@
 alias AppAnimal.{TestHelpers,Extras}
 
-defmodule ScenarioCase do
+defmodule Scenario.Case do
 
   defmacro __using__(opts) do
     quote do
