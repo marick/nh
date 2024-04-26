@@ -1,6 +1,6 @@
 alias AppAnimal.{Network,NetworkBuilder}
 
-# see also NetworkBuilder.ProcessTest
+# see also NetworkBuilderTest
 
 defmodule NetworkBuilder.GutsTest do
   use ClusterCase, async: true

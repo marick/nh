@@ -1,8 +1,8 @@
 alias AppAnimal.{NetworkBuilder}
 
-defmodule NetworkBuilder.ProcessTest do
+defmodule NetworkBuilderTest do
   use ClusterCase, async: true
-  alias NetworkBuilder.Process, as: UT
+  alias NetworkBuilder, as: UT
 
   test "beginning" do
     m = start_link_supervised!(UT)

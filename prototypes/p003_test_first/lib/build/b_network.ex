@@ -1,6 +1,6 @@
 alias AppAnimal.{Network,NetworkBuilder}
 
-defmodule NetworkBuilder.Process do
+defmodule NetworkBuilder do
 
   use AppAnimal
   use AppAnimal.GenServer

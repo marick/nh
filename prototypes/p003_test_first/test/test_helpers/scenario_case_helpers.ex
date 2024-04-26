@@ -5,7 +5,7 @@ defmodule ScenarioCase.Helpers do
   """
   use AppAnimal
   alias AppAnimal.{System,Extras}
-  alias AppAnimal.NetworkBuilder.Process, as: NB
+  alias AppAnimal.NetworkBuilder, as: NB
   alias System.{CannedResponse}
   alias ExUnit.Assertions
   alias AppAnimal.ClusterBuilders, as: C

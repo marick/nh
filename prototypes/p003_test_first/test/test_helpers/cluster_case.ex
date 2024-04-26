@@ -18,7 +18,7 @@ defmodule ClusterCase do
 
       alias AppAnimal.Duration
       alias AppAnimal.ClusterBuilders, as: C
-      alias AppAnimal.NetworkBuilder.Process, as: Add    ### delete
+      alias AppAnimal.NetworkBuilder
     end
   end
 end

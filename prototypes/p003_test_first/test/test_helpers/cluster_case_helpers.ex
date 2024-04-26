@@ -4,7 +4,7 @@ defmodule ClusterCase.Helpers do
   the Switchboard, and AffordanceLand.
   """
   use AppAnimal
-  alias AppAnimal.{System, Cluster, Network}
+  alias AppAnimal.{System, Cluster, Network,NetworkBuilder}
   alias System.{Switchboard,AffordanceLand,Pulse,CannedResponse}
   alias Cluster.Shape
   alias ExUnit.Assertions
@@ -174,16 +174,12 @@ defmodule ClusterCase.Helpers do
 
 
   def animal(callback) when is_function(callback, 1) do
-    alias AppAnimal.NetworkBuilder.Process, as: Builder
-
-    ExUnit.Callbacks.start_link_supervised!(Builder)
+    ExUnit.Callbacks.start_link_supervised!(NetworkBuilder)
     |> callback.()
     |> AppAnimal.from_network
   end
 
   def animal(trace) when is_list(trace) do
-    alias AppAnimal.NetworkBuilder.Process, as: Builder
-
-    animal& Builder.trace(&1, trace)
+    animal& NetworkBuilder.trace(&1, trace)
   end
 end

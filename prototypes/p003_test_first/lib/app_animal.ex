@@ -1,4 +1,4 @@
-alias AppAnimal.{System,Network,Cluster,Duration}
+alias AppAnimal.{System,Network,Cluster,Duration,NetworkBuilder}
 
 defmodule AppAnimal do
   alias System.{Switchboard, AffordanceLand, ActivityLogger}
@@ -41,8 +41,6 @@ defmodule AppAnimal do
 
 
   def from_network(p_network_builder, opts \\ []) when is_pid(p_network_builder) do
-    alias AppAnimal.NetworkBuilder.Process, as: NB
-
     s = start_processes()
 
     router = System.Router.new(%{
@@ -51,8 +49,8 @@ defmodule AppAnimal do
                  System.Delay => s.p_timer})
 
 
-    NB.install_routers(p_network_builder, router)
-    network = NB.network(p_network_builder)
+    NetworkBuilder.install_routers(p_network_builder, router)
+    network = NetworkBuilder.network(p_network_builder)
 
     finish_struct(s, network, opts)
   end

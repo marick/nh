@@ -1,5 +1,4 @@
-alias AppAnimal.System
-
+alias AppAnimal.{NetworkBuilder,System}
 
 defmodule System.TopologyTest do
   use ClusterCase, async: true
@@ -23,8 +22,8 @@ defmodule System.TopologyTest do
     first = C.circular(:first, send_n_times, initial_value: %{pids: [], count: n})
 
     a = animal(fn builder ->
-      Add.trace(builder, [first, :first])
-      Add.trace(builder, [:first, forward_to_test()])
+      NetworkBuilder.trace(builder, [first, :first])
+      NetworkBuilder.trace(builder, [:first, forward_to_test()])
     end)
 
     send_test_pulse(a, to: :first, carrying: :nothing)
