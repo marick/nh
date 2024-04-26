@@ -4,6 +4,10 @@ defmodule ClusterBuilders do
   use AppAnimal
   alias Cluster.Throb
 
+  def no_pulse(next_state),          do: {:no_result, next_state}
+  def pulse(pulse_data, next_state), do: {:useful_result, pulse_data, next_state}
+  def pulse_and_save(data),          do: {:useful_result, data, data}
+
   def circular(name, calc, opts) when is_function(calc) and is_list(opts) do
     opts
     |> Opts.rename(:initial_value, to: :previously)

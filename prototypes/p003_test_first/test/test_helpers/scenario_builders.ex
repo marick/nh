@@ -32,6 +32,10 @@ defmodule TestHelpers.ScenarioBuilding do
     NB.branch(network_builder(), at: name, with: list)
   end
 
+  def trace(list) do
+    NB.trace(network_builder(), list)
+  end
+
 
   # Scripting AffordanceLand behavior
 

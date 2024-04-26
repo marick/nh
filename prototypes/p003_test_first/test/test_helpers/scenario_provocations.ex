@@ -8,6 +8,10 @@ defmodule TestHelpers.ScenarioProvocations do
   def provocation(thunk), do: init_provocation_thunk(thunk)
 
   def take_action(opts) do
-    fn aa -> LessGrotty.take_action(aa, opts) end
+    fn animal -> LessGrotty.take_action(animal, opts) end
+  end
+
+  def send_test_pulse(opts) do
+    fn animal -> LessGrotty.send_test_pulse(animal, opts) end
   end
 end
