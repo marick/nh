@@ -1,18 +1,19 @@
 alias AppAnimal.{System,Network}
 
 defmodule Network.CircularSubnetTest do
-  use ClusterCase, async: true
+  use AppAnimal.Case, async: true
   alias Network.CircularSubnet, as: UT
   alias System.Pulse
 
   describe "construction of a throbber" do
     test "A throbber is initialized with a set of *circular* clusters" do
-      # original = C.circular(:will_throb) |> dbg
-      # pid = start_link_supervised!({UT, [original]})
+      original = C.circular(:will_throb)
+      pid = start_link_supervised!(UT)
+      UT.call__add_cluster(pid, original)
 
-      # assert [Cluster.Circular.new(original)] == UT.clusters(pid)
-      # assert [] == UT.throbbing_names(pid)
-      # assert [] == UT.throbbing_pids(pid)
+      assert [original] == UT.clusters(pid)
+      assert [] == UT.throbbing_names(pid)
+      assert [] == UT.throbbing_pids(pid)
     end
   end
 
@@ -37,9 +38,12 @@ defmodule Network.CircularSubnetTest do
       :no_result
     end
 
-    original = circular(:original, kludge_a_calc)
-    unused = circular(:unused)
-    p_ut = start_link_supervised!({UT, [original, unused]})
+    p_ut = start_link_supervised!(UT)
+    original = C.circular(:original, kludge_a_calc)
+    unused = C.circular(:unused)
+    UT.call__add_cluster(p_ut, original)
+    UT.call__add_cluster(p_ut, unused)
+
 
     UT.cast__distribute_pulse(p_ut, carrying: Pulse.new("value"), to: [:original])
     assert {p_cluster, "value"} = assert_receive(_)

@@ -1,7 +1,7 @@
 alias AppAnimal.Cluster
 
 defmodule Cluster.ThrobTest do
-  use ClusterCase, async: true
+  use AppAnimal.Case, async: true
   alias Cluster.Throb, as: UT
 
   describe "setting up a countdown" do

@@ -3,7 +3,7 @@ alias AppAnimal.{Network,NetworkBuilder}
 # see also NetworkBuilderTest
 
 defmodule NetworkBuilder.GutsTest do
-  use ClusterCase, async: true
+  use AppAnimal.Case, async: true
   alias NetworkBuilder.Guts, as: UT
 
   describe "handling duplicates" do

@@ -1,7 +1,7 @@
 alias AppAnimal.{NetworkBuilder}
 
 defmodule NetworkBuilderTest do
-  use ClusterCase, async: true
+  use AppAnimal.Case, async: true
   alias NetworkBuilder, as: UT
 
   test "beginning" do

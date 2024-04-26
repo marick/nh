@@ -1,10 +1,9 @@
 alias AppAnimal.{Cluster,System}
 
 defmodule Cluster.CalcTest do
-  use ExUnit.Case, async: true
+  use AppAnimal.Case, async: true
   alias Cluster.Calc, as: UT
   alias System.{Pulse,Action}
-  import FlowAssertions.TabularA
 
   test "default pulses (only) are unwrapped" do
     becomes = run_and_assert(&UT.pulse_or_pulse_data/1)
