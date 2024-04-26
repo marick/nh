@@ -1,3 +1,5 @@
+alias AppAnimal.{TestHelpers,Extras}
+
 defmodule ScenarioCase do
 
   defmacro __using__(opts) do
@@ -5,16 +7,18 @@ defmodule ScenarioCase do
       use ExUnit.Case, unquote(opts)
       use AppAnimal
       use FlowAssertions
-
-      alias AppAnimal.{System,Network,Extras}
-      alias System.{Switchboard,AffordanceLand,ActivityLogger}
-
       use Extras.TestAwareProcessStarter
 
-      import ScenarioCase.Helpers
+      # Universal enough to make top-level
+      alias AppAnimal.{System,Network,Extras,Duration}
+      alias System.{Switchboard,AffordanceLand,ActivityLogger}
+
+      import TestHelpers.ProcessKludgery, only: [animal: 0]
+      import TestHelpers.ScenarioBuilding
+      import TestHelpers.ScenarioProvocations
+      import TestHelpers.ConnectAnimalToTest
       import AppAnimal.ActivityLogAssertions
 
-      alias AppAnimal.Duration
       alias AppAnimal.ClusterBuilders, as: C
     end
   end
