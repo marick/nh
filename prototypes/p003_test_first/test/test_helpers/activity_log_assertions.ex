@@ -1,3 +1,6 @@
+alias AppAnimal.System
+
+
 defmodule AppAnimal.ActivityLogAssertions do
   @moduledoc """
   Some fairly rudimentary assertions against the log. Perhaps more to come.
@@ -8,7 +11,7 @@ defmodule AppAnimal.ActivityLogAssertions do
   use FlowAssertions
   use FlowAssertions.Define
   use Private
-  alias AppAnimal.System.ActivityLogger
+  alias System.{ActivityLogger,Pulse}
   alias ActivityLogger.{ActionReceived, PulseSent}
 
   @doc "shorthand for an action received"
@@ -102,11 +105,12 @@ defmodule AppAnimal.ActivityLogAssertions do
   end
 
   def assert_log_entry(%PulseSent{} = actual, [{name, pulse_data}]) do
-    assert_fields(actual, name: name, pulse_data: pulse_data)
+    assert actual.cluster_id.name == name
+    assert actual.pulse == Pulse.ensure(pulse_data)
   end
 
   def assert_log_entry(%PulseSent{} = actual, name) when is_atom(name) do
-    assert_field(actual, name: name)
+    assert actual.cluster_id.name == name
   end
 
   def assert_log_entry(%ActionReceived{} = actual, %ActionReceived{name: name}) do

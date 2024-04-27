@@ -27,8 +27,8 @@ defmodule AppAnimal.Pretty.LogFormat do
 
     def format_name(metadata) do
       case Keyword.get(metadata, :pulse_entry) do
-        %ActivityLogger.PulseSent{cluster_label: label, name: name} ->
-          "#{label} #{name}"
+        %ActivityLogger.PulseSent{cluster_id: id} ->
+          "#{id.label} #{id.name}"
         %ActivityLogger.ActionReceived{name: name} ->
           "#{name}"
         _ ->

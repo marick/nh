@@ -1,27 +1,33 @@
-alias AppAnimal.System
+alias AppAnimal.{System,Cluster}
 
 defmodule System.ActivityLogger do
   use AppAnimal
   use AppAnimal.GenServer
   require CircularBuffer
-
+  alias System.Pulse
 
   defstruct [:buffer, also_to_terminal: false]
 
   defmodule PulseSent do
-    @enforce_keys [:cluster_label, :name, :pulse_data]
-    defstruct [:cluster_label, :name, :pulse_data]
-
-    def new(cluster_label, name, pulse_data) do
-      %__MODULE__{cluster_label: cluster_label, name: name, pulse_data: pulse_data}
+    typedstruct enforce: true do
+      field :cluster_id, Cluster.Identification.t
+      field :pulse, Pulse.t
     end
+
+    def new(%Cluster.Identification{} = id, pulse_data) do
+      %__MODULE__{cluster_id: id, pulse: Pulse.ensure(pulse_data)}
+    end
+
+    def new(cluster, pulse_data), do: new(cluster.id, pulse_data)
   end
 
   defmodule ActionReceived do
-    @enforce_keys [:name, :pulse_data]
-    defstruct [:name, :pulse_data]
+    typedstruct enforce: true do
+      field :name, atom
+      field :action, Action.t
+    end
 
-    def new(name, data \\ :no_data), do: %__MODULE__{name: name, pulse_data: data}
+    def new(name, data \\ nil), do: %__MODULE__{name: name, action: data}
   end
 
 
@@ -49,14 +55,13 @@ defmodule System.ActivityLogger do
     end
 
     def log_pulse_sent(pid, source, pulse) do
-      entry = %PulseSent{cluster_label: source.label, name: source.name, pulse_data: pulse.data}
+      entry = PulseSent.new(source, pulse)
       GenServer.cast(pid, [log: entry])
     end
 
     def log_action_received(pid, name, data) do
       entry = ActionReceived.new(name, data)
       GenServer.cast(pid, [log: entry])
-
     end
 
     def get_log(pid) do
@@ -81,7 +86,7 @@ defmodule System.ActivityLogger do
 
     def handle_cast([log: entry], me) do
       if me.also_to_terminal,
-         do: Logger.info(inspect(entry.pulse_data), pulse_entry: entry)
+         do: Logger.info(inspect(entry.pulse.data), pulse_entry: entry)
 
       update_in(me.buffer, &(CircularBuffer.insert(&1, entry)))
       |> continue

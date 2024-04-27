@@ -8,12 +8,15 @@ defmodule TestHelpers.ScenarioBuilding do
   alias System.{CannedResponse}
   import TestHelpers.ProcessKludgery
 
-  defmacro configuration(do: body) do
+  defmacro configuration(opts \\ [], do: body) do
+    [terminal_log?] = Opts.parse(opts, [terminal_log: false])
     quote do
       init_network_builder compatibly_start_link(NB, :ok)
       init_affordance_thunks()
       unquote(body)
       animal = AppAnimal.from_network(network_builder())
+      if unquote(terminal_log?),
+         do: System.ActivityLogger.spill_log_to_terminal(animal.p_logger)
       for thunk <- affordance_thunks() do
         thunk.(animal)
       end
@@ -35,7 +38,6 @@ defmodule TestHelpers.ScenarioBuilding do
   def trace(list) do
     NB.trace(network_builder(), list)
   end
-
 
   # Scripting AffordanceLand behavior
 
