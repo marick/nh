@@ -14,6 +14,20 @@ defmodule Pulse do
   def new(pulse_data), do: %__MODULE__{data: pulse_data}
 
   def new, do: new(:no_data)
+
+  @doc """
+  Return a Pulse argument or convert into a *default* Pulse."
+  """
+  def (data) do
+    case data do
+      nil ->
+        __MODULE__.new
+      %__MODULE__{} = pulse ->
+        pulse
+      pulse_data ->
+        __MODULE__.new(pulse_data)
+    end
+  end
 end
 
 
