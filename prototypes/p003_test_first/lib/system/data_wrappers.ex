@@ -18,7 +18,8 @@ defmodule Pulse do
   @doc """
   Return a Pulse argument or convert into a *default* Pulse."
   """
-  def (data) do
+
+  def ensure(data) do
     case data do
       nil ->
         __MODULE__.new

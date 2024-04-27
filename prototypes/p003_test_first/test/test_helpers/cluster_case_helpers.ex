@@ -51,16 +51,16 @@ defmodule ClusterCase.Helpers do
   with the given data wrapped in a `Pulse`. The `carrying` argument may be omitted,
   in which case some innocuous, to-be-ignored data is sent.
   """
+  def spontaneous_affordance(%AppAnimal{} = pids, opts),
+      do: spontaneous_affordance(pids.p_affordances, opts)
 
-  def spontaneous_affordance(p_affordances, named: name),
-      do: spontaneous_affordance(p_affordances, named: name, carrying: :no_pulse_data)
-
-  def spontaneous_affordance(p_affordances, named: name, carrying: pulse_data) do
-    pulse = Pulse.new(pulse_data)
+  def spontaneous_affordance(p_affordances, opts) when is_pid(p_affordances) do
+    [name, data] = Opts.parse(opts, [:named, carrying: Pulse.new])
     AffordanceLand.cast__produce_spontaneous_affordance(p_affordances,
                                                         named: name,
-                                                        pulse: pulse)
+                                                        pulse: Pulse.ensure(data))
   end
+
 
 
 
@@ -148,11 +148,14 @@ defmodule ClusterCase.Helpers do
 
   Behaves the same way as an `action_edge` cluster.
   """
-  def take_action(%AppAnimal{} = aa, arg),
-      do: take_action(aa.p_affordances, arg)
+  def take_action(%AppAnimal{} = aa, action_name) when is_atom(action_name),
+      do: take_action(aa.p_affordances, [{action_name, :no_data}])
 
-  def take_action(p_affordances, [{type, data}]) do
-    action = System.Action.new(type, data)
+  def take_action(%AppAnimal{} = aa, opts),
+      do: take_action(aa.p_affordances, opts)
+
+  def take_action(p_affordances, [{action_name, data}]) do
+    action = System.Action.new(action_name, data)
     GenServer.cast(p_affordances, {:take_action, action})
   end
 

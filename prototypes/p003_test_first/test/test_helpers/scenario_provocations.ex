@@ -14,4 +14,8 @@ defmodule TestHelpers.ScenarioProvocations do
   def send_test_pulse(opts) do
     fn animal -> LessGrotty.send_test_pulse(animal, opts) end
   end
+
+  def spontaneous_affordance(opts) do
+    fn animal -> LessGrotty.spontaneous_affordance(animal, opts) end
+  end
 end
