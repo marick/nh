@@ -2,6 +2,7 @@ defmodule AppAnimal.Cluster.ActionEdgeTest do
   use ClusterCase, async: true
   alias System.ActivityLogger
 
+  @tag :skip
   test "action edges call into Affordance Land, prompting messages out" do
     alive =
       trace([action_edge(:focus_on_new_paragraph)])

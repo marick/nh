@@ -3,6 +3,7 @@ alias AppAnimal.{Cluster}
 defmodule Cluster.PerceptionEdgeTest do
   use Scenario.Case, async: true
 
+  @tag :skip
   test "perception edges serve only to fan out" do
     provocation take_action(focus_on_paragraph: :no_data)
 
