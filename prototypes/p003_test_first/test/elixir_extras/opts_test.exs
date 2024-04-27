@@ -5,6 +5,32 @@ defmodule Extras.OptsTest do
   use FlowAssertions
   alias Extras.Opts, as: UT
 
+  describe "parse" do
+    test "simple case" do
+      assert UT.parse([b: 2, a: 1], [:a, :b]) == [1, 2]
+    end
+
+    test "missing required key" do
+      assert_raise(KeyError, "required argument :b is missing", fn ->
+        UT.parse([a: 2], [:a, :b])
+      end)
+    end
+
+    test "optional values" do
+      assert UT.parse([a: 1, c: 3], [:a, b: 2, c: "unused"]) == [1, 2, 3]
+    end
+
+    test "unmentioned keys are an error" do
+      assert_raise(KeyError, "extra keys are not allowed: [:b, :c]", fn ->
+        UT.parse([a: 2, b: 3, c: 4], [:a])
+      end)
+    end
+
+    test "... unless specifically allowed" do
+      assert UT.parse([a: 2, b: 3, c: 4], [:a], extra_keys: :allowed) == [2]
+    end
+  end
+
   describe "replace key" do
     test "key is present" do
       actual = UT.replace_key([a: 3, b: 4], :a, :z)

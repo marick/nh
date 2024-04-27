@@ -3,6 +3,44 @@ defmodule AppAnimal.Extras.Opts do
   Utilities for Keyword lists used for named arguments (usually called `opts` in Elixir).
   """
 
+  @missing_key :unique_7347b976_d636_4521
+
+  defp parse_one(key, {opts, parsed}) when is_atom(key) do
+    case Keyword.pop_first(opts, key, @missing_key) do
+      {@missing_key, _} ->
+        raise(KeyError, term: opts, key: key,
+                        message: "required argument #{inspect key} is missing")
+      {value, smaller_opts} ->
+        {smaller_opts, [value | parsed]}
+    end
+  end
+
+  defp parse_one({key,default}, {opts, parsed}) do
+    case Keyword.pop_first(opts, key, @missing_key) do
+      {@missing_key, smaller_opts} ->
+        {smaller_opts, [default | parsed]}
+      {value, smaller_opts} ->
+        {smaller_opts, [value | parsed]}
+    end
+  end
+
+  def parse(original_opts, descriptions, local_opts \\ [extra_keys: :disallowed]) do
+    {remaining_opts, reversed} =
+      Enum.reduce(descriptions, {original_opts, []}, &parse_one/2)
+
+    if remaining_opts == [] or Keyword.get(local_opts, :extra_keys) == :allowed do
+      Enum.reverse(reversed)
+    else
+      extra_keys = Keyword.keys(remaining_opts)
+      raise(KeyError, term: original_opts,
+                      message: "extra keys are not allowed: #{inspect extra_keys}")
+    end
+  end
+
+
+  ## Old stuff
+
+
   def replace_key(opts, maybe_present, replacement) do
     case Keyword.pop_first(opts, maybe_present, :no_such_value) do
       {:no_such_value, _} ->
