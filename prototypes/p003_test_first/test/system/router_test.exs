@@ -1,7 +1,7 @@
 AppAnimal.System
 
 defmodule System.RouterTest do
-  use ClusterCase, async: true
+  use AppAnimal.Case, async: true
   alias System.Router, as: UT
   alias System.{Pulse,Action,Delay}
 

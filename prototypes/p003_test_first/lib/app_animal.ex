@@ -89,6 +89,7 @@ defmodule AppAnimal do
     quote do
       require Logger
       use Private
+      use TypedStruct
       alias AppAnimal.Pretty
       import AppAnimal.Extras.Tuples
       import AppAnimal.Extras.Kernel

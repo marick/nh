@@ -1,7 +1,7 @@
 alias AppAnimal.Network
 
 defmodule Network.LinearSubnetTest do
-  use ClusterCase, async: true
+  use AppAnimal.Case, async: true
   alias Network.LinearSubnet, as: UT
 
   test "lens for setting router" do
