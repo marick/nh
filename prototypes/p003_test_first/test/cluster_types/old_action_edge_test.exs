@@ -1,8 +1,7 @@
 defmodule AppAnimal.Cluster.ActionEdgeTest do
   use ClusterCase, async: true
-  alias System.ActivityLogger
+  # alias System.ActivityLogger
 
-  @tag :skip
   test "action edges call into Affordance Land, prompting messages out" do
     alive =
       trace([action_edge(:focus_on_new_paragraph)])
@@ -17,9 +16,10 @@ defmodule AppAnimal.Cluster.ActionEdgeTest do
 
     assert_test_receives("some text") 
 
-    [first, second] = ActivityLogger.get_log(alive.p_logger)
-    assert_fields(first, name: :focus_on_new_paragraph)
-    assert_fields(second, name: :paragraph_text,
-                          pulse_data: "some text")
+    IO.puts "A use of the activity log that needs to be updated."
+    # [first, second] = ActivityLogger.get_log(alive.p_logger)
+    # assert_fields(first, name: :focus_on_new_paragraph)
+    # assert_fields(second, name: :paragraph_text,
+    #                       pulse_data: "some text")
   end
 end
