@@ -1,6 +1,6 @@
 alias AppAnimal.TestHelpers
 
-defmodule TestHelpers.ConnectAnimalToTest do
+defmodule TestHelpers.ConnectTestToAnimal do
   use AppAnimal
   alias AppAnimal.ClusterBuilders, as: C
   alias ExUnit.Assertions
