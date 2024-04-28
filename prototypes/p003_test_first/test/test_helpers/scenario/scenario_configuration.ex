@@ -1,10 +1,10 @@
-alias AppAnimal.{Extras,System,Scenario}
+alias AppAnimal.{Extras,System,Scenario,TestHelpers}
 
 defmodule Scenario.Configuration do
   use AppAnimal
   alias AppAnimal.NetworkBuilder, as: NB
   use Extras.TestAwareProcessStarter
-  alias ClusterCase.Helpers, as: LessGrotty
+  alias TestHelpers.Animal
   alias System.{CannedResponse}
   import Scenario.ProcessKludgery
 
@@ -42,7 +42,7 @@ defmodule Scenario.Configuration do
   # Scripting AffordanceLand behavior
 
   def respond_to_action(action, canned_response) do
-    f = fn aa -> LessGrotty.respond_to_action(aa, action, canned_response) end
+    f = fn aa -> Animal.respond_to_action(aa, action, canned_response) end
     append_affordance_thunk(f)
   end
 

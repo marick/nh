@@ -1,21 +1,21 @@
-alias AppAnimal.Scenario
+alias AppAnimal.{Scenario,TestHelpers}
 
 defmodule Scenario.Provocations do
   use AppAnimal
   import Scenario.ProcessKludgery
-  alias ClusterCase.Helpers, as: LessGrotty
+  alias TestHelpers.Animal
 
   def provocation(thunk), do: init_provocation_thunk(thunk)
 
   def take_action(opts) do
-    fn animal -> LessGrotty.take_action(animal, opts) end
+    fn animal -> Animal.take_action(animal, opts) end
   end
 
   def send_test_pulse(opts) do
-    fn animal -> LessGrotty.send_test_pulse(animal, opts) end
+    fn animal -> Animal.send_test_pulse(animal, opts) end
   end
 
   def spontaneous_affordance(opts) do
-    fn animal -> LessGrotty.spontaneous_affordance(animal, opts) end
+    fn animal -> Animal.spontaneous_affordance(animal, opts) end
   end
 end
