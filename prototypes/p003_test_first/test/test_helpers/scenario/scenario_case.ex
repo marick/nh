@@ -16,7 +16,7 @@ defmodule Scenario.Case do
       import TestHelpers.ProcessKludgery, only: [animal: 0]
       import TestHelpers.ScenarioBuilding
       import TestHelpers.ScenarioProvocations
-      import TestHelpers.ConnectAnimalToTest
+      import TestHelpers.ConnectTestToAnimal
       import AppAnimal.ActivityLogAssertions
 
       alias AppAnimal.ClusterBuilders, as: C
