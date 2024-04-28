@@ -1,7 +1,7 @@
 alias AppAnimal.Duration
 
-defmodule AppAnimal.DurationTestTest do
-  use ClusterCase, async: true
+defmodule AppAnimal.DurationTest do
+  use AppAnimal.Case, async: true
   alias Duration, as: UT
 
   describe "conversions" do

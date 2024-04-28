@@ -15,6 +15,6 @@ defmodule AppAnimal.Scenario.ProcessKludgery do
   def provocation_thunk(), do: Process.get(@provocation_thunk)
 
   @animal :animal
-  def init_animal(aa), do: Process.put(@animal, aa)
+  def make_animal_kludgily_available(aa), do: Process.put(@animal, aa)
   def animal(), do: Process.get(@animal)
 end

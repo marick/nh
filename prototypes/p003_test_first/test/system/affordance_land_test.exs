@@ -1,7 +1,6 @@
 alias AppAnimal.{System,Scenario}
 
-
-defmodule AppAnimal.System.AffordanceLandTest do
+defmodule System.AffordanceLandTest do
   use Scenario.Case, async: true
   alias System.Pulse
 

@@ -1,4 +1,4 @@
-alias AppAnimal.{Scenario,Extras}
+alias AppAnimal.{Scenario,Extras,TestHelpers}
 
 defmodule Scenario.Case do
   defmacro __using__(opts) do
@@ -16,7 +16,10 @@ defmodule Scenario.Case do
       import Scenario.ProcessKludgery, only: [animal: 0]
       import Scenario.Configuration
       import Scenario.Provocations
-      import AppAnimal.TestHelpers.ConnectTestToAnimal
+
+      import TestHelpers.ConnectTestToAnimal
+      alias TestHelpers.Animal
+
       import AppAnimal.ActivityLogAssertions
 
       alias AppAnimal.ClusterBuilders, as: C

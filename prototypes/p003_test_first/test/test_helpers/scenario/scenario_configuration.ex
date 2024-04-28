@@ -20,8 +20,11 @@ defmodule Scenario.Configuration do
       for thunk <- affordance_thunks() do
         thunk.(animal)
       end
-      provocation_thunk().(animal)
-      init_animal(animal)
+
+      provocation = provocation_thunk()
+      if provocation, do: provocation.(animal)
+      make_animal_kludgily_available(animal)
+      animal
     end
   end
 

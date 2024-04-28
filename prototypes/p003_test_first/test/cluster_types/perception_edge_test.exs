@@ -24,6 +24,10 @@ defmodule Cluster.PerceptionEdgeTest do
     assert_test_receives("txet emos", from: :to_test)
 
     IO.puts("update activity log")
+
+
+
+    # Dealing causality is being put off.
     # log = ActivityLogger.get_log(animal().p_logger)
 
     # assert_causal_chain(log, [
