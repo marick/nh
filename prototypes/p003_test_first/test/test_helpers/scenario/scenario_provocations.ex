@@ -1,8 +1,8 @@
-alias AppAnimal.TestHelpers
+alias AppAnimal.Scenario
 
-defmodule TestHelpers.ScenarioProvocations do
+defmodule Scenario.Provocations do
   use AppAnimal
-  import TestHelpers.ProcessKludgery
+  import Scenario.ProcessKludgery
   alias ClusterCase.Helpers, as: LessGrotty
 
   def provocation(thunk), do: init_provocation_thunk(thunk)

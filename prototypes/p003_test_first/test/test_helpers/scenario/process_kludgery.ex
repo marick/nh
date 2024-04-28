@@ -1,6 +1,4 @@
-alias AppAnimal.TestHelpers
-
-defmodule TestHelpers.ProcessKludgery do
+defmodule AppAnimal.Scenario.ProcessKludgery do
 
   @network_builder :network_builder     # get warnings about typos
   def network_builder(), do: Process.get(@network_builder)

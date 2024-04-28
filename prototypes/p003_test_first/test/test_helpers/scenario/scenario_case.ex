@@ -1,7 +1,6 @@
-alias AppAnimal.{TestHelpers,Extras,Scenario}
+alias AppAnimal.{Scenario,Extras}
 
 defmodule Scenario.Case do
-
   defmacro __using__(opts) do
     quote do
       use ExUnit.Case, unquote(opts)
@@ -12,11 +11,12 @@ defmodule Scenario.Case do
       # Universal enough to make top-level
       alias AppAnimal.{System,Network,Extras,Duration}
       alias System.{Switchboard,AffordanceLand,ActivityLogger}
+      alias AppAnimal.Scenario
 
-      import TestHelpers.ProcessKludgery, only: [animal: 0]
-      import TestHelpers.ScenarioBuilding
-      import TestHelpers.ScenarioProvocations
-      import TestHelpers.ConnectTestToAnimal
+      import Scenario.ProcessKludgery, only: [animal: 0]
+      import Scenario.Configuration
+      import Scenario.Provocations
+      import AppAnimal.TestHelpers.ConnectTestToAnimal
       import AppAnimal.ActivityLogAssertions
 
       alias AppAnimal.ClusterBuilders, as: C

@@ -1,12 +1,12 @@
-alias AppAnimal.{TestHelpers,Extras,System}
+alias AppAnimal.{Extras,System,Scenario}
 
-defmodule TestHelpers.ScenarioBuilding do
+defmodule Scenario.Configuration do
   use AppAnimal
   alias AppAnimal.NetworkBuilder, as: NB
   use Extras.TestAwareProcessStarter
   alias ClusterCase.Helpers, as: LessGrotty
   alias System.{CannedResponse}
-  import TestHelpers.ProcessKludgery
+  import Scenario.ProcessKludgery
 
   defmacro configuration(opts \\ [], do: body) do
     [terminal_log?] = Opts.parse(opts, [terminal_log: false])
