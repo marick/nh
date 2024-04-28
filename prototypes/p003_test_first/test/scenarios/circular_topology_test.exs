@@ -1,4 +1,6 @@
-defmodule AppAnimal.CircularTopologyTest do
+alias AppAnimal.Scenario
+
+defmodule Scenario.CircularTopologyTest do
   use Scenario.Case, async: true
 
   test "a sequence of clusters with a loop (repeated clusters)" do

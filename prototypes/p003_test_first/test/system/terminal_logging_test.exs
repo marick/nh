@@ -1,4 +1,4 @@
-alias AppAnimal.System
+alias AppAnimal.{System,Scenario}
 
 defmodule System.TerminalLoggingTest do
   use Scenario.Case, async: true

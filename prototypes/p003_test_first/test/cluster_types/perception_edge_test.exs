@@ -1,4 +1,4 @@
-alias AppAnimal.{Cluster}
+alias AppAnimal.{Cluster,Scenario}
 
 defmodule Cluster.PerceptionEdgeTest do
   use Scenario.Case, async: true

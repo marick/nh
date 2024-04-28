@@ -1,4 +1,4 @@
-alias AppAnimal.{TestHelpers,Extras}
+alias AppAnimal.{TestHelpers,Extras,Scenario}
 
 defmodule Scenario.Case do
 
