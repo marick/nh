@@ -1,4 +1,4 @@
-alias AppAnimal.ClusterBuilders
+alias AppAnimal.{ClusterBuilders,System}
 
 defmodule ClusterBuilders do
   use AppAnimal
@@ -55,4 +55,8 @@ defmodule ClusterBuilders do
     linear(name, label: :perception_edge)
   end
 
+  def action_edge(name) do
+    linear(name, & System.Action.new(name, &1),
+           label: :action_edge)
+  end
 end
