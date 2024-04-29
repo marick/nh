@@ -85,11 +85,36 @@ defmodule System.ActivityLogger do
     end
 
     def handle_cast([log: entry], me) do
-      if me.also_to_terminal,
-         do: Logger.info(inspect(entry.pulse.data), pulse_entry: entry)
+      maybe_log(me.also_to_terminal, entry)
 
       update_in(me.buffer, &(CircularBuffer.insert(&1, entry)))
       |> continue
     end
+
+    # This is all awful, but the whole thing needs rework.
+
+    defp maybe_log(false, _) do
+    end
+
+    defp maybe_log(true, %ActionReceived{} = entry) do
+      t =
+        if is_atom(entry.action),
+           do: entry.action,
+           else: entry.action.data
+
+      Logger.info(inspect(t))
+    end
+
+    defp maybe_log(true, %PulseSent{} = entry) do
+      t =
+        if is_atom(entry.pulse),
+           do: entry.pulse,
+           else: entry.pulse.data
+
+      Logger.info(inspect(t), pulse_entry: entry)
+    end
+
+
+
   end
 end

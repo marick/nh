@@ -1,9 +1,8 @@
-alias AppAnimal.Scenarios
+alias AppAnimal.Scenario
 
 
-defmodule Scenarios.SwitchParagraphTest do
-  use ClusterCase, async: true
-  import AppAnimal.Cluster.Make
+defmodule Scenario.SwitchParagraphTest do
+  use Scenario.Case, async: true
   alias AppAnimal.Perceptions.ParagraphGaps
 
   setup do
@@ -31,38 +30,33 @@ defmodule Scenarios.SwitchParagraphTest do
     :ok
   end
 
+  @tag :test_uses_sleep
   test "simple run-through" do
     IO.puts "======= switch_paragraph_test ============="
-    new_paragraph_perception = [
-      :notice_new_paragraph |> perception_edge,
-      :focus_on_paragraph   |> action_edge,
-    ]
 
-    response_to_paragraph_text = [
-      :paragraph_text          |> perception_edge,
-      :paragraph_structure     |> summarizer(&ParagraphGaps.summarize/1),
-      :gap_count               |> summarizer(&ParagraphGaps.gap_count/1),
-      :is_big_edit?            |> gate(& &1 >= 2),
-      :ignore_same_edit_status |> forward_unique,
-      :wait_for_edit_to_stop   |> delay(Duration.seconds(0.1)),
-      # :big_edit_wait |> wait_for_quiet(seconds(2))
-      # :mark_paragraph_with_big_edit |> action_edge
-      to_test()
-    ]
+    provocation  spontaneous_affordance(named: :notice_new_paragraph)
 
-    a = 
-      trace(new_paragraph_perception)
-      |> trace(response_to_paragraph_text)
-      |> AppAnimal.enliven
+    configuration terminal_log: true do
+      # new paragraph perception
+      trace([C.perception_edge(:notice_new_paragraph),
+             C.action_edge(:focus_on_paragraph)])
 
-    a.p_affordances
-    |> respond_to_action(:focus_on_paragraph,
-                         by_sending_cluster(:paragraph_text, "para\n\npara\n\npara"))
 
-    ActivityLogger.spill_log_to_terminal(a.p_logger)
-    spontaneous_affordance(a.p_affordances, named: :notice_new_paragraph)
+      respond_to_action(:focus_on_paragraph,
+                        by_sending_cluster(:paragraph_text, "para\n\npara\n\npara"))
 
-    # assert_test_receives(2)
-    # ActivityLogger.get_log(a.p_logger)
+      [:paragraph_text          |> C.perception_edge,
+       :paragraph_structure     |> C.summarizer(&ParagraphGaps.summarize/1),
+       :gap_count               |> C.summarizer(&ParagraphGaps.gap_count/1),
+       :is_big_edit?            |> C.gate(& &1 >= 2),
+       :ignore_same_edit_status |> C.forward_unique,
+       :wait_for_edit_to_stop   |> C.delay(Duration.seconds(0.2)),
+       # :big_edit_wait |> wait_for_quiet(seconds(2))
+       # :mark_paragraph_with_big_edit |> action_edge
+       forward_to_test()] |> trace
+    end
+
+    Process.sleep(200)
+    assert_test_receives(2)
   end
 end
