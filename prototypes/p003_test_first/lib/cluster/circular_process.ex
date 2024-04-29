@@ -1,6 +1,6 @@
 alias AppAnimal.{Cluster,System}
 
-defmodule Cluster.Process do
+defmodule Cluster.CircularProcess do
   use AppAnimal
   use AppAnimal.GenServer
   alias Cluster.Calc

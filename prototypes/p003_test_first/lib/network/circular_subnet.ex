@@ -152,7 +152,7 @@ defmodule Network.CircularSubnet do
             bimap
           else
             cluster = Map.get(s_state.name_to_cluster, name)
-            {:ok, pid} = GenServer.start(Cluster.Process, cluster)
+            {:ok, pid} = GenServer.start(Cluster.CircularProcess, cluster)
             Process.monitor(pid)
             BiMap.put(bimap, name, pid)
           end
