@@ -1,25 +1,30 @@
-AppAnimal.Cluster
+alias AppAnimal.{Cluster,Scenario}
 
 defmodule Cluster.ForwardUniqueTest do
-  use ClusterCase, async: true
+  use Scenario.Case, async: true
+
+  def current_age(name), do: Animal.peek_at(animal(), :current_age, of: name)
+  def pulse(name, data), do: Animal.send_test_pulse(animal(), to: name, carrying: data)
 
   describe "forward_unique" do
     test "only unique values pass through" do
-      aa = enliven([forward_unique(:first), to_test()])
 
-      send_test_pulse(aa, to: :first, carrying: 1)
+      configuration do: trace([C.forward_unique(:first),
+                               forward_to_test()])
+
+      pulse(:first, 1)
       assert_test_receives(1)
 
       # Already saw this one, so no pulse is sent
-      send_test_pulse(aa, to: :first, carrying: 1)
+      pulse(:first, 1)
       refute_receive(_)
 
       # But a new value is sent on
-      send_test_pulse(aa, to: :first, carrying: 2)
+      pulse(:first, 2)
       assert_test_receives(2)
 
       # And is remembered to avoid future duplicates
-      send_test_pulse(aa, to: :first, carrying: 2)
+      pulse(:first, 2)
       refute_receive(_)
     end
 
@@ -28,34 +33,37 @@ defmodule Cluster.ForwardUniqueTest do
       alias Cluster.Throb
 
       throb = Throb.counting_down_from(2, on_pulse: &Throb.pulse_increases_lifespan/2)
-      first = forward_unique(:first, throb: throb)
+      first = C.forward_unique(:first, throb: throb)
 
-      aa = enliven([first, to_test()], throb_interval: Duration.foreverish)
+      animal =
+        configuration throb_interval: Duration.foreverish do
+          trace([first, forward_to_test()])
+        end
 
       # Start at maximum
-      send_test_pulse(aa, to: :first, carrying: "data")
+      pulse(:first, "data")
       assert_test_receives("data")
 
       # As usual, a repetition is not forwarded
-      send_test_pulse(aa, to: :first, carrying: "data")
+      pulse(:first, "data")
       refute_receive("data")
 
-      assert peek_at(aa, :current_age, of: :first) == 2
+      assert current_age(:first) == 2
 
       # a normal, decrementing throb
-      throb_all_active(aa)
-      assert peek_at(aa, :current_age, of: :first) == 1
+      Animal.throb_all_active(animal)
+      assert current_age(:first) == 1
 
       # decrement to zero - should cause exit
-      throb_all_active(aa)
-      throb_all_active(aa)
+      Animal.throb_all_active(animal)
+      Animal.throb_all_active(animal)
 
       Process.sleep(10)   # Alas, need to wait for process death to be found.
 
       # A test pulse recreates the process
-      send_test_pulse(aa, to: :first, carrying: "data")
+      pulse(:first, "data")
       assert_test_receives("data")
-      assert peek_at(aa, :current_age, of: :first) == 2
+      assert current_age(:first) == 2
     end
   end
 end

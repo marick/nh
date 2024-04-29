@@ -9,12 +9,13 @@ defmodule Scenario.Configuration do
   import Scenario.ProcessKludgery
 
   defmacro configuration(opts \\ [], do: body) do
-    [terminal_log?] = Opts.parse(opts, [terminal_log: false])
+    [terminal_log?] =
+      Opts.parse(opts, [terminal_log: false], extra_keys: :allowed)
     quote do
       init_network_builder compatibly_start_link(NB, :ok)
       init_affordance_thunks()
       unquote(body)
-      animal = AppAnimal.from_network(network_builder())
+      animal = AppAnimal.from_network(network_builder(), unquote(opts))
       if unquote(terminal_log?),
          do: System.ActivityLogger.spill_log_to_terminal(animal.p_logger)
       for thunk <- affordance_thunks() do

@@ -12,6 +12,7 @@ defmodule AppAnimal.Case do
       import AppAnimal.ActivityLogAssertions
       alias AppAnimal.Duration
       alias AppAnimal.ClusterBuilders, as: C
+      alias Cluster.Identification
     end
   end
 end

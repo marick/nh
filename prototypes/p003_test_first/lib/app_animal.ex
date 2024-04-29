@@ -95,6 +95,7 @@ defmodule AppAnimal do
       import AppAnimal.Extras.Kernel
       alias AppAnimal.Extras.DepthAgnostic, as: A
       alias AppAnimal.Cluster
+      alias Cluster.Identification
       import Lens.Macros
       alias AppAnimal.Duration
       alias AppAnimal.Extras.Opts

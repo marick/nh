@@ -59,4 +59,56 @@ defmodule ClusterBuilders do
     linear(name, & System.Action.new(name, &1),
            label: :action_edge)
   end
+
+  def summarizer(name, calc) do
+    linear(name, calc, label: :summarizer)
+  end
+
+
+  def gate(name, predicate) do
+    f = fn pulse_data ->
+      if predicate.(pulse_data),
+         do: pulse_data,
+         else: :no_result
+    end
+
+    linear(name, f, label: :gate)
+  end
+
+  def forward_unique(name, opts \\ []) do
+    alias Cluster.Throb
+
+    effectively_a_uuid = :erlang.make_ref()
+
+    throb = Throb.counting_down_from(Duration.frequent_glance,
+                                     on_pulse: &Throb.pulse_increases_lifespan/2)
+
+    updated_opts =
+      opts
+      |> Opts.add_if_missing(initial_value: effectively_a_uuid,
+                             throb: throb)
+      |> Opts.add_missing!(label: :forward_unique)
+
+    calc = fn pulse_data, previously ->
+      if pulse_data == previously,
+         do: :no_result,
+         else: pulse_and_save(pulse_data)
+    end
+    circular(name, calc, updated_opts)
+  end
+
+  def delay(name, duration) do
+    throb = Throb.counting_up_to(duration,
+                                 on_pulse: &Throb.pulse_zeroes_lifespan/2,
+                                 before_stopping: &Throb.pulse_current_value/2)
+
+    f_stash_pulse_data = fn pulse_data, _previously ->
+      {:no_result, pulse_data}
+    end
+
+    circular(name, f_stash_pulse_data, throb: throb)
+  end
+
+
+
 end

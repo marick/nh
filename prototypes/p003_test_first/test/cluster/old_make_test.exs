@@ -33,27 +33,4 @@ defmodule Cluster.MakeTest do
     assert UT.no_pulse("next state") ==            {:no_result,                      "next state"}
     assert UT.pulse_and_save("both") ==            {:useful_result,    "both",       "both"}
   end
-
-  describe "specializations" do
-    test "summarizer" do
-      cluster = UT.summarizer(:example, &String.length/1)
-
-      assert_fields(cluster, name: :example,
-                             label: :summarizer,
-                             shape: Cluster.Shape.Linear.new)
-
-      assert cluster.calc.("long") == 4
-    end
-
-    test "gate" do
-      cluster = UT.gate(:example, & &1 > 0)
-
-      assert_fields(cluster, name: :example,
-                             label: :gate,
-                             shape: Cluster.Shape.Linear.new)
-
-      assert cluster.calc.(0) == :no_result
-      assert cluster.calc.(1) == 1
-    end
-  end
 end
