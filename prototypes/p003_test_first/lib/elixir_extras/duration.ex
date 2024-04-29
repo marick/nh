@@ -11,5 +11,5 @@ defmodule Duration do
 
   def frequent_glance, do: seconds(2)
 
-  def seconds(n), do: trunc(n * 1000)
+  def seconds(n), do: trunc(n * 1000 / quantum())
 end

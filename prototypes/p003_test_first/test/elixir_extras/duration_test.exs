@@ -5,11 +5,12 @@ defmodule AppAnimal.DurationTest do
   alias Duration, as: UT
 
   describe "conversions" do
-    test "seconds into milliseconds" do
-      assert UT.seconds(1) == 1000
-      assert UT.seconds(0.1) == 100
-
+    test "seconds into quanta" do
+      assert UT.quantum() == 100
       assert UT.quanta(10) == 1000
+
+      assert UT.seconds(1) == 10
+      assert UT.seconds(0.1) == 1
     end
   end
 
