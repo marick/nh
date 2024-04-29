@@ -144,7 +144,5 @@ defmodule Calc do
         raw_data           ->  {:useful_result, Pulse.new(raw_data),  previous_state}
       end
     end
-
   end
-
 end

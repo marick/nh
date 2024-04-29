@@ -20,7 +20,6 @@ defmodule NetworkBuilder do
       trace(pid, [branch_point | trace])
     end
 
-
     def unordered(pid, list) when is_list(list) do
       GenServer.call(pid, {:apply, :unordered, [list]})
       pid

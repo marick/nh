@@ -108,7 +108,4 @@ defmodule ClusterBuilders do
 
     circular(name, f_stash_pulse_data, throb: throb)
   end
-
-
-
 end

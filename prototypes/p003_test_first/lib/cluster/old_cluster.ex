@@ -53,14 +53,14 @@ defmodule Cluster do
     field :downstream, [atom], default: []
   end
 
-  deflens never_throbs(), do: Lens.filter(& can_throb?(&1) == false)
+  # deflens never_throbs(), do: Lens.filter(& can_throb?(&1) == false)
 
-  def can_throb?(s_cluster) do
-    case s_cluster.shape do
-      %Shape.Circular{} -> true
-      %Shape.Linear{} -> false
-    end
-  end
+  # def can_throb?(s_cluster) do
+  #   case s_cluster.shape do
+  #     %Shape.Circular{} -> true
+  #     %Shape.Linear{} -> false
+  #   end
+  # end
 
   def start_throbbing(s_cluster) do
     starting_state = Cluster.Circular.new(s_cluster)

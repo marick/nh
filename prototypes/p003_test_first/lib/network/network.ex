@@ -21,43 +21,25 @@ defmodule Network do
   use TypedStruct
   alias System.Pulse
 
-  typedstruct enforce: true do
+  typedstruct do
     plugin TypedStructLens
 
     field :name_to_id, %{atom => Cluster.Identification.t}, default: %{}
-    field :name_to_downstreams, %{atom => MapSet.t(atom)}
+    field :name_to_downstreams, %{atom => MapSet.t(atom)},  default: %{}
 
-    field :circular_names, MapSet.t(atom)
-    field :p_circular_clusters, pid
+    field :circular_names, MapSet.t(atom),                  default: MapSet.new
+    field :linear_names, MapSet.t(atom),                    default: MapSet.new
 
-    field :linear_names, MapSet.t(atom)
-    field :linear_clusters, Network.LinearSubnet.t
+    field :p_circular_clusters, pid,                 enforce: true
+    field :linear_clusters, Network.LinearSubnet.t,  enforce: true
   end
 
-  def empty(), do: new(%{})
-
-  def new(%{} = cluster_map) do
-    clusters = Map.values(cluster_map)
-    {circular_clusters, linear_clusters}  =
-      Enum.split_with(clusters, &Cluster.can_throb?/1)
-
+  def empty() do
     {:ok, p_circular_clusters} =
-      Network.CircularSubnet.start_link(circular_clusters)
+      Network.CircularSubnet.start_link([])
 
-    name_to_id =
-      for c <- clusters, into: %{}, do: {c.name, Cluster.Identification.new(c)}
-
-    name_to_downstreams =
-      for c <- clusters, into: %{},
-                         do: {c.name, MapSet.new(c.downstream)}
-
-    %__MODULE__{p_circular_clusters: p_circular_clusters,
-                name_to_id: name_to_id,
-                name_to_downstreams: name_to_downstreams,
-                circular_names: MapSet.new(for c <- circular_clusters, do: c.name),
-                linear_names: MapSet.new(for c <- linear_clusters, do: c.name),
-                linear_clusters: Network.LinearSubnet.new(linear_clusters)
-    }
+    struct!(__MODULE__, p_circular_clusters: p_circular_clusters,
+                        linear_clusters: Network.LinearSubnet.new([]))
   end
 
   def full_identification(network, name), do: Map.fetch!(network.name_to_id, name)
