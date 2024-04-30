@@ -35,12 +35,20 @@ defmodule Scenario.Configuration do
     NB.cluster(network_builder(), cluster)
   end
 
+  def unordered(list) do
+    NB.unordered(network_builder(), list)
+  end
+
   def branch(at: name, with: list) do
     NB.branch(network_builder(), at: name, with: list)
   end
 
   def trace(list) do
     NB.trace(network_builder(), list)
+  end
+
+  def fan_out(opts) do
+    dbg opts
   end
 
   # Scripting AffordanceLand behavior
