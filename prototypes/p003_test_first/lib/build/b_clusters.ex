@@ -3,6 +3,8 @@ alias AppAnimal.{ClusterBuilders,System}
 defmodule ClusterBuilders do
   use AppAnimal
   alias Cluster.Throb
+  alias System.Pulse
+
 
   def no_pulse(next_state),          do: {:no_result, next_state}
   def pulse(pulse_data, next_state), do: {:useful_result, pulse_data, next_state}
@@ -111,5 +113,13 @@ defmodule ClusterBuilders do
     end
 
     circular(name, f_stash_pulse_data, throb: throb, label: :delay)
+  end
+
+  def focus_shift(name, _opts) do
+    on_default_pulse = fn _ ->
+      Pulse.new(:suppress, "no data")
+    end
+    circular(name, on_default_pulse,
+                   label: :focus_shift)
   end
 end
