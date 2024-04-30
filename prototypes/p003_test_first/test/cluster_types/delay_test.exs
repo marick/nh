@@ -3,6 +3,16 @@ alias AppAnimal.{Cluster,Scenario}
 defmodule Cluster.DelayTest do
   use Scenario.Case, async: true
 
+  test "static parts" do
+    C.delay(:first, 2)
+    |> assert_fields(router: :must_be_supplied_later,
+                     id: Identification.new(:first, :delay),
+                     name: :first)
+    |> Map.get(:throb)
+    |> assert_fields(max_age: 2, current_age: 0)
+  end
+
+
   describe "delay" do
     setup do
       animal =

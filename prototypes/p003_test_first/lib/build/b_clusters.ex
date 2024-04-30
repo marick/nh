@@ -12,11 +12,15 @@ defmodule ClusterBuilders do
     opts
     |> Opts.rename(:initial_value, to: :previously)
     |> Opts.add_missing!(name: name, calc: calc)
-    |> Opts.add_missing!(id: Cluster.Identification.new(name, :circular))
-    |> Opts.add_if_missing(label: :circular,
-                           throb: Throb.default,
+
+    |> Opts.add_if_missing(label: :circular)
+    |> Opts.create(:id, if_present: :label,
+                        with: & Cluster.Identification.new(name, &1))
+
+    |> Opts.add_if_missing(throb: Throb.default,
                            previously: %{})
     |> Opts.add_missing!(router: :must_be_supplied_later)
+
     |> then(& struct(Cluster.Circular, &1))
 
   end
@@ -106,6 +110,6 @@ defmodule ClusterBuilders do
       {:no_result, pulse_data}
     end
 
-    circular(name, f_stash_pulse_data, throb: throb)
+    circular(name, f_stash_pulse_data, throb: throb, label: :delay)
   end
 end

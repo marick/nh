@@ -6,6 +6,14 @@ defmodule Cluster.ForwardUniqueTest do
   def current_age(name), do: Animal.peek_at(animal(), :current_age, of: name)
   def pulse(name, data), do: Animal.send_test_pulse(animal(), to: name, carrying: data)
 
+
+  test "static parts" do
+    C.forward_unique(:first)
+    |> assert_fields(router: :must_be_supplied_later,
+                     id: Identification.new(:first, :forward_unique),
+                     name: :first)
+  end
+
   describe "forward_unique" do
     test "only unique values pass through" do
 
