@@ -1,9 +1,13 @@
 alias AppAnimal.{Cluster,System}
+alias Cluster.CircularProcess
 
-defmodule Cluster.CircularProcess do
+defmodule CircularProcess do
   use AppAnimal
   use AppAnimal.GenServer
   alias Cluster.Calc
+
+  def start_link(cluster), do: GenServer.start_link(CircularProcess, cluster)
+
 
   @impl GenServer
   def init(%Cluster.Circular{} = starting_state) do
