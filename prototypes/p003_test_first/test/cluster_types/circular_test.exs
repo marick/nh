@@ -1,8 +1,7 @@
-alias AppAnimal.{ClusterBuilders,Cluster}
+alias AppAnimal.ClusterBuilders
 
 defmodule ClusterBuilders.CircularTest do
-  use ExUnit.Case, async: true
-  use FlowAssertions
+  use AppAnimal.Case, async: true
   alias ClusterBuilders, as: UT
 
   describe "variants of circular creation" do
@@ -10,7 +9,7 @@ defmodule ClusterBuilders.CircularTest do
     test "only a name is specified" do
       UT.circular(:name)
       |> assert_fields(name: :name,
-                       id: Cluster.Identification.new(:name, :circular),
+                       id: Identification.new(:name, :circular),
                        throb: Cluster.Throb.default,
                        calc: &Function.identity/1,
                        previously: %{})
@@ -19,7 +18,7 @@ defmodule ClusterBuilders.CircularTest do
     test "name and options" do
       UT.circular(:name, previously: 3)
       |> assert_fields(name: :name,
-                       id: Cluster.Identification.new(:name, :circular),
+                       id: Identification.new(:name, :circular),
                        throb: Cluster.Throb.default,
                        calc: &Function.identity/1,
 
@@ -30,7 +29,7 @@ defmodule ClusterBuilders.CircularTest do
       f = & &1+1
       UT.circular(:rounder, f)
       |> assert_fields(name: :rounder,
-                       id: Cluster.Identification.new(:rounder, :circular),
+                       id: Identification.new(:rounder, :circular),
                        throb: Cluster.Throb.default,
                        calc: f,
                        previously: %{})
@@ -43,7 +42,7 @@ defmodule ClusterBuilders.CircularTest do
       throb = Cluster.Throb.counting_down_from(Duration.quanta(3))
       UT.circular(:rounder, f, throb: throb, previously: 5)
       |> assert_fields(name: :rounder,
-                       id: Cluster.Identification.new(:rounder, :circular),
+                       id: Identification.new(:rounder, :circular),
                        throb: throb,
                        calc: f,
                        previously: 5)
@@ -53,7 +52,7 @@ defmodule ClusterBuilders.CircularTest do
       initial_value = %{pids: [], count: 5}
       UT.circular(:first, initial_value: initial_value)
       |> assert_fields(name: :first,
-                       id: Cluster.Identification.new(:first, :circular),
+                       id: Identification.new(:first, :circular),
                        calc: &Function.identity/1,
                        previously: initial_value)
     end
