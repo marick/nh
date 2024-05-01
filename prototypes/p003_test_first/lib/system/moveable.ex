@@ -119,3 +119,22 @@ defimpl Moveable, for: Delay do
     Network.Timer.cast(pid, delay.pulse, after: delay.delay)
   end
 end
+
+
+####
+
+defmodule Moveable.Collection do
+  use TypedStruct
+
+  typedstruct enforce: true do
+    field :members, MapSet.t(Moveable.t)
+  end
+
+  def new(collection), do: %__MODULE__{members: collection}
+end
+
+defimpl Moveable, for: Moveable.Collection do
+  def cast(collection, cluster) do
+    for moveable <- collection.members, do: Moveable.cast(moveable, cluster)
+  end
+end

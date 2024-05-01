@@ -11,7 +11,6 @@ defmodule System.MoveableTest do
     def as_cast_delivers(data), do: {:"$gen_cast", data}
 
     test "sending a pulse FROM" do
-
       clusterish = Clusterish.Minimal.new(:some_cluster_name,
                                           Router.new(%{Pulse =>  self()}))
       pulse = Pulse.new("data")
@@ -47,6 +46,26 @@ defmodule System.MoveableTest do
       actual = assert_receive(_)
       expected = as_cast_delivers(Pulse.new("some data"))
       assert actual == expected
+    end
+
+    @tag :test_uses_sleep
+    test "sending a collection of moveables" do
+      p_timer = start_link_supervised!(Network.Timer)
+      clusterish = Clusterish.Minimal.new(:some_cluster_name,
+                                          Router.new(%{Pulse => self(),
+                                                       Delay => p_timer}))
+      pulse = Pulse.new("data")
+      delay_pulse = Pulse.new("delay data")
+      delay = Delay.new(Duration.quantum, delay_pulse)
+      collection = UT.Collection.new([pulse, delay])
+
+      UT.cast(collection, clusterish)
+
+      assert_receive({:"$gen_cast", {:distribute_pulse, carrying: ^pulse, from: :some_cluster_name}})
+
+      Process.sleep(10)
+      {:"$gen_cast", received_delay_pulse} = assert_receive(_)
+      assert received_delay_pulse == delay_pulse
     end
   end
 end
