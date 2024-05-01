@@ -1,11 +1,11 @@
-alias AppAnimal.{System,Network}
+alias AppAnimal.{System,Network,Clusterish}
 alias System.{Pulse, Action, Affordance, Delay}
-alias System.Moveable
+alias System.{Moveable}
 
 
 defprotocol Moveable do
-  @spec cast(t, System.Router.t, atom) :: none
-  def cast(moveable, router, name)
+  @spec cast(t, Clusterish.t) :: none
+  def cast(moveable, cluster)
 end
 
 
@@ -42,9 +42,12 @@ defmodule Pulse do
 end
 
 defimpl Moveable, for: Pulse do
-  def cast(pulse, router, source) do
-    pid = System.Router.pid_for(router, pulse)
-    System.Switchboard.cast__distribute_pulse(pid, carrying: pulse, from: source)
+  def cast(pulse, cluster) do
+    pid = Clusterish.pid_for(cluster, pulse)
+
+    System.Switchboard.cast__distribute_pulse(pid,
+                                              carrying: pulse,
+                                              from: Clusterish.name(cluster))
   end
 end
 
@@ -70,8 +73,8 @@ defmodule Action do
 end
 
 defimpl Moveable, for: Action do
-  def cast(action, router, _source) do
-    pid = System.Router.pid_for(router, action)
+  def cast(action, cluster) do
+    pid = Clusterish.pid_for(cluster, action)
     GenServer.cast(pid, {:take_action, action})
   end
 end
@@ -111,8 +114,8 @@ defmodule Delay do
 end
 
 defimpl Moveable, for: Delay do
-  def cast(delay, router, _source) do
-    pid = System.Router.pid_for(router, delay)
+  def cast(delay, cluster) do
+    pid = Clusterish.pid_for(cluster, delay)
     Network.Timer.cast(pid, delay.pulse, after: delay.delay)
   end
 end

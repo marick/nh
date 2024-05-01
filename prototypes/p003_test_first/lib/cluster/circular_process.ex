@@ -20,7 +20,7 @@ defmodule CircularProcess do
                       with_state: s_process_state.previously)
 
     Calc.maybe_pulse(result, fn moveable ->
-      System.Moveable.cast(moveable, s_process_state.router, s_process_state.name)
+      System.Moveable.cast(moveable, s_process_state)
     end)
 
     s_process_state

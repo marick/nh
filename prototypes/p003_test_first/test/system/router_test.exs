@@ -1,4 +1,4 @@
-AppAnimal.System
+alias AppAnimal.System
 
 defmodule System.RouterTest do
   use AppAnimal.Case, async: true
