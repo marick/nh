@@ -8,6 +8,9 @@ defprotocol Moveable do
   def cast(moveable, router, name)
 end
 
+
+#######
+
 defmodule Pulse do
   use TypedStruct
 
@@ -45,6 +48,8 @@ defimpl Moveable, for: Pulse do
   end
 end
 
+#######
+
 
 defmodule Action do
   @moduledoc """
@@ -71,6 +76,8 @@ defimpl Moveable, for: Action do
   end
 end
 
+#######
+
 defmodule Affordance do
   @moduledoc """
   Describes how an action turns into a pulse sent to a PerceptionEdge.
@@ -88,6 +95,7 @@ defmodule Affordance do
       do: new(downstream, Pulse.new(data))
 end
 
+#######
 
 defmodule Delay do
   use TypedStruct
