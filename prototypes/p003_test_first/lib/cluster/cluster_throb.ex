@@ -120,6 +120,6 @@ defmodule Throb do
   end
 
   def pulse_current_value(s_process_state, pulse_value) do
-    System.Router.cast_via(s_process_state.router, Pulse.new(pulse_value), from: s_process_state.name)
+    System.Moveable.cast(Pulse.new(pulse_value), s_process_state.router, s_process_state.name)
   end
 end

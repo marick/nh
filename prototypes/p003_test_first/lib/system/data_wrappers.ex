@@ -1,5 +1,12 @@
-alias AppAnimal.System
+alias AppAnimal.{System,Network}
 alias System.{Pulse, Action, Affordance, Delay}
+alias System.Moveable
+
+
+defprotocol Moveable do
+  @spec cast(t, System.Router.t, atom) :: none
+  def cast(moveable, router, name)
+end
 
 defmodule Pulse do
   use TypedStruct
@@ -31,6 +38,13 @@ defmodule Pulse do
   end
 end
 
+defimpl Moveable, for: Pulse do
+  def cast(pulse, router, source) do
+    pid = System.Router.pid_for(router, pulse)
+    System.Switchboard.cast__distribute_pulse(pid, carrying: pulse, from: source)
+  end
+end
+
 
 defmodule Action do
   @moduledoc """
@@ -50,6 +64,12 @@ defmodule Action do
   def new(type, action_data), do: %__MODULE__{type: type, data: action_data}
 end
 
+defimpl Moveable, for: Action do
+  def cast(action, router, _source) do
+    pid = System.Router.pid_for(router, action)
+    GenServer.cast(pid, {:take_action, action})
+  end
+end
 
 defmodule Affordance do
   @moduledoc """
@@ -68,6 +88,7 @@ defmodule Affordance do
       do: new(downstream, Pulse.new(data))
 end
 
+
 defmodule Delay do
   use TypedStruct
 
@@ -79,4 +100,11 @@ defmodule Delay do
   def new(delay, %Pulse{} = pulse),
       do: %__MODULE__{delay: delay, pulse: pulse}
   def new(delay, pulse_data), do: new(delay, Pulse.new(pulse_data))
+end
+
+defimpl Moveable, for: Delay do
+  def cast(delay, router, _source) do
+    pid = System.Router.pid_for(router, delay)
+    Network.Timer.cast(pid, delay.pulse, after: delay.delay)
+  end
 end
