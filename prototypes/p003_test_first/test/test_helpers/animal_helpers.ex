@@ -4,7 +4,7 @@ defmodule AppAnimal.TestHelpers.Animal do
   """
   use AppAnimal
   alias AppAnimal.System
-  alias System.{Switchboard,AffordanceLand,Pulse,CannedResponse}
+  alias System.{Switchboard,AffordanceLand,Pulse,Affordance}
 
   # How the test starts things off
 
@@ -57,12 +57,12 @@ defmodule AppAnimal.TestHelpers.Animal do
     respond_to_action(pids.p_affordances, action_name, canned_response)
   end
 
-  def respond_to_action(p_affordances, action_name, %CannedResponse{} = canned_response) do
-    GenServer.cast(p_affordances, {:respond_to, action_name, [canned_response]})
+  def respond_to_action(p_affordances, action_name, %Affordance{} = affordance) do
+    GenServer.cast(p_affordances, {:respond_to, action_name, [affordance]})
     p_affordances
   end
 
-  def by_sending_cluster(downstream, data), do: CannedResponse.new(downstream, data)
+  def by_sending_cluster(downstream, data), do: Affordance.new(downstream, data)
 
   @doc """
   Cast a message representing an action to AffordanceLand from a test.

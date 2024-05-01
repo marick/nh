@@ -17,13 +17,13 @@ defmodule System.AffordanceLand do
   use AppAnimal
   use AppAnimal.GenServer
   use TypedStruct
-  alias System.{ActivityLogger,Switchboard,Pulse,CannedResponse,Action}
+  alias System.{ActivityLogger,Switchboard,Pulse,Affordance,Action}
 
   typedstruct do
     field :p_switchboard, pid
     field :p_logger, pid
     field :programmed_responses, list, default: []
-    field :canned_responses, list, default: []
+    field :affordances, list, default: []
   end
 
   runs_in_sender do
@@ -56,27 +56,27 @@ defmodule System.AffordanceLand do
       continue(s_affordances)
     end
 
-    def handle_cast({:respond_to, action_name, canned_responses},
+    def handle_cast({:respond_to, action_name, affordances},
                     s_affordances) do
       s_affordances
-      |> Map.update!(:canned_responses, & &1 ++ [{action_name, canned_responses}])
+      |> Map.update!(:affordances, & &1 ++ [{action_name, affordances}])
       |> continue()
     end
 
     def handle_cast({:take_action, %Action{} = action}, s_affordances) do
-      {responses, remaining_canned_responses} =
-        Keyword.pop_first(s_affordances.canned_responses, action.type)
+      {responses, remaining_affordances} =
+        Keyword.pop_first(s_affordances.affordances, action.type)
 
       if responses == nil,
-         do: IO.puts("==== SAY, there is no canned response for #{action.type}. Test error.")
+         do: IO.puts("==== SAY, there is no affordance for #{action.type}. Test error.")
 
       ActivityLogger.log_action_received(s_affordances.p_logger, action.type, action.data)
-      for %CannedResponse{} = response <- responses do
+      for %Affordance{} = response <- responses do
         handle_cast({:produce_this_affordance, response.downstream, response.pulse},
                     s_affordances)
       end
 
-      %{s_affordances | canned_responses: remaining_canned_responses}
+      %{s_affordances | affordances: remaining_affordances}
       |> continue()
     end
 

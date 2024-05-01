@@ -5,7 +5,7 @@ defmodule Scenario.Configuration do
   alias AppAnimal.NetworkBuilder, as: NB
   use Extras.TestAwareProcessStarter
   alias TestHelpers.Animal
-  alias System.{CannedResponse}
+  alias System.Affordance
   import Scenario.ProcessKludgery
 
   defmacro configuration(opts \\ [], do: body) do
@@ -58,5 +58,5 @@ defmodule Scenario.Configuration do
     append_affordance_thunk(f)
   end
 
-  def by_sending_cluster(downstream, data), do: CannedResponse.new(downstream, data)
+  def by_sending_cluster(downstream, data), do: Affordance.new(downstream, data)
 end

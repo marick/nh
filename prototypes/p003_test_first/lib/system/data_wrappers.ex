@@ -1,5 +1,5 @@
 alias AppAnimal.System
-alias System.{Pulse, Action, CannedResponse, Delay}
+alias System.{Pulse, Action, Affordance, Delay}
 
 defmodule Pulse do
   use TypedStruct
@@ -51,7 +51,7 @@ defmodule Action do
 end
 
 
-defmodule CannedResponse do
+defmodule Affordance do
   @moduledoc """
   Describes how an action turns into a pulse sent to a PerceptionEdge.
   """
