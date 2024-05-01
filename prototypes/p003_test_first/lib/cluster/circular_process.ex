@@ -19,7 +19,9 @@ defmodule CircularProcess do
                       on: pulse,
                       with_state: s_process_state.previously)
 
-    Calc.maybe_pulse(result, & Cluster.start_pulse_on_its_way(s_process_state, &1))
+    Calc.maybe_pulse(result, fn data_wrapper ->
+      System.Router.cast_via(s_process_state.router, data_wrapper, from: s_process_state.name)
+    end)
 
     s_process_state
     |> A.put(:previously, Calc.next_state(result))

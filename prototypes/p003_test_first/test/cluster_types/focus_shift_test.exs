@@ -29,6 +29,7 @@ defmodule ClusterBuilders.FocusShiftTest do
     distribute_what_pulse(cast)
   end
 
+  @tag :skip
   test "suppresses downstream circular clusters" do
     router = System.Router.new(%{Pulse => self()})
     s_cluster = focus_shift() |> Map.put(:router, router)
@@ -38,5 +39,6 @@ defmodule ClusterBuilders.FocusShiftTest do
 
     assert pulse_to_switchboard().type == :suppress
 
+    assert "timer request is received" == "unimplemented: need composite wrapper"
   end
 end

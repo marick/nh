@@ -33,7 +33,9 @@ defmodule Network.LinearSubnet do
 
     Task.start(fn ->
       Calc.run(s_cluster.calc, on: pulse)
-      |> Calc.maybe_pulse(& Cluster.start_pulse_on_its_way(s_cluster, &1))
+      |> Calc.maybe_pulse(fn data_wrapper ->
+        System.Router.cast_via(s_cluster.router, data_wrapper, from: s_cluster.name)
+      end)
       :there_is_no_return_value
     end)
   end

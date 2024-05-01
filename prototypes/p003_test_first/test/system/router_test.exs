@@ -19,17 +19,6 @@ defmodule System.RouterTest do
 
     def as_cast_delivers(data), do: {:"$gen_cast", data}
 
-    test "sending a pulse TO" do
-      router = UT.new(%{Pulse =>  self()})
-
-      pulse = Pulse.new("data")
-      UT.cast_via(router, pulse, to: [:some_cluster_name])
-
-      actual = assert_receive(_)
-      expected = as_cast_delivers({:distribute_pulse, carrying: pulse, to: [:some_cluster_name]})
-      assert actual == expected
-    end
-
     test "sending a pulse FROM" do
       router = UT.new(%{Pulse =>  self()})
 
@@ -45,7 +34,7 @@ defmodule System.RouterTest do
       router = UT.new(%{Action =>  self()})
 
       action = Action.new(:action_name)
-      UT.cast_via(router, action)
+      UT.cast_via(router, action, from: :some_name)
 
       actual = assert_receive(_)
       expected = as_cast_delivers({:take_action, action})
@@ -58,7 +47,7 @@ defmodule System.RouterTest do
       router = UT.new(%{Delay => p_timer})
 
       action = Delay.new(3, "some data")
-      UT.cast_via(router, action)
+      UT.cast_via(router, action, from: :some_name)
 
       actual = assert_receive(_)
       expected = as_cast_delivers(Pulse.new("some data"))

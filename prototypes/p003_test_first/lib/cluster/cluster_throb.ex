@@ -120,6 +120,6 @@ defmodule Throb do
   end
 
   def pulse_current_value(s_process_state, pulse_value) do
-    Cluster.start_pulse_on_its_way(s_process_state, Pulse.new(pulse_value))
+    System.Router.cast_via(s_process_state.router, Pulse.new(pulse_value), from: s_process_state.name)
   end
 end
