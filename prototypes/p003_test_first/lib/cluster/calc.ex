@@ -65,7 +65,7 @@ defmodule Calc do
 
   """
   use AppAnimal
-  alias System.{Pulse,Action}
+  alias System.Pulse
 
   def run(calc, on: %Pulse{} = pulse, with_state: previously) when is_function(calc, 1) do
     pulse_or_pulse_data(pulse)
@@ -109,39 +109,38 @@ defmodule Calc do
 
     def assemble_result(calc_result,                 :there_is_no_state) do
       case calc_result do
-        :no_result         -> {:no_result}
-        %Pulse{} = pulse   -> {:useful_result, pulse}
-        %Action{} = action -> {:useful_result, action}
-        raw_data           -> {:useful_result, Pulse.new(raw_data)}
+        :no_result -> {:no_result}
+        untagged   -> {:useful_result, ensure_moveable(untagged)}
       end
     end
 
     def assemble_result(calc_result, previous_state, :state_does_not_change) do
       case calc_result do
-        :no_result         -> {:no_result,                            previous_state}
-        %Pulse{} = pulse   -> {:useful_result,  pulse,                previous_state}
-        %Action{} = action -> {:useful_result,  action,               previous_state}
-        raw_data           -> {:useful_result,  Pulse.new(raw_data),  previous_state}
+        :no_result -> {:no_result,                                previous_state}
+        untagged   -> {:useful_result, ensure_moveable(untagged), previous_state}
       end
     end
 
     def assemble_result(calc_result, previous_state, :state_may_change) do
       case calc_result do
-         :no_result              ->  {:no_result, previous_state}
-        {:no_result, next_state} ->  {:no_result, next_state}
+         :no_result              -> {:no_result, previous_state}
+        {:no_result, next_state} -> {:no_result, next_state}
 
-        {:useful_result,            %Pulse{} = pulse, next_state} ->
-        {:useful_result,                       pulse, next_state}
 
-        {:useful_result,            %Action{} = action, next_state} ->
-        {:useful_result,                        action, next_state}
+        {:useful_result, tagged, next_state}
+                                 -> {:useful_result, ensure_moveable(tagged),   next_state}
+        untagged
+                                 -> {:useful_result, ensure_moveable(untagged), previous_state}
+      end
+    end
+  end
 
-        {:useful_result,           raw_data,  next_state} ->
-        {:useful_result, Pulse.new(raw_data), next_state}
 
-        %Pulse{} = pulse   ->  {:useful_result, pulse,                previous_state}
-        %Action{} = action ->  {:useful_result, action,               previous_state}
-        raw_data           ->  {:useful_result, Pulse.new(raw_data),  previous_state}
+  private do
+    def ensure_moveable(data) do
+      case System.Moveable.impl_for(data) do
+        nil -> Pulse.new(data)
+        _ -> data
       end
     end
   end
