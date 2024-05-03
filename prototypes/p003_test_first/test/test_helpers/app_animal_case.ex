@@ -10,6 +10,7 @@ defmodule AppAnimal.Case do
       alias System.{Switchboard,AffordanceLand,ActivityLogger}
 
       import AppAnimal.ActivityLogAssertions
+      import AppAnimal.TestHelpers.MessageHelpers
       alias AppAnimal.Duration
       alias AppAnimal.ClusterBuilders, as: C
       alias Cluster.Identification

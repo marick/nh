@@ -4,13 +4,21 @@ defmodule Network.Timer do
   use AppAnimal
   use AppAnimal.GenServer
 
+  typedstruct module: ThrobInstructions, enforce: true do
+    field :interval, Integer
+    field :p_notify, pid
+  end
+
+  # It might be better to have separate processes for throbbing and one-shot timed pulses.
+
   runs_in_sender do
     def start_link(_) do
       GenServer.start_link(__MODULE__, :ok)
     end
 
-    def cast(self, payload, every: millis, to: destination_pid) do
-      GenServer.call(self, {:cast_every, millis, payload, destination_pid})
+    def begin_throbbing(self, every: millis, notify: p_notify) do
+      instructions = %ThrobInstructions{interval: millis, p_notify: p_notify}
+      GenServer.call(self, instructions)
     end
 
     def cast(self, payload, after: millis) do
@@ -25,8 +33,8 @@ defmodule Network.Timer do
     end
 
     @impl GenServer
-    def handle_call({:cast_every, millis, payload, p_destination}, _from, :ok) do
-      repeating(every: millis, sending: payload, to: p_destination)
+    def handle_call(%ThrobInstructions{} = instructions, _from, :ok) do
+      repeating(instructions)
       continue(:ok, returning: :ok)
     end
 
@@ -36,9 +44,9 @@ defmodule Network.Timer do
     end
 
     @impl GenServer
-    def handle_info([every: _millis, sending: payload, to: pid] = opts, :ok) do
-      GenServer.cast(pid, payload)
-      repeating(opts)
+    def handle_info(%ThrobInstructions{} = instructions, :ok) do
+      GenServer.cast(instructions.p_notify, :time_to_throb)
+      repeating(instructions)
       continue(:ok)
     end
 
@@ -48,8 +56,8 @@ defmodule Network.Timer do
     end
 
     private do
-      def repeating([every: millis, sending: _payload, to: _on_behalf_of] = opts) do
-        Process.send_after(self(), opts, millis)
+      def repeating(%ThrobInstructions{} = instructions) do
+        Process.send_after(self(), instructions, instructions.interval)
       end
 
       def once([after: millis, sending: payload, to: on_behalf_of]) do

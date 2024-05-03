@@ -38,9 +38,8 @@ defmodule AppAnimal do
     def finish_struct(s, network, opts) do
       GenServer.call(s.p_switchboard, accept_network: network)
       throb_interval = Keyword.get(opts, :throb_interval, Duration.quantum())
-      Network.Timer.cast(s.p_timer, :time_to_throb,
-                         every: throb_interval,
-                         to: network.p_circular_clusters)
+      Network.Timer.begin_throbbing(s.p_timer, every: throb_interval,
+                                               notify: network.p_circular_clusters)
 
       %{s | p_circular_clusters: network.p_circular_clusters}
     end

@@ -1,17 +1,17 @@
 alias AppAnimal.Network
 
 defmodule Network.TimerTest do
-  use ExUnit.Case, async: true
+  use AppAnimal.Case, async: true
   alias Network.Timer, as: UT
 
   test "repeating" do
     pid = start_link_supervised!(UT)
 
-    assert :ok == UT.cast(pid, "payload", every: 10, to: self())
+    assert :ok == UT.begin_throbbing(pid, every: 10, notify: self())
 
-    assert_receive({:"$gen_cast", "payload"})
-    assert_receive({:"$gen_cast", "payload"})
-    assert_receive({:"$gen_cast", "payload"})
+    assert_receive_cast(:time_to_throb)
+    assert_receive_cast(:time_to_throb)
+    assert_receive_cast(:time_to_throb)
   end
 
   test "one_shot" do
