@@ -3,6 +3,7 @@ alias AppAnimal.Network
 defmodule Network.TimerTest do
   use AppAnimal.Case, async: true
   alias Network.Timer, as: UT
+  alias System.Pulse
 
   test "repeating" do
     pid = start_link_supervised!(UT)
@@ -16,10 +17,13 @@ defmodule Network.TimerTest do
 
   test "one_shot" do
     pid = start_link_supervised!(UT)
+    pulse = Pulse.new("payload")
 
-    assert :ok == UT.cast(pid, "payload", after: 10)
+    assert :ok == UT.delayed(pid, pulse, after: 10, destination: :name,
+                                  via_switchboard: self())
 
-    assert_receive({:"$gen_cast", "payload"})
+    assert_receive(_) |> assert_distribute_to(pulse: pulse, to: [:name])
+
     refute_receive(_)
   end
 end

@@ -82,7 +82,6 @@ defmodule ActivityLogAssertionsTest do
   #               PulseSent.new(:c_label, :c_cluster, "c_data")]]
   #   end
 
-  #   @tag :skip
   #   test "elements can be skipped", %{actual: actual} do
   #     UT.assert_causal_chain(actual, [:a_cluster, :b_cluster])
   #     UT.assert_causal_chain(actual, [:a_cluster, [c_cluster: "c_data"]])
@@ -97,7 +96,6 @@ defmodule ActivityLogAssertionsTest do
   #       end)
   #   end
 
-  #   @tag :skip
   #   test "a pulse_data not found will produce an error", %{actual: actual} do
   #     assertion_fails(
   #       "There is no entry matching `:c_cluster`.",

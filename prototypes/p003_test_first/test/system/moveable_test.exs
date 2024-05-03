@@ -8,18 +8,15 @@ defmodule System.MoveableTest do
   alias AppAnimal.Clusterish
 
   describe "system router" do
-    def as_cast_delivers(data), do: {:"$gen_cast", data}
-
     test "sending a pulse FROM" do
       clusterish = Clusterish.Minimal.new(:some_cluster_name,
-                                          Router.new(%{Pulse =>  self()}))
+                                          Router.new(%{Pulse => self()}))
       pulse = Pulse.new("data")
 
       UT.cast(pulse, clusterish)
 
-      actual = assert_receive(_)
-      expected = as_cast_delivers({:distribute_pulse, carrying: pulse, from: :some_cluster_name})
-      assert actual == expected
+      assert_receive(_)
+      |> assert_distribute_from(pulse: pulse, from: :some_cluster_name)
     end
 
     test "sending an action" do
@@ -29,23 +26,23 @@ defmodule System.MoveableTest do
       action = Action.new(:action_name)
       UT.cast(action, clusterish)
 
-      actual = assert_receive(_)
-      expected = as_cast_delivers({:take_action, action})
-      assert actual == expected
+      assert_receive(_) |> cast_content
+      |> assert_equal({:take_action, action})
     end
 
     test "sending a delay" do
       p_timer = start_link_supervised!(Network.Timer)
+      self_acts_as_switchboard = self()
 
       clusterish = Clusterish.Minimal.new(:some_cluster_name,
-                                          Router.new(%{Delay => p_timer}))
+                                          Router.new(%{Delay => p_timer,
+                                          Pulse => self_acts_as_switchboard}))
 
-      action = Delay.new(3, "some data")
-      UT.cast(action, clusterish)
+      delay = Delay.new(3, "some data")
+      UT.cast(delay, clusterish)
 
-      actual = assert_receive(_)
-      expected = as_cast_delivers(Pulse.new("some data"))
-      assert actual == expected
+      assert_receive(_)
+      |> assert_distribute_to(pulse: Pulse.new("some data"), to: [:some_cluster_name])
     end
 
     @tag :test_uses_sleep
@@ -61,11 +58,12 @@ defmodule System.MoveableTest do
 
       UT.cast(collection, clusterish)
 
-      assert_receive({:"$gen_cast", {:distribute_pulse, carrying: ^pulse, from: :some_cluster_name}})
+      assert_receive(_)
+      |> assert_distribute_from(from: clusterish.name, pulse: pulse)
 
       Process.sleep(10)
-      {:"$gen_cast", received_delay_pulse} = assert_receive(_)
-      assert received_delay_pulse == delay_pulse
+      assert_receive(_)
+      |> assert_distribute_to(to: [clusterish.name], pulse: delay_pulse)
     end
   end
 end

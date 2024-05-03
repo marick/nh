@@ -116,7 +116,10 @@ end
 defimpl Moveable, for: Delay do
   def cast(delay, cluster) do
     pid = Clusterish.pid_for(cluster, delay)
-    Network.Timer.cast(pid, delay.pulse, after: delay.delay)
+    Network.Timer.delayed(pid, delay.pulse,
+                          after: delay.delay,
+                          destination: cluster.name,
+                          via_switchboard: Clusterish.pid_for(cluster, delay.pulse))
   end
 end
 

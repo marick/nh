@@ -18,6 +18,7 @@ defmodule Scenario.Case do
       import Scenario.Provocations
 
       import TestHelpers.ConnectTestToAnimal
+      import AppAnimal.TestHelpers.MessageHelpers
       alias TestHelpers.Animal
 
       import AppAnimal.ActivityLogAssertions

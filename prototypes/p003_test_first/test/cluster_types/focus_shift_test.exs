@@ -3,11 +3,11 @@ alias AppAnimal.{ClusterBuilders,Scenario}
 defmodule ClusterBuilders.FocusShiftTest do
   use Scenario.Case, async: true
   alias ClusterBuilders, as: UT
-  alias System.{Pulse}
+  alias System.{Pulse,Delay}
 
   def focus_shift do
     UT.focus_shift(:my_focus,
-                   movement_time: Duration.quanta(5),
+                   movement_time: Duration.seconds(0.05),
                    action: :look_for_paragraph_shape)
   end
 
@@ -18,27 +18,25 @@ defmodule ClusterBuilders.FocusShiftTest do
                                  name: :my_focus)
   end
 
+  test "suppresses downstream circular clusters AND sends timer delay" do
+    # You cannot send a timer pulse directly to the test process: a
+    # restriction of `Process.send_after`.
+    p_timer = start_link_supervised!(Network.Timer)
 
-  def distribute_what_pulse(pattern) do
-    {:distribute_pulse, carrying: pulse, from: _} = pattern
-    pulse
-  end
+    router = System.Router.new(%{Pulse => self(), Delay => p_timer})
 
-  def pulse_to_switchboard() do
-    {:"$gen_cast", cast} = assert_receive(_)
-    distribute_what_pulse(cast)
-  end
-
-  @tag :skip
-  test "suppresses downstream circular clusters" do
-    router = System.Router.new(%{Pulse => self()})
     s_cluster = focus_shift() |> Map.put(:router, router)
 
     p_cluster = start_link_supervised!({Cluster.CircularProcess, s_cluster})
     GenServer.cast(p_cluster, [handle_pulse: Pulse.new("paragraph id")])
 
-    assert pulse_to_switchboard().type == :suppress
+    assert_receive(_)
+    |> assert_distribute_from(from: s_cluster.name, pulse: Pulse.new(:suppress, "no data"))
 
-    assert "timer request is received" == "unimplemented: need composite wrapper"
+    Process.sleep(Duration.seconds(0.05))
+
+    assert_receive(_)
+    |> assert_distribute_to(to: [s_cluster.name],
+                            pulse: Pulse.new(:movement_finished, "paragraph id"))
   end
 end

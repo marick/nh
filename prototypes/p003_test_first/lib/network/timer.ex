@@ -3,17 +3,24 @@ alias AppAnimal.Network
 defmodule Network.Timer do
   use AppAnimal
   use AppAnimal.GenServer
+  alias AppAnimal.System.Switchboard
 
   typedstruct module: ThrobInstructions, enforce: true do
     field :interval, Integer
     field :p_notify, pid
   end
 
+  typedstruct module: DelayedPulseInstructions, enforce: true do
+    field :p_switchboard, pid
+    field :pulse, Pulse.t
+    field :destination_name, atom
+  end
+
   # It might be better to have separate processes for throbbing and one-shot timed pulses.
 
   runs_in_sender do
     def start_link(_) do
-      GenServer.start_link(__MODULE__, :ok)
+      GenServer.start_link(__MODULE__, :no_state)
     end
 
     def begin_throbbing(self, every: millis, notify: p_notify) do
@@ -21,47 +28,50 @@ defmodule Network.Timer do
       GenServer.call(self, instructions)
     end
 
-    def cast(self, payload, after: millis) do
-      GenServer.call(self, {:cast_after, millis, payload})
+    def delayed(self, pulse, opts) do
+      [interval, p_switchboard, destination_name] =
+        Opts.required!(opts, [:after, :via_switchboard, :destination])
+      instructions = %DelayedPulseInstructions{p_switchboard: p_switchboard,
+                                               pulse: pulse,
+                                               destination_name: destination_name}
+      GenServer.call(self, {instructions, interval})
     end
   end
 
   runs_in_receiver do
     @impl GenServer
-    def init(:ok) do
-      ok(:ok)
+    def init(:no_state) do
+      ok(:no_state)
     end
 
     @impl GenServer
-    def handle_call(%ThrobInstructions{} = instructions, _from, :ok) do
+    def handle_call(%ThrobInstructions{} = instructions, _from, :no_state) do
       repeating(instructions)
-      continue(:ok, returning: :ok)
+      continue(:no_state, returning: :ok)
     end
 
-    def handle_call({:cast_after, millis, payload}, {on_behalf_of, _}, :ok) do
-      once(after: millis, sending: payload, to: on_behalf_of)
-      continue(:ok, returning: :ok)
+    def handle_call({%DelayedPulseInstructions{} = instructions, delay}, _from, :no_state) do
+      Process.send_after(self(), instructions, delay)
+      continue(:no_state, returning: :ok)
     end
 
     @impl GenServer
-    def handle_info(%ThrobInstructions{} = instructions, :ok) do
+    def handle_info(%ThrobInstructions{} = instructions, :no_state) do
       GenServer.cast(instructions.p_notify, :time_to_throb)
       repeating(instructions)
-      continue(:ok)
+      continue(:no_state)
     end
 
-    def handle_info([sending: payload, to: pid], :ok) do
-      GenServer.cast(pid, payload)
-      continue(:ok)
+    def handle_info(%DelayedPulseInstructions{} = instructions, :no_state) do
+      Switchboard.cast__distribute_pulse(instructions.p_switchboard,
+                                         carrying: instructions.pulse,
+                                         to: [instructions.destination_name])
+      continue(:no_state)
     end
 
     private do
       def repeating(%ThrobInstructions{} = instructions) do
         Process.send_after(self(), instructions, instructions.interval)
-      end
-
-      def once([after: millis, sending: payload, to: on_behalf_of]) do
-        Process.send_after(self(), [sending: payload, to: on_behalf_of], millis)
       end
     end
   end
