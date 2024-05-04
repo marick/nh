@@ -50,4 +50,14 @@ defmodule AppAnimal.TestHelpers.MessageHelpers do
        do: assert distribute_what_from(value) == Keyword.fetch!(opts, :pulse)
   end
 
+
+  def assert_action_taken({@cast_marker, value}, opts),
+      do: assert_action_taken(value, opts)
+
+  def assert_action_taken(value, expected_action) do
+    {:take_action, actual_action} = value
+
+    assert actual_action == expected_action
+  end
+
 end

@@ -3,7 +3,7 @@ alias AppAnimal.{ClusterBuilders,System}
 defmodule ClusterBuilders do
   use AppAnimal
   alias Cluster.Throb
-  alias System.Pulse
+  alias System.{Pulse,Moveable,Delay,Action}
 
 
   def no_pulse(next_state),          do: {:no_result, next_state}
@@ -115,11 +115,22 @@ defmodule ClusterBuilders do
     circular(name, f_stash_pulse_data, throb: throb, label: :delay)
   end
 
-  def focus_shift(name, _opts) do
-    on_default_pulse = fn _ ->
-      Pulse.new(:suppress, "no data")
+  def focus_shift(name, opts) do
+    [movement_time, action_to_take] =
+      Opts.required!(opts, [:movement_time, :action_type])
+
+    # This is somewhat awkward. Because of how `Pulse` default structs are stripped
+    # down to their data before sent to the `calc` function, the function clause
+    # that's first to be exercised has to be listed second.
+    calc = fn
+      %Pulse{type: :movement_finished, data: focus_on} ->
+        Action.new(action_to_take, focus_on)
+      focus_on ->
+        Moveable.Collection.new([
+          Pulse.new(:suppress, "no data"),
+          Delay.new(movement_time, Pulse.new(:movement_finished, focus_on))])
     end
-    circular(name, on_default_pulse,
-                   label: :focus_shift)
+
+    circular(name, calc, label: :focus_shift)
   end
 end
