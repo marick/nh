@@ -11,6 +11,7 @@ defmodule NetworkBuilderTest do
 
     assert_fields(network, name_to_id: %{},
                            name_to_downstreams: %{},
+                           out_edges: %{},
                            circular_names: MapSet.new,
                            linear_names: MapSet.new)
     assert is_pid(p_circular)
@@ -37,6 +38,7 @@ defmodule NetworkBuilderTest do
 
       # Does not change downstream relationships
       assert network.name_to_downstreams == %{}
+      assert network.out_edges == %{}
     end
 
     test "traces also update 'downstream' relationships" do

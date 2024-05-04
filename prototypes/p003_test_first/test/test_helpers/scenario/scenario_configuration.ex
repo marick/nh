@@ -48,8 +48,7 @@ defmodule Scenario.Configuration do
   end
 
   def fan_out(opts) do
-    [_from, _destinations, _for_pulse_type] =
-      Opts.parse(opts, [:from, :to, for_pulse_type: :default]) |> dbg
+    NB.fan_out(network_builder(), opts)
   end
 
   # Scripting AffordanceLand behavior

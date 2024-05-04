@@ -26,6 +26,7 @@ defmodule Network do
 
     field :name_to_id, %{atom => Cluster.Identification.t}, default: %{}
     field :name_to_downstreams, %{atom => MapSet.t(atom)},  default: %{}
+    field :out_edges, %{atom => %{atom => MapSet.t(atom)}}, default: %{}
 
     field :circular_names, MapSet.t(atom),                  default: MapSet.new
     field :linear_names, MapSet.t(atom),                    default: MapSet.new

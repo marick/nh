@@ -29,6 +29,11 @@ defmodule NetworkBuilder do
         do: unordered(pid, [cluster])
     def install_routers(pid, router),
         do: GenServer.call(pid, {:apply, :install_routers, [router]})
+
+
+    def fan_out(pid, opts) do
+      GenServer.call(pid, {:apply, :fan_out, [opts]})
+    end
   end
 
   runs_in_receiver do

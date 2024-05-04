@@ -31,6 +31,39 @@ defmodule NetworkBuilder.Guts do
   def cluster(%Network{} = s_network, cluster),
       do: unordered(s_network, [cluster])
 
+  def fan_out(%Network{} = s_network, opts) do
+      [from, destinations, for_pulse_type] =
+        Opts.parse(opts, [:from, :to, for_pulse_type: :default])
+
+    s_network
+    |> unordered([from | destinations])
+    |> add_direct_targets(from, destinations, for_pulse_type)
+  end
+
+  def add_direct_targets(s_network, from, destinations, pulse_type) do
+    [from_name | destination_names] = names_from([from | destinations])
+    mutated =
+      s_network.out_edges
+      |> ensure_both_levels(from_name, pulse_type)
+      |> update_in([from_name, pulse_type], &MapSet.union(&1, MapSet.new(destination_names)))
+    %{s_network | out_edges: mutated}
+
+  end
+
+  # I should be able to do this automagically with lenses, but don't know how.
+  def ensure_both_levels(out_edges, from_name, pulse_type) do
+    cond do
+      out_edges[from_name] == nil ->
+        Map.put(out_edges, from_name, %{})
+        |> ensure_both_levels(from_name, pulse_type)
+      out_edges[from_name][pulse_type] == nil ->
+        put_in(out_edges, [from_name, pulse_type], MapSet.new)
+      true ->
+        out_edges
+    end
+  end
+
+
   def add_to_downstreams(%Network{} = s_network, clusters) do
     names = names_from(clusters)
     mutated =

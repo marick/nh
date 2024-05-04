@@ -39,6 +39,8 @@ defmodule NetworkBuilder.GutsTest do
       |> assert_fields(first: MapSet.new([:two_a, :two_b]),
                        two_a: MapSet.new,
                        two_b: MapSet.new)
+
+      assert updated.out_edges == %{}
     end
 
     test "it is an error to refer to a cluster that hasn't been added" do
@@ -50,6 +52,30 @@ defmodule NetworkBuilder.GutsTest do
                    "You referred to `:circular`, but there is no such cluster", fn ->
         UT.trace(Network.empty, [:circular])
       end)
+    end
+  end
+
+  describe "constructing out_edges" do
+    test "fanning out to structures" do
+      network =
+        Network.empty
+        |> UT.fan_out(from: C.circular(:root), to: [C.linear(:a), C.linear(:b)])
+
+      assert network.out_edges == %{root: %{default: MapSet.new([:a, :b])}}
+    end
+
+    test "fanning out to names" do
+      alias AppAnimal.NetworkBuilder, as: NB
+
+      p_builder = start_link_supervised!(NB)
+      NB.unordered(p_builder, [C.circular(:root), C.linear(:a)])
+
+      network = NB.network(p_builder)
+
+      updated =
+        UT.fan_out(network, from: :root, to: [:a, C.linear(:b)])
+
+      assert updated.out_edges == %{root: %{default: MapSet.new([:a, :b])}}
     end
   end
 end
