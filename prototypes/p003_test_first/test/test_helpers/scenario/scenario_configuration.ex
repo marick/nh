@@ -48,7 +48,8 @@ defmodule Scenario.Configuration do
   end
 
   def fan_out(opts) do
-    dbg opts
+    [_from, _destinations, _for_pulse_type] =
+      Opts.parse(opts, [:from, :to, for_pulse_type: :default]) |> dbg
   end
 
   # Scripting AffordanceLand behavior
