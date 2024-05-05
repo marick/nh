@@ -127,7 +127,7 @@ defmodule ClusterBuilders do
         Action.new(action_to_take, focus_on)
       focus_on ->
         Moveable.Collection.new([
-          Pulse.new(:suppress, "no data"),
+          Pulse.suppress,
           Delay.new(movement_time, Pulse.new(:movement_finished, focus_on))])
     end
 

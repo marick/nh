@@ -20,10 +20,10 @@ defmodule Pulse do
   end
 
   def new(type, pulse_data), do: %__MODULE__{type: type, data: pulse_data}
-
   def new(pulse_data), do: %__MODULE__{data: pulse_data}
-
   def new, do: new(:no_data)
+
+  def suppress(), do: new(:suppress, :no_data)
 
   @doc """
   Return a Pulse argument or convert into a *default* Pulse."

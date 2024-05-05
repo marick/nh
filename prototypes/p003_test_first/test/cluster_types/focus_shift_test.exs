@@ -31,7 +31,7 @@ defmodule ClusterBuilders.FocusShiftTest do
     GenServer.cast(p_cluster, [handle_pulse: Pulse.new("paragraph id")])
 
     assert_receive(_)
-    |> assert_distribute_from(from: s_cluster.name, pulse: Pulse.new(:suppress, "no data"))
+    |> assert_distribute_from(from: s_cluster.name, pulse: Pulse.suppress)
 
     Process.sleep(Duration.seconds(0.05))
 
