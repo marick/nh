@@ -1,9 +1,8 @@
 alias AppAnimal.{Network,NetworkBuilder}
 
 defmodule NetworkBuilder do
-
   use AppAnimal
-  use AppAnimal.GenServer
+  use AppAnimal.StructServer
   alias NetworkBuilder.Guts, as: Guts
 
   runs_in_sender do

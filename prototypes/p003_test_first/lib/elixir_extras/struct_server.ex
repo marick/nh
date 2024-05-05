@@ -1,10 +1,10 @@
-defmodule AppAnimal.GenServer do
+defmodule AppAnimal.StructServer do
   @moduledoc "might make how a GenServer works more clear to reader"
   defmacro __using__(_opts)  do
     quote do
       use GenServer
-      require AppAnimal.GenServer
-      import AppAnimal.GenServer
+      require AppAnimal.StructServer
+      import AppAnimal.StructServer
       alias AppAnimal.Cluster
 
       def start_link(struct),

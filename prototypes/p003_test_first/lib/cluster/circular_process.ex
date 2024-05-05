@@ -3,7 +3,7 @@ alias Cluster.CircularProcess
 
 defmodule CircularProcess do
   use AppAnimal
-  use AppAnimal.GenServer
+  use AppAnimal.StructServer
   alias Cluster.Calc
   alias System.Pulse
 

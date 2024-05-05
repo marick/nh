@@ -2,7 +2,7 @@ alias AppAnimal.Network
 
 defmodule Network.Timer do
   use AppAnimal
-  use AppAnimal.GenServer
+  use AppAnimal.StructServer
   alias AppAnimal.System.Switchboard
 
   typedstruct module: ThrobInstructions, enforce: true do

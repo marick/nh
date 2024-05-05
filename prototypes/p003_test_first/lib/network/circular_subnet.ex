@@ -16,7 +16,7 @@ defmodule Network.CircularSubnet do
   I don't see how to represent that in a non-cringy way.
   """
   use AppAnimal
-  use AppAnimal.GenServer
+  use AppAnimal.StructServer
   use TypedStruct
   alias System.Pulse
 

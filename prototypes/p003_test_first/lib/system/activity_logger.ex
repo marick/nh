@@ -2,7 +2,7 @@ alias AppAnimal.{System,Cluster}
 
 defmodule System.ActivityLogger do
   use AppAnimal
-  use AppAnimal.GenServer
+  use AppAnimal.StructServer
   require CircularBuffer
   alias System.Pulse
 

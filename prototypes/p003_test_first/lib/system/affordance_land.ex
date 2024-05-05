@@ -15,7 +15,7 @@ defmodule System.AffordanceLand do
   type.
   """
   use AppAnimal
-  use AppAnimal.GenServer
+  use AppAnimal.StructServer
   use TypedStruct
   alias System.{ActivityLogger,Switchboard,Pulse,Affordance,Action}
 
