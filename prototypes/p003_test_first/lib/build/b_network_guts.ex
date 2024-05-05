@@ -3,14 +3,6 @@ alias AppAnimal.{Network,NetworkBuilder, Cluster}
 defmodule NetworkBuilder.Guts do
   use AppAnimal
 
-  def trace(%Network{} = s_network, clusters, opts \\ []) do
-    [pulse_type] = Opts.parse(opts, for_pulse_type: :default)
-    s_network
-    |> unordered(clusters)
-    |> add_to_downstreams(clusters)
-    |> add_sequence_of_targets(clusters, pulse_type)
-  end
-
   def unordered(%Network{} = s_network, clusters) do
     reducer =
       fn
@@ -33,6 +25,13 @@ defmodule NetworkBuilder.Guts do
   def cluster(%Network{} = s_network, cluster),
       do: unordered(s_network, [cluster])
 
+  def trace(%Network{} = s_network, clusters, opts \\ []) do
+    [pulse_type] = Opts.parse(opts, for_pulse_type: :default)
+    s_network
+    |> unordered(clusters)
+    |> add_sequence_of_targets(clusters, pulse_type)
+  end
+
   def fan_out(%Network{} = s_network, opts) do
       [from, destinations, for_pulse_type] =
         Opts.parse(opts, [:from, :to, for_pulse_type: :default])
@@ -41,66 +40,6 @@ defmodule NetworkBuilder.Guts do
     |> unordered([from | destinations])
     |> add_direct_targets(from, destinations, for_pulse_type)
   end
-
-  def add_direct_targets(s_network, from, destinations, pulse_type) do
-    [from_name | destination_names] = names_from([from | destinations])
-    mutated =
-      s_network.out_edges
-      |> ensure_both_levels(from_name, pulse_type)
-      |> update_in([from_name, pulse_type], &MapSet.union(&1, MapSet.new(destination_names)))
-    %{s_network | out_edges: mutated}
-
-  end
-
-  # I should be able to do this automagically with lenses, but don't know how.
-  def ensure_both_levels(out_edges, names, pulse_type) when is_list(names) do
-    Enum.reduce(names, out_edges, fn name, updated_out_edges ->
-      ensure_both_levels(updated_out_edges, name, pulse_type)
-    end)
-  end
-
-  def ensure_both_levels(out_edges, from_name, pulse_type) when is_atom(from_name) do
-    cond do
-      out_edges[from_name] == nil ->
-        Map.put(out_edges, from_name, %{})
-        |> ensure_both_levels(from_name, pulse_type)
-      out_edges[from_name][pulse_type] == nil ->
-        put_in(out_edges, [from_name, pulse_type], MapSet.new)
-      true ->
-        out_edges
-    end
-  end
-
-  def add_out_edge_values(out_edges, [], _pulse_type), do: out_edges
-
-  def add_out_edge_values(out_edges, [[upstream, downstream] | rest], pulse_type) do
-    out_edges
-    |> update_in([upstream, pulse_type], fn mapset ->
-      MapSet.put(mapset, downstream)
-    end)
-    |> add_out_edge_values(rest, pulse_type)
-  end
-
-  def add_to_downstreams(%Network{} = s_network, clusters) do
-    names = names_from(clusters)
-    mutated =
-      s_network.name_to_downstreams
-      |> downstream_ensure_keys(names)
-      |> downstream_add_values(Enum.chunk_every(names, 2, 1, :discard))
-    %{s_network | name_to_downstreams: mutated}
-  end
-
-  def add_sequence_of_targets(%Network{} = s_network, clusters, pulse_type) do
-    names = names_from(clusters)
-
-    mutated =
-      s_network.out_edges
-      |> ensure_both_levels(names, pulse_type)
-      |> add_out_edge_values(Enum.chunk_every(names, 2, 1, :discard), pulse_type)
-    %{s_network | out_edges: mutated}
-  end
-
-
 
   def install_routers(%Network{} = s_network, router) do
     Network.CircularSubnet.add_router_to_all(s_network.p_circular_clusters, router)
@@ -160,19 +99,55 @@ defmodule NetworkBuilder.Guts do
 
     #
 
-    def downstream_ensure_keys(name_to_names, upstream_names) do
-      Enum.reduce(upstream_names, name_to_names, fn name, acc ->
-        Map.put_new(acc, name, MapSet.new)
+    # I should be able to do this automagically with lenses, but don't know how.
+    def ensure_both_levels(out_edges, names, pulse_type) when is_list(names) do
+      Enum.reduce(names, out_edges, fn name, updated_out_edges ->
+        ensure_both_levels(updated_out_edges, name, pulse_type)
       end)
     end
 
-    def downstream_add_values(name_to_names, []), do: name_to_names
-
-    def downstream_add_values(name_to_names, [[upstream, downstream] | rest]) do
-      name_to_names
-      |> Map.update!(upstream, & MapSet.put(&1, downstream))
-      |> downstream_add_values(rest)
+    def ensure_both_levels(out_edges, from_name, pulse_type) when is_atom(from_name) do
+      cond do
+        out_edges[from_name] == nil ->
+          Map.put(out_edges, from_name, %{})
+          |> ensure_both_levels(from_name, pulse_type)
+        out_edges[from_name][pulse_type] == nil ->
+          put_in(out_edges, [from_name, pulse_type], MapSet.new)
+        true ->
+          out_edges
+      end
     end
+
+    def add_out_edge_values(out_edges, [], _pulse_type), do: out_edges
+
+    def add_out_edge_values(out_edges, [[upstream, downstream] | rest], pulse_type) do
+      out_edges
+      |> update_in([upstream, pulse_type], fn mapset ->
+        MapSet.put(mapset, downstream)
+      end)
+      |> add_out_edge_values(rest, pulse_type)
+    end
+
+    def add_sequence_of_targets(%Network{} = s_network, clusters, pulse_type) do
+      names = names_from(clusters)
+
+      mutated =
+        s_network.out_edges
+        |> ensure_both_levels(names, pulse_type)
+        |> add_out_edge_values(Enum.chunk_every(names, 2, 1, :discard), pulse_type)
+      %{s_network | out_edges: mutated}
+    end
+
+    def add_direct_targets(s_network, from, destinations, pulse_type) do
+      [from_name | destination_names] = names_from([from | destinations])
+      mutated =
+        s_network.out_edges
+        |> ensure_both_levels(from_name, pulse_type)
+        |> update_in([from_name, pulse_type], &MapSet.union(&1, MapSet.new(destination_names)))
+      %{s_network | out_edges: mutated}
+    end
+
+    #
 
     def existing_name?(s_network, name) do
       MapSet.member?(s_network.circular_names, name) ||

@@ -10,7 +10,6 @@ defmodule NetworkBuilderTest do
     %{linear_clusters: linears, p_circular_clusters: p_circular} = network = UT.network(m)
 
     assert_fields(network, name_to_id: %{},
-                           name_to_downstreams: %{},
                            out_edges: %{},
                            circular_names: MapSet.new,
                            linear_names: MapSet.new)
@@ -37,7 +36,6 @@ defmodule NetworkBuilderTest do
       |> assert_fields(first: first.id, second: second.id)
 
       # Does not change downstream relationships
-      assert network.name_to_downstreams == %{}
       assert network.out_edges == %{}
     end
 
