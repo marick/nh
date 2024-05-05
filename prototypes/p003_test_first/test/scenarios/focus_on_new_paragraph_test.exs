@@ -32,7 +32,7 @@ defmodule Cluster.FocusOnNewParagraphTest do
     # Set up current running clusters
 
     Animal.send_test_pulse(animal, to: :delay1,
-                                   carrying: "you will not time out - you'll be killed")
+                                   carrying: "hang out until killed")
     # Note delay2 is not running.
     Process.sleep(rapid_throbs * 3) # Give Delay1 some pulses pulses to *not* do anything
     refute_receive(_) # Delay1 hangs on to its pulse.
@@ -43,7 +43,7 @@ defmodule Cluster.FocusOnNewParagraphTest do
     assert_test_receives("a shape")
 
     # Oh, and the running process has been killed.
-    assert_test_receives("you will not time out - you'll be killed", from: :delay1_result)
+    assert_test_receives("hang out until killed", from: :delay1_result)
 
     # But the one that wasn't started is left alone
     refute_receive(_)

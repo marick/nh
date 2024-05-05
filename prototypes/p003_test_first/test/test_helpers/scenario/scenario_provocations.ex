@@ -5,7 +5,7 @@ defmodule Scenario.Provocations do
   import Scenario.ProcessKludgery
   alias TestHelpers.Animal
 
-  def provocation(thunk), do: init_provocation_thunk(thunk)
+  def provocation(thunk), do: provocation_thunks([thunk])
 
   def take_action(opts) do
     fn animal -> Animal.take_action(animal, opts) end

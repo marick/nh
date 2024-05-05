@@ -22,8 +22,8 @@ defmodule Scenario.Configuration do
         thunk.(animal)
       end
 
-      provocation = provocation_thunk()
-      if provocation, do: provocation.(animal)
+      for provocation <- provocation_thunks(), do: provocation.(animal)
+
       make_animal_kludgily_available(animal)
       animal
     end

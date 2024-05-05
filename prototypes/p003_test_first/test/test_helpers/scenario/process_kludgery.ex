@@ -10,9 +10,10 @@ defmodule AppAnimal.Scenario.ProcessKludgery do
   def append_affordance_thunk(thunk),
       do: Process.put(@affordance_thunks,[thunk | affordance_thunks()])
 
-  @provocation_thunk :provocation_thunk
-  def init_provocation_thunk(thunk), do: Process.put(@provocation_thunk, thunk)
-  def provocation_thunk(), do: Process.get(@provocation_thunk)
+  @provocation_thunks :provocation_thunks
+  def provocation_thunks(thunks),
+      do: Process.put(@provocation_thunks, provocation_thunks() ++ thunks)
+  def provocation_thunks(), do: Process.get(@provocation_thunks, [])
 
   @animal :animal
   def make_animal_kludgily_available(aa), do: Process.put(@animal, aa)
