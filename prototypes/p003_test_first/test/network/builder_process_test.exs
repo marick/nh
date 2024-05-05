@@ -53,9 +53,12 @@ defmodule NetworkBuilderTest do
       # spot check that `trace` uses `unordered`
       assert network.circular_names == MapSet.new([:first, :second])
 
-      # downstream
-      assert Network.downstream_of(network, :first) == MapSet.new([:second])
-      assert Network.downstream_of(network, :second) == MapSet.new([])
+      # out-edges
+      first_destinations = Network.destination_names(network, from: :first, for: :default)
+      assert first_destinations == MapSet.new([:second])
+
+      second_destinations = Network.destination_names(network, from: :second, for: :default)
+      assert second_destinations == MapSet.new
     end
 
     test "linear clusters work too" do
@@ -79,9 +82,12 @@ defmodule NetworkBuilderTest do
       network.name_to_id
       |> assert_fields(first: first.id, second: second.id)
 
-      # downstream
-      assert Network.downstream_of(network, :first) == MapSet.new([:second])
-      assert Network.downstream_of(network, :second) == MapSet.new([])
+      # out-edges
+      first_destinations = Network.destination_names(network, from: :first, for: :default)
+      assert first_destinations == MapSet.new([:second])
+
+      second_destinations = Network.destination_names(network, from: :second, for: :default)
+      assert second_destinations == MapSet.new
     end
   end
 

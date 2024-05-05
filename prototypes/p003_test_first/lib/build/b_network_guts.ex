@@ -4,10 +4,11 @@ defmodule NetworkBuilder.Guts do
   use AppAnimal
 
   def trace(%Network{} = s_network, clusters, opts \\ []) do
-    [_pulse_type] = Opts.parse(opts, for_pulse_type: :default)
+    [pulse_type] = Opts.parse(opts, for_pulse_type: :default)
     s_network
     |> unordered(clusters)
     |> add_to_downstreams(clusters)
+    |> add_sequence_of_targets(clusters, pulse_type)
   end
 
   def unordered(%Network{} = s_network, clusters) do
@@ -52,7 +53,13 @@ defmodule NetworkBuilder.Guts do
   end
 
   # I should be able to do this automagically with lenses, but don't know how.
-  def ensure_both_levels(out_edges, from_name, pulse_type) do
+  def ensure_both_levels(out_edges, names, pulse_type) when is_list(names) do
+    Enum.reduce(names, out_edges, fn name, updated_out_edges ->
+      ensure_both_levels(updated_out_edges, name, pulse_type)
+    end)
+  end
+
+  def ensure_both_levels(out_edges, from_name, pulse_type) when is_atom(from_name) do
     cond do
       out_edges[from_name] == nil ->
         Map.put(out_edges, from_name, %{})
@@ -64,6 +71,15 @@ defmodule NetworkBuilder.Guts do
     end
   end
 
+  def add_out_edge_values(out_edges, [], _pulse_type), do: out_edges
+
+  def add_out_edge_values(out_edges, [[upstream, downstream] | rest], pulse_type) do
+    out_edges
+    |> update_in([upstream, pulse_type], fn mapset ->
+      MapSet.put(mapset, downstream)
+    end)
+    |> add_out_edge_values(rest, pulse_type)
+  end
 
   def add_to_downstreams(%Network{} = s_network, clusters) do
     names = names_from(clusters)
@@ -73,6 +89,18 @@ defmodule NetworkBuilder.Guts do
       |> downstream_add_values(Enum.chunk_every(names, 2, 1, :discard))
     %{s_network | name_to_downstreams: mutated}
   end
+
+  def add_sequence_of_targets(%Network{} = s_network, clusters, pulse_type) do
+    names = names_from(clusters)
+
+    mutated =
+      s_network.out_edges
+      |> ensure_both_levels(names, pulse_type)
+      |> add_out_edge_values(Enum.chunk_every(names, 2, 1, :discard), pulse_type)
+    %{s_network | out_edges: mutated}
+  end
+
+
 
   def install_routers(%Network{} = s_network, router) do
     Network.CircularSubnet.add_router_to_all(s_network.p_circular_clusters, router)

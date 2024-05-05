@@ -11,51 +11,68 @@ defmodule NetworkBuilder.GutsTest do
     test "a duplicate name is an error" do
       original =
         Network.empty
-        |> UT.trace([C.linear(:linear), C.circular(:circular)])
+        |> UT.trace([C.linear(:linear), C.circular(:circular)], for_pulse_type: :default)
 
       assert_raise(KeyError,
                    "You attempted to add cluster `:linear`, which already exists", fn ->
-        UT.trace(original, [C.linear(:linear)])
+        UT.trace(original, [C.linear(:linear)], for_pulse_type: :default)
       end)
       assert_raise(KeyError,
                    "You attempted to add cluster `:circular`, which already exists", fn ->
-        UT.trace(original, [C.circular(:circular)])
+        UT.trace(original, [C.circular(:circular)], for_pulse_type: :default)
       end)
     end
 
     test "the way to refer to an already-existing cluster is by its name" do
       original =
         Network.empty
-        |> UT.trace([C.linear(:first), C.circular(:two_a)])
+        |> UT.trace([C.linear(:first), C.circular(:two_a)], for_pulse_type: :default)
 
       updated =
         original
-        |> UT.trace([:first, C.circular(:two_b)])
+        |> UT.trace([:first, C.circular(:two_b)], for_pulse_type: :default)
 
       assert updated.linear_names == MapSet.new([:first])
       assert updated.circular_names == MapSet.new([:two_a, :two_b])
 
-      updated.name_to_downstreams
-      |> assert_fields(first: MapSet.new([:two_a, :two_b]),
-                       two_a: MapSet.new,
-                       two_b: MapSet.new)
+      updated.out_edges
+      |> assert_fields(first: %{default: MapSet.new([:two_a, :two_b])},
+                       two_a: %{default: MapSet.new},
+                       two_b: %{default: MapSet.new})
+    end
 
-      assert updated.out_edges == %{}
+    test "traces of different cluster types" do
+      original =
+        Network.empty
+        |> UT.trace([C.linear(:first), C.circular(:two_a)], for_pulse_type: :default)
+
+      updated =
+        original
+        |> UT.trace([:first, C.circular(:two_b)], for_pulse_type: :other)
+
+      assert updated.linear_names == MapSet.new([:first])
+      assert updated.circular_names == MapSet.new([:two_a, :two_b])
+
+      updated.out_edges
+      |> assert_fields(first: %{default: MapSet.new([:two_a]),
+                                other: MapSet.new([:two_b])},
+                       two_a: %{default: MapSet.new},
+                       two_b: %{other: MapSet.new})
     end
 
     test "it is an error to refer to a cluster that hasn't been added" do
       assert_raise(KeyError,
                    "You referred to `:linear`, but there is no such cluster", fn ->
-        UT.trace(Network.empty, [:linear])
+        UT.trace(Network.empty, [:linear], for_pulse_type: :default)
       end)
       assert_raise(KeyError,
                    "You referred to `:circular`, but there is no such cluster", fn ->
-        UT.trace(Network.empty, [:circular])
+        UT.trace(Network.empty, [:circular], for_pulse_type: :default)
       end)
     end
   end
 
-  describe "constructing out_edges" do
+  describe "fanning out" do
     test "fanning out to structures" do
       network =
         Network.empty
