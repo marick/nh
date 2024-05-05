@@ -18,7 +18,6 @@ defmodule Network.CircularSubnetTest do
   end
 
   test "setting routers" do
-
     pid = start_link_supervised!(UT)
     UT.call__add_cluster(pid, C.circular(:first))
     UT.call__add_cluster(pid, C.circular(:second))
@@ -58,6 +57,23 @@ defmodule Network.CircularSubnetTest do
     # https://hexdocs.pm/elixir/Process.html#exit/2
     Process.exit(p_cluster, :some_non_normal_value)
     Process.sleep(10)
+    assert [] == UT.throbbing_pids(p_ut)
+  end
+
+
+  test "only :default pulses start a circular cluster" do
+    kludge_a_calc = fn _arg ->
+      raise "should never be called"
+    end
+
+    p_ut = start_link_supervised!(UT)
+    original = C.circular(:original, kludge_a_calc)
+    UT.call__add_cluster(p_ut, original)
+
+
+    UT.cast__distribute_pulse(p_ut, carrying: Pulse.new(:oddity, "value"), to: [:original])
+    refute_receive(_)
+
     assert [] == UT.throbbing_pids(p_ut)
   end
 end

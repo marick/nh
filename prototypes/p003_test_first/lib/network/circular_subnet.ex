@@ -66,14 +66,19 @@ defmodule Network.CircularSubnet do
     end
 
     @impl GenServer
-    def handle_cast({:distribute_pulse, carrying: %Pulse{} = pulse, to: names}, s_state) do
+    def handle_cast({:distribute_pulse,
+                     carrying: %Pulse{type: :default} = pulse,
+                     to: names}, s_state) do
       s_mutated = ensure_started(s_state, names)
-
-      for name <- names do
-        pid = BiMap.fetch!(s_mutated.name_to_pid, name)
-        GenServer.cast(pid, [handle_pulse: pulse])
-      end
+      send_to_throbbers(s_mutated.name_to_pid, names, pulse)
       continue(s_mutated)
+    end
+
+    def handle_cast({:distribute_pulse,
+                     carrying: %Pulse{type: type} = pulse,
+                     to: names}, s_state) when type != :default do
+      send_to_throbbers(s_state.name_to_pid, names, pulse)
+      continue(s_state)
     end
 
     def handle_cast(:time_to_throb, s_state) do
@@ -162,9 +167,17 @@ defmodule Network.CircularSubnet do
         %{s_state | name_to_pid: new_bimap}
       end
 
+      def send_to_throbbers(name_to_pid, names, pulse) do
+        throbbers =
+          names
+          |> Enum.map(& BiMap.get(name_to_pid, &1))
+          |> Enum.reject(&is_nil/1)
+
+        Enum.each(throbbers, & GenServer.cast(&1, [handle_pulse: pulse]))
+      end
+
       def throb(pids) do
-        for pid <- pids,
-            do: GenServer.cast(pid, [throb: 1])
+        for pid <- pids, do: GenServer.cast(pid, [throb: 1])
       end
     end
   end
