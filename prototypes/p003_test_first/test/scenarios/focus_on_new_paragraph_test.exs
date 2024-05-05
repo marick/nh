@@ -3,7 +3,6 @@ alias AppAnimal.{Scenario,Cluster}
 defmodule Cluster.FocusOnNewParagraphTest do
   use Scenario.Case, async: true
 
-  @tag :skip
   test "scenario" do
     rapid_throbs = 20
     long_enough_for_several_throbs = 60
@@ -23,8 +22,8 @@ defmodule Cluster.FocusOnNewParagraphTest do
 
         # Meanwhile, there are circular clusters perhaps active when the focus shift starts.
 
-        trace [C.delay(:delay1, longer_than_test), forward_to_test(:from_delay1)]
-        trace [C.delay(:delay2, longer_than_test), forward_to_test(:from_delay2)]
+        trace [C.delay(:delay1, longer_than_test), forward_to_test(:delay1_result)]
+        trace [C.delay(:delay2, longer_than_test), forward_to_test(:delay2_result)]
 
         # They are suppressed by...
         fan_out(from: :focus_on_paragraph, for_pulse_type: :suppress, to: [:delay1, :delay2])
@@ -43,12 +42,8 @@ defmodule Cluster.FocusOnNewParagraphTest do
     Animal.send_test_pulse(animal, to: :focus_on_paragraph, carrying: :paragraph_id_of_some_sort)
     assert_test_receives("a shape")
 
-    # Process.sleep(2000)
-
-    #   ActivityLogger.get_log(animal.p_logger) |> dbg
-
     # Oh, and the running process has been killed.
-    assert_receive("you will not time out - you'll be killed")
+    assert_test_receives("you will not time out - you'll be killed", from: :delay1_result)
 
     # But the one that wasn't started is left alone
     refute_receive(_)

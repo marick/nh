@@ -5,6 +5,7 @@ defmodule CircularProcess do
   use AppAnimal
   use AppAnimal.GenServer
   alias Cluster.Calc
+  alias System.Pulse
 
   def start_link(cluster), do: GenServer.start_link(CircularProcess, cluster)
 
@@ -14,7 +15,13 @@ defmodule CircularProcess do
     ok(starting_state)
   end
 
-  def handle_cast([handle_pulse: %System.Pulse{} = pulse], s_process_state) do
+
+  def handle_cast([handle_pulse: %Pulse{type: :suppress}], s_process_state) do
+    s_process_state.throb.f_before_stopping.(s_process_state, s_process_state.previously)
+    stop(s_process_state)
+  end
+
+  def handle_cast([handle_pulse: %Pulse{} = pulse], s_process_state) do
     result = Calc.run(s_process_state.calc,
                       on: pulse,
                       with_state: s_process_state.previously)
@@ -36,10 +43,10 @@ defmodule CircularProcess do
     next_process_state = Map.put(s_process_state, :throb, next_throb)
     case action do
       :continue ->
-        AppAnimal.GenServer.continue(next_process_state)
+        continue(next_process_state)
       :stop ->
         s_process_state.throb.f_before_stopping.(s_process_state, s_process_state.previously)
-        AppAnimal.GenServer.stop(next_process_state)
+        stop(next_process_state)
     end
   end
 
