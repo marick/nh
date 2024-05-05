@@ -16,10 +16,9 @@ defmodule Cluster.LinearClusterTest do
     assert_test_receives(4)
   end
 
-  @tag :skip
   test "choosing to pulse something other than the default type" do
     function_that_causes_pulse = fn count ->
-      Pulse.new(count+1, :special)
+      Pulse.new(:special, count+1)
     end
 
     provocation send_test_pulse(to: :incrementer, carrying: 3)
@@ -30,7 +29,7 @@ defmodule Cluster.LinearClusterTest do
             for_pulse_type: :special)
     end
 
-    assert assert_test_receives(_) == Pulse.new(4, :special)
+    assert assert_test_receives(_) == Pulse.new(:special, 4)
 
   end
 
