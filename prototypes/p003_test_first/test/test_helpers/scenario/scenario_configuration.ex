@@ -43,8 +43,8 @@ defmodule Scenario.Configuration do
     NB.branch(network_builder(), at: name, with: list)
   end
 
-  def trace(list) do
-    NB.trace(network_builder(), list)
+  def trace(list, opts \\ []) do
+    NB.trace(network_builder(), list, opts)
   end
 
   def fan_out(opts) do

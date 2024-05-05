@@ -3,7 +3,8 @@ alias AppAnimal.{Network,NetworkBuilder, Cluster}
 defmodule NetworkBuilder.Guts do
   use AppAnimal
 
-  def trace(%Network{} = s_network, clusters) do
+  def trace(%Network{} = s_network, clusters, opts \\ []) do
+    [_pulse_type] = Opts.parse(opts, for_pulse_type: :default)
     s_network
     |> unordered(clusters)
     |> add_to_downstreams(clusters)
