@@ -47,6 +47,16 @@ defmodule Network do
 
   def downstream_of(network, name), do: Map.fetch!(network.name_to_downstreams, name)
 
+  def destination_names(network, from: source_name, for: pulse) do
+    if pulse.type == :default do
+      downstream_of(network, source_name)
+    else
+      network.out_edges
+      |> Map.fetch!(source_name)
+      |> Map.fetch!(pulse.type)
+    end
+  end
+
   def router_for(network, name) do
     circular_case =
       if MapSet.member?(network.circular_names, name),

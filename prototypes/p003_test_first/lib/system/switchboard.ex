@@ -68,7 +68,9 @@ defmodule System.Switchboard do
                     s_switchboard) do
       source = Network.full_identification(s_switchboard.network, source_name)
       ActivityLogger.log_pulse_sent(s_switchboard.p_logger, source, pulse)
-      destination_names = Network.downstream_of(s_switchboard.network, source_name)
+      destination_names =
+        Network.destination_names(s_switchboard.network, from: source_name, for: pulse)
+
       handle_cast({:distribute_pulse, carrying: pulse, to: destination_names},
                   s_switchboard)
     end
