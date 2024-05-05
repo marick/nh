@@ -58,5 +58,6 @@ defmodule Scenario.Configuration do
     append_affordance_thunk(f)
   end
 
-  def by_sending_cluster(downstream, data), do: Affordance.new(downstream, data)
+  def by_sending(data, to: downstream), do: Affordance.new(downstream, data)
+
 end

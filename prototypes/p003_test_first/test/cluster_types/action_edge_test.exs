@@ -13,7 +13,7 @@ defmodule Cluster.ActionEdgeTest do
       trace [C.action_edge(:focus_on_new_paragraph)]
 
       respond_to_action(:focus_on_new_paragraph,
-                        by_sending_cluster(:paragraph_text, "some text"))
+                        by_sending("some text", to: :paragraph_text))
 
       trace [C.perception_edge(:paragraph_text),
              forward_to_test()]

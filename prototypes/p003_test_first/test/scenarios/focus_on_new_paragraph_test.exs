@@ -15,8 +15,8 @@ defmodule Cluster.FocusOnNewParagraphTest do
                               movement_time: long_enough_for_several_throbs,
                               action_type: :perceive_paragraph_shape)
 
-        respond_to_action(:perceive_paragraph_shape,
-                          by_sending_cluster(:paragraph_shape, "a shape"))
+        respond_to_action :perceive_paragraph_shape,
+                          by_sending("a shape", to: :paragraph_shape)
 
         trace [C.perception_edge(:paragraph_shape), forward_to_test()]
 
@@ -29,16 +29,15 @@ defmodule Cluster.FocusOnNewParagraphTest do
         fan_out(from: :focus_on_paragraph, for_pulse_type: :suppress, to: [:delay1, :delay2])
       end
 
-    # Set up current running clusters
+    # Set up the state before a new paragraph is noticed.
 
     Animal.send_test_pulse(animal, to: :delay1,
                                    carrying: "hang out until killed")
     # Note delay2 is not running.
     Process.sleep(rapid_throbs * 3) # Give Delay1 some pulses pulses to *not* do anything
-    refute_receive(_) # Delay1 hangs on to its pulse.
+    refute_receive(_) # Delay1 has been hanging on to its pulse
 
     # Start things off.
-
     Animal.send_test_pulse(animal, to: :focus_on_paragraph, carrying: :paragraph_id_of_some_sort)
     assert_test_receives("a shape")
 
@@ -47,6 +46,5 @@ defmodule Cluster.FocusOnNewParagraphTest do
 
     # But the one that wasn't started is left alone
     refute_receive(_)
-
   end
 end

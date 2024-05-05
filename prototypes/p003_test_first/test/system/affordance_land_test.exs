@@ -20,7 +20,7 @@ defmodule System.AffordanceLandTest do
 
     configuration do
       respond_to_action(:focus_on_paragraph,
-                        by_sending_cluster(:current_paragraph_text, "para\n"))
+                        by_sending( "para\n", to: :current_paragraph_text))
       trace [C.perception_edge(:current_paragraph_text), forward_to_test()]
     end
 

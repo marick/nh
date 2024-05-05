@@ -4,11 +4,11 @@ defmodule Cluster.PerceptionEdgeTest do
   use Scenario.Case, async: true
 
   test "perception edges serve only to fan out" do
-    provocation take_action(focus_on_paragraph: :no_data)
+    provocation take_action(:focus_on_paragraph)
 
     configuration do
       respond_to_action(:focus_on_paragraph,
-                        by_sending_cluster(:paragraph_text, "some text"))
+                        by_sending("some text", to: :paragraph_text))
 
       cluster(C.perception_edge(:paragraph_text))
       branch(at: :paragraph_text,

@@ -62,8 +62,6 @@ defmodule AppAnimal.TestHelpers.Animal do
     p_affordances
   end
 
-  def by_sending_cluster(downstream, data), do: Affordance.new(downstream, data)
-
   @doc """
   Cast a message representing an action to AffordanceLand from a test.
 

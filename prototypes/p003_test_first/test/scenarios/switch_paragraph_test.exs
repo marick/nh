@@ -43,7 +43,7 @@ defmodule Scenario.SwitchParagraphTest do
 
 
       respond_to_action(:focus_on_paragraph,
-                        by_sending_cluster(:paragraph_text, "para\n\npara\n\npara"))
+                        by_sending("para\n\npara\n\npara", to: :paragraph_text))
 
       [:paragraph_text          |> C.perception_edge,
        :paragraph_structure     |> C.summarizer(&ParagraphGaps.summarize/1),
