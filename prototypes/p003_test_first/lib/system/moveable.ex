@@ -45,9 +45,8 @@ defimpl Moveable, for: Pulse do
   def cast(pulse, cluster) do
     pid = Clusterish.pid_for(cluster, pulse)
 
-    System.Switchboard.cast__distribute_pulse(pid,
-                                              carrying: pulse,
-                                              from: Clusterish.name(cluster))
+    System.Switchboard.cast(pid, :distribute_pulse, carrying: pulse,
+                                                    from: Clusterish.name(cluster))
   end
 end
 

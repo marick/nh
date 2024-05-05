@@ -20,36 +20,6 @@ defmodule System.Switchboard do
     field :p_logger, ActivityLogger.t, default: ActivityLogger.start_link |> okval
   end
 
-  runs_in_sender do
-    # I'd rather not have this layer of indirection, but it's needed for tests to use
-    # start_supervised.
-    def start_link(%__MODULE__{} = s_switchboard),
-        do: GenServer.start_link(__MODULE__, s_switchboard)
-
-    @doc """
-    Send a pulse to a set of clusters.
-
-    There are two variants. You can say the pulse comes *from:* a cluster, in which
-    case the pulse is delivered to that cluster's downstream. Or the pulse can be
-    delivered `to:` a list of names.
-
-    In either case, clusters are identified by their atom names.
-
-    Examples:
-        cast__distribute_pulse(p_switchboard, carrying: pulse_data, from: source_name)
-        cast__distribute_pulse(p_switchboard, carrying: pulse_data, to: destination_names)
-
-    """
-    def cast__distribute_pulse(p_switchboard, one_of_two_keyword_lists)
-    def cast__distribute_pulse(p_switchboard, carrying: %Pulse{} = pulse, from: source_name),
-        do: GenServer.cast(p_switchboard,
-                           {:distribute_pulse, carrying: pulse, from: source_name})
-
-    def cast__distribute_pulse(p_switchboard, carrying: %Pulse{} = pulse, to: destination_names),
-        do: GenServer.cast(p_switchboard,
-                           {:distribute_pulse, carrying: pulse, to: destination_names})
-  end
-
   runs_in_receiver do
     @impl GenServer
     def init(s_switchboard) do

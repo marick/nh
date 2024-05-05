@@ -24,9 +24,8 @@ defmodule AppAnimal.TestHelpers.Animal do
 
   def send_test_pulse(p_switchboard, to: destination_name, carrying: pulse_data) do
     pulse = Pulse.new(pulse_data)
-    Switchboard.cast__distribute_pulse(p_switchboard,
-                                       carrying: pulse,
-                                       to: [destination_name])
+    Switchboard.cast(p_switchboard, :distribute_pulse, carrying: pulse,
+                                                       to: [destination_name])
   end
 
 

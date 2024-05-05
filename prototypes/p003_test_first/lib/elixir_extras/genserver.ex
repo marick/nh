@@ -6,6 +6,15 @@ defmodule AppAnimal.GenServer do
       require AppAnimal.GenServer
       import AppAnimal.GenServer
       alias AppAnimal.Cluster
+
+      def start_link(struct),
+          do: GenServer.start_link(__MODULE__, struct)
+
+      def cast(p_switchboard, name, opts \\ []),
+          do: GenServer.cast(p_switchboard,{name, opts})
+
+
+      defoverridable start_link: 1, cast: 3
     end
   end
 

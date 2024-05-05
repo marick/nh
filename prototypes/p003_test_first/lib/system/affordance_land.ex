@@ -51,8 +51,8 @@ defmodule System.AffordanceLand do
     def handle_cast({:produce_this_affordance, affordance_name, %Pulse{} = pulse},
                     s_affordances) do
       cluster_name = affordance_name # this is for documentation
-      Switchboard.cast__distribute_pulse(s_affordances.p_switchboard,
-                                         carrying: pulse, to: [cluster_name])
+      Switchboard.cast(s_affordances.p_switchboard, :distribute_pulse,
+                       carrying: pulse, to: [cluster_name])
       continue(s_affordances)
     end
 
