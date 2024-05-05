@@ -10,11 +10,13 @@ defmodule AppAnimal.GenServer do
       def start_link(struct),
           do: GenServer.start_link(__MODULE__, struct)
 
-      def cast(p_switchboard, name, opts \\ []),
-          do: GenServer.cast(p_switchboard,{name, opts})
+      def cast(pid, name, arg), do: GenServer.cast(pid, {name, arg})
+      def call(pid, name, arg), do: GenServer.call(pid, {name, arg})
 
+      @impl GenServer
+      def init(struct), do: ok(struct)
 
-      defoverridable start_link: 1, cast: 3
+      defoverridable start_link: 1, cast: 3, call: 3, init: 1
     end
   end
 
