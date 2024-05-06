@@ -1,5 +1,11 @@
 
 defmodule AppAnimal do
+  @moduledoc """
+  Assemble the top-level processes into a single structure.
+
+  When `use`d, pre-aliases and imports various universally useful modules.
+  """
+
   alias AppAnimal.{System,Network,Duration,NetworkBuilder}
   alias System.{Switchboard, AffordanceLand, ActivityLogger}
   alias Network.Timer
@@ -18,6 +24,14 @@ defmodule AppAnimal do
     field :p_timer,             pid
   end
 
+  @doc """
+  Given a `NetworkBuilder` process, extract the finished network and use it to
+  start all the top-level processes.
+
+  ## Options:
+    * `throb_interval:` Used by tests to make the `Timer` throb faster than normal.
+      Units are milliseconds. Default is `Duration.quantum()` (100 milliseconds).
+  """
   def from_network(p_network_builder, opts \\ []) when is_pid(p_network_builder) do
     s = start_processes()
 
@@ -67,8 +81,7 @@ defmodule AppAnimal do
       use TypedStruct
       import Lens.Macros
       alias AppAnimal.Extras
-      import AppAnimal.Extras.Tuples
-      import AppAnimal.Extras.Kernel
+      import Extras.{Tuples,Kernel,Nesting}
       alias AppAnimal.Pretty
       alias AppAnimal.Extras.DepthAgnostic, as: A
       alias AppAnimal.Duration

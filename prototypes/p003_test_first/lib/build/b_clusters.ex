@@ -3,55 +3,80 @@ defmodule AppAnimal.ClusterBuilders do
   use KeyConceptAliases
   use MoveableAliases
 
-
-  def no_pulse(next_state),          do: {:no_result, next_state}
-  def pulse(pulse_data, next_state), do: {:useful_result, pulse_data, next_state}
-  def pulse_and_save(data),          do: {:useful_result, data, data}
-
-  def circular(name, calc, opts) when is_function(calc) and is_list(opts) do
-    opts
-    |> Opts.rename(:initial_value, to: :previously)
-    |> Opts.add_missing!(name: name, calc: calc)
-
-    |> Opts.add_if_missing(label: :circular)
-    |> Opts.create(:id, if_present: :label,
-                        with: & Cluster.Identification.new(name, &1))
-
-    |> Opts.add_if_missing(throb: Throb.default,
-                           previously: %{})
-    |> Opts.add_missing!(router: :must_be_supplied_later)
-
-    |> then(& struct(Cluster.Circular, &1))
-
+  section "slightly more pleasant return values" do
+    def no_pulse(next_state),          do: {:no_result, next_state}
+    def pulse(pulse_data, next_state), do: {:useful_result, pulse_data, next_state}
+    def pulse_and_save(data),          do: {:useful_result, data, data}
   end
 
-  def circular(name, calc     ) when is_function(calc),
-      do: circular(name, calc, [])
-  def circular(name,      opts) when is_list(opts),
-      do: circular(name, &Function.identity/1, opts)
+  section "the two core functions: circular and linear" do
 
-  def circular(name), do: circular(name, [])
+      @doc """
+      Construct a circular cluster.
 
-  ##
+      The basic format is `circular(name, calc, opts)`. Either or both
+      of `calc` and `opts` can be omitted.
 
-  def linear(name, calc, opts) when is_function(calc) and is_list(opts) do
-    opts
-    |> Opts.add_missing!(name: name, calc: calc)
-    |> Opts.create(       :id, if_present: :label,
-                               with: & Cluster.Identification.new(name, &1))
-    |> Opts.add_if_missing(id: Cluster.Identification.new(name, :linear))
+      ## Options
+      * `initial_value`: The starting value of the cluster's persistent state. (Default %{})
+      * `label`:         Override the default label `circular`.
+      * `id`:            A full `Identification` structure; otherwise calculated from the `label`.
+      * `throb`:         A `Throb` structure
+      """
+    def circular(name, calc, opts) when is_function(calc) and is_list(opts) do
+      opts
+      |> Opts.rename(:initial_value, to: :previously)
+      |> Opts.provide_default(previously: %{})
+      |> Opts.provide_default(label: :circular,
+                              throb: Throb.default)
+      |> Opts.calculate_unless_given(:id, from: :label,
+                                          using: & Cluster.Identification.new(name, &1))
 
-    |> then(& struct(Cluster.Linear, &1))
+      |> Opts.put_missing!(router: :must_be_supplied_later,
+                           name: name,
+                           calc: calc)
+
+      |> then(& struct(Cluster.Circular, &1))
+    end
+
+    def circular(name, calc     ) when is_function(calc),
+        do: circular(name, calc, [])
+    def circular(name,      opts) when is_list(opts),
+        do: circular(name, &Function.identity/1, opts)
+
+    def circular(name), do: circular(name, [])
+
+    ##
+
+      @doc """
+      Construct a linear cluster.
+
+      The basic format is `linear(name, calc, opts)`. Either or both
+      of `calc` and `opts` can be omitted.
+
+      ## Options
+      * `label`:         Override the default label `linear`.
+      * `id`:            A full `Identification` structure; otherwise calculated from the `label`.
+      * `throb`:         A `Throb` structure
+      """
+    def linear(name, calc, opts) when is_function(calc) and is_list(opts) do
+      opts
+      |> Opts.put_missing!(name: name, calc: calc)
+      |> Opts.provide_default(label: :linear)
+      |> Opts.calculate_unless_given(:id, from: :label,
+                                          using: & Cluster.Identification.new(name, &1))
+
+      |> then(& struct(Cluster.Linear, &1))
+    end
+
+    def linear(name, calc) when is_function(calc),
+        do: linear(name, calc, [])
+
+    def linear(name, opts) when is_list(opts),
+        do: linear(name, &Function.identity/1, opts)
+
+    def linear(name), do: linear(name, &Function.identity/1)
   end
-
-  def linear(name, calc) when is_function(calc),
-      do: linear(name, calc, [])
-
-  def linear(name, opts) when is_list(opts),
-      do: linear(name, &Function.identity/1, opts)
-
-  def linear(name), do: linear(name, &Function.identity/1)
-
 
   ## Specializations
 
@@ -89,9 +114,9 @@ defmodule AppAnimal.ClusterBuilders do
 
     updated_opts =
       opts
-      |> Opts.add_if_missing(initial_value: effectively_a_uuid,
-                             throb: throb)
-      |> Opts.add_missing!(label: :forward_unique)
+      |> Opts.provide_default(initial_value: effectively_a_uuid,
+                              throb: throb)
+      |> Opts.put_missing!(label: :forward_unique)
 
     calc = fn pulse_data, previously ->
       if pulse_data == previously,

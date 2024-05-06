@@ -79,31 +79,31 @@ defmodule Extras.OptsTest do
     end
   end
 
-  describe "add_missing!" do
+  describe "put_missing!" do
     test "augment an option list" do
-      UT.add_missing!([a: 1, z: 444], b: 2, c: 3)
+      UT.put_missing!([a: 1, z: 444], b: 2, c: 3)
       |> assert_good_enough(in_any_order [a: 1, z: 444, b: 2, c: 3])
     end
 
     test "it better actually *be* missing" do
       assert_raise(KeyError, "keys [:a] are already present", fn ->
-        UT.add_missing!([a: 1], b: 2, a: 3)
+        UT.put_missing!([a: 1], b: 2, a: 3)
       end)
     end
   end
 
-  describe "add_if_missing" do
+  describe "provide_default" do
     test "default if needed" do
-      UT.add_if_missing([a: 1, z: 444], a: "ignored", b: 3)
+      UT.provide_default([a: 1, z: 444], a: "ignored", b: 3)
       |> assert_good_enough(in_any_order [a: 1, b: 3, z: 444])
     end
   end
 
-  describe "create :if_present" do
+  describe "calculating a new key from another key" do
     test "does nothing if the key is not present" do
       f = fn _ -> :do_nothing end
       [a: 1]
-      |> UT.create(:derived, if_present: :source, with: f)
+      |> UT.calculate_unless_given(:derived, from: :source, using: f)
       |> assert_equals([a: 1])
     end
 
@@ -111,7 +111,7 @@ defmodule Extras.OptsTest do
       opts = [aux: 3, source: 1]
 
       opts
-      |> UT.create(:derived, if_present: :source, with: fn source ->
+      |> UT.calculate_unless_given(:derived, from: :source, using: fn source ->
         Keyword.fetch!(opts, :aux) + source
       end)
       |> assert_good_enough(in_any_order([aux: 3, source: 1, derived: 4]))
@@ -121,12 +121,7 @@ defmodule Extras.OptsTest do
     test "if the 'derived' exists, nothing is done, regardless of source" do
       opts = [aux: 3, source: 1, derived: 4]
       opts
-      |> UT.create(:derived, if_present: :source, with: &{opts, &1})
-      |> assert_good_enough(in_any_order(opts))
-
-      opts = [aux: 3, derived: 4]
-      opts
-      |> UT.create(:derived, with: &{opts, &1}, if_present: :source)
+      |> UT.calculate_unless_given(:derived, from: :source, using: &{opts, &1})
       |> assert_good_enough(in_any_order(opts))
     end
   end

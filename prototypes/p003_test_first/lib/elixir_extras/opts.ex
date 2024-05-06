@@ -88,7 +88,7 @@ defmodule AppAnimal.Extras.Opts do
     Enum.reverse(reversed_values)
   end
 
-  def add_missing!(opts, replacements) do
+  def put_missing!(opts, replacements) do
     already_existing =
       Keyword.keys(replacements)
       |> Enum.filter(& Keyword.has_key?(opts, &1))
@@ -97,10 +97,10 @@ defmodule AppAnimal.Extras.Opts do
            do: raise(KeyError, term: opts,
                                message: "keys #{inspect already_existing} are already present")
 
-    add_if_missing(opts, replacements)
+    provide_default(opts, replacements)
   end
 
-  def add_if_missing(opts, possible_replacements),
+  def provide_default(opts, possible_replacements),
       do: Keyword.merge(possible_replacements, opts)
 
 
@@ -120,8 +120,8 @@ defmodule AppAnimal.Extras.Opts do
   4. Order is not guaranteed.
   5. The source key/value pair is *not* removed.
   """
-  def create(opts, derived, positional) do
-    [source, f] = required!(positional, [:if_present, :with])
+  def calculate_unless_given(opts, derived, positional) do
+    [source, f] = required!(positional, [:from, :using])
     case Keyword.fetch(opts, source) do
       {:ok, source_value} ->
         opts
