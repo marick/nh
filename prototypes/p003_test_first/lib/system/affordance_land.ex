@@ -17,7 +17,7 @@ defmodule System.AffordanceLand do
   use AppAnimal
   use AppAnimal.StructServer
   use TypedStruct
-  alias System.{ActivityLogger,Switchboard,Pulse,Affordance,Action}
+  alias System.{ActivityLogger,Switchboard,Affordance,Action}
 
   typedstruct do
     field :p_switchboard, pid
@@ -26,34 +26,9 @@ defmodule System.AffordanceLand do
     field :affordances, list, default: []
   end
 
-  runs_in_sender do
-    @doc """
-    Given a name/pulse pair, send that affordance to the given name.
-
-    Affordances have the same name as the PerceptionEdge that receives them.
-    """
-    def cast__produce_spontaneous_affordance(p_affordances, named: name, pulse: pulse),
-        do: GenServer.cast(p_affordances, {:produce_this_affordance, name, pulse})
-
-  end
-
   runs_in_receiver do
     def init(opts) do
       {:ok, struct(__MODULE__, opts)}
-    end
-
-    def handle_cast({:produce_this_affordance, affordance_name, %Pulse{} = pulse},
-                    s_affordances) do
-      cluster_name = affordance_name # this is for documentation
-      cast_affordances_into_network(s_affordances.p_switchboard, pulse, cluster_name)
-      continue(s_affordances)
-    end
-
-    def handle_cast({:respond_to, action_name, affordances},
-                    s_affordances) do
-      s_affordances
-      |> Map.update!(:affordances, & &1 ++ [{action_name, affordances}])
-      |> continue()
     end
 
     def handle_cast({:take_action, %Action{} = action}, s_affordances) do
@@ -65,7 +40,7 @@ defmodule System.AffordanceLand do
 
       ActivityLogger.log_action_received(s_affordances.p_logger, action.type, action.data)
       for %Affordance{} = response <- responses do
-        cast_affordances_into_network(s_affordances.p_switchboard,
+        cast_affordance_into_network(s_affordances.p_switchboard,
                                       response.pulse, response.downstream)
       end
 
@@ -73,10 +48,22 @@ defmodule System.AffordanceLand do
       |> continue()
     end
 
+    def handle_cast({:pulse_to_cluster, opts}, s_affordances) do
+      [cluster_name, pulse] = Opts.required!(opts, [:to_cluster, :pulse])
+      cast_affordance_into_network(s_affordances.p_switchboard, pulse, cluster_name)
+      continue(s_affordances)
+    end
+
+    def handle_cast({:respond_to, action_name, affordances}, s_affordances) do
+      s_affordances
+      |> Map.update!(:affordances, & &1 ++ [{action_name, affordances}])
+      |> continue()
+    end
+
     unexpected_cast()
 
     private do
-      def cast_affordances_into_network(p_switchboard, pulse, cluster_name) do
+      def cast_affordance_into_network(p_switchboard, pulse, cluster_name) do
         Switchboard.cast(p_switchboard, :distribute_pulse,
                          carrying: pulse, to: [cluster_name])
       end

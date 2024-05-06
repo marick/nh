@@ -44,9 +44,9 @@ defmodule AppAnimal.TestHelpers.Animal do
 
   def spontaneous_affordance(p_affordances, opts) when is_pid(p_affordances) do
     [name, data] = Opts.parse(opts, [:named, carrying: Pulse.new])
-    AffordanceLand.cast__produce_spontaneous_affordance(p_affordances,
-                                                        named: name,
-                                                        pulse: Pulse.ensure(data))
+    AffordanceLand.cast(p_affordances, :pulse_to_cluster,
+                        to_cluster: name,
+                        pulse: Pulse.ensure(data))
   end
 
   ### Note that this needs only a small tweak to allow multiple canned responses (sending
