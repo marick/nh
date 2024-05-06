@@ -1,6 +1,6 @@
-alias AppAnimal.{Network,NetworkBuilder, Cluster}
+alias AppAnimal.{Network,Cluster}
 
-defmodule NetworkBuilder.Guts do
+defmodule Network.Grow do
   use AppAnimal
 
   def unordered(%Network{} = s_network, clusters) do

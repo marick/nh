@@ -3,7 +3,7 @@ alias AppAnimal.{Network,NetworkBuilder}
 defmodule NetworkBuilder do
   use AppAnimal
   use AppAnimal.StructServer
-  alias NetworkBuilder.Guts, as: Guts
+  alias Network.Grow
 
   runs_in_sender do
     def start_link(_), do: GenServer.start_link(__MODULE__, Network.empty)
@@ -40,7 +40,7 @@ defmodule NetworkBuilder do
         do: continue(s_network, returning: s_network)
 
     def handle_call({:apply, fun_name, rest_args}, _from, s_network) do
-      mutated = apply(Guts, fun_name, [s_network | rest_args])
+      mutated = apply(Grow, fun_name, [s_network | rest_args])
       continue(mutated, returning: :ok)
     end
 

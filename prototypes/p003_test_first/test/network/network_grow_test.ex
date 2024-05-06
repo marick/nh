@@ -1,10 +1,8 @@
-alias AppAnimal.{Network,NetworkBuilder}
+alias AppAnimal.Network
 
-# see also NetworkBuilderTest
-
-defmodule NetworkBuilder.GutsTest do
+defmodule Network.GrowTest do
   use AppAnimal.Case, async: true
-  alias NetworkBuilder.Guts, as: UT
+  alias Network.Grow, as: UT
 
   describe "handling duplicates" do
 
