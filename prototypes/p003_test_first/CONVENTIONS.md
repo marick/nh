@@ -1,4 +1,4 @@
-### Suffixes
+### Prefixes
 
 A particular struct, such as `Cluster.Circular`, may be referred to
 both as the struct itself and a pid that names a process that uses the
@@ -6,11 +6,8 @@ struct as its mutable state. Because I kept confusing the two, I
 established this convention that structures should be named
 `s_<structure>` and pids `p_<structure>`. 
 
-Similarly, there's sometimes a question of whether a name refers to
-the *field* of a structure or a *lens* that refers to that
-field. Therefore, lenses begin with `l_`.
-
-When it's not clear that a name is bound to a function, it begins with `f_`. A function-making function is prefixed with `mkfn_`. 
+When it's not clear that a name is bound to a function, it begins with
+`f_`. A function-making function is prefixed with `mkfn_`.
 
 Not super-happy about reinventing
 [Hungarian Notation](https://en.wikipedia.org/wiki/Hungarian_notation),
@@ -31,12 +28,32 @@ like `handle_call(pattern_for_message_x, _from, state)`.
 The point of the App Animal is to use asynchronous messaging almost
 exclusively. Making the module looke like a regular model with
 ordinary functions hides the asynchrony and I think is confusing. So
-I'd prefer not to use those sender functions. However, there's no way
-to attach doc strings to the individual `handle_cast` clauses so Oh Well.
+I'd prefer not to use those sender functions.
 
-However, I name them to emphasize their role.
+The `AppAnimal.StructServer` model supports that. It defines two
+(overridable) functions, `cast` and `call`. A call of this form is:
 
-### Naming the module under tests
+    Switchboard.cast(p_switchboard, :distribute_pulse,
+                                    carrying: pulse,
+                                    to: [destination_name])
+                                                       
+`cast` converts that to this:
+
+    GenServer.cast(p_switchboard, {:distribute_pulse,
+                                   carrying: pulse, to: [destination_name]})
+
+However, certain GenServers that use `call` heavily, like
+`AppAnimal.NetworkBuilder`, are more conventional in style and are
+called like this:
+
+    NB.branch(pid, at: name, with: list)
+    
+A disadvantage of this approach is that it gives no place to put
+`@doc` strings that will appear in the results of `mix docs`. (The
+`handle_cast` versions do not appear in module docs.)
+
+
+### Naming the module being tested
 
 When a test file is all about a particular module, I'll often alias
 the module _U_nder _T_test to `UT`. I don't know if that's an OK idea
@@ -44,18 +61,15 @@ or a bad idea that's a habit. Given that I don't have a refactoring
 IDE, it makes my ever-present name changes slightly less annoying and
 less of a sprawling commit.
 
-### The System.Pulse structure
 
-The Switchboard and the individual clusters communicate with
-`System.Pulse` structures. For convenience, the test support functions
-in `ClusterCase` create and decode those structures so that tests can
-be written in terms of raw data. There are (will be) exceptions in the
-case of Pulses of non-`normal` type.
+### Moveables
 
-When it comes to Affordance Land:
+`Pulse` structures carry data to clusters. `Actions` carry data into
+`AffordanceLand`.  `Affordance` structures carry data out of
+`AffordanceLand`. `Delay` structures request behavior from the
+`Timer`.
 
-* actions sent *into* it from ActionEdges are not wrapped in `Pulse`.
-* actions sent *from* it to PerceptionEdges *are* wrapped in a `Pulse`.
+All of these structures implement the `Moveable` structure.
 
 ### Affordances and their names
 
@@ -68,10 +82,41 @@ together. That is, whereas cluster-to-cluster communication happens by:
 3. sending the same Pulse to each of them.
 
 ... Affordance Land to cluster communication happens by sending a
-pulse to the cluster with the same name as the affordance.
+`Pulse` to the cluster with the same name as the affordance.
 
 
 ### Map names
 
 Use `x_to_y`. That's somewhat like the definition of a function as a
 *map* from a domain to a range.
+
+    field :name_to_id, %{atom => Cluster.Identification.t}, default: %{}
+
+### Lens use
+
+I'm still working out how to use lenses, but I'm converging on something like this:
+
+Structures defined with `typedstruct` and the `TypedStructLens` plugin
+have lenses for each field. Generally speaking, I avoid composed
+lenses that "reach into" a nested structure. That is, you won't often see
+a function within a module with a variable defined like this:
+
+    lens = Network.linear_clusters() |> Network.LinearSubnet.cluster_named(cluster.name)
+
+Instead, `Network` will have a top-level lens with that definition, so that its internal
+structure can be ignored by its clients. 
+
+Generally, lenses are used like `Map` functions, but with the
+`DepthAgnostic` module (universally aliased to `A`). That looks like
+this:
+
+    A.put(s_circular, :max_age, 12)
+    
+Although `:max_age` looks like a field name, it's actually the name of
+a lens that reaches into a substructure. As far as the client knows,
+it's at the top level.
+
+
+Lens functions can take arguments, in which case the function is called like this:
+
+    A.get_only(s_network, cluster_named(name))

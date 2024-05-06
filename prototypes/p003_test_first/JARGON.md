@@ -1,11 +1,21 @@
+#### Action
+
+An *action* is a data structure sent from a cluster into *affordance
+land*. It contains a name and some data.
+
 #### Action Edge
+
+An Action Edge is a cluster that sends an *action* into Affordance Land.
 
 #### Affordance
 
 As a descriptive term, used in the psychology sense:
 what the environment offers the individual. Affordances are received from *Affordance Land* by 
 *perception edges*. *Action edges* change Affordance Land to present new affordances to either
-some later perceptiuon edge or to the user.
+some later perception edge or to the user.
+
+`Affordance` is also a structure that contains the name of the
+destination *perception edge* and the *pulse* to be sent to it.
 
 #### Affordance Land
 
@@ -18,11 +28,13 @@ suppose that all app animal actions are about creating new
 affordances (perhaps for the app-animal itself, perhaps for the
 user).
 
-In implementation terms, Affordance Land can send affordances into
-the *network* when the app-animal *focuses* on it. These are messages
-that are requested: "I am focused on the text of this paragraph;
-please send any relevant affordances into the network." But
-affordances can also be generated asynchronously, by "noticing
+In implementation terms, Affordance Land can send affordances into the
+*network* of *clusters* when the app-animal *focuses* on it. These are of two types:
+
+* affordances that are requested: "I am focused on the text of this
+paragraph; please send any relevant affordances into the network."
+
+* But affordances can also be generated asynchronously, by "noticing
 something out of the corner of my eye". For example, movement of the
 cursor into a new paragraph will generate an affordance that causes
 the app animal to focus on that new paragraph.
@@ -39,8 +51,7 @@ A cluster represents a group of neurons that act together to respond
 to a *pulse* by calculating a function and sending the result to
 downstream clusters. In addition to data from the pulse, the cluster
 may use some stored configuration information. All clusters run
-asynchronously from other clusters. Clusters may be implemented by
-modules or maps of named functions.
+asynchronously from other clusters. 
 
 A **linear** cluster represents a plain function: each pulse spawns an
 independent Elixir process, which exits immediately after sending its
@@ -60,21 +71,32 @@ might remember the results of its last calculation and only send a
 *pulse* downstream if the value changes.
 
 As clusters throb, they count down to to their death, when they
-exit. (Perhaps later to be reborn.) However, incoming pulses can
-increase a cluster's strength or *lifespan*, so some might never end
-up exiting.
+exit. (Perhaps later to be reborn/reactivated.) However, incoming
+pulses can increase a cluster's strength or *lifespan*, so some might
+never end up exiting.
+
+#### Delay 
+
+A delay contains a duration and a *pulse*. After the duration, the
+timer sends the pulse to the cluster that requested the delay.
 
 #### Downstream
 
-A cluster sends *pulses* to other clusters. They are its "downstream".
+Any *cluster* is a node in a *network* of clusters. Any cluster has a
+series of outgoing edges. Think of them as axons that connect to other
+clusters. The "downstream" of a cluster is the transitive closure of
+all the out-edges. 
 
-#### Edges
+When a cluster finishes a computation, it sends *pulses*
+downstream. (It may also send *actions* into affordance-land or
+*delays* into the global timer, but they are not considered part of
+its downstream. You can think a *perception edge's* downstream as
+extending to include terminal *action edges*.
 
-Typically a cluster will receive a pulse from one cluster, run a
-calculation, and send the result *downstream*. However, some clusters
-receive an *affordance* from the *Affordance Land* or send pulses into
-it. (That latter is shorthand for metaphorically activating motor
-neural clusters that act on the world.
+Note that clusters can have different types. For example, a cluster
+might produce both an ordinary ("default") cluster and a "suppress"
+cluster. The two clusters will be routed to different recipient
+clusters.
 
 #### Focus
 
@@ -86,7 +108,7 @@ flow into the *network*.
 
 A *cluster* is idle if it's consuming no resources but is waiting for
 a *pulse*. In Elixir terms, this means it has no associated running
-process.
+process. A synonym for *waiting*.
 
 #### Lifespan
 
@@ -112,7 +134,7 @@ Pulses represent the act of sending an Elixir message
 *downstream*. They carry some amount of data (usually small). A pulse
 represents what, in a real brain, is the combined effect of the
 electrical ("action") potentials sent down axons by a number of
-neurons (which neurons I'm lumping together into a "*cluster*".
+neurons (which neurons I'm lumping together into a "*cluster*").
 
 #### Throbbing
 
@@ -123,10 +145,9 @@ it's died off because of a lack of work to do, it's called *waiting*.
 
 #### Trace
 
-A linear sequence of _clusters_. Each cluster is downstream of its
-predecessor, meaning it receives *pulses* from it. Traces are
-combined to form a *network*.
-
+A linear sequence of _clusters_. The first sends its *pulse* to the
+second, which calculates on it. If it produces a pulse, that pulse is
+sent to the third.
 
 #### Waiting
 
@@ -138,7 +159,7 @@ outgoing pulse.
 
 *Linear* clusters are always waiting. Technically, there's a brief
 time in which they are performing a calculation; however, no outside
-observer can see that.
+observer can see that. (The calculation is run in an Elixir Task.)
 
 *Circular* clusters are more relevant. The first pulse they receive
 starts them working. They continue to remain active (and retain some
