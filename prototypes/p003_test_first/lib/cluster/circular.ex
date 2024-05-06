@@ -1,4 +1,4 @@
-alias AppAnimal.{Cluster,System}
+alias AppAnimal.Cluster
 
 defmodule Cluster.Circular do
   @moduledoc """

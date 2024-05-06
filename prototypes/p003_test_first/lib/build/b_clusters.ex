@@ -1,6 +1,4 @@
-alias AppAnimal.{ClusterBuilders,System}
-
-defmodule ClusterBuilders do
+defmodule AppAnimal.ClusterBuilders do
   use AppAnimal
   alias Cluster.Throb
   alias System.{Pulse,Moveable,Delay,Action}

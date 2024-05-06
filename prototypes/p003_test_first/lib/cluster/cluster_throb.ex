@@ -1,7 +1,6 @@
-alias AppAnimal.{Cluster,System}
-alias Cluster.Throb
+alias AppAnimal.Cluster
 
-defmodule Throb do
+defmodule Cluster.Throb do
   @moduledoc """
   Captures the handling of throbbing by a circular cluster.
 
@@ -14,8 +13,8 @@ defmodule Throb do
   cluster will eventually "age out".
   """
   use AppAnimal
-  use TypedStruct
   alias System.Pulse
+  alias Cluster.Throb
 
   @type throb_handler :: (Throb.t, integer -> Throb.t)
   @type pulse_handler :: (Throb.t, any -> Throb.t)

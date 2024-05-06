@@ -1,7 +1,6 @@
-alias AppAnimal.{Cluster,System}
-alias Cluster.Calc
+alias AppAnimal.Cluster
 
-defmodule Calc do
+defmodule Cluster.Calc do
   @moduledoc """
 
   `Calc` is responsible for calling a clusters "calc" function and

@@ -1,5 +1,5 @@
 alias AppAnimal.Clusterish
-alias AppAnimal.System.Router
+alias AppAnimal.System
 
 defprotocol Clusterish do
   @spec name(t) :: atom
@@ -12,7 +12,7 @@ end
 
 defimpl Clusterish, for: Any do
   def name(clusterish), do: clusterish.name
-  def pid_for(clusterish, moveable), do: Router.pid_for(clusterish.router, moveable)
+  def pid_for(clusterish, moveable), do: System.Router.pid_for(clusterish.router, moveable)
 end
 
 
@@ -21,7 +21,7 @@ defmodule Clusterish.Minimal do
   use AppAnimal
   @derive [Clusterish]
   typedstruct enforce: true do
-    field :router, Router
+    field :router, System.Router
     field :name, atom
   end
 

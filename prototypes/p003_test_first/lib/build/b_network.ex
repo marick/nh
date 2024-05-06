@@ -1,8 +1,7 @@
-alias AppAnimal.{Network,NetworkBuilder}
-
-defmodule NetworkBuilder do
+defmodule AppAnimal.NetworkBuilder do
   use AppAnimal
   use AppAnimal.StructServer
+  alias AppAnimal.Network
   alias Network.Grow
 
   runs_in_sender do
