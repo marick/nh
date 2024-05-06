@@ -36,8 +36,6 @@ defmodule NetworkBuilder do
   end
 
   runs_in_receiver do
-    def init(network), do: ok(network)
-
     def handle_call(:get_network, _from, s_network),
         do: continue(s_network, returning: s_network)
 

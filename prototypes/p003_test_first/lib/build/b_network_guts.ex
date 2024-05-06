@@ -42,7 +42,7 @@ defmodule NetworkBuilder.Guts do
   end
 
   def install_routers(%Network{} = s_network, router) do
-    Network.CircularSubnet.add_router_to_all(s_network.p_circular_clusters, router)
+    Network.CircularSubnet.call(s_network.p_circular_clusters, :add_router_to_all, router)
 
     lens = Lens.key(:linear_clusters) |> Network.LinearSubnet.routers()
     A.put(s_network, lens, router)
@@ -62,7 +62,7 @@ defmodule NetworkBuilder.Guts do
       case cluster do
         %Cluster.Circular{} = _ ->
           pid = s_network.p_circular_clusters
-          Network.CircularSubnet.call__add_cluster(pid, cluster)
+          Network.CircularSubnet.call(pid, :add_cluster, cluster)
           s_network
         %Cluster.Linear{} = _ ->
           lens = Network.linear_clusters() |> Network.LinearSubnet.cluster_named(cluster.name)

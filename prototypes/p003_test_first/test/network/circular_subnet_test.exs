@@ -9,7 +9,7 @@ defmodule Network.CircularSubnetTest do
     test "A throbber is initialized with a set of *circular* clusters" do
       original = C.circular(:will_throb)
       pid = start_link_supervised!(UT)
-      UT.call__add_cluster(pid, original)
+      UT.call(pid, :add_cluster, original)
 
       assert [original] == UT.clusters(pid)
       assert [] == UT.throbbing_names(pid)
@@ -19,10 +19,10 @@ defmodule Network.CircularSubnetTest do
 
   test "setting routers" do
     pid = start_link_supervised!(UT)
-    UT.call__add_cluster(pid, C.circular(:first))
-    UT.call__add_cluster(pid, C.circular(:second))
+    UT.call(pid, :add_cluster, C.circular(:first))
+    UT.call(pid, :add_cluster, C.circular(:second))
 
-    UT.add_router_to_all(pid, "the new router")
+    UT.call(pid, :add_router_to_all, "the new router")
 
     [one, other] = UT.clusters(pid)
     assert one.router == "the new router"
@@ -40,15 +40,15 @@ defmodule Network.CircularSubnetTest do
     p_ut = start_link_supervised!(UT)
     original = C.circular(:original, kludge_a_calc)
     unused = C.circular(:unused)
-    UT.call__add_cluster(p_ut, original)
-    UT.call__add_cluster(p_ut, unused)
+    UT.call(p_ut, :add_cluster, original)
+    UT.call(p_ut, :add_cluster, unused)
 
 
-    UT.cast__distribute_pulse(p_ut, carrying: Pulse.new("value"), to: [:original])
+    UT.cast(p_ut, :distribute_pulse, carrying: Pulse.new("value"), to: [:original])
     assert {p_cluster, "value"} = assert_receive(_)
 
     # Another pulse goes to the same pid
-    UT.cast__distribute_pulse(p_ut, carrying: Pulse.new("value"), to: [:original])
+    UT.cast(p_ut, :distribute_pulse, carrying: Pulse.new("value"), to: [:original])
     assert {^p_cluster, "value"} = assert_receive(_)
 
     # A dead process removes it from the throbbing list.
@@ -68,10 +68,10 @@ defmodule Network.CircularSubnetTest do
 
     p_ut = start_link_supervised!(UT)
     original = C.circular(:original, kludge_a_calc)
-    UT.call__add_cluster(p_ut, original)
+    UT.call(p_ut, :add_cluster, original)
 
 
-    UT.cast__distribute_pulse(p_ut, carrying: Pulse.new(:oddity, "value"), to: [:original])
+    UT.cast(p_ut, :distribute_pulse, carrying: Pulse.new(:oddity, "value"), to: [:original])
     refute_receive(_)
 
     assert [] == UT.throbbing_pids(p_ut)

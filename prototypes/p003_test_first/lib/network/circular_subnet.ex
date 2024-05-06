@@ -27,21 +27,11 @@ defmodule Network.CircularSubnet do
     field :name_to_cluster, %{atom => Cluster.Circular.t}
   end
 
+  deflens routers,
+          do: name_to_cluster() |> Lens.map_values() |> Cluster.Circular.router()
+
+
   runs_in_sender do
-    def start_link(clusters_and_maybe_more) do
-      GenServer.start_link(__MODULE__, clusters_and_maybe_more)
-    end
-
-    def cast__distribute_pulse(pid, carrying: %Pulse{} = pulse, to: destination_names),
-        do: GenServer.cast(pid, {:distribute_pulse, carrying: pulse, to: destination_names})
-
-
-    def call__add_cluster(pid, cluster), do: GenServer.call(pid, [add: cluster])
-
-    def add_router_to_all(pid, router), do: GenServer.call(pid, [add_router_to_all: router])
-
-    def router_for(pid, name), do: GenServer.call(pid, [router_for: name])
-
     private do
       # For tests
       def names(pid), do: GenServer.call(pid, :names)
@@ -120,7 +110,7 @@ defmodule Network.CircularSubnet do
       continue(s_state, returning: values)
     end
 
-    def handle_call([router_for: name], _from, s_state) do
+    def handle_call({:router_for, name}, _from, s_state) do
       cluster = s_state.name_to_cluster[name]
       continue(s_state, returning: cluster.router)
     end
@@ -133,7 +123,7 @@ defmodule Network.CircularSubnet do
     end
 
 
-    def handle_call([add: %Cluster.Circular{} = cluster], _from, s_state) do
+    def handle_call({:add_cluster, %Cluster.Circular{} = cluster}, _from, s_state) do
       precondition Map.has_key?(s_state, :name_to_cluster)
 
       s_state
@@ -141,10 +131,9 @@ defmodule Network.CircularSubnet do
       |> continue(returning: :ok)
     end
 
-    def handle_call([add_router_to_all: router], _from, s_state) do
-      lens = Lens.key(:name_to_cluster) |> Lens.map_values() |> Cluster.Circular.router()
+    def handle_call({:add_router_to_all, router}, _from, s_state) do
       s_state
-      |> A.put(lens, router)
+      |> A.put(:routers, router)
       |> continue(returning: :ok)
     end
 

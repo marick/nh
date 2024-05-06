@@ -20,6 +20,7 @@ defmodule Network do
   use AppAnimal
   use TypedStruct
   alias System.Pulse
+  alias Network.{LinearSubnet,CircularSubnet}
 
   typedstruct do
     plugin TypedStructLens
@@ -31,15 +32,15 @@ defmodule Network do
     field :linear_names, MapSet.t(atom),                    default: MapSet.new
 
     field :p_circular_clusters, pid,                 enforce: true
-    field :linear_clusters, Network.LinearSubnet.t,  enforce: true
+    field :linear_clusters, LinearSubnet.t,  enforce: true
   end
 
   def empty() do
     {:ok, p_circular_clusters} =
-      Network.CircularSubnet.start_link([])
+      CircularSubnet.start_link([])
 
     struct!(__MODULE__, p_circular_clusters: p_circular_clusters,
-                        linear_clusters: Network.LinearSubnet.new([]))
+                        linear_clusters: LinearSubnet.new([]))
   end
 
   def full_identification(network, name), do: Map.fetch!(network.name_to_id, name)
@@ -56,13 +57,16 @@ defmodule Network do
 
   def router_for(network, name) do
     circular_case =
-      if MapSet.member?(network.circular_names, name),
-         do: Network.CircularSubnet.router_for(network.p_circular_clusters, name)
+      if MapSet.member?(network.circular_names, name) do
+        network.p_circular_clusters
+        |> CircularSubnet.call(:router_for, name)
+      end
 
     linear_case =
       if MapSet.member?(network.linear_names, name) do
-        lens = Network.LinearSubnet.cluster_named(name)
-        A.get_only(network.linear_clusters, lens).router
+        network.linear_clusters
+        |> A.get_only(LinearSubnet.cluster_named(name))
+        |> Map.get(:router)
       end
 
     circular_case || linear_case
@@ -89,12 +93,12 @@ defmodule Network do
     {circular_names, linear_names} =
       split_targets(network, names)
 
-    Network.CircularSubnet.cast__distribute_pulse(network.p_circular_clusters,
-                                                  carrying: pulse,
-                                                  to: circular_names)
-    Network.LinearSubnet.distribute_pulse(network.linear_clusters,
-                                         carrying: pulse,
-                                         to: linear_names)
+    CircularSubnet.cast(network.p_circular_clusters, :distribute_pulse,
+                        carrying: pulse,
+                        to: circular_names)
+    LinearSubnet.distribute_pulse(network.linear_clusters,
+                                  carrying: pulse,
+                                  to: linear_names)
     :no_return_value
   end
 
