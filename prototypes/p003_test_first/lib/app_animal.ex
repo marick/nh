@@ -1,6 +1,6 @@
-alias AppAnimal.{System,Network,Cluster,Duration,NetworkBuilder}
 
 defmodule AppAnimal do
+  alias AppAnimal.{System,Network,Duration,NetworkBuilder}
   alias System.{Switchboard, AffordanceLand, ActivityLogger}
   alias Network.Timer
   alias AppAnimal.Extras.DepthAgnostic, as: A
@@ -65,16 +65,16 @@ defmodule AppAnimal do
       require Logger
       use Private
       use TypedStruct
-      alias AppAnimal.Pretty
+      import Lens.Macros
+      alias AppAnimal.Extras
       import AppAnimal.Extras.Tuples
       import AppAnimal.Extras.Kernel
+      alias AppAnimal.Pretty
       alias AppAnimal.Extras.DepthAgnostic, as: A
-      alias AppAnimal.{Cluster,System}
-      alias Cluster.Identification
-      import Lens.Macros
       alias AppAnimal.Duration
       alias AppAnimal.Extras.Opts
-      alias System.MoveableAliases
+      alias AppAnimal.System.MoveableAliases
+      alias AppAnimal.KeyConceptAliases
     end
   end
 end

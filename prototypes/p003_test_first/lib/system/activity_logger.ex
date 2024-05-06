@@ -3,7 +3,7 @@ alias AppAnimal.System
 defmodule System.ActivityLogger do
   use AppAnimal
   use AppAnimal.StructServer
-  use System.MoveableAliases
+  use MoveableAliases
   require CircularBuffer
   alias AppAnimal.Cluster
 

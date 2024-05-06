@@ -1,4 +1,4 @@
-alias AppAnimal.{System,Network}
+alias AppAnimal.Network
 
 defmodule Network.CircularSubnetTest do
   use AppAnimal.Case, async: true

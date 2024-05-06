@@ -1,13 +1,11 @@
-alias AppAnimal.{ClusterBuilders,Cluster}
+alias AppAnimal.ClusterBuilders
 
 defmodule ClusterBuilders.LinearTest do
-  use ExUnit.Case, async: true
-  use FlowAssertions
-  alias ClusterBuilders, as: UT
+  use AppAnimal.Case, async: true
 
   describe "variants of linear creation" do
     test "only a name is specified" do
-      UT.linear(:name)
+      C.linear(:name)
       |> assert_fields(name: :name,
                        id: Cluster.Identification.new(:name, :linear),
                        calc: &Function.identity/1)
@@ -15,14 +13,14 @@ defmodule ClusterBuilders.LinearTest do
 
     test "can also add a calc function" do
       f = & &1 + 1
-      UT.linear(:name, f)
+      C.linear(:name, f)
       |> assert_fields(name: :name,
                        id: Cluster.Identification.new(:name, :linear),
                        calc: f)
     end
 
     test ".. or options" do
-      UT.linear(:name, label: :subtype)
+      C.linear(:name, label: :subtype)
       |> assert_fields(name: :name,
                        id: Cluster.Identification.new(:name, :subtype),
                        calc: &Function.identity/1)
@@ -30,7 +28,7 @@ defmodule ClusterBuilders.LinearTest do
 
     test ".. or both" do
       f = & &1+1
-      UT.linear(:name, f, label: :subtype)
+      C.linear(:name, f, label: :subtype)
       |> assert_fields(name: :name,
                        id: Cluster.Identification.new(:name, :subtype),
                        calc: f)

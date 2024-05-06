@@ -2,8 +2,8 @@ alias AppAnimal.System
 
 defmodule System.RouterTest do
   use AppAnimal.Case, async: true
+  use MoveableAliases
   alias System.Router, as: UT
-  alias System.{Pulse,Action}
 
   test "creation and use" do
     actual = UT.new(%{

@@ -1,11 +1,9 @@
 alias AppAnimal.System
 
-
 defmodule AppAnimal.ActivityLogAssertions do
   @moduledoc """
   Some fairly rudimentary assertions against the log. Perhaps more to come.
   """
-
 
   use AppAnimal
   use FlowAssertions

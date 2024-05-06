@@ -1,4 +1,4 @@
-alias AppAnimal.{NetworkBuilder}
+alias AppAnimal.NetworkBuilder
 
 defmodule NetworkBuilderTest do
   use AppAnimal.Case, async: true

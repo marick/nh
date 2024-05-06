@@ -1,12 +1,9 @@
 alias AppAnimal.Extras
 
 defmodule Extras.DepthAgnosticTest do
-  use ExUnit.Case, async: true
-  use FlowAssertions
+  use AppAnimal.Case, async: true
   alias Extras.DepthAgnostic, as: A   # as is customary
   import Lens.Macros
-
-  use TypedStruct
 
   typedstruct do
     plugin TypedStructLens

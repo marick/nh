@@ -1,10 +1,9 @@
 alias AppAnimal.Perceptions
 
 defmodule Perceptions.ParagraphGapsTest do
-  use ExUnit.Case, async: true
+  use AppAnimal.Case, async: true
   alias Perceptions.ParagraphGaps, as: UT
-  import FlowAssertions.TabularA
-  import FlowAssertions.MiscA
+
 
   describe "utilities" do
     test "decomposition into text and gaps" do

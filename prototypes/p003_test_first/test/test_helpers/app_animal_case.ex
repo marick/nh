@@ -3,17 +3,12 @@ defmodule AppAnimal.Case do
     quote do
       use ExUnit.Case, unquote(opts)
       use AppAnimal
+      use AppAnimal.KeyConceptAliases
       use FlowAssertions
       import FlowAssertions.TabularA
-
-      alias AppAnimal.{System,Network,Cluster,Extras}
-      alias System.{Switchboard,AffordanceLand,ActivityLogger}
-
       import AppAnimal.ActivityLogAssertions
       import AppAnimal.TestHelpers.MessageHelpers
-      alias AppAnimal.Duration
       alias AppAnimal.ClusterBuilders, as: C
-      alias Cluster.Identification
     end
   end
 end

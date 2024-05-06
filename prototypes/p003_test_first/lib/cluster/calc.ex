@@ -64,6 +64,7 @@ defmodule Cluster.Calc do
 
   """
   use AppAnimal
+  use KeyConceptAliases
   alias System.Pulse
 
   def run(calc, on: %Pulse{} = pulse, with_state: previously) when is_function(calc, 1) do

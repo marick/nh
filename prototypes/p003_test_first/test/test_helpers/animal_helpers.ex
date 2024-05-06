@@ -3,8 +3,8 @@ defmodule AppAnimal.TestHelpers.Animal do
   Use this package to get various conveniences for working an animal as a whole
   """
   use AppAnimal
-  alias AppAnimal.System
-  alias System.{Switchboard,AffordanceLand,Pulse,Affordance}
+  use KeyConceptAliases
+  use MoveableAliases
 
   # How the test starts things off
 

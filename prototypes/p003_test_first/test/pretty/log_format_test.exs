@@ -1,7 +1,8 @@
-defmodule AppAnimal.Pretty.LogFormatTest do
-  use ExUnit.Case, async: true
-  alias AppAnimal.Pretty.LogFormat, as: UT
-  import FlowAssertions.TabularA
+alias AppAnimal.Pretty
+
+defmodule Pretty.LogFormatTest do
+  use AppAnimal.Case, async: true
+  alias Pretty.LogFormat, as: UT
 
   test "modifying newlines" do
     returns = run_and_assert(&UT.handle_newlines/2)

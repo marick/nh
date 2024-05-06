@@ -1,8 +1,9 @@
-defmodule AppAnimal.Pretty.LogFormat do
+alias AppAnimal.Pretty
+
+defmodule Pretty.LogFormat do
   @moduledoc "Used to configure Logger. See root/config/config.exs"
 
-  alias AppAnimal.Pretty
-  use Private
+  use AppAnimal
   alias AppAnimal.System.ActivityLogger
 
   def format(_level, message, _timestamp, metadata) do

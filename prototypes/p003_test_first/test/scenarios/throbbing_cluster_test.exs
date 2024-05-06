@@ -6,7 +6,7 @@ defmodule Scenario.ThrobTest do
   @tag :test_uses_sleep
   test "actual throbbing / aging-out behavior" do
     first = C.circular(:first, fn _pulse -> self() end,
-                       throb: Cluster.Throb.counting_down_from(2))
+                       throb: Throb.counting_down_from(2))
 
     animal =
       configuration do: trace([first, forward_to_test()])

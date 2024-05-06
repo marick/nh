@@ -3,7 +3,7 @@ alias AppAnimal.Network
 defmodule Network.Timer do
   use AppAnimal
   use AppAnimal.StructServer
-  alias AppAnimal.System.Switchboard
+  use KeyConceptAliases
 
   typedstruct module: ThrobInstructions, enforce: true do
     field :interval, Integer

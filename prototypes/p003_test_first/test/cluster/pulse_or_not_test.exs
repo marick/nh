@@ -1,5 +1,4 @@
-alias AppAnimal.{Cluster,System,Scenario}
-
+alias AppAnimal.{Cluster,Scenario}
 
 defmodule Cluster.LinearClusterTest do
   use Scenario.Case, async: true

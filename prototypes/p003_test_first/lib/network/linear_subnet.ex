@@ -2,6 +2,7 @@ alias AppAnimal.Network
 
 defmodule Network.LinearSubnet do
   use AppAnimal
+  use KeyConceptAliases
   use MoveableAliases
 
   typedstruct enforce: true do

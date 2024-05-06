@@ -1,6 +1,5 @@
 alias AppAnimal.Scenario
 
-
 defmodule Scenario.SwitchParagraphTest do
   use Scenario.Case, async: true
   alias AppAnimal.Perceptions.ParagraphGaps

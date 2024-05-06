@@ -2,11 +2,8 @@ alias AppAnimal.{Scenario,Cluster}
 
 defmodule Cluster.ActionEdgeTest do
   use Scenario.Case, async: true
-  # alias System.ActivityLogger
 
   test "action edges call into Affordance Land, prompting messages out" do
-
-
     provocation send_test_pulse(to: :focus_on_new_paragraph, carrying: :nothing)
 
     configuration do

@@ -2,12 +2,11 @@ alias AppAnimal.{ClusterBuilders,Scenario}
 
 defmodule ClusterBuilders.FocusShiftTest do
   use Scenario.Case, async: true
-  alias ClusterBuilders, as: UT
-  alias System.{Pulse,Delay,Action}
+  use MoveableAliases
 
   def paragraph_focus(router_map \\ %{}) do
     router = System.Router.new(router_map)
-    UT.focus_shift(:my_focus,
+    C.focus_shift(:my_focus,
                    movement_time: Duration.seconds(0.05),
                    action_type: :perceive_paragraph_shape)
     |> Map.put(:router, router)

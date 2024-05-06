@@ -1,6 +1,8 @@
-defmodule AppAnimal.Pretty.ModuleTest do
+alias AppAnimal.Pretty
+
+defmodule Pretty.ModuleTest do
   use ExUnit.Case, async: true
-  alias AppAnimal.Pretty.Module, as: UT
+  alias Pretty.Module, as: UT
   import FlowAssertions.TabularA
 
   test "terse display for modules" do

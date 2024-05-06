@@ -5,12 +5,10 @@ defmodule Scenario.Case do
     quote do
       use ExUnit.Case, unquote(opts)
       use AppAnimal
+      use AppAnimal.KeyConceptAliases
       use FlowAssertions
       use Extras.TestAwareProcessStarter
 
-      # Universal enough to make top-level
-      alias AppAnimal.{System,Network,Extras,Duration}
-      alias System.{Switchboard,AffordanceLand,ActivityLogger}
       alias AppAnimal.Scenario
 
       import Scenario.ProcessKludgery, only: [animal: 0]

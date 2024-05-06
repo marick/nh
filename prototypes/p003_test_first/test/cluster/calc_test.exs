@@ -1,9 +1,9 @@
-alias AppAnimal.{Cluster,System}
+alias AppAnimal.Cluster
 
 defmodule Cluster.CalcTest do
   use AppAnimal.Case, async: true
+  use MoveableAliases
   alias Cluster.Calc, as: UT
-  alias System.{Pulse,Action}
 
   test "default pulses (only) are unwrapped" do
     becomes = run_and_assert(&UT.pulse_or_pulse_data/1)

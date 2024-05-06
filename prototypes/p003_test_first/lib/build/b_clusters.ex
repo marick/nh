@@ -1,7 +1,7 @@
 defmodule AppAnimal.ClusterBuilders do
   use AppAnimal
-  alias Cluster.Throb
-  alias System.{Pulse,Moveable,Delay,Action}
+  use KeyConceptAliases
+  use MoveableAliases
 
 
   def no_pulse(next_state),          do: {:no_result, next_state}

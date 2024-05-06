@@ -13,8 +13,8 @@ defmodule Cluster.Throb do
   cluster will eventually "age out".
   """
   use AppAnimal
+  use KeyConceptAliases
   alias System.Pulse
-  alias Cluster.Throb
 
   @type throb_handler :: (Throb.t, integer -> Throb.t)
   @type pulse_handler :: (Throb.t, any -> Throb.t)

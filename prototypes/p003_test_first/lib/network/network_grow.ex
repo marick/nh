@@ -1,7 +1,8 @@
-alias AppAnimal.{Network,Cluster}
+alias AppAnimal.Network
 
 defmodule Network.Grow do
   use AppAnimal
+  use KeyConceptAliases
 
   def unordered(%Network{} = s_network, clusters) do
     reducer =
