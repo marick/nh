@@ -35,8 +35,7 @@ defmodule Network do
   end
 
   def empty() do
-    {:ok, p_circular_clusters} =
-      CircularSubnet.start_link([])
+    {:ok, p_circular_clusters} = CircularSubnet.start_link([])
 
     struct!(__MODULE__, p_circular_clusters: p_circular_clusters,
                         linear_clusters: LinearSubnet.new([]))

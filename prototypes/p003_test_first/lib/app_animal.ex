@@ -45,7 +45,7 @@ defmodule AppAnimal do
     end
 
     def start_processes() do
-      {:ok, p_logger} = ActivityLogger.start_link
+      p_logger = compatibly_start_link(ActivityLogger, 1000)
       switchboard_struct = struct(Switchboard, p_logger: p_logger)
       p_switchboard = compatibly_start_link(Switchboard, switchboard_struct)
       p_affordances = compatibly_start_link(AffordanceLand,

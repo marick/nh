@@ -15,9 +15,9 @@ defmodule System.Switchboard do
   alias AppAnimal.Network
   alias System.ActivityLogger
 
-  typedstruct do
+  typedstruct enforce: true do
     field :network,         Network.t
-    field :p_logger, ActivityLogger.t, default: ActivityLogger.start_link |> okval
+    field :p_logger, ActivityLogger.t
   end
 
   @impl GenServer
