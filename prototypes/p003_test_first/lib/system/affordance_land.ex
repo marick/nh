@@ -27,12 +27,6 @@ defmodule System.AffordanceLand do
   end
 
   runs_in_sender do
-    # I'd rather not have this layer of indirection, but it's needed for tests to use
-    # start_supervised.
-    def start_link(opts) do
-      GenServer.start_link(__MODULE__, opts)
-    end
-
     @doc """
     Given a name/pulse pair, send that affordance to the given name.
 
@@ -51,8 +45,7 @@ defmodule System.AffordanceLand do
     def handle_cast({:produce_this_affordance, affordance_name, %Pulse{} = pulse},
                     s_affordances) do
       cluster_name = affordance_name # this is for documentation
-      Switchboard.cast(s_affordances.p_switchboard, :distribute_pulse,
-                       carrying: pulse, to: [cluster_name])
+      cast_affordances_into_network(s_affordances.p_switchboard, pulse, cluster_name)
       continue(s_affordances)
     end
 
@@ -72,8 +65,8 @@ defmodule System.AffordanceLand do
 
       ActivityLogger.log_action_received(s_affordances.p_logger, action.type, action.data)
       for %Affordance{} = response <- responses do
-        handle_cast({:produce_this_affordance, response.downstream, response.pulse},
-                    s_affordances)
+        cast_affordances_into_network(s_affordances.p_switchboard,
+                                      response.pulse, response.downstream)
       end
 
       %{s_affordances | affordances: remaining_affordances}
@@ -83,6 +76,11 @@ defmodule System.AffordanceLand do
     unexpected_cast()
 
     private do
+      def cast_affordances_into_network(p_switchboard, pulse, cluster_name) do
+        Switchboard.cast(p_switchboard, :distribute_pulse,
+                         carrying: pulse, to: [cluster_name])
+      end
+
       def append_programmed_responses(keywords, new) do
         wrapped = Enum.map(new, &wrap/1)
         keywords ++ wrapped

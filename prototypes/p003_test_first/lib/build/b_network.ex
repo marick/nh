@@ -9,6 +9,7 @@ defmodule NetworkBuilder do
     def start_link(_), do: GenServer.start_link(__MODULE__, Network.empty)
 
     def network(pid), do: GenServer.call(pid, :get_network)
+
     def trace(pid, list, opts \\ []) do
       GenServer.call(pid, {:apply, :trace, [list, opts]})
       pid
