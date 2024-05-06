@@ -1,4 +1,4 @@
-alias AppAnimal.{Network,System,Cluster}
+alias AppAnimal.{Network,Cluster}
 
 defmodule Network.CircularSubnet do
   @moduledoc """
@@ -17,8 +17,7 @@ defmodule Network.CircularSubnet do
   """
   use AppAnimal
   use AppAnimal.StructServer
-  use TypedStruct
-  alias System.Pulse
+  use MoveableAliases
 
   typedstruct enforce: true do
     plugin TypedStructLens

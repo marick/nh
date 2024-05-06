@@ -69,11 +69,12 @@ defmodule AppAnimal do
       import AppAnimal.Extras.Tuples
       import AppAnimal.Extras.Kernel
       alias AppAnimal.Extras.DepthAgnostic, as: A
-      alias AppAnimal.Cluster
+      alias AppAnimal.{Cluster,System}
       alias Cluster.Identification
       import Lens.Macros
       alias AppAnimal.Duration
       alias AppAnimal.Extras.Opts
+      alias System.MoveableAliases
     end
   end
 end

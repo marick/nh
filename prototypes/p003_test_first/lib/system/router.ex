@@ -2,7 +2,6 @@ alias AppAnimal.System
 
 defmodule System.Router do
   use AppAnimal
-  use TypedStruct
 
   typedstruct enforce: true do
     field :map, %{atom => pid}

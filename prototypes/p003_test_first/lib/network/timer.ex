@@ -40,11 +40,6 @@ defmodule Network.Timer do
 
   runs_in_receiver do
     @impl GenServer
-    def init(:no_state) do
-      ok(:no_state)
-    end
-
-    @impl GenServer
     def handle_call(%ThrobInstructions{} = instructions, _from, :no_state) do
       repeating(instructions)
       continue(:no_state, returning: :ok)

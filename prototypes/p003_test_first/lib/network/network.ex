@@ -1,4 +1,4 @@
-alias AppAnimal.{Network,System,Cluster}
+alias AppAnimal.{Network,Cluster}
 
 defmodule Network do
   @moduledoc """
@@ -18,8 +18,7 @@ defmodule Network do
   """
 
   use AppAnimal
-  use TypedStruct
-  alias System.Pulse
+  use MoveableAliases
   alias Network.{LinearSubnet,CircularSubnet}
 
   typedstruct do

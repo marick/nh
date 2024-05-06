@@ -1,4 +1,4 @@
-alias AppAnimal.{System,Network}
+alias AppAnimal.System
 
 defmodule System.Switchboard do
   @moduledoc """
@@ -12,8 +12,8 @@ defmodule System.Switchboard do
 
   use AppAnimal
   use AppAnimal.StructServer
-  use TypedStruct
-  alias System.{ActivityLogger}
+  alias AppAnimal.Network
+  alias System.ActivityLogger
 
   typedstruct do
     field :network,         Network.t

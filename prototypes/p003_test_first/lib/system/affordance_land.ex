@@ -16,7 +16,6 @@ defmodule System.AffordanceLand do
   """
   use AppAnimal
   use AppAnimal.StructServer
-  use TypedStruct
   alias System.{ActivityLogger,Switchboard,Affordance,Action}
 
   typedstruct do

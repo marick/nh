@@ -1,9 +1,8 @@
-alias AppAnimal.{Network,System,Cluster}
+alias AppAnimal.Network
 
 defmodule Network.LinearSubnet do
   use AppAnimal
-  use TypedStruct
-  alias System.Pulse
+  use MoveableAliases
 
   typedstruct enforce: true do
     field :name_to_cluster, %{atom => Cluster.t}
@@ -34,7 +33,7 @@ defmodule Network.LinearSubnet do
     Task.start(fn ->
       Calc.run(s_cluster.calc, on: pulse)
       |> Calc.maybe_pulse(fn moveable ->
-        System.Moveable.cast(moveable, s_cluster)
+        Moveable.cast(moveable, s_cluster)
       end)
       :there_is_no_return_value
     end)

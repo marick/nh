@@ -1,11 +1,20 @@
 alias AppAnimal.{System,Network,Clusterish}
 alias System.{Pulse, Action, Affordance, Delay}
-alias System.{Moveable}
+alias System.Moveable
 
 
 defprotocol Moveable do
   @spec cast(t, Clusterish.t) :: none
   def cast(moveable, cluster)
+end
+
+defmodule System.MoveableAliases do
+  defmacro __using__(_) do
+    quote do
+      alias System.Moveable
+      alias System.{Pulse, Action, Affordance, Delay}
+    end
+  end
 end
 
 

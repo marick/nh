@@ -1,10 +1,11 @@
-alias AppAnimal.{System,Cluster}
+alias AppAnimal.System
 
 defmodule System.ActivityLogger do
   use AppAnimal
   use AppAnimal.StructServer
+  use System.MoveableAliases
   require CircularBuffer
-  alias System.Pulse
+  alias AppAnimal.Cluster
 
   defstruct [:buffer, also_to_terminal: false]
 
