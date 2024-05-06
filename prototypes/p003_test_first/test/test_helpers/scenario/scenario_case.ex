@@ -1,27 +1,18 @@
-alias AppAnimal.{Scenario,Extras,TestHelpers}
+alias AppAnimal.{Scenario,Extras}
 
 defmodule Scenario.Case do
   defmacro __using__(opts) do
     quote do
-      use ExUnit.Case, unquote(opts)
-      use AppAnimal
-      use AppAnimal.KeyConceptAliases
-      use FlowAssertions
+      use AppAnimal.Case, unquote(opts)
       use Extras.TestAwareProcessStarter
-
-      alias AppAnimal.Scenario
 
       import Scenario.ProcessKludgery, only: [animal: 0]
       import Scenario.Configuration
       import Scenario.Provocations
 
-      import TestHelpers.ConnectTestToAnimal
-      import AppAnimal.TestHelpers.MessageHelpers
-      alias TestHelpers.Animal
-
-      import AppAnimal.ActivityLogAssertions
-
-      alias AppAnimal.ClusterBuilders, as: C
+      alias AppAnimal.TestHelpers
+      alias AppAnimal.TestHelpers.Animal
+      import TestHelpers.{ConnectTestToAnimal,MessageHelpers}
     end
   end
 end
