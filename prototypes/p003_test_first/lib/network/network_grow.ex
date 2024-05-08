@@ -100,25 +100,6 @@ defmodule Network.Grow do
 
     #
 
-    # I should be able to do this automagically with lenses, but don't know how.
-    def ensure_both_levels(out_edges, names, pulse_type) when is_list(names) do
-      Enum.reduce(names, out_edges, fn name, updated_out_edges ->
-        ensure_both_levels(updated_out_edges, name, pulse_type)
-      end)
-    end
-
-    def ensure_both_levels(out_edges, from_name, pulse_type) when is_atom(from_name) do
-      cond do
-        out_edges[from_name] == nil ->
-          Map.put(out_edges, from_name, %{})
-          |> ensure_both_levels(from_name, pulse_type)
-        out_edges[from_name][pulse_type] == nil ->
-          put_in(out_edges, [from_name, pulse_type], MapSet.new)
-        true ->
-          out_edges
-      end
-    end
-
     def add_out_edge_values(out_edges, [], _pulse_type), do: out_edges
 
     def add_out_edge_values(out_edges, [[upstream, downstream] | rest], pulse_type) do
@@ -134,7 +115,7 @@ defmodule Network.Grow do
 
       mutated =
         s_network.out_edges
-        |> ensure_both_levels(names, pulse_type)
+        |> Extras.Lens.ensure_nested_map_leaves([names, pulse_type], MapSet.new)
         |> add_out_edge_values(Enum.chunk_every(names, 2, 1, :discard), pulse_type)
       %{s_network | out_edges: mutated}
     end
@@ -143,7 +124,7 @@ defmodule Network.Grow do
       [from_name | destination_names] = names_from([from | destinations])
       mutated =
         s_network.out_edges
-        |> ensure_both_levels(from_name, pulse_type)
+        |> Extras.Lens.ensure_nested_map_leaves([from_name, pulse_type], MapSet.new)
         |> update_in([from_name, pulse_type], &MapSet.union(&1, MapSet.new(destination_names)))
       %{s_network | out_edges: mutated}
     end
