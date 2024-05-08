@@ -3,13 +3,7 @@ defmodule AppAnimal.ClusterBuilders do
   use KeyConceptAliases
   use MoveableAliases
 
-  section "slightly more pleasant return values" do
-    def no_pulse(next_state),          do: {:no_result, next_state}
-    def pulse(pulse_data, next_state), do: {:useful_result, pulse_data, next_state}
-    def pulse_and_save(data),          do: {:useful_result, data, data}
-  end
-
-  section "the two core functions: circular and linear" do
+  section "the two core functions: `circular` and `linear`" do
 
       @doc """
       Construct a circular cluster.
@@ -78,82 +72,92 @@ defmodule AppAnimal.ClusterBuilders do
     def linear(name), do: linear(name, &Function.identity/1)
   end
 
-  ## Specializations
 
-  def perception_edge(name) do
-    linear(name, label: :perception_edge)
-  end
+  section "specializations of linear clusters" do
 
-  def action_edge(name) do
-    linear(name, & System.Action.new(name, &1),
-           label: :action_edge)
-  end
-
-  def summarizer(name, calc) do
-    linear(name, calc, label: :summarizer)
-  end
-
-
-  def gate(name, predicate) do
-    f = fn pulse_data ->
-      if predicate.(pulse_data),
-         do: pulse_data,
-         else: :no_result
+    def perception_edge(name) do
+      linear(name, label: :perception_edge)
     end
 
-    linear(name, f, label: :gate)
-  end
-
-  def forward_unique(name, opts \\ []) do
-    alias Cluster.Throb
-
-    effectively_a_uuid = :erlang.make_ref()
-
-    throb = Throb.counting_down_from(Duration.frequent_glance,
-                                     on_pulse: &Throb.pulse_increases_lifespan/2)
-
-    updated_opts =
-      opts
-      |> Opts.provide_default(initial_value: effectively_a_uuid,
-                              throb: throb)
-      |> Opts.put_missing!(label: :forward_unique)
-
-    calc = fn pulse_data, previously ->
-      if pulse_data == previously,
-         do: :no_result,
-         else: pulse_and_save(pulse_data)
-    end
-    circular(name, calc, updated_opts)
-  end
-
-  def delay(name, duration) do
-    throb = Throb.counting_up_to(duration,
-                                 on_pulse: &Throb.pulse_zeroes_lifespan/2,
-                                 before_stopping: &Throb.pulse_current_value/2)
-
-    f_stash_pulse_data = fn pulse_data, _previously ->
-      {:no_result, pulse_data}
+    def action_edge(name) do
+      linear(name, & System.Action.new(name, &1),
+             label: :action_edge)
     end
 
-    circular(name, f_stash_pulse_data, throb: throb, label: :delay)
-  end
-
-  def focus_shift(name, opts) do
-    [movement_time, action_to_take] =
-      Opts.required!(opts, [:movement_time, :action_type])
-
-    # This is somewhat awkward. Because of how `Pulse` default structs are stripped
-    # down to their data before sent to the `calc` function, the function clause
-    # that's first to be exercised has to be listed second.
-    calc = fn
-      %Pulse{type: :movement_finished, data: focus_on} ->
-        Action.new(action_to_take, focus_on)
-      focus_on ->
-        Moveable.Collection.new([
-          Pulse.suppress,
-          Delay.new(movement_time, Pulse.new(:movement_finished, focus_on))])
+    def summarizer(name, calc) do
+      linear(name, calc, label: :summarizer)
     end
 
-    circular(name, calc, label: :focus_shift)
+    def gate(name, predicate) do
+      f = fn pulse_data ->
+        if predicate.(pulse_data),
+           do: pulse_data,
+           else: :no_result
+      end
+
+      linear(name, f, label: :gate)
+    end
+  end
+
+  section "specializations of circular structures" do
+
+    def forward_unique(name, opts \\ []) do
+      alias Cluster.Throb
+
+      effectively_a_uuid = :erlang.make_ref()
+
+      throb = Throb.counting_down_from(Duration.frequent_glance,
+                                       on_pulse: &Throb.pulse_increases_lifespan/2)
+
+      updated_opts =
+        opts
+        |> Opts.provide_default(initial_value: effectively_a_uuid,
+                                throb: throb)
+        |> Opts.put_missing!(label: :forward_unique)
+
+      calc = fn pulse_data, previously ->
+        if pulse_data == previously,
+           do: :no_result,
+           else: both_pulse_and_save(pulse_data)
+      end
+      circular(name, calc, updated_opts)
+    end
+
+    def delay(name, duration) do
+      throb = Throb.counting_up_to(duration,
+                                   on_pulse: &Throb.pulse_zeroes_lifespan/2,
+                                   before_stopping: &Throb.pulse_current_value/2)
+
+      f_stash_pulse_data = fn pulse_data, _previously ->
+        {:no_result, pulse_data}
+      end
+
+      circular(name, f_stash_pulse_data, throb: throb, label: :delay)
+    end
+
+    def focus_shift(name, opts) do
+      [movement_time, action_to_take] =
+        Opts.required!(opts, [:movement_time, :action_type])
+
+      # This is somewhat awkward. Because of how `Pulse` default structs are stripped
+      # down to their data before sent to the `calc` function, the function clause
+      # that's first to be exercised has to be listed second.
+      calc = fn
+        %Pulse{type: :movement_finished, data: focus_on} ->
+          Action.new(action_to_take, focus_on)
+        focus_on ->
+          Moveable.Collection.new([
+            Pulse.suppress,
+            Delay.new(movement_time, Pulse.new(:movement_finished, focus_on))])
+      end
+
+      circular(name, calc, label: :focus_shift)
+    end
+  end
+
+  private do
+    def no_pulse(next_state),          do: {:no_result, next_state}
+    def pulse(pulse_data, next_state), do: {:useful_result, pulse_data, next_state}
+    def both_pulse_and_save(data),     do: {:useful_result, data, data}
   end
 end
