@@ -49,7 +49,7 @@ defmodule Network.CircularSubnet do
     def init(clusters) do
       indexed =
         for c <- clusters, into: %{} do
-          {c.name, Cluster.Circular.new(c)}  # TODO: should use c itself when `Shape` goes away
+          {c.name, c}
         end
       {:ok, %__MODULE__{name_to_cluster: indexed}}
     end
