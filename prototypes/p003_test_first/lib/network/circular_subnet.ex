@@ -110,8 +110,8 @@ defmodule Network.CircularSubnet do
     end
 
     def handle_call({:router_for, name}, _from, s_state) do
-      cluster = s_state.name_to_cluster[name]
-      continue(s_state, returning: cluster.router)
+      router = s_state.name_to_cluster[name] |> A.get_only(:router)
+      continue(s_state, returning: router)
     end
 
     def handle_call({:throb_to_test, name, pid}, _from, s_state) do

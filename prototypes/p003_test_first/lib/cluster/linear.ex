@@ -8,7 +8,7 @@ defmodule Cluster.Linear do
   typedstruct enforce: true do
     plugin TypedStructLens
 
-    # Common among "Clusterish" structs (but I don't know a way to enforce it.)
+    # Common among "Clusterish" structs (but I don't know a good way to enforce it.)
     field :name, atom  # This is more convenient than :id.
     field :id, Cluster.Identification.t
     field :calc, fun

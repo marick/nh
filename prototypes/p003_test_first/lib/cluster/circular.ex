@@ -15,6 +15,10 @@ defmodule Cluster.Circular do
   typedstruct enforce: true do
     plugin TypedStructLens
 
+    # You may note that `Linear` consists entirely of the following fields;
+    # `Circular` is a superset. I can't think of a a solution that pleases me
+    # and works with Elixir.
+
     field :name, atom  # This is more convenient than `id`
     field :id, Cluster.Identification.t
     field :calc, fun
