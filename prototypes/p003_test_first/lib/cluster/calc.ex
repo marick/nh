@@ -62,7 +62,7 @@ defmodule Cluster.Calc do
   """
   use AppAnimal
   use KeyConceptAliases
-  alias System.Pulse
+  alias System.{Pulse,Moveable}
 
   def run(calc, on: %Pulse{} = pulse, with_state: previously) when is_function(calc, 1) do
     pulse_or_pulse_data(pulse)
@@ -84,14 +84,16 @@ defmodule Cluster.Calc do
 
   ####
 
-  @doc "Use `f_send_pulse` to send pulse data iff the `tuple` argument so indicates."
-  def maybe_pulse(tuple, f_send_pulse) when is_tuple(tuple) do
+  @doc "If the tuple contains a useful result, use `Moveable.cast` to send it."
+  def cast_useful_result(tuple, s_cluster,
+                         # overridden in tests
+                         f_send \\ &Moveable.cast/2) when is_tuple(tuple) do
     case elem(tuple, 0) do
       :no_result ->
         :do_nothing
       :useful_result ->
         pulse_data = elem(tuple, 1)
-        f_send_pulse.(pulse_data)
+        f_send.(pulse_data, s_cluster)
     end
     tuple
   end

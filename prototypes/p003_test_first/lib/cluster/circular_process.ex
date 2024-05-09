@@ -26,9 +26,7 @@ defmodule Cluster.CircularProcess do
                       on: pulse,
                       with_state: s_process_state.previously)
 
-    Calc.maybe_pulse(result, fn moveable ->
-      System.Moveable.cast(moveable, s_process_state)
-    end)
+    Calc.cast_useful_result(result, s_process_state)
 
     s_process_state
     |> A.put(:previously, Calc.next_state(result))

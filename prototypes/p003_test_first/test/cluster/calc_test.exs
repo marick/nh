@@ -125,15 +125,24 @@ defmodule Cluster.CalcTest do
     end
   end
 
-  test "maybe_pulse" do
-    UT.maybe_pulse({:no_result}, & Process.exit(self(), {:crash, &1}))
-    UT.maybe_pulse({:no_result, :state}, & Process.exit(self(), {:crash, &1}))
+  test "cast_useful_result" do
+    # Not testing Moveable, so inject a sending function
+    f_cast = fn moveable, cluster ->
+      send(self(), {moveable, cluster})
+    end
 
-    assert UT.maybe_pulse({:useful_result, 5}, &(send self(), &1)) == {:useful_result, 5}
-    assert_receive(5)
+    UT.cast_useful_result({:no_result}, :cluster_stand_in, f_cast)
+    refute_receive(_, 10)  # Note: even if it comes late, some test will fail.
 
-    assert UT.maybe_pulse({:useful_result, 5, "state"}, &(send self(), &1)) == {:useful_result, 5, "state"}
-    assert_receive(5)
+    UT.cast_useful_result({:no_result, :state}, :cluster_stand_in, f_cast)
+    refute_receive(_, 10)
+
+
+    UT.cast_useful_result({:useful_result, 5}, :cluster_stand_in, f_cast)
+    assert_receive({5, :cluster_stand_in})
+
+    assert UT.cast_useful_result({:useful_result, 5, :state_ignored}, :cluster_stand_in, f_cast)
+    assert_receive({5, :cluster_stand_in})
   end
 
   test "next_state" do
