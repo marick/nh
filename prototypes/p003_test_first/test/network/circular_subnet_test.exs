@@ -34,7 +34,7 @@ defmodule Network.CircularSubnetTest do
     p_test = self()
     kludge_a_calc = fn arg ->
       send(p_test, {self(), arg})
-      :no_result
+      C.pulse_ignored
     end
 
     p_ut = start_link_supervised!(UT)

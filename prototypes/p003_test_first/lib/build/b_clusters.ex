@@ -116,7 +116,7 @@ defmodule AppAnimal.ClusterBuilders do
       f = fn pulse_data ->
         if predicate.(pulse_data),
            do: pulse_data,
-           else: :no_result
+           else: no_result()
       end
 
       linear(name, f, label: :gate)
@@ -158,7 +158,7 @@ defmodule AppAnimal.ClusterBuilders do
       calc = fn pulse_data, previously ->
         if pulse_data == previously,
            do: :no_result,
-           else: both_pulse_and_save(pulse_data)
+           else: pulse_and_save_same_value(pulse_data)
       end
       circular(name, calc, updated_opts)
     end
@@ -226,9 +226,12 @@ defmodule AppAnimal.ClusterBuilders do
     end
   end
 
-  private do
-    def no_pulse(next_state),          do: {:no_result, next_state}
-    def pulse(pulse_data, next_state), do: {:useful_result, pulse_data, next_state}
-    def both_pulse_and_save(data),     do: {:useful_result, data, data}
+  section "helper functions for clients" do
+    def no_result,                       do: :no_result
+    # Maybe more clear for circular cluster:
+    def pulse_ignored,                   do: :no_result
+    def no_pulse(next_state),            do: {:no_result,                 next_state}
+    def pulse(pulse_data, next_state),   do: {:useful_result, pulse_data, next_state}
+    def pulse_and_save_same_value(data), do: {:useful_result, data,       data}
   end
 end

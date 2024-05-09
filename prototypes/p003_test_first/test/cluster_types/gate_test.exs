@@ -9,7 +9,7 @@ defmodule Cluster.GateTest do
     assert_fields(cluster, id: Identification.new(name: :example, label: :gate),
                            name: :example)
 
-    assert cluster.calc.(0) == :no_result
+    assert cluster.calc.(0) == C.no_result
     assert cluster.calc.(1) == 1
   end
 end

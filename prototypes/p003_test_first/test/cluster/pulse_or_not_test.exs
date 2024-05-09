@@ -33,7 +33,7 @@ defmodule Cluster.LinearClusterTest do
   end
 
   test "choosing not to pulse" do
-    calc = fn _ -> :no_result end
+    calc = fn _ -> C.pulse_ignored end
 
     provocation send_test_pulse(to: :first, carrying: 3)
 

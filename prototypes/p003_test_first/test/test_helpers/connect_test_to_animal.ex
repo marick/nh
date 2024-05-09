@@ -14,7 +14,7 @@ defmodule TestHelpers.ConnectTestToAnimal do
     # casting, which is not compatible with `assert_receive`
     kludge_a_calc = fn arg ->
       send(p_test, [arg, from: name])
-      :no_result
+      C.no_result
     end
 
     C.linear(name, kludge_a_calc, label: :test_endpoint)
