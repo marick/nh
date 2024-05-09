@@ -34,4 +34,9 @@ defmodule Cluster.Circular do
   private do
     def in_throb(key), do: throb() |> Lens.key!(key)
   end
+
+  def perhaps_pulse_final_value(s_circular) do
+    s_circular.throb.f_before_stopping.(s_circular, s_circular.previously)
+  end
+
 end

@@ -1,58 +1,61 @@
 alias AppAnimal.Cluster
 
 defmodule Cluster.CircularProcess do
+    @moduledoc """
+    Define a process that manages `Cluster.Circular` state.
+    """
   use AppAnimal
   use AppAnimal.StructServer
   use KeyConceptAliases
-  alias Cluster.Calc
+  alias Cluster.{Calc,Circular}
   alias System.Pulse
 
-  def start_link(cluster), do: GenServer.start_link(__MODULE__, cluster)
+  runs_in_sender do
+    # I still need to experiment with handling different types of
+    # pulses. Some should be hardcoded for all circulars (like
+    # `:suppress`), but I fear some may need to be handled in the
+    # `calc` function, and oh no what if I need to override a default
+    # hardcoded implementation?
+    #
+    # I doubt I'll always only have `:suppress`.
 
-
-  @impl GenServer
-  def init(%Cluster.Circular{} = starting_state) do
-    ok(starting_state)
-  end
-
-
-  def handle_cast([handle_pulse: %Pulse{type: :suppress}], s_process_state) do
-    s_process_state.throb.f_before_stopping.(s_process_state, s_process_state.previously)
-    stop(s_process_state)
-  end
-
-  def handle_cast([handle_pulse: %Pulse{} = pulse], s_process_state) do
-    result = Calc.run(s_process_state.calc,
-                      on: pulse,
-                      with_state: s_process_state.previously)
-
-    Calc.cast_useful_result(result, s_process_state)
-
-    s_process_state
-    |> A.put(:previously, Calc.just_next_state(result))
-    |> Map.update!(:throb, &Cluster.Throb.note_pulse(&1, result))
-    |> continue
-  end
-
-  @impl GenServer
-  def handle_cast([throb: n], s_process_state) do
-    {action, next_throb} = Cluster.Throb.throb(s_process_state.throb, n)
-
-    next_process_state = Map.put(s_process_state, :throb, next_throb)
-    case action do
-      :continue ->
-        continue(next_process_state)
-      :stop ->
-        s_process_state.throb.f_before_stopping.(s_process_state, s_process_state.previously)
-        stop(next_process_state)
+    def handle_cast([handle_pulse: %Pulse{type: :suppress}], s_circular) do
+      Circular.perhaps_pulse_final_value(s_circular)
+      stop(s_circular)
     end
-  end
 
-  # Test support
+    def handle_cast([handle_pulse: %Pulse{} = pulse], s_circular) do
+      result = Calc.run(s_circular.calc, on: pulse,
+                                         with_state: s_circular.previously)
 
-  @impl GenServer
-  def handle_call(:current_age, _from, s_process_state) do
-    lifespan = A.get_only(s_process_state, :current_age)
-    continue(s_process_state, returning: lifespan)
+      Calc.cast_useful_result(result, s_circular)
+
+      s_circular
+      |> A.put(:previously, Calc.just_next_state(result))
+      |> A.map(:throb, &Throb.note_pulse(&1, result))
+      |> continue
+    end
+
+    @impl GenServer
+    def handle_cast([throb: n], s_circular) do
+      {action, next_throb} = Throb.throb(s_circular.throb, n)
+
+      next_process_state = Map.put(s_circular, :throb, next_throb)
+      case action do
+        :continue ->
+          continue(next_process_state)
+        :stop ->
+          Circular.perhaps_pulse_final_value(next_process_state)
+          stop(next_process_state)
+      end
+    end
+
+    # Test support
+
+    @impl GenServer
+    def handle_call(:current_age, _from, s_circular) do
+      lifespan = A.get_only(s_circular, :current_age)
+      continue(s_circular, returning: lifespan)
+    end
   end
 end
