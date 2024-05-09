@@ -8,12 +8,10 @@ defmodule Cluster.Linear do
   typedstruct enforce: true do
     plugin TypedStructLens
 
-    field :name, atom  # This is useful for debugging
-    field :id, Cluster.Identification.t, default: "default value is temporary"
+    # Common among "Clusterish" structs (but I don't know a way to enforce it.)
+    field :name, atom  # This is more convenient than :id.
+    field :id, Cluster.Identification.t
     field :calc, fun
-    field :router, System.Router.t, default: :installed_later
+    field :router, System.Router.t
   end
-
-  def new(struct) when is_struct(struct), do: new(Map.from_struct(struct))
-  def new(opts), do: struct(__MODULE__, opts)
 end

@@ -16,7 +16,7 @@ defmodule Network.LinearSubnet do
 
   def new(clusters) do
     cluster_map =
-      for c <- clusters, into: %{}, do: {c.name, Cluster.Linear.new(c)}
+      for c <- clusters, into: %{}, do: {c.name, c}
     %__MODULE__{name_to_cluster: cluster_map}
   end
 
