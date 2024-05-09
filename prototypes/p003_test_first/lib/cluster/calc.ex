@@ -98,9 +98,9 @@ defmodule Cluster.Calc do
     tuple
   end
 
-  def next_state({:useful_result, _pulse_data, next_state}), do: next_state
-  def next_state({:no_result, next_state}), do: next_state
-
+  @doc "Extract the next state from a `Calc` return tuple."
+  def just_next_state({:useful_result, _pulse_data, next_state}), do: next_state
+  def just_next_state({:no_result, next_state}), do: next_state
 
   private do
     def pulse_or_pulse_data(%Pulse{type: :default} = pulse), do: pulse.data

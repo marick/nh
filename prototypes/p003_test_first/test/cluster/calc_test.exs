@@ -146,7 +146,7 @@ defmodule Cluster.CalcTest do
   end
 
   test "next_state" do
-    assert UT.next_state({:useful_result, "retval", "state"}) == "state"
-    assert UT.next_state({:no_result, "state"}) == "state"
+    assert UT.just_next_state({:useful_result, "retval", "state"}) == "state"
+    assert UT.just_next_state({:no_result, "state"}) == "state"
   end
 end

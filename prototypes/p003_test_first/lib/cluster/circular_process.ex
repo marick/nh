@@ -29,7 +29,7 @@ defmodule Cluster.CircularProcess do
     Calc.cast_useful_result(result, s_process_state)
 
     s_process_state
-    |> A.put(:previously, Calc.next_state(result))
+    |> A.put(:previously, Calc.just_next_state(result))
     |> Map.update!(:throb, &Cluster.Throb.note_pulse(&1, result))
     |> continue
   end
