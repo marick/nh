@@ -103,8 +103,10 @@ defmodule Cluster.Calc do
   def just_next_state({:no_result, next_state}), do: next_state
 
   private do
+    # Like `just_next_state`, but not used exernally
     def pulse_or_pulse_data(%Pulse{type: :default} = pulse), do: pulse.data
     def pulse_or_pulse_data(%Pulse{              } = pulse), do: pulse
+
 
     def assemble_result(calc_result,                 :there_is_no_state) do
       case calc_result do
@@ -132,10 +134,7 @@ defmodule Cluster.Calc do
                                  -> {:useful_result, ensure_moveable(untagged), previous_state}
       end
     end
-  end
 
-
-  private do
     def ensure_moveable(data) do
       case System.Moveable.impl_for(data) do
         nil -> Pulse.new(data)
