@@ -3,7 +3,7 @@ alias AppAnimal.Cluster
 defmodule Cluster.Calc do
   @moduledoc """
 
-  `Calc` is responsible for calling a clusters "calc" function and
+  `Calc` is responsible for calling a cluster's "calc" function and
   normalizing or "assembling" the result.
 
   ### Inputs
@@ -31,32 +31,29 @@ defmodule Cluster.Calc do
 
   A one-argument function should return one of these values:
 
-  `:no_result`  - there is to be no outgoing pulse or action
-  `Pulse.t`     - the result is to be sent downstream.
-  `Action.t`    - the result is to be sent downstream.
+  `:no_result`            - there is to be no outgoing pulse or action
+  `System.Moveable.t`     - the result to be sent somewhere. Where depends on
+                            the particular type implementing the `Moveable` protocol.
 
   As a convenience, any other value is wrapped in a :default Pulse.
 
   A two-argument function is more complicated because both outgoing
   data and changed state may be involved. `:no_result` is used to
-  indicate that there will be no pulse or action sent. There are two
+  indicate that there will be no `Moveable` sent. There are two
   cases:
 
-  :no_result              - no outgoing pulse, and the state is unchanged.
-  {:no_result, any}       - no outgoing pulse, and the state is changed.
+  :no_result                - no outgoing data, and the state is unchanged.
+  {:no_result, Moveable.t}  - no outgoing data, and the state is changed.
 
-  When there is to be a pulse, the canonical cases are:
+  When there is to be a result, the canonical case is:
 
-  {:useful_result, Pulse.t,  any} - the pulse is to be sent and the state is
-                                    to be changed.
-  {:useful_result, Action.t, any} - the pulse is to be sent and the state is
-                                    to be changed.
+  {:useful_result, Moveable.t,  any} - the data is to be sent and the state is
+                                       to be changed.
 
-  As in the one-argument case, if the second argument is not a
-  `Pulse.t` or `Action.t`, it is converted into a pulse
-  of `:default` type:
+  As in the one-argument case, if the second argument does not implement `Moveable`,
+  it is converted into a pulse of `:default` type:
 
-  {:useful_result, any, any}     - {:useful_result, Pulse.new(any), any}
+  {:useful_result, any, any} = {:useful_result, Pulse.new(any), any}
 
   It is also valid to return a single value (Pulse.t, `Action.t`, or
   something else).  That signals that a pulse is to be sent but the
