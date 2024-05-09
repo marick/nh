@@ -3,6 +3,8 @@ defmodule AppAnimal.Extras.Opts do
   Utilities for Keyword lists used for named arguments (usually called `opts` in Elixir).
   """
 
+  use AppAnimal
+
   @missing_key :unique_7347b976_d636_4521
 
   defp parse_one(key, {opts, parsed}) when is_atom(key) do
@@ -39,6 +41,24 @@ defmodule AppAnimal.Extras.Opts do
 
 
   ## Old stuff
+
+  def put_new!(opts, new) do
+    precondition all_keys_missing?(opts, Keyword.keys(new))
+
+    opts ++ new
+  end
+
+  def all_keys_missing?(opts, keys) do
+    m_opts = MapSet.new(Keyword.keys(opts))
+    m_keys = MapSet.new(keys)
+    MapSet.disjoint?(m_opts, m_keys)
+  end
+
+
+
+
+
+
 
 
   def replace_key(opts, maybe_present, replacement) do
