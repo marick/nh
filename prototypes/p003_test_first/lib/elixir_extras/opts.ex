@@ -109,6 +109,21 @@ defmodule AppAnimal.Extras.Opts do
 
       provide_default(opts, replacements)
     end
+
+
+    def rename(opts, outer, to: inner) do
+      case Keyword.pop_first(opts, outer) do
+        {nil, ^opts} ->
+          opts
+        {value, new_opts} ->
+          if Keyword.has_key?(opts, inner) do
+            message = "Keys `#{inspect inner}` and `#{inspect outer}` conflict"
+            raise(KeyError, term: opts, key: outer, message: message)
+          end
+          Keyword.put_new(new_opts, inner, value)
+      end
+    end
+
   end
 
 
@@ -174,18 +189,6 @@ defmodule AppAnimal.Extras.Opts do
     end
   end
 
-  def rename(opts, outer, to: inner) do
-    case Keyword.pop_first(opts, outer) do
-      {nil, ^opts} ->
-        opts
-      {value, new_opts} ->
-        if Keyword.has_key?(opts, inner) do
-          message = "Keys `#{inspect inner}` and `#{inspect outer}` conflict"
-          raise(KeyError, term: opts, key: outer, message: message)
-        end
-        Keyword.put_new(new_opts, inner, value)
-    end
-  end
 
 
   private do
