@@ -1,44 +1,89 @@
 defmodule AppAnimal.Extras.Opts do
   @moduledoc """
   Utilities for Keyword lists used for named arguments (usually called `opts` in Elixir).
+
+  These functions are not suited for keyword lists that contain duplicate keys.
   """
 
   use AppAnimal
 
   @missing_key :unique_7347b976_d636_4521
 
-  defp parse_one(key, {opts, parsed}) when is_atom(key) do
-    case Keyword.pop_first(opts, key, @missing_key) do
-      {@missing_key, _} ->
-        raise(KeyError, term: opts, key: key,
-                        message: "required argument #{inspect key} is missing")
-      {value, smaller_opts} ->
-        {smaller_opts, [value | parsed]}
+  section "decomposing keyword lists into individual bindings" do
+
+
+    @doc """
+    Extract option values into individual variables.
+
+    The `descriptions` are a list of individual keywords or {keyword, default} tuples:
+
+        iex> [_a, _b, _c] = parse([a: 1, b: 2], [:a, b: 3333, c: 4444])
+        [1, 2, 4444]
+
+    Notice that `:b` in the option list was not overwritten: defaults are not applied
+    if the key exists.
+
+    Ordinarily, an error is raised if the `opts` contains an extra key
+    (one unmentioned in the `descriptions`:
+
+        [a, b, c] = parse([a: 1, b: 2, fff: 3], [:a, b: 3333, c: 4444])   # error
+
+    That can be overruled with `extra_keys: :allowed`:
+
+        iex> [_a, _b, _c] = parse([a: 1, b: 2, fff: 3], [:a, b: 3333, c: 4444],
+        ...>                       extra_keys: :allowed)
+        [1, 2, 4444]
+
+    """
+    def parse(opts, descriptions, parse_opts \\ [extra_keys: :disallowed]) do
+      {remaining_opts, reversed} =
+        Enum.reduce(descriptions, {opts, []}, &parse_one/2)
+
+      if remaining_opts == [] or Keyword.get(parse_opts, :extra_keys) == :allowed do
+        Enum.reverse(reversed)
+      else
+        extra_keys = Keyword.keys(remaining_opts)
+        raise(KeyError, term: opts,
+                        message: "extra keys are not allowed: #{inspect extra_keys}")
+      end
+    end
+
+    @doc """
+    Extract all values from a keyword list into individual variables.
+
+    This is like `parse/3` except that no defaults are allowed.
+
+        iex> [_a, _b] = required!([a: 1, b: 2], [:a, :b])
+        [1, 2]
+
+    Like `parse/3`, it insists that all keys in the `opts` be mentioned. Unlike `parse/3`,
+    that cannot be overridden.
+
+        required!([a: 1, b: 2, ccccc: 33333], [:a, :b])
+    """
+    def required!(opts, keys) when is_list(keys) do
+      reducer = fn key, {values, opts} ->
+        case Keyword.pop_first(opts, key) do
+          {nil, _} ->
+            raise(KeyError, term: opts, key: key,
+                            message: "keyword argument #{inspect key} is missing")
+          {value, next_opts} ->
+            {[value | values], next_opts}
+        end
+      end
+
+      {reversed_values, remaining_opts} =
+        Enum.reduce(keys, {[], opts}, reducer)
+
+      unless remaining_opts == [] do
+        extra_keys = Keyword.keys(remaining_opts)
+        raise(KeyError, term: extra_keys,
+                        message: "extra keyword arguments: #{inspect extra_keys}")
+      end
+
+      Enum.reverse(reversed_values)
     end
   end
-
-  defp parse_one({key,default}, {opts, parsed}) do
-    case Keyword.pop_first(opts, key, @missing_key) do
-      {@missing_key, smaller_opts} ->
-        {smaller_opts, [default | parsed]}
-      {value, smaller_opts} ->
-        {smaller_opts, [value | parsed]}
-    end
-  end
-
-  def parse(original_opts, descriptions, local_opts \\ [extra_keys: :disallowed]) do
-    {remaining_opts, reversed} =
-      Enum.reduce(descriptions, {original_opts, []}, &parse_one/2)
-
-    if remaining_opts == [] or Keyword.get(local_opts, :extra_keys) == :allowed do
-      Enum.reverse(reversed)
-    else
-      extra_keys = Keyword.keys(remaining_opts)
-      raise(KeyError, term: original_opts,
-                      message: "extra keys are not allowed: #{inspect extra_keys}")
-    end
-  end
-
 
   ## Old stuff
 
@@ -85,28 +130,6 @@ defmodule AppAnimal.Extras.Opts do
     end
   end
 
-  def required!(original_opts, keys) when is_list(keys) do
-    reducer = fn key, {values, opts} ->
-      case Keyword.pop_first(opts, key) do
-        {nil, _} ->
-          raise(KeyError, term: original_opts, key: key,
-                          message: "keyword argument #{inspect key} is missing")
-        {value, next_opts} ->
-          {[value | values], next_opts}
-      end
-    end
-
-    {reversed_values, remaining_opts} =
-      Enum.reduce(keys, {[], original_opts}, reducer)
-
-    unless remaining_opts == [] do
-      extra_keys = Keyword.keys(remaining_opts)
-      raise(KeyError, term: extra_keys,
-                      message: "extra keyword arguments: #{inspect extra_keys}")
-    end
-
-    Enum.reverse(reversed_values)
-  end
 
   def put_missing!(opts, replacements) do
     already_existing =
@@ -161,6 +184,28 @@ defmodule AppAnimal.Extras.Opts do
           raise(KeyError, term: opts, key: outer, message: message)
         end
         Keyword.put_new(new_opts, inner, value)
+    end
+  end
+
+
+  private do
+    def parse_one(key, {opts, parsed}) when is_atom(key) do
+      case Keyword.pop_first(opts, key, @missing_key) do
+        {@missing_key, _} ->
+          raise(KeyError, term: opts, key: key,
+                          message: "required argument #{inspect key} is missing")
+        {value, smaller_opts} ->
+          {smaller_opts, [value | parsed]}
+      end
+    end
+
+    def parse_one({key,default}, {opts, parsed}) do
+      case Keyword.pop_first(opts, key, @missing_key) do
+        {@missing_key, smaller_opts} ->
+          {smaller_opts, [default | parsed]}
+        {value, smaller_opts} ->
+          {smaller_opts, [value | parsed]}
+      end
     end
   end
 end
