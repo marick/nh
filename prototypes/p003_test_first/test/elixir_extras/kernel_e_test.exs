@@ -1,5 +1,5 @@
 alias AppAnimal.Extras
 
-defmodule Extras.KernelTest do
+defmodule Extras.KernelETest do
   use AppAnimal.Case, async: true
 end
