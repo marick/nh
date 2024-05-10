@@ -14,7 +14,6 @@ defmodule Cluster.Throb do
   """
   use AppAnimal
   use KeyConceptAliases
-  alias System.Pulse
 
   @type throb_handler :: (Throb.t, integer -> Throb.t)
   @type pulse_handler :: (Throb.t, any -> Throb.t)
@@ -27,7 +26,6 @@ defmodule Cluster.Throb do
     field :f_throb,           throb_handler
 
     field :f_note_pulse,      pulse_handler,        default: &__MODULE__.pulse_does_nothing/1
-    field :f_before_stopping, (Cluster.t -> :none), default: &__MODULE__.stop_silently/2
   end
 
   section "Simple initialization" do
@@ -47,14 +45,11 @@ defmodule Cluster.Throb do
       ## Options:
         * `:on_pulse` - a function that takes a `Throb` and the new state of the process and
           adjusts the `current_age`.
-        * `before_stopping` - a function that takes the new state of the process.
-          It will typically send a pulse downstream.
       """
     def counting_down_from(max_age, opts \\ []) do
       opts
       |> Opts.put_new!(current_age: max_age, max_age: max_age, f_throb: &__MODULE__.count_down/2)
       |> Opts.rename(:on_pulse, to: :f_note_pulse)
-      |> Opts.rename(:before_stopping, to: :f_before_stopping)
       |> then(& struct(__MODULE__, &1))
     end
 
@@ -64,10 +59,10 @@ defmodule Cluster.Throb do
       The `before_stopping` function is called when the age hits `max_age`.
       """
     def counting_up_to(max_age, opts \\ []) do
-      new_opts =
-        [current_age: 0, max_age: max_age, f_throb: &__MODULE__.count_up/2] ++
-        Opts.replace_keys(opts, on_pulse: :f_note_pulse, before_stopping: :f_before_stopping)
-      struct(__MODULE__, new_opts)
+      opts
+      |> Opts.put_new!(current_age: 0, max_age: max_age, f_throb: &__MODULE__.count_up/2)
+      |> Opts.rename(:on_pulse, to: :f_note_pulse)
+      |> then(& struct(__MODULE__, &1))
     end
   end
 
@@ -103,18 +98,7 @@ defmodule Cluster.Throb do
     end
   end
 
-  section "Control over end-of-life behavior" do
-    def stop_silently(_s_process_state, _pulse_value) do
-      :no_return_value
-    end
-
-    def pulse_current_value(s_process_state, pulse_value) do
-      System.Moveable.cast(Pulse.new(pulse_value), s_process_state)
-    end
-  end
-
   section "Implementation of chosen behavior" do
-
     @doc "React to a periodic throb message."
     def throb(s_throb, n \\ 1),
         do: s_throb.f_throb.(s_throb, n)
@@ -123,5 +107,4 @@ defmodule Cluster.Throb do
     def note_pulse(s_throb),
         do: s_throb.f_note_pulse.(s_throb)
   end
-
 end

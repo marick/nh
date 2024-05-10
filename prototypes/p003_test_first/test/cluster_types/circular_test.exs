@@ -59,8 +59,8 @@ defmodule ClusterBuilders.CircularTest do
     end
 
     test "while_stopping option" do
-      C.circular(:first, while_stopping: &Circular.pulse_current_value/1)
-      |> assert_field(f_while_stopping: &Circular.pulse_current_value/1)
+      C.circular(:first, while_stopping: &Circular.pulse_saved_state/1)
+      |> assert_field(f_while_stopping: &Circular.pulse_saved_state/1)
     end
   end
 end

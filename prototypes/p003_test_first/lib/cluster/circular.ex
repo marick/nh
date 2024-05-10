@@ -4,10 +4,11 @@ defmodule Cluster.Circular do
   @moduledoc """
   The structure that serves as state for a circular process.
 
-  # The two fields different from a linear cluster are these:
+  # The fields different from a linear cluster are these:
 
-  - throb          - Controls the aging of this cluster and its eventual exit.
-  - previously     - The part of the state the `calc` function can channged.
+  - throb            - Controls the aging of this cluster and its eventual exit.
+  - previously       - The part of the state the `calc` function can channged.
+  - f_while_stopping - run a function before the process goes away.
   """
   use AppAnimal
   alias System.{Moveable, Pulse}
@@ -25,6 +26,7 @@ defmodule Cluster.Circular do
     field :calc, fun
     field :router, System.Router.t
 
+    # Special to `Circular`
     field :previously, any
     field :throb, Cluster.Throb.t
     field :f_while_stopping, (t -> :none)
@@ -42,13 +44,14 @@ defmodule Cluster.Circular do
       :no_return_value
     end
 
-    def pulse_current_value(s_circular) do
+    def pulse_saved_state(s_circular) do
       Moveable.cast(Pulse.new(s_circular.previously), s_circular)
+      :no_return_value
     end
 
     @doc "Call this before the owning process stops."
     def time_to_die(s_circular) do
-      s_circular.throb.f_before_stopping.(s_circular, s_circular.previously)
+      s_circular.f_while_stopping.(s_circular)
     end
   end
 end

@@ -6,6 +6,7 @@ defmodule AppAnimal.ClusterBuilders do
   use AppAnimal
   use KeyConceptAliases
   use MoveableAliases
+  alias Cluster.Circular
 
   section "the two core functions: `circular` and `linear`" do
 
@@ -16,10 +17,11 @@ defmodule AppAnimal.ClusterBuilders do
       of `calc` and `opts` can be omitted.
 
       ## Options
-      * `initial_value`: The starting value of the cluster's persistent state. (Default %{})
-      * `label`:         Override the default label `circular`.
-      * `id`:            A full `Identification` structure; otherwise calculated from the `label`.
-      * `throb`:         A `Throb` structure
+      * `initial_value`:   The starting value of the cluster's persistent state. (Default %{})
+      * `label`:   Override the default label `circular`.
+      * `id`:   A full `Identification` structure; otherwise calculated from the `label`.
+      * `throb`:  A `Throb` structure
+      * `while_stopping`: A function called when the process is about to stop/exit.
       """
     def circular(name, calc, opts) when is_function(calc) and is_list(opts) do
       opts
@@ -28,7 +30,7 @@ defmodule AppAnimal.ClusterBuilders do
       |> Opts.provide_default(previously: %{})
       |> Opts.provide_default(label: :circular,
                               throb: Throb.default,
-                              f_while_stopping: &Cluster.Circular.stop_silently/1)
+                              f_while_stopping: &Circular.stop_silently/1)
       |> Opts.calculate_unless_given(:id, from: :label,
                                           using: & Cluster.Identification.new(name, &1))
 
@@ -36,7 +38,7 @@ defmodule AppAnimal.ClusterBuilders do
                            name: name,
                            calc: calc)
 
-      |> then(& struct(Cluster.Circular, &1))
+      |> then(& struct(Circular, &1))
     end
 
     def circular(name, calc     ) when is_function(calc),
@@ -57,7 +59,6 @@ defmodule AppAnimal.ClusterBuilders do
       ## Options
       * `label`:         Override the default label `linear`.
       * `id`:            A full `Identification` structure; otherwise calculated from the `label`.
-      * `throb`:         A `Throb` structure
       """
     def linear(name, calc, opts) when is_function(calc) and is_list(opts) do
       opts
@@ -177,14 +178,16 @@ defmodule AppAnimal.ClusterBuilders do
       """
     def delay(name, duration) do
       throb = Throb.counting_up_to(duration,
-                                   on_pulse: &Throb.pulse_zeroes_lifespan/1,
-                                   before_stopping: &Throb.pulse_current_value/2)
+                                   on_pulse: &Throb.pulse_zeroes_lifespan/1)
 
       f_stash_pulse_data = fn pulse_data, _previously ->
         {:no_result, pulse_data}
       end
 
-      circular(name, f_stash_pulse_data, throb: throb, label: :delay)
+      circular(name, f_stash_pulse_data,
+               throb: throb,
+               label: :delay,
+               while_stopping: &Circular.pulse_saved_state/1)
     end
 
       @doc """

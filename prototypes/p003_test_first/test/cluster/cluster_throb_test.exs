@@ -20,16 +20,6 @@ defmodule Cluster.ThrobTest do
                        f_throb: &UT.count_down/2,
                        f_note_pulse: &UT.pulse_increases_lifespan/1)
     end
-
-    test "can also add a before_stopping: value" do
-      UT.counting_down_from(Duration.quanta(5),
-                            on_pulse: &UT.pulse_increases_lifespan/1,
-                            before_stopping: &UT.pulse_current_value/2)
-      |> assert_fields(current_age: Duration.quanta(5),
-                       max_age: Duration.quanta(5),
-                       f_throb: &UT.count_down/2,
-                       f_note_pulse: &UT.pulse_increases_lifespan/1)
-    end
   end
 
   describe "setting up a count-up" do
