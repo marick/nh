@@ -1,19 +1,29 @@
 defmodule AppAnimal.Extras.DepthAgnostic do
+  @moduledoc """
+  Lens getter/setter/etc functions that:
+  1. Take the structure to work on first, rather than second. This fits better
+     with pipelining:
+
+         ... |> A.put(MyStruct.lens(...), 5)
+
+  2. Allows the second argument to be a plain atom. When the first argument is a structure,
+     it itself is used to look up the module and the lens function. That allows for
+     calls that look a lot like typical `Map` functions that actual use lenses to
+     dig deep into a structure.
+
+         struct = %MyStruct{...}
+         alias Extras.DepthAgnostic, as: A
+
+         A.put(struct, :lens, value)
+
+         # Same as:
+
+         A.put(struct, MyStruct.lens(), value)
+
+     You have to use the other form when the lens function takes arguments.
+  """
   use Private
   import AppAnimal.Extras.DefDeeply
-
-  @doc """
-  In addition to reordering the arguments to follow the usual structure-first convention,
-  It creates a function that takes a symbol naming a function in the struct argument's
-  module. That is, given:
-
-     struct = %MyStruct{...}
-     alias Extras.DepthAgnostic, as: A
-
-  ... `A.put(struct, :lens, value)` is the same as:
-
-     Lens.put(struct, MyStruct.lens(), value)
-  """
 
   defdeeply put(s_struct, lens, value),
             do: Lens.put(lens, s_struct, value)
