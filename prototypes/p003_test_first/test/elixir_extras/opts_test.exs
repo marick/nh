@@ -149,10 +149,4 @@ defmodule Extras.OptsTest do
     end
   end
 
-  test "all_keys_missing?" do
-    assert UT.all_keys_missing?([a: 1, b: 1], [:c, :b, :a]) == false
-    assert UT.all_keys_missing?([a: 1, b: 1], [:c, :d]) == true
-  end
-
-
 end

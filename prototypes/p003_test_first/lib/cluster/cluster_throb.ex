@@ -48,7 +48,7 @@ defmodule Cluster.Throb do
       """
     def counting_down_from(max_age, opts \\ []) do
       opts
-      |> Opts.put_new!(current_age: max_age, max_age: max_age, f_throb: &__MODULE__.count_down/2)
+      |> Opts.put_missing!(current_age: max_age, max_age: max_age, f_throb: &__MODULE__.count_down/2)
       |> Opts.rename(:on_pulse, to: :f_note_pulse)
       |> then(& struct(__MODULE__, &1))
     end
@@ -60,7 +60,7 @@ defmodule Cluster.Throb do
       """
     def counting_up_to(max_age, opts \\ []) do
       opts
-      |> Opts.put_new!(current_age: 0, max_age: max_age, f_throb: &__MODULE__.count_up/2)
+      |> Opts.put_missing!(current_age: 0, max_age: max_age, f_throb: &__MODULE__.count_up/2)
       |> Opts.rename(:on_pulse, to: :f_note_pulse)
       |> then(& struct(__MODULE__, &1))
     end

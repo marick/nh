@@ -85,18 +85,30 @@ defmodule AppAnimal.Extras.Opts do
     end
   end
 
-  ## Old stuff
+  section "constructing new option lists" do
+    @doc """
+    Add all the key/value tuples from `additions` into `opts`.
 
-  def put_new!(opts, new) do
-    precondition all_keys_missing?(opts, Keyword.keys(new))
+        iex> put_missing!([a: 1], [b: 1])
+        [a: 1, b: 1]
 
-    opts ++ new
-  end
+    This differs from just appending the lists because `put_missing!` insists that the
+    two keyword lists not contain any keys in common. (That's what the ! signifies;
+    think of it as akin to `Keyword.fetch!/2`.)
 
-  def all_keys_missing?(opts, keys) do
-    m_opts = MapSet.new(Keyword.keys(opts))
-    m_keys = MapSet.new(keys)
-    MapSet.disjoint?(m_opts, m_keys)
+    """
+
+    def put_missing!(opts, replacements) do
+      already_existing =
+        Keyword.keys(replacements)
+        |> Enum.filter(& Keyword.has_key?(opts, &1))
+
+      unless already_existing == [],
+             do: raise(KeyError, term: opts,
+                                 message: "keys #{inspect already_existing} are already present")
+
+      provide_default(opts, replacements)
+    end
   end
 
 
@@ -130,18 +142,6 @@ defmodule AppAnimal.Extras.Opts do
     end
   end
 
-
-  def put_missing!(opts, replacements) do
-    already_existing =
-      Keyword.keys(replacements)
-      |> Enum.filter(& Keyword.has_key?(opts, &1))
-
-    unless already_existing == [],
-           do: raise(KeyError, term: opts,
-                               message: "keys #{inspect already_existing} are already present")
-
-    provide_default(opts, replacements)
-  end
 
   def provide_default(opts, possible_replacements),
       do: Keyword.merge(possible_replacements, opts)
