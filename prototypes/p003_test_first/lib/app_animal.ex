@@ -80,15 +80,16 @@ defmodule AppAnimal do
       use Private
       use TypedStruct
       import Lens.Macros
-      alias AppAnimal.Extras
-      import Extras.{TuplesE,KernelE,Nesting}
+
       alias AppAnimal.Pretty
-      alias AppAnimal.Extras.DepthAgnostic, as: A
-      alias AppAnimal.Extras.LensE
       alias AppAnimal.Duration
-      alias AppAnimal.Extras.Opts
       alias AppAnimal.System.MoveableAliases
       alias AppAnimal.KeyConceptAliases
+
+      alias AppAnimal.Extras
+      import Extras.{TuplesE,KernelE,Nesting}
+      alias Extras.DepthAgnostic, as: A
+      alias Extras.{LensE,Opts}
     end
   end
 end
