@@ -90,11 +90,13 @@ defmodule AppAnimal.Extras.Opts do
     Add all the key/value tuples from `additions` into `opts`.
 
         iex> put_missing!([a: 1], [b: 1])
-        [a: 1, b: 1]
+        [b: 1, a: 1]
 
     This differs from just appending the lists because `put_missing!` insists that the
     two keyword lists not contain any keys in common. (That's what the ! signifies;
     think of it as akin to `Keyword.fetch!/2`.)
+
+    As there are no duplicates, the order of keys is irrelevant.
 
     """
 
@@ -110,17 +112,24 @@ defmodule AppAnimal.Extras.Opts do
       provide_default(opts, replacements)
     end
 
+    @doc """
+    Rename a key that's meaningful externally to one that's more meaningful internal.
 
-    def rename(opts, outer, to: inner) do
-      case Keyword.pop_first(opts, outer) do
+        iex> rename([a: 1], :a, to: :much_more_meaningful)
+        [much_more_meaningful: 1]
+
+    (Like the way Swift does things.)
+    """
+    def rename(opts, opts_name, to: internal_name) do
+      case Keyword.pop_first(opts, opts_name) do
         {nil, ^opts} ->
           opts
         {value, new_opts} ->
-          if Keyword.has_key?(opts, inner) do
-            message = "Keys `#{inspect inner}` and `#{inspect outer}` conflict"
-            raise(KeyError, term: opts, key: outer, message: message)
+          if Keyword.has_key?(opts, internal_name) do
+            message = "Keys `#{inspect internal_name}` and `#{inspect opts_name}` conflict"
+            raise(KeyError, term: opts, key: opts_name, message: message)
           end
-          Keyword.put_new(new_opts, inner, value)
+          Keyword.put_new(new_opts, internal_name, value)
       end
     end
 

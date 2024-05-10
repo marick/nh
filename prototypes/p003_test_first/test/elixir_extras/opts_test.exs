@@ -4,6 +4,7 @@ defmodule Extras.OptsTest do
   use ExUnit.Case, async: true
   use FlowAssertions
   alias Extras.Opts, as: UT
+  doctest UT, import: true
 
   describe "parse" do
     test "simple case" do
