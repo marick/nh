@@ -109,7 +109,7 @@ defmodule AppAnimal.Extras.Opts do
              do: raise(KeyError, term: opts,
                                  message: "keys #{inspect already_existing} are already present")
 
-      provide_default(opts, replacements)
+      put_when_needed(opts, replacements)  # we know it's needed from the above.
     end
 
     @doc """
@@ -160,35 +160,19 @@ defmodule AppAnimal.Extras.Opts do
           opts
       end
     end
+
+    @doc """
+    Insert {key, value} pairs for keys not present in `opts`.
+
+         iex> put_when_needed([present: 1], [present: "unused", absent: 2])
+         [absent: 2, present: 1]
+
+    You should not depend on the order of `Keyword` entries.
+    """
+
+    def put_when_needed(opts, possible_replacements),
+        do: Keyword.merge(possible_replacements, opts)
   end
-
-
-
-
-
-
-
-
-  def replace_key(opts, maybe_present, replacement) do
-    case Keyword.pop_first(opts, maybe_present, :no_such_value) do
-      {:no_such_value, _} ->
-        opts
-      {value, new_opts} ->
-        Keyword.put(new_opts, replacement, value)
-    end
-  end
-
-  def replace_keys(opts, replacements) do
-    Enum.reduce(replacements, opts, fn {key, value}, acc ->
-      replace_key(acc, key, value)
-    end)
-  end
-
-
-  def provide_default(opts, possible_replacements),
-      do: Keyword.merge(possible_replacements, opts)
-
-
 
   private do
     def parse_one(key, {opts, parsed}) when is_atom(key) do

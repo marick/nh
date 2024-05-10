@@ -32,24 +32,6 @@ defmodule Extras.OptsTest do
     end
   end
 
-  describe "replace key" do
-    test "key is present" do
-      actual = UT.replace_key([a: 3, b: 4], :a, :z)
-      assert actual == [z: 3, b: 4]
-    end
-
-    test "missing key is fine" do
-      original = [a: 3, b: 4]
-      actual = UT.replace_key(original, :missing, :z)
-      assert actual == original
-    end
-  end
-
-  test "replace keys" do
-    actual = UT.replace_keys([a: 3, b: 4, left_alone: 5], b: :bb, a: :aa, missing: :unused)
-    assert actual == [aa: 3, bb: 4, left_alone: 5]
-  end
-
   describe "required!" do
     test "fetches N keys" do
       assert UT.required!([a: 2, b: 3], [:a, :b]) == [2, 3]
@@ -81,11 +63,9 @@ defmodule Extras.OptsTest do
     end
   end
 
-  describe "provide_default" do
-    test "default if needed" do
-      UT.provide_default([a: 1, z: 444], a: "ignored", b: 3)
-      |> assert_good_enough(in_any_order [a: 1, b: 3, z: 444])
-    end
+  test "put if needed" do
+    UT.put_when_needed([a: 1, z: 444], a: "ignored", b: 3)
+    |> assert_good_enough(in_any_order [a: 1, b: 3, z: 444])
   end
 
   describe "calculating a new key from another key" do

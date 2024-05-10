@@ -27,10 +27,10 @@ defmodule AppAnimal.ClusterBuilders do
       opts
       |> Opts.rename(:initial_value, to: :previously)
       |> Opts.rename(:while_stopping, to: :f_while_stopping)
-      |> Opts.provide_default(previously: %{})
-      |> Opts.provide_default(label: :circular,
-                              throb: Throb.default,
-                              f_while_stopping: &Circular.stop_silently/1)
+      |> Opts.put_when_needed(previously: %{})
+      |> Opts.put_when_needed(label: :circular,
+                                         throb: Throb.default,
+                                         f_while_stopping: &Circular.stop_silently/1)
       |> Opts.calculate_unless_given(:id, from: :label,
                                           using: & Cluster.Identification.new(name, &1))
 
@@ -63,7 +63,7 @@ defmodule AppAnimal.ClusterBuilders do
     def linear(name, calc, opts) when is_function(calc) and is_list(opts) do
       opts
       |> Opts.put_missing!(name: name, calc: calc)
-      |> Opts.provide_default(label: :linear)
+      |> Opts.put_when_needed(label: :linear)
       |> Opts.calculate_unless_given(:id, from: :label,
                                           using: & Cluster.Identification.new(name, &1))
 
@@ -154,7 +154,7 @@ defmodule AppAnimal.ClusterBuilders do
 
       updated_opts =
         opts
-        |> Opts.provide_default(initial_value: effectively_a_uuid,
+        |> Opts.put_when_needed(initial_value: effectively_a_uuid,
                                 throb: throb)
         |> Opts.put_missing!(label: :forward_unique)
 
