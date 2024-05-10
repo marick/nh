@@ -32,7 +32,7 @@ defmodule Cluster.CircularProcess do
 
       s_circular
       |> A.put(:previously, Calc.just_next_state(result))
-      |> A.map(:throb, &Throb.note_pulse(&1, result))
+      |> A.map(:throb, &Throb.note_pulse/1)
       |> continue
     end
 

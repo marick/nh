@@ -147,7 +147,7 @@ defmodule AppAnimal.ClusterBuilders do
       effectively_a_uuid = :erlang.make_ref()
 
       throb = Throb.counting_down_from(Duration.frequent_glance,
-                                       on_pulse: &Throb.pulse_increases_lifespan/2)
+                                       on_pulse: &Throb.pulse_increases_lifespan/1)
 
       updated_opts =
         opts
@@ -175,7 +175,7 @@ defmodule AppAnimal.ClusterBuilders do
       """
     def delay(name, duration) do
       throb = Throb.counting_up_to(duration,
-                                   on_pulse: &Throb.pulse_zeroes_lifespan/2,
+                                   on_pulse: &Throb.pulse_zeroes_lifespan/1,
                                    before_stopping: &Throb.pulse_current_value/2)
 
       f_stash_pulse_data = fn pulse_data, _previously ->

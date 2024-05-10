@@ -40,7 +40,7 @@ defmodule Cluster.ForwardUniqueTest do
     test "a cluster can age out and start over" do
       alias Cluster.Throb
 
-      throb = Throb.counting_down_from(2, on_pulse: &Throb.pulse_increases_lifespan/2)
+      throb = Throb.counting_down_from(2, on_pulse: &Throb.pulse_increases_lifespan/1)
       first = C.forward_unique(:first, throb: throb)
 
       animal =
