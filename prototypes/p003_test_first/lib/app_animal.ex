@@ -81,7 +81,7 @@ defmodule AppAnimal do
       use TypedStruct
       import Lens.Macros
       alias AppAnimal.Extras
-      import Extras.{Tuples,KernelE,Nesting}
+      import Extras.{TuplesE,KernelE,Nesting}
       alias AppAnimal.Pretty
       alias AppAnimal.Extras.DepthAgnostic, as: A
       alias AppAnimal.Extras.LensE

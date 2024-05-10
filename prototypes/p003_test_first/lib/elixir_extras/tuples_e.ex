@@ -1,4 +1,4 @@
-defmodule AppAnimal.Extras.Tuples do
+defmodule AppAnimal.Extras.TuplesE do
   def ok(value), do: {:ok, value}
   def okval({:ok, value}), do: value
 end
