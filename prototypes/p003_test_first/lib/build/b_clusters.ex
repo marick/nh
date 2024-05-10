@@ -24,9 +24,11 @@ defmodule AppAnimal.ClusterBuilders do
     def circular(name, calc, opts) when is_function(calc) and is_list(opts) do
       opts
       |> Opts.rename(:initial_value, to: :previously)
+      |> Opts.rename(:while_stopping, to: :f_while_stopping)
       |> Opts.provide_default(previously: %{})
       |> Opts.provide_default(label: :circular,
-                              throb: Throb.default)
+                              throb: Throb.default,
+                              f_while_stopping: &Cluster.Circular.stop_silently/1)
       |> Opts.calculate_unless_given(:id, from: :label,
                                           using: & Cluster.Identification.new(name, &1))
 

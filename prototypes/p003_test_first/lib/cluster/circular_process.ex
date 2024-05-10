@@ -20,7 +20,7 @@ defmodule Cluster.CircularProcess do
     # I doubt I'll always only have `:suppress`.
 
     def handle_cast([handle_pulse: %Pulse{type: :suppress}], s_circular) do
-      Circular.perhaps_pulse_final_value(s_circular)
+      Circular.time_to_die(s_circular)
       stop(s_circular)
     end
 
@@ -45,7 +45,7 @@ defmodule Cluster.CircularProcess do
         :continue ->
           continue(next_process_state)
         :stop ->
-          Circular.perhaps_pulse_final_value(next_process_state)
+          Circular.time_to_die(next_process_state)
           stop(next_process_state)
       end
     end

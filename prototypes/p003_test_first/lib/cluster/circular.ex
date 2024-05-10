@@ -1,4 +1,4 @@
-alias AppAnimal.Cluster
+alias AppAnimal.{Cluster,System}
 
 defmodule Cluster.Circular do
   @moduledoc """
@@ -10,6 +10,7 @@ defmodule Cluster.Circular do
   - previously     - The part of the state the `calc` function can channged.
   """
   use AppAnimal
+  alias System.{Moveable, Pulse}
   @derive [AppAnimal.Clusterish]
 
   typedstruct enforce: true do
@@ -26,6 +27,7 @@ defmodule Cluster.Circular do
 
     field :previously, any
     field :throb, Cluster.Throb.t
+    field :f_while_stopping, (t -> :none)
   end
 
   deflens current_age(), do: in_throb(:current_age)
@@ -35,8 +37,18 @@ defmodule Cluster.Circular do
     def in_throb(key), do: throb() |> Lens.key!(key)
   end
 
-  def perhaps_pulse_final_value(s_circular) do
-    s_circular.throb.f_before_stopping.(s_circular, s_circular.previously)
-  end
+  section "Control over end-of-life behavior" do
+    def stop_silently(_s_circular) do
+      :no_return_value
+    end
 
+    def pulse_current_value(s_circular) do
+      Moveable.cast(Pulse.new(s_circular.previously), s_circular)
+    end
+
+    @doc "Call this before the owning process stops."
+    def time_to_die(s_circular) do
+      s_circular.throb.f_before_stopping.(s_circular, s_circular.previously)
+    end
+  end
 end
