@@ -2,6 +2,7 @@ alias AppAnimal.Clusterish
 alias AppAnimal.System
 
 defprotocol Clusterish do
+  @moduledoc "Functions common to linear and circular clusters."
   @spec name(t) :: atom
   def name(clusterish)
 

@@ -1,8 +1,10 @@
 alias AppAnimal.{Cluster,System}
 
 defmodule Cluster.Linear do
+  @moduledoc """
+  A type of cluster whose `calc` function is run inside a `Task`.
+  """
   use AppAnimal
-  use TypedStruct
   @derive [AppAnimal.Clusterish]
 
   typedstruct enforce: true do

@@ -1,10 +1,12 @@
 alias AppAnimal.Cluster
 
 defmodule Cluster.Identification do
+  @moduledoc """
+  Currently, a name and a descriptive label suggesting cluster customizations or uses.
+  """
   use TypedStruct
 
   typedstruct enforce: true do
-
     field :label, atom
     field :name,  atom
   end
