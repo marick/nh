@@ -50,18 +50,6 @@ defmodule Extras.OptsTest do
     assert actual == [aa: 3, bb: 4, left_alone: 5]
   end
 
-  describe "copy" do
-    test "when original exists" do
-      actual = UT.copy([a: 3, b: 4], :c, from_existing: :a)
-      assert_good_enough(actual, in_any_order([a: 3, b: 4, c: 3]))
-    end
-
-    test "when it doesn't" do
-      actual = UT.copy([a: 3, b: 4], :c, from_existing: :nonexistent)
-      assert actual == [a: 3, b: 4]
-    end
-  end
-
   describe "required!" do
     test "fetches N keys" do
       assert UT.required!([a: 2, b: 3], [:a, :b]) == [2, 3]

@@ -184,15 +184,6 @@ defmodule AppAnimal.Extras.Opts do
     end)
   end
 
-  def copy(opts, new_key, from_existing: old_key) do
-    case Keyword.fetch(opts, old_key) do
-      {:ok, value} ->
-        Keyword.put_new(opts, new_key, value)
-      :error ->
-        opts
-    end
-  end
-
 
   def provide_default(opts, possible_replacements),
       do: Keyword.merge(possible_replacements, opts)
