@@ -1,8 +1,8 @@
 alias AppAnimal.Extras
 
-defmodule Extras.LensTest do
+defmodule Extras.LensETest do
   use AppAnimal.Case, async: true
-  alias Extras.Lens, as: UT
+  alias Extras.LensE, as: UT
 
   describe "nested_map_leaves" do
     test "success cases" do
@@ -13,7 +13,6 @@ defmodule Extras.LensTest do
       one_branch = %{a: %{b: 3}}
       [one_branch, [:a, :b]]     |> produces.([3])
       [one_branch, [[:a], [:b]]] |> produces.([3])
-
 
       three_by_three = %{
         a: %{aa:   1, bb:   2, cc:   3},

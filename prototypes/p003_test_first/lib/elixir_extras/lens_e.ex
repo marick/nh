@@ -1,4 +1,4 @@
-defmodule AppAnimal.Extras.Lens do
+defmodule AppAnimal.Extras.LensE do
   @moduledoc "Additional functions to make lenses, particularly for nested structs or maps."
 
   use AppAnimal

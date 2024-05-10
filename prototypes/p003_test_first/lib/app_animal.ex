@@ -84,6 +84,7 @@ defmodule AppAnimal do
       import Extras.{Tuples,KernelE,Nesting}
       alias AppAnimal.Pretty
       alias AppAnimal.Extras.DepthAgnostic, as: A
+      alias AppAnimal.Extras.LensE
       alias AppAnimal.Duration
       alias AppAnimal.Extras.Opts
       alias AppAnimal.System.MoveableAliases
