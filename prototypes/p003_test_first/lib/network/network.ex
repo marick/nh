@@ -3,18 +3,12 @@ alias AppAnimal.{Network,Cluster}
 defmodule Network do
   @moduledoc """
   The structure that represents the static structure of clusters and the connections
-  between them. Also has the responsibility for delivering a pulse to a set of clusters.
+  between them. Also has the responsibility for delivering a pulse to a set of clusters,
+  though that responsibility is delegated to `LinearSubnet` and `CircularSubnet`.
 
-  There are two types of clusters: circular (gensyms) and linear
-  (tasks). "Delivering a cluster" works rather differently for each, so this module
-  tries to hide that.
-
-  A linear cluster is just wrapped in a Task and started. Purely asynchronous.
-
-  A circular cluster has to be `start_linked` (a synchronous
-  operation), then the pulse can be `cast` at it, which is the same
-  sort of asynchronous action as starting a Task.
-
+  `AppAnimal.Network.Grow` contains functions that build the
+  network. `AppAnimal.NetworkBuilder` is a process that coordinates
+  the calls in a way convenient for writing scenario tests.
   """
 
   use AppAnimal

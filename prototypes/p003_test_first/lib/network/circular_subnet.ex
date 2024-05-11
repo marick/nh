@@ -8,8 +8,11 @@ defmodule Network.CircularSubnet do
   This keeps track of the lifespan of throbbing clusters. It also sends messages
   to them. This hides knowledge of lifespans inside this module.
 
-  This module stores all the circular clusters known in the `Network`, not just the
-  ones that are actively throbbing.
+  This module stores all the circular clusters known in the
+  `AppAnimal.Network`, not just the ones that are actively throbbing.
+
+  A circular cluster has to be `start_linked` (a synchronous
+  operation), then a pulse can be `cast` at it.
   """
   use AppAnimal
   use AppAnimal.StructServer

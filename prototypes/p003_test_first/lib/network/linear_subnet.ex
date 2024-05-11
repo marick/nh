@@ -1,6 +1,12 @@
 alias AppAnimal.Network
 
 defmodule Network.LinearSubnet do
+  @moduledoc """
+  Manage the subset of clusters that are `Cluster.Linear`.
+
+  Mainly distributing pulses, which is done by wrapping the cluster's `calc`
+  function in a `Task` and starting the task. No return value is awaited.
+  """
   use AppAnimal
   use KeyConceptAliases
   use MoveableAliases
