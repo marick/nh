@@ -33,76 +33,83 @@ defmodule Network.CircularSubnet do
       {:ok, %__MODULE__{name_to_cluster: indexed}}
     end
 
-    @impl GenServer
-    # Eventually, there may be a more sophisticated way of deciding whether a
-    # pulse should start the cluster throbbing. For now, it's only done for `:default`
-    # pulses.
-    def handle_cast({:distribute_pulse, opts}, s_subnet) do
-      [pulse, names] = Opts.required!(opts, [:carrying, :to])
-      if pulse.type == :default,
-         do:   distribute_then_continue(pulse, names, ensure_started(s_subnet, names)),
-         else: distribute_then_continue(pulse, names,                s_subnet        )
-    end
+    handle_CAST do
 
-    def handle_cast(:time_to_throb, s_subnet) do
-      throb(BiMap.values(s_subnet.name_to_pid))
-      continue(s_subnet)
-    end
+      # Eventually, there may be a more sophisticated way of deciding whether a
+      # pulse should start the cluster throbbing. For now, it's only done for `:default`
+      # pulses.
+      def handle_cast({:distribute_pulse, opts}, s_subnet) do
+        [pulse, names] = Opts.required!(opts, [:carrying, :to])
+        if pulse.type == :default,
+           do:   distribute_then_continue(pulse, names, ensure_started(s_subnet, names)),
+           else: distribute_then_continue(pulse, names,                s_subnet        )
+      end
 
-    @impl GenServer
-    def handle_info({:DOWN, _, :process, pid, _}, s_subnet) do
-      s_subnet.name_to_pid
-      |> BiMap.delete_value(pid)
-      |> then(& Map.put(s_subnet, :name_to_pid, &1))
-      |> continue
+      def handle_cast(:time_to_throb, s_subnet) do
+        throb(BiMap.values(s_subnet.name_to_pid))
+        continue(s_subnet)
+      end
     end
 
 
-    # This is used for testing as a way to get internal values of clusters.
-    @impl GenServer
-    def handle_call([forward: getter_name, to: name], _from, s_subnet) do
-      result =
-        BiMap.get(s_subnet.name_to_pid, name)
-        |> GenServer.call(getter_name)
-      continue(s_subnet, returning: result)
+    handle_INFO do
+
+      def handle_info({:DOWN, _, :process, pid, _}, s_subnet) do
+        s_subnet.name_to_pid
+        |> BiMap.delete_value(pid)
+        |> then(& Map.put(s_subnet, :name_to_pid, &1))
+        |> continue
+      end
     end
 
-    def handle_call(:clusters, _from, s_subnet) do
-      values = Map.values(s_subnet.name_to_cluster)
-      continue(s_subnet, returning: values)
+
+    handle_CALL do
+
+      def handle_call({:router_for, name}, _from, s_subnet) do
+        router = s_subnet.name_to_cluster[name] |> A.get_only(:router)
+        continue(s_subnet, returning: router)
+      end
+
+      def handle_call({:add_cluster, %Cluster.Circular{} = cluster}, _from, s_subnet) do
+        precondition Map.has_key?(s_subnet, :name_to_cluster)
+
+        s_subnet
+        |> A.put(name_to_cluster() |> Lens.key(cluster.name), cluster)
+        |> continue(returning: :ok)
+      end
+
+      def handle_call({:add_router_to_all, router}, _from, s_subnet) do
+        s_subnet
+        |> A.put(:routers, router)
+        |> continue(returning: :ok)
+      end
+
+      section "test helpers" do
+        # This is used for testing as a way to get internal values of clusters.
+        @impl GenServer
+        def handle_call([forward: getter_name, to: name], _from, s_subnet) do
+          result =
+            BiMap.get(s_subnet.name_to_pid, name)
+            |> GenServer.call(getter_name)
+          continue(s_subnet, returning: result)
+        end
+
+        def handle_call(:clusters, _from, s_subnet) do
+          values = Map.values(s_subnet.name_to_cluster)
+          continue(s_subnet, returning: values)
+        end
+
+        def handle_call(:throbbing_names, _from, s_subnet) do
+          keys = BiMap.keys(s_subnet.name_to_pid)
+          continue(s_subnet, returning: keys)
+        end
+
+        def handle_call(:throbbing_pids, _from, s_subnet) do
+          values = BiMap.values(s_subnet.name_to_pid)
+          continue(s_subnet, returning: values)
+        end
+      end
     end
-
-    def handle_call(:throbbing_names, _from, s_subnet) do
-      keys = BiMap.keys(s_subnet.name_to_pid)
-      continue(s_subnet, returning: keys)
-    end
-
-    def handle_call(:throbbing_pids, _from, s_subnet) do
-      values = BiMap.values(s_subnet.name_to_pid)
-      continue(s_subnet, returning: values)
-    end
-
-    def handle_call({:router_for, name}, _from, s_subnet) do
-      router = s_subnet.name_to_cluster[name] |> A.get_only(:router)
-      continue(s_subnet, returning: router)
-    end
-
-    def handle_call({:add_cluster, %Cluster.Circular{} = cluster}, _from, s_subnet) do
-      precondition Map.has_key?(s_subnet, :name_to_cluster)
-
-      s_subnet
-      |> A.put(name_to_cluster() |> Lens.key(cluster.name), cluster)
-      |> continue(returning: :ok)
-    end
-
-    def handle_call({:add_router_to_all, router}, _from, s_subnet) do
-      s_subnet
-      |> A.put(:routers, router)
-      |> continue(returning: :ok)
-    end
-
-    unexpected_call()
-    unexpected_cast()
 
     private do
       def ensure_started(s_subnet, names) do

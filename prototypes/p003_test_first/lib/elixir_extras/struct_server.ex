@@ -74,6 +74,31 @@ defmodule AppAnimal.StructServer do
     end
   end
 
+  defmacro handle_CAST(do: block) do
+    quote do
+      @impl GenServer
+      unquote(block)
+      def handle_cast(arg, _state), do: oops(arg)
+    end
+  end
+
+  defmacro handle_CALL(do: block) do
+    quote do
+      @impl GenServer
+      unquote(block)
+      def handle_call(arg, _from, _state), do: oops(arg)
+    end
+  end
+
+  defmacro handle_INFO(do: block) do
+    quote do
+      @impl GenServer
+      unquote(block)
+      def handle_info(arg, _state), do: oops(arg)
+    end
+  end
+
+
   # special names for my style of genserver. Allows pipelines.
   def continue(s_state),
       do: {:noreply, s_state}  # for `cast`
