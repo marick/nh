@@ -27,7 +27,7 @@ defmodule NetworkBuilderTest do
 
       network = UT.network(m)
 
-      Network.CircularSubnet.clusters(network.p_circular_clusters)
+      Network.CircularSubnet.call(network.p_circular_clusters, :clusters)
       |> assert_good_enough(in_any_order([first, second]))
 
       assert network.circular_names == MapSet.new([:first, :second])
@@ -68,7 +68,7 @@ defmodule NetworkBuilderTest do
 
       network = UT.network(m)
 
-      Network.CircularSubnet.clusters(network.p_circular_clusters)
+      Network.CircularSubnet.call(network.p_circular_clusters, :clusters)
       |> assert_equals([second])
 
       assert A.get_only(network.linear_clusters,

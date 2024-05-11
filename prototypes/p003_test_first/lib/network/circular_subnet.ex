@@ -9,11 +9,7 @@ defmodule Network.CircularSubnet do
   to them. This hides knowledge of lifespans inside this module.
 
   This module stores all the circular clusters known in the `Network`, not just the
-  ones that are actively throbbing. It stores them in a whittled-down form, not including
-  fields irrelevant to this module's purpose.
-
-  Linear and Circular clusters really want to inherit from some Cluster supertype, but
-  I don't see how to represent that in a non-cringy way.
+  ones that are actively throbbing.
   """
   use AppAnimal
   use AppAnimal.StructServer
@@ -29,130 +25,105 @@ defmodule Network.CircularSubnet do
   deflens routers,
           do: name_to_cluster() |> Lens.map_values() |> Cluster.Circular.router()
 
-
-  runs_in_sender do
-    private do
-      # For tests
-      def names(pid), do: GenServer.call(pid, :names)
-      def clusters(pid), do: GenServer.call(pid, :clusters)
-      def throbbing_names(pid), do: GenServer.call(pid, :throbbing_names)
-      def throbbing_pids(pid), do: GenServer.call(pid, :throbbing_pids)
-
-      def throb_to_test(pid, name: name, pid: fake_cluster_pid) do
-        GenServer.call(pid, {:throb_to_test, name, fake_cluster_pid})
-      end
-    end
-  end
-
   runs_in_receiver do
     @impl GenServer
     def init(clusters) do
       indexed =
-        for c <- clusters, into: %{} do
-          {c.name, c}
-        end
+        for c <- clusters, into: %{}, do: {c.name, c}
       {:ok, %__MODULE__{name_to_cluster: indexed}}
     end
 
     @impl GenServer
-    def handle_cast({:distribute_pulse,
-                     carrying: %Pulse{type: :default} = pulse,
-                     to: names}, s_state) do
-      s_mutated = ensure_started(s_state, names)
-      send_to_throbbers(s_mutated.name_to_pid, names, pulse)
-      continue(s_mutated)
+    # Eventually, there may be a more sophisticated way of deciding whether a
+    # pulse should start the cluster throbbing. For now, it's only done for `:default`
+    # pulses.
+    def handle_cast({:distribute_pulse, opts}, s_subnet) do
+      [pulse, names] = Opts.required!(opts, [:carrying, :to])
+      if pulse.type == :default,
+         do:   distribute_then_continue(pulse, names, ensure_started(s_subnet, names)),
+         else: distribute_then_continue(pulse, names,                s_subnet        )
     end
 
-    def handle_cast({:distribute_pulse,
-                     carrying: %Pulse{type: type} = pulse,
-                     to: names}, s_state) when type != :default do
-      send_to_throbbers(s_state.name_to_pid, names, pulse)
-      continue(s_state)
+    def handle_cast(:time_to_throb, s_subnet) do
+      throb(BiMap.values(s_subnet.name_to_pid))
+      continue(s_subnet)
     end
-
-    def handle_cast(:time_to_throb, s_state) do
-      throb(BiMap.values(s_state.name_to_pid))
-      continue(s_state)
-    end
-
-    unexpected_cast()
 
     @impl GenServer
-    def handle_info({:DOWN, _, :process, pid, _}, s_state) do
-      s_state.name_to_pid
+    def handle_info({:DOWN, _, :process, pid, _}, s_subnet) do
+      s_subnet.name_to_pid
       |> BiMap.delete_value(pid)
-      |> then(& Map.put(s_state, :name_to_pid, &1))
+      |> then(& Map.put(s_subnet, :name_to_pid, &1))
       |> continue
     end
 
+
     # This is used for testing as a way to get internal values of clusters.
     @impl GenServer
-    def handle_call([forward: getter_name, to: name], _from, s_state) do
+    def handle_call([forward: getter_name, to: name], _from, s_subnet) do
       result =
-        BiMap.get(s_state.name_to_pid, name)
+        BiMap.get(s_subnet.name_to_pid, name)
         |> GenServer.call(getter_name)
-      continue(s_state, returning: result)
+      continue(s_subnet, returning: result)
     end
 
-    def handle_call(:clusters, _from, s_state) do
-      values = Map.values(s_state.name_to_cluster)
-      continue(s_state, returning: values)
+    def handle_call(:clusters, _from, s_subnet) do
+      values = Map.values(s_subnet.name_to_cluster)
+      continue(s_subnet, returning: values)
     end
 
-    def handle_call(:throbbing_names, _from, s_state) do
-      keys = BiMap.keys(s_state.name_to_pid)
-      continue(s_state, returning: keys)
+    def handle_call(:throbbing_names, _from, s_subnet) do
+      keys = BiMap.keys(s_subnet.name_to_pid)
+      continue(s_subnet, returning: keys)
     end
 
-    def handle_call(:throbbing_pids, _from, s_state) do
-      values = BiMap.values(s_state.name_to_pid)
-      continue(s_state, returning: values)
+    def handle_call(:throbbing_pids, _from, s_subnet) do
+      values = BiMap.values(s_subnet.name_to_pid)
+      continue(s_subnet, returning: values)
     end
 
-    def handle_call({:router_for, name}, _from, s_state) do
-      router = s_state.name_to_cluster[name] |> A.get_only(:router)
-      continue(s_state, returning: router)
+    def handle_call({:router_for, name}, _from, s_subnet) do
+      router = s_subnet.name_to_cluster[name] |> A.get_only(:router)
+      continue(s_subnet, returning: router)
     end
 
-    def handle_call({:throb_to_test, name, pid}, _from, s_state) do
-      s_state.name_to_pid
-      |> BiMap.put(name, pid)
-      |> then(& Map.put(s_state, :name_to_pid, &1))
-      |> continue(returning: :ok)
-    end
+    def handle_call({:add_cluster, %Cluster.Circular{} = cluster}, _from, s_subnet) do
+      precondition Map.has_key?(s_subnet, :name_to_cluster)
 
-
-    def handle_call({:add_cluster, %Cluster.Circular{} = cluster}, _from, s_state) do
-      precondition Map.has_key?(s_state, :name_to_cluster)
-
-      s_state
+      s_subnet
       |> A.put(name_to_cluster() |> Lens.key(cluster.name), cluster)
       |> continue(returning: :ok)
     end
 
-    def handle_call({:add_router_to_all, router}, _from, s_state) do
-      s_state
+    def handle_call({:add_router_to_all, router}, _from, s_subnet) do
+      s_subnet
       |> A.put(:routers, router)
       |> continue(returning: :ok)
     end
 
     unexpected_call()
+    unexpected_cast()
 
     private do
-      def ensure_started(s_state, names) do
+      def ensure_started(s_subnet, names) do
         reducer = fn name, bimap ->
           if BiMap.has_key?(bimap, name) do
             bimap
           else
-            cluster = Map.get(s_state.name_to_cluster, name)
+            cluster = Map.get(s_subnet.name_to_cluster, name)
             {:ok, pid} = GenServer.start(Cluster.CircularProcess, cluster)
             Process.monitor(pid)
             BiMap.put(bimap, name, pid)
           end
         end
 
-        new_bimap = Enum.reduce(names, s_state.name_to_pid, reducer)
-        %{s_state | name_to_pid: new_bimap}
+        new_bimap = Enum.reduce(names, s_subnet.name_to_pid, reducer)
+        %{s_subnet | name_to_pid: new_bimap}
+      end
+
+      def distribute_then_continue(pulse, names, s_subnet) do
+        send_to_throbbers(s_subnet.name_to_pid, names, pulse)
+        continue(s_subnet)
       end
 
       def send_to_throbbers(name_to_pid, names, pulse) do

@@ -6,9 +6,6 @@ defmodule Extras.TestAwareProcessStarter do
   start with `GenServer.start_link`.
   """
 
-
-  import ExUnit.Callbacks, only: [start_link_supervised!: 1]
-
   defmacro __using__(_opts)  do
     module = __MODULE__
     quote do
@@ -18,7 +15,6 @@ defmodule Extras.TestAwareProcessStarter do
     end
   end
 
-
   defmacro compatibly_start_link(module, initial_mutable_state) do
     quote do
       Code.ensure_loaded(Mix)
@@ -27,6 +23,7 @@ defmodule Extras.TestAwareProcessStarter do
   end
 
   def compatibly_start_link(:test, module, initial_mutable_state) do
+    import ExUnit.Callbacks, only: [start_link_supervised!: 1]
     start_link_supervised!({module, initial_mutable_state})
   end
 

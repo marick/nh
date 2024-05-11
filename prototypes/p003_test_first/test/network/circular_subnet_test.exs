@@ -11,9 +11,9 @@ defmodule Network.CircularSubnetTest do
       pid = start_link_supervised!(UT)
       UT.call(pid, :add_cluster, original)
 
-      assert [original] == UT.clusters(pid)
-      assert [] == UT.throbbing_names(pid)
-      assert [] == UT.throbbing_pids(pid)
+      assert [original] == UT.call(pid, :clusters)
+      assert [] == UT.call(pid, :throbbing_names)
+      assert [] == UT.call(pid, :throbbing_pids)
     end
   end
 
@@ -24,7 +24,7 @@ defmodule Network.CircularSubnetTest do
 
     UT.call(pid, :add_router_to_all, "the new router")
 
-    [one, other] = UT.clusters(pid)
+    [one, other] = UT.call(pid, :clusters)
     assert one.router == "the new router"
     assert other.router == "the new router"
   end
@@ -52,12 +52,12 @@ defmodule Network.CircularSubnetTest do
     assert {^p_cluster, "value"} = assert_receive(_)
 
     # A dead process removes it from the throbbing list.
-    assert [p_cluster] == UT.throbbing_pids(p_ut)
+    assert [p_cluster] == UT.call(p_ut, :throbbing_pids)
     # :normal exits are swallowed by the process
     # https://hexdocs.pm/elixir/Process.html#exit/2
     Process.exit(p_cluster, :some_non_normal_value)
     Process.sleep(10)
-    assert [] == UT.throbbing_pids(p_ut)
+    assert [] == UT.call(p_ut, :throbbing_pids)
   end
 
 
@@ -74,6 +74,6 @@ defmodule Network.CircularSubnetTest do
     UT.cast(p_ut, :distribute_pulse, carrying: Pulse.new(:oddity, "value"), to: [:original])
     refute_receive(_)
 
-    assert [] == UT.throbbing_pids(p_ut)
+    assert [] == UT.call(p_ut, :throbbing_pids)
   end
 end
