@@ -148,21 +148,21 @@ defmodule Network.Grow do
       end
     end
 
-    def add_to_name_set(s_network, %Cluster.Circular{} = cluster) do
-      Map.update!(s_network, :circular_names, & MapSet.put(&1, cluster.name))
+
+    def add_to_name_set(s_network, cluster) do
+      key =
+        case cluster do
+          %Cluster.Circular{} -> :circular_names
+          %Cluster.Linear{} -> :linear_names
+        end
+      Map.update!(s_network, key, & MapSet.put(&1, cluster.name))
     end
 
-    def add_to_name_set(s_network, %Cluster.Linear{} = cluster) do
-      Map.update!(s_network, :linear_names, & MapSet.put(&1, cluster.name))
-    end
-
-    #
 
     def add_to_id_map(s_network, cluster) when is_struct(cluster) do
       A.put(s_network, Network.name_to_id() |> Lens.key(cluster.name), cluster.id)
     end
 
-    #
 
     def names_from(clusters) do
       mapper =
@@ -175,8 +175,6 @@ defmodule Network.Grow do
       Enum.map(clusters, mapper)
     end
 
-    #
-
     def add_out_edge_values(out_edges, [], _pulse_type), do: out_edges
 
     def add_out_edge_values(out_edges, [[upstream, downstream] | rest], pulse_type) do
@@ -186,6 +184,7 @@ defmodule Network.Grow do
       end)
       |> add_out_edge_values(rest, pulse_type)
     end
+
 
     def add_sequence_of_targets(%Network{} = s_network, clusters, pulse_type) do
       names = names_from(clusters)
@@ -206,7 +205,6 @@ defmodule Network.Grow do
       %{s_network | out_edges: mutated}
     end
 
-    #
 
     def existing_name?(s_network, name) do
       MapSet.member?(s_network.circular_names, name) ||
