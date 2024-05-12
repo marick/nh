@@ -15,6 +15,60 @@ defmodule AppAnimal.Extras.LensE do
   """
   deflens missing(), do: Lens.filter(& &1 == nil)
 
+
+  @doc """
+  Like `Lens.all/0`, but operations more often produces a MapSet.
+
+  `mapset_values` is pointless without other lenses appended to look
+  deeper into the nested structure.
+
+  Consider this lens and this data:
+
+       lens =
+         LensE.mapset_values |> Lens.key?(:a)
+       input =
+         MapSet.new([%{a: 1}, %{a: 2}, %{a: 3}, %{vvvv: "unchanged"}])
+
+  You can now increment the values of all the `:a` values like this:
+
+       A.map(input, lens, & &1*100)
+       > MapSet.new([%{a: 100}, %{a: 200}, %{a: 300}, %{vvvv: "unchanged"}])
+
+  Note that the question mark in `Lens.key?` is required, else the
+  multiplication function will be called on `nil`.
+
+  `mapset_values` also works reasonably well with `put`. Given the above
+  `input` mapset and `lens`,
+
+       A.put(input, 3)
+
+  ... will produce:
+
+       MapSet.new([%{a: 3}, %{vvvv: "unchanged"}]
+
+  Note that the multiple maps with now-identical `:a` values have
+  been correctly collapsed into one.
+
+  As is typical for `Lens`, `get` functions return lists rather than
+  the base type:
+
+       A.get_all(input, lens)
+       > [1, 2, 3]    # MapSet.new([1, 2, 3]) would be better
+
+  """
+
+
+  deflens mapset_values(), do: Lens.into(Lens.all, MapSet.new)
+
+  # deflens_raw mapset_values do
+  #   fn
+  #     data, fun ->
+  #       dbg {data, fun}
+  #       {data, data}
+  #   end
+  # end
+
+
   @doc """
   Easy construction of multiple "foci" for a nested map or struct.
 

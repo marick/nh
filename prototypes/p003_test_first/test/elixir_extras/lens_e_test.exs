@@ -3,6 +3,7 @@ alias AppAnimal.Extras
 defmodule Extras.LensETest do
   use AppAnimal.Case, async: true
   alias Extras.LensE, as: UT
+  doctest UT, import: true
 
   describe "nested_map_leaves" do
     test "success cases" do
@@ -74,6 +75,30 @@ defmodule Extras.LensETest do
                        c: %{},                   # left alone
                        d: %{aa: %{aaa: :LEAF},
                             bb: %{aaa: :LEAF}})
+    end
+  end
+
+  describe "mapset lenses" do
+    test "mapset_value/1 as an intermediate lens" do
+      lens = UT.mapset_values |> Lens.key?(:a)
+
+      input    = MapSet.new([%{a: 1  }, %{a: 2  }, %{a: 3  }, %{vvvv: "unchanged"}])
+      expected = MapSet.new([%{a: 100}, %{a: 200}, %{a: 300}, %{vvvv: "unchanged"}])
+      assert A.map(input, lens, & &1*100) == expected
+
+      A.get_all(input, lens) |> assert_good_enough(in_any_order([1, 2, 3]))
+      assert A.get_all(input, lens |> Lens.filter(& &1 < 2)) == [1]
+
+      assert A.put(input, lens, 3) == MapSet.new([%{a: 3}, %{vvvv: "unchanged"}])
+                                      # Note that it collapsed the 3 identical maps
+    end
+
+    test "mapset_value as an ending lens" do
+      input = MapSet.new([%{a: 1}, %{a: 2}, %{a: 3}])
+
+      input
+      |> A.get_all(UT.mapset_values)
+      |> assert_good_enough(in_any_order([%{a: 1}, %{a: 2}, %{a: 3}]))
     end
   end
 end
