@@ -6,10 +6,10 @@ defmodule Extras.LensXTest do
   alias Extras.LensX, as: UT
   doctest UT, import: true
 
-  describe "nested_map_leaves" do
+  describe "map_multipath" do
     test "success cases" do
       produces = run_and_assert(fn [map, route] ->
-        A.get_all(map, UT.nested_map_leaves(route))
+        A.get_all(map, UT.map_multipath(route))
       end)
 
       one_branch = %{a: %{b: 3}}
@@ -39,20 +39,20 @@ defmodule Extras.LensXTest do
       m = %{a: %{b: 1}}
 
       assert_raise(KeyError, fn ->
-        A.get_all(m, UT.nested_map_leaves([:b]))
+        A.get_all(m, UT.map_multipath([:b]))
       end)
 
       assert_raise(KeyError, fn ->
-        A.get_all(m, UT.nested_map_leaves([:a, :c]))
+        A.get_all(m, UT.map_multipath([:a, :c]))
       end)
 
     end
   end
 
-  describe "ensure_nested_map_leaves" do
+  describe "ensure_map_multipath" do
     test "normal use" do
       produces = run_and_assert(fn [map, route] ->
-        UT.ensure_nested_map_leaves(map, route, :LEAF)
+        UT.ensure_map_multipath(map, route, :LEAF)
       end)
 
       [%{a: %{aa: %{}}}, [:a, :aa, :aaa]] |> produces.(%{a: %{aa: %{aaa: :LEAF}}})
@@ -68,7 +68,7 @@ defmodule Extras.LensXTest do
                 c: %{}}
 
       input
-      |> UT.ensure_nested_map_leaves([[:a, :b, :d], [:aa, :bb], :aaa], :LEAF)
+      |> UT.ensure_map_multipath([[:a, :b, :d], [:aa, :bb], :aaa], :LEAF)
       |> assert_fields(a: %{aa: %{aaa: 1},       # no change
                             bb: %{aaa: :LEAF}},
                        b: %{aa: %{aaa: :LEAF},

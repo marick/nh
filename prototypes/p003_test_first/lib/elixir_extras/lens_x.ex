@@ -128,24 +128,26 @@ defmodule AppAnimal.Extras.LensX do
   # end
 
   @doc """
-  Easy construction of multiple "foci" for a nested map or struct.
+  Easy construction of a lens to multiple locations deep within a tree of map/structs.
 
-  Starting at the root of the structure,
-  * lists (like `[:a, :b, :c]`) add a `Lens.keys!` to a chain of lens-makers.
-  * atoms add a `Lens.key!`
+  A *multipath* is a list, each of which elements produces a lens.
+
+  * non-lists (typically atoms) create a component with `Lens.key!`.
+  * lists use `Lens.keys!`.
 
   Thus this:
 
       cluster_names = [:a, :b, :c]
-      nested_map_leaves([cluster_names, :calc])
+      multipath = [cluster_names, :calc]
+      map_multipath(multipath)
 
   ... is the same as:
 
       Lens.keys!(cluster_names) |> Lens.key!(:calc)
 
-  Note that there may be no missing keys. See `ensure_nested_map_leaves/1`.
+  Note that there may be no missing keys. See `ensure_map_multipath/1`.
   """
-  deflens nested_map_leaves(route) do
+  deflens map_multipath(route) do
     reducer = fn
       keys, building_lens when is_list(keys) ->
         Lens.seq(building_lens, Lens.keys!(keys))
@@ -167,12 +169,12 @@ defmodule AppAnimal.Extras.LensX do
       twisty_little_paths = [[:a, :b, :c], [:top, :bottom]
 
       maps
-      |> ensure_nested_map_leaves(twisty_little_paths, 0)
-      |> A.map(nested_map_leaves(twisty_little_paths), & &1+1)
+      |> ensure_map_multipath(twisty_little_paths, 0)
+      |> A.map(map_multipath(twisty_little_paths), & &1+1)
 
   Note that the `route` argument is not a lens.
   """
-  def ensure_nested_map_leaves(map, route, leaf_value) do
+  def ensure_map_multipath(map, route, leaf_value) do
     scanner = fn
       keys, building_lens when is_list(keys) ->
         Lens.seq(building_lens, Lens.keys(keys))
