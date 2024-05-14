@@ -15,17 +15,17 @@ defmodule Network do
   use MoveableAliases
   alias Network.{LinearSubnet,CircularSubnet}
 
-  typedstruct do
+  typedstruct enforce: true do
     plugin TypedStructLens
 
     field :name_to_id, %{atom => Cluster.Identification.t}, default: %{}
     field :out_edges, %{atom => %{atom => MapSet.t(atom)}}, default: %{}
 
-    field :circular_names, MapSet.t(atom),                  default: MapSet.new
-    field :linear_names, MapSet.t(atom),                    default: MapSet.new
+    field :circular_names, MapSet.t(atom),           default: MapSet.new
+    field :linear_names, MapSet.t(atom),             default: MapSet.new
 
-    field :p_circular_clusters, pid,                 enforce: true
-    field :linear_clusters, LinearSubnet.t,  enforce: true
+    field :p_circular_clusters, pid
+    field :linear_clusters, LinearSubnet.t
   end
 
   def empty() do

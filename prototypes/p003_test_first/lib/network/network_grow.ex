@@ -76,7 +76,7 @@ defmodule Network.Grow do
     [pulse_type] = Opts.parse(opts, for_pulse_type: :default)
     s_network
     |> unordered(clusters)
-    |> add_sequence_of_targets(clusters, pulse_type)
+    |> add_trace_edges(clusters, pulse_type)
   end
 
   @doc """
@@ -105,7 +105,7 @@ defmodule Network.Grow do
 
     s_network
     |> unordered([from | destinations])
-    |> add_direct_targets(from, destinations, for_pulse_type)
+    |> put_fan_out_edges(from, destinations, for_pulse_type)
   end
 
   @doc """
@@ -128,7 +128,8 @@ defmodule Network.Grow do
 
   private do
 
-    # parts
+    # Network field :p_circular_clusters, pid
+    # Network field field :linear_clusters, LinearSubnet.t
 
     def add_cluster(s_network, cluster) do
       name = cluster.name
@@ -148,6 +149,8 @@ defmodule Network.Grow do
       end
     end
 
+    # Network field :circular_names, MapSet.t(atom),           default: MapSet.new
+    # Network field :linear_names, MapSet.t(atom),             default: MapSet.new
 
     def add_to_name_set(s_network, cluster) do
       key =
@@ -158,13 +161,52 @@ defmodule Network.Grow do
       Map.update!(s_network, key, & MapSet.put(&1, cluster.name))
     end
 
+    def existing_name?(s_network, name) do
+      MapSet.member?(s_network.circular_names, name) ||
+        MapSet.member?(s_network.linear_names, name)
+    end
+
+
+    # Network field :name_to_id, %{atom => Cluster.Identification.t}, default: %{}
 
     def add_to_id_map(s_network, cluster) when is_struct(cluster) do
       A.put(s_network, Network.name_to_id() |> Lens.key(cluster.name), cluster.id)
     end
 
+    # Network field :out_edges, %{atom => %{atom => MapSet.t(atom)}}, default: %{}
 
-    def names_from(clusters) do
+    def put_fan_out_edges(s_network, from, destinations, pulse_type) do
+      [from_name | destination_names] = just_names([from | destinations])
+      mutated =
+        s_network.out_edges
+        |> LensX.ensure_nested_map_leaves([from_name, pulse_type], MapSet.new)
+        |> update_in([from_name, pulse_type], &MapSet.union(&1, MapSet.new(destination_names)))
+      %{s_network | out_edges: mutated}
+    end
+
+    def add_trace_edges(%Network{} = s_network, clusters, pulse_type) do
+      names = just_names(clusters)
+
+      mutated =
+        s_network.out_edges
+        |> LensX.ensure_nested_map_leaves([names, pulse_type], MapSet.new)
+        |> put_edges_between_cluster_pairs(Enum.chunk_every(names, 2, 1, :discard), pulse_type)
+      %{s_network | out_edges: mutated}
+    end
+
+    def put_edges_between_cluster_pairs(out_edges, [], _pulse_type), do: out_edges
+
+    def put_edges_between_cluster_pairs(out_edges, [[upstream, downstream] | rest], pulse_type) do
+      out_edges
+      |> update_in([upstream, pulse_type], fn mapset ->
+        MapSet.put(mapset, downstream)
+      end)
+      |> put_edges_between_cluster_pairs(rest, pulse_type)
+    end
+
+    # Etc
+
+    def just_names(clusters) do
       mapper =
         fn
           atom when is_atom(atom) ->
@@ -173,42 +215,6 @@ defmodule Network.Grow do
             cluster.name
         end
       Enum.map(clusters, mapper)
-    end
-
-    def add_out_edge_values(out_edges, [], _pulse_type), do: out_edges
-
-    def add_out_edge_values(out_edges, [[upstream, downstream] | rest], pulse_type) do
-      out_edges
-      |> update_in([upstream, pulse_type], fn mapset ->
-        MapSet.put(mapset, downstream)
-      end)
-      |> add_out_edge_values(rest, pulse_type)
-    end
-
-
-    def add_sequence_of_targets(%Network{} = s_network, clusters, pulse_type) do
-      names = names_from(clusters)
-
-      mutated =
-        s_network.out_edges
-        |> LensX.ensure_nested_map_leaves([names, pulse_type], MapSet.new)
-        |> add_out_edge_values(Enum.chunk_every(names, 2, 1, :discard), pulse_type)
-      %{s_network | out_edges: mutated}
-    end
-
-    def add_direct_targets(s_network, from, destinations, pulse_type) do
-      [from_name | destination_names] = names_from([from | destinations])
-      mutated =
-        s_network.out_edges
-        |> LensX.ensure_nested_map_leaves([from_name, pulse_type], MapSet.new)
-        |> update_in([from_name, pulse_type], &MapSet.union(&1, MapSet.new(destination_names)))
-      %{s_network | out_edges: mutated}
-    end
-
-
-    def existing_name?(s_network, name) do
-      MapSet.member?(s_network.circular_names, name) ||
-        MapSet.member?(s_network.linear_names, name)
     end
   end
 end
