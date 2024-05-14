@@ -57,17 +57,75 @@ defmodule AppAnimal.Extras.LensE do
 
   """
 
-
   deflens mapset_values(), do: Lens.into(Lens.all, MapSet.new)
 
-  # deflens_raw mapset_values do
-  #   fn
-  #     data, fun ->
-  #       dbg {data, fun}
-  #       {data, data}
+  @doc """
+  Since mapsets don't have keys, there needs to be a way of identifying focus elements.
+
+  This function has two ways of identifying MapSet entries: by the entries' key/value pairs,
+  and by a filter function. The first way is more common.
+
+  Suppose you have a a MapSet of points:
+
+      input =
+        # A struct with `:x` and `:y` fields
+        [Point.new(0, 0), Point.new(0, 1), Point.new(1, 10)]
+        |> MapSet.new
+
+  You can now update all the *y* values for points on the origin like this:
+
+       lens = LensE.mapset_value_identified_by(x: 0) |> Lens.key(:y)
+       A.map(input, lens, & &1 + 1000)
+       # [Point.new(0, 1000), Point.new(0, 1001), Point.new(1, 0)] |> MapSet.new
+
+  You could do the same thing with an actual function:
+
+       predicate = fn data ->
+         Map.has_key?(data, key) && Map.get(data, key) == value
+       end
+       lens =
+         LensE.mapset_value_identified_by(predicate) |> Lens.key(:y)
+
+  That is, in fact, how the shorthand version is implemented.
+
+  Note that there is a distinction between a *missing* key and a key
+  that's *present* with the value `nil`. Only the latter will match
+  `mapset_value_identified_by(a: nil).
+
+  """
+
+  deflens mapset_value_identified_by([{key, value}]) do
+    predicate = fn data ->
+      Map.has_key?(data, key) && Map.get(data, key) == value
+    end
+    mapset_value_identified_by(predicate)
+  end
+
+  deflens mapset_value_identified_by(f) do
+    Lens.into(mapset_values() |> Lens.filter(f), MapSet.new)
+  end
+
+  ### For reference, here's how you do it in one fell swoop, without composing lenses.
+  # deflens_raw mapset_value_identified_by([{key, value}]),
+  #             do: common__mapset_value_identified_by(& Map.get(&1, key) == value)
+  # deflens_raw mapset_value_identified_by(f),
+  #             do: common__mapset_value_identified_by(f)
+
+  # defp common__mapset_value_identified_by(f) do
+  #   fn data, fun ->
+  #     {res, changed} =
+  #       Enum.reduce(data, {[], []}, fn item, {res, updated} ->
+  #         if f.(item) do
+  #           {res_item, updated_item} = fun.(item)
+  #           {[res_item | res], [updated_item | updated]}
+  #         else
+  #           {res, [item | updated]}
+  #         end
+  #       end)
+
+  #     {res, MapSet.new(changed)}
   #   end
   # end
-
 
   @doc """
   Easy construction of multiple "foci" for a nested map or struct.

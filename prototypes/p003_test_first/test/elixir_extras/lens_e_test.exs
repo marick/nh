@@ -1,5 +1,6 @@
 alias AppAnimal.Extras
 
+
 defmodule Extras.LensETest do
   use AppAnimal.Case, async: true
   alias Extras.LensE, as: UT
@@ -79,7 +80,7 @@ defmodule Extras.LensETest do
   end
 
   describe "mapset lenses" do
-    test "mapset_value/1 as an intermediate lens" do
+    test "mapset_values/0 as an intermediate lens" do
       lens = UT.mapset_values |> Lens.key?(:a)
 
       input    = MapSet.new([%{a: 1  }, %{a: 2  }, %{a: 3  }, %{vvvv: "unchanged"}])
@@ -93,12 +94,103 @@ defmodule Extras.LensETest do
                                       # Note that it collapsed the 3 identical maps
     end
 
-    test "mapset_value as an ending lens" do
+    test "mapset_values/0 as an ending lens" do
       input = MapSet.new([%{a: 1}, %{a: 2}, %{a: 3}])
 
       input
       |> A.get_all(UT.mapset_values)
       |> assert_good_enough(in_any_order([%{a: 1}, %{a: 2}, %{a: 3}]))
+
+      # The other cases blow up in various ways.
+    end
+
+
+    test "mapset_value_identified_by!/1 as an ending lens; element present" do
+      input = MapSet.new([%{a: :X, b: 1}, %{a: :X}, %{a: 3}])
+
+      lens = UT.mapset_value_identified_by(a: :X)
+
+      A.get_all(input, lens)
+      |> assert_good_enough(in_any_order([%{a: :X, b: 1}, %{a: :X}]))
+
+      assert A.put(input, lens, 3333) == MapSet.new([3333, %{a: 3}])
+
+      A.map(input, lens, fn map -> Map.put(map, :c, 2) end)
+      |> assert_equal(MapSet.new([%{a: :X, b: 1, c: 2}, %{a: :X, c: 2}, %{a: 3}]))
+    end
+
+
+    test "mapset_value_identified_by/1 as an ending lens; element absent" do
+      # Really covered by above, but wotthehell, wotthehell, archie.
+      input = MapSet.new([%{a: :X, b: 1}])
+      lens = UT.mapset_value_identified_by(a: :missing)
+
+      assert A.get_all(input, lens) == []
+      assert A.put(input, lens, %{a: :missing}) == input
+      assert A.map(input, lens, fn map -> %{map | c: 2} end) == input
+    end
+
+    test "mapset_value_identified_by!/1 as an intermediate lens; element present" do
+      # Really covered by above, but wotthehell, wotthehell, archie.
+      input = MapSet.new([%{a: :X, b: 1}, %{a: :X, b: 2, c: 3}, %{a: :X}, %{a: 3}])
+
+      lens = UT.mapset_value_identified_by(a: :X) |> Lens.key?(:b)
+
+      A.get_all(input, lens)
+      |> assert_good_enough(in_any_order([1, 2]))
+
+      actual = A.put(input, lens, 3333)
+      expected = MapSet.new([%{a: :X, b: 3333}, %{a: :X, b: 3333, c: 3}, %{a: :X}, %{a: 3}])
+      assert actual == expected
+
+      actual = A.map(input, lens, & &1 * 1000)
+      expected = MapSet.new([%{a: :X, b: 1000}, %{a: :X, b: 2000, c: 3}, %{a: :X}, %{a: 3}])
+      assert actual == expected
+    end
+
+
+    test "mapset_value_identified_by/1 as an intermediate lens; element absent" do
+      input = MapSet.new([%{a: 1, b: 2}, %{a: 3}])
+      lens = UT.mapset_value_identified_by(a: :X) |> Lens.key?(:b)
+
+      assert A.get_all(input, lens) == []
+
+      assert A.put(input, lens, 3333) == input
+
+      assert A.map(input, lens, & &1 * 1000) == input
+    end
+
+    test "doctest would be too cluttered" do
+      defmodule Point do
+        use AppAnimal
+
+        typedstruct do
+          field :x, integer
+          field :y, integer
+        end
+
+        def new(x, y), do: %__MODULE__{x: x, y: y}
+      end
+
+      input =
+        # A struct with `:x` and `:y` fields
+        [Point.new(0, 0), Point.new(0, 1), Point.new(1, 10)]
+        |> MapSet.new
+
+      lens = UT.mapset_value_identified_by(x: 0) |> Lens.key(:y)
+      actual = A.map(input, lens, & &1 + 1000)
+      assert actual == [Point.new(0, 1000), Point.new(0, 1001), Point.new(1, 10)] |> MapSet.new
+
+      A.get_all(input, lens)
+      |> assert_good_enough(in_any_order([0, 1]))
     end
   end
+
+  test "justify the difference between a missing key and one with a nil value" do
+    input = MapSet.new [%{a: 1}, %{a: nil, b: 2}, %{}]
+    lens = UT.mapset_value_identified_by(a: nil)
+
+    assert A.get_only(input, lens) == %{a: nil, b: 2}
+  end
+
 end
