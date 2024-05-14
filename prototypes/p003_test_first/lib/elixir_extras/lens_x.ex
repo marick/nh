@@ -135,7 +135,10 @@ defmodule AppAnimal.Extras.LensX do
   * non-lists (typically atoms) create a component with `Lens.key!`.
   * lists use `Lens.keys!`.
 
-  Thus this:
+  The result is a lens that selects the leaves at the end of a
+  branching path through a map structure.
+
+  That is, this:
 
       cluster_names = [:a, :b, :c]
       multipath = [cluster_names, :calc]
@@ -146,16 +149,31 @@ defmodule AppAnimal.Extras.LensX do
       Lens.keys!(cluster_names) |> Lens.key!(:calc)
 
   Note that there may be no missing keys. See `ensure_map_multipath/1`.
+
+  If some of your keys are maps, put them inside a singleton map.
   """
-  deflens map_multipath(route) do
+  deflens map_multipath!(multipath) do
     reducer = fn
       keys, building_lens when is_list(keys) ->
         Lens.seq(building_lens, Lens.keys!(keys))
       key, building_lens ->
         Lens.seq(building_lens, Lens.key!(key))
     end
-    Enum.reduce(route, Lens.root, reducer)
+    Enum.reduce(multipath, Lens.root, reducer)
   end
+
+  @doc """
+  Like `map_multipath!/1`, except lists are not allowed in the path (no branching).
+
+  This perhaps has some use as documentation of intent.
+  """
+
+  deflens map_path!(path) do
+    precondition no_list_elements?(path)
+    map_multipath!(path)
+  end
+
+  defp no_list_elements?(enum), do: !Enum.any?(enum, &is_list/1)
 
   @doc """
   Ensure there are no missing branches or leaves in a map/struct tree.
@@ -172,9 +190,9 @@ defmodule AppAnimal.Extras.LensX do
       |> ensure_map_multipath(twisty_little_paths, 0)
       |> A.map(map_multipath(twisty_little_paths), & &1+1)
 
-  Note that the `route` argument is not a lens.
+  Note that the `multipath` argument is not a lens.
   """
-  def ensure_map_multipath(map, route, leaf_value) do
+  def ensure_map_multipath(map, multipath, leaf_value) do
     scanner = fn
       keys, building_lens when is_list(keys) ->
         Lens.seq(building_lens, Lens.keys(keys))
@@ -183,7 +201,7 @@ defmodule AppAnimal.Extras.LensX do
     end
 
     lenses =
-      route
+      multipath
       |> Enum.scan(Lens.root, scanner)
       |> Enum.map(& Lens.seq(&1, missing()))
 
@@ -194,5 +212,16 @@ defmodule AppAnimal.Extras.LensX do
         A.put(building_map, lens, %{})
     end)
     |> A.put(leaf, leaf_value)
+  end
+
+
+  @doc """
+  Like `ensure_map_multipath/1`, except lists are not allowed in the path (no branching).
+
+  This perhaps has some use as documentation of intent.
+  """
+  def ensure_map_path(map, path, leaf_value) do
+    precondition no_list_elements?(path)
+    ensure_map_multipath(map, path, leaf_value)
   end
 end

@@ -6,10 +6,10 @@ defmodule Extras.LensXTest do
   alias Extras.LensX, as: UT
   doctest UT, import: true
 
-  describe "map_multipath" do
+  describe "map_multipath!" do
     test "success cases" do
       produces = run_and_assert(fn [map, route] ->
-        A.get_all(map, UT.map_multipath(route))
+        A.get_all(map, UT.map_multipath!(route))
       end)
 
       one_branch = %{a: %{b: 3}}
@@ -39,13 +39,19 @@ defmodule Extras.LensXTest do
       m = %{a: %{b: 1}}
 
       assert_raise(KeyError, fn ->
-        A.get_all(m, UT.map_multipath([:b]))
+        A.get_all(m, UT.map_multipath!([:b]))
       end)
 
       assert_raise(KeyError, fn ->
-        A.get_all(m, UT.map_multipath([:a, :c]))
+        A.get_all(m, UT.map_multipath!([:a, :c]))
       end)
+    end
 
+    test "map_path!" do
+      m = %{a: 1, b: 2}
+
+      assert A.get_only(m, UT.map_path!([:a])) == 1
+      assert A.put(m, UT.map_path!([:b]), 333) == %{a: 1, b: 333}
     end
   end
 
@@ -77,7 +83,12 @@ defmodule Extras.LensXTest do
                        d: %{aa: %{aaa: :LEAF},
                             bb: %{aaa: :LEAF}})
     end
+
+    test "ensure_map_path!" do
+      assert UT.ensure_map_multipath(%{}, [:a, :b], 1) == %{a: %{b: 1}}
+    end
   end
+
 
   describe "mapset lenses" do
     test "mapset_values/0 as an intermediate lens" do

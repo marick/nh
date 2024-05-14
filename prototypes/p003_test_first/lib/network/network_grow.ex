@@ -177,11 +177,13 @@ defmodule Network.Grow do
 
     def put_fan_out_edges(s_network, from, destinations, pulse_type) do
       [from_name | destination_names] = just_names([from | destinations])
-      mutated =
-        s_network.out_edges
-        |> LensX.ensure_nested_map_leaves([from_name, pulse_type], MapSet.new)
-        |> update_in([from_name, pulse_type], &MapSet.union(&1, MapSet.new(destination_names)))
-      %{s_network | out_edges: mutated}
+
+      path = [:out_edges, from_name, pulse_type]
+      put_destinations = &MapSet.union(&1, MapSet.new(destination_names))
+
+      s_network
+      |> LensX.ensure_map_path(path, MapSet.new)
+      |> A.map(LensX.map_path!(path), put_destinations)
     end
 
     def add_trace_edges(%Network{} = s_network, clusters, pulse_type) do
@@ -189,7 +191,7 @@ defmodule Network.Grow do
 
       mutated =
         s_network.out_edges
-        |> LensX.ensure_nested_map_leaves([names, pulse_type], MapSet.new)
+        |> LensX.ensure_map_multipath([names, pulse_type], MapSet.new)
         |> put_edges_between_cluster_pairs(Enum.chunk_every(names, 2, 1, :discard), pulse_type)
       %{s_network | out_edges: mutated}
     end
