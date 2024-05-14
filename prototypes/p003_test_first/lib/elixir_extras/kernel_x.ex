@@ -1,4 +1,4 @@
-defmodule AppAnimal.Extras.KernelE do
+defmodule AppAnimal.Extras.KernelX do
   @moduledoc "Some things I wish were in the Elixir `Kernel`."
   use Private
 

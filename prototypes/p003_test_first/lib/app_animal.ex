@@ -87,9 +87,9 @@ defmodule AppAnimal do
       alias AppAnimal.KeyConceptAliases
 
       alias AppAnimal.Extras
-      import Extras.{TuplesE,KernelE,Nesting}
+      import Extras.{TupleX,KernelX,Nesting}
       alias Extras.DepthAgnostic, as: A
-      alias Extras.{LensE,Opts}
+      alias Extras.{LensX,Opts}
     end
   end
 end

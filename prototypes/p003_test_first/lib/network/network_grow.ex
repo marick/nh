@@ -191,7 +191,7 @@ defmodule Network.Grow do
 
       mutated =
         s_network.out_edges
-        |> LensE.ensure_nested_map_leaves([names, pulse_type], MapSet.new)
+        |> LensX.ensure_nested_map_leaves([names, pulse_type], MapSet.new)
         |> add_out_edge_values(Enum.chunk_every(names, 2, 1, :discard), pulse_type)
       %{s_network | out_edges: mutated}
     end
@@ -200,7 +200,7 @@ defmodule Network.Grow do
       [from_name | destination_names] = names_from([from | destinations])
       mutated =
         s_network.out_edges
-        |> LensE.ensure_nested_map_leaves([from_name, pulse_type], MapSet.new)
+        |> LensX.ensure_nested_map_leaves([from_name, pulse_type], MapSet.new)
         |> update_in([from_name, pulse_type], &MapSet.union(&1, MapSet.new(destination_names)))
       %{s_network | out_edges: mutated}
     end

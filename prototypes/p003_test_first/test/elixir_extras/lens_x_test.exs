@@ -1,9 +1,9 @@
 alias AppAnimal.Extras
 
 
-defmodule Extras.LensETest do
+defmodule Extras.LensXTest do
   use AppAnimal.Case, async: true
-  alias Extras.LensE, as: UT
+  alias Extras.LensX, as: UT
   doctest UT, import: true
 
   describe "nested_map_leaves" do

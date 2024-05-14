@@ -1,4 +1,4 @@
-defmodule AppAnimal.Extras.LensE do
+defmodule AppAnimal.Extras.LensX do
   @moduledoc "Additional functions to make lenses, particularly for nested structs or maps."
 
   use AppAnimal
@@ -7,7 +7,7 @@ defmodule AppAnimal.Extras.LensE do
   @doc """
   Produces a lens that allows you to do what's effectively `put_new`.
 
-      lens = Lens.keys([:a, :b, :c]) |> LensE.missing
+      lens = Lens.keys([:a, :b, :c]) |> LensX.missing
 
       %{a: 1}
       |> A.put(lens, 5)
@@ -25,7 +25,7 @@ defmodule AppAnimal.Extras.LensE do
   Consider this lens and this data:
 
        lens =
-         LensE.mapset_values |> Lens.key?(:a)
+         LensX.mapset_values |> Lens.key?(:a)
        input =
          MapSet.new([%{a: 1}, %{a: 2}, %{a: 3}, %{vvvv: "unchanged"}])
 
@@ -74,7 +74,7 @@ defmodule AppAnimal.Extras.LensE do
 
   You can now update all the *y* values for points on the origin like this:
 
-       lens = LensE.mapset_value_identified_by(x: 0) |> Lens.key(:y)
+       lens = LensX.mapset_value_identified_by(x: 0) |> Lens.key(:y)
        A.map(input, lens, & &1 + 1000)
        # [Point.new(0, 1000), Point.new(0, 1001), Point.new(1, 0)] |> MapSet.new
 
@@ -84,7 +84,7 @@ defmodule AppAnimal.Extras.LensE do
          Map.has_key?(data, key) && Map.get(data, key) == value
        end
        lens =
-         LensE.mapset_value_identified_by(predicate) |> Lens.key(:y)
+         LensX.mapset_value_identified_by(predicate) |> Lens.key(:y)
 
   That is, in fact, how the shorthand version is implemented.
 
