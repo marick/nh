@@ -188,11 +188,12 @@ defmodule Network.Grow do
 
     def add_trace_edges(%Network{} = s_network, clusters, pulse_type) do
       names = just_names(clusters)
+      pairs__from_to = Enum.chunk_every(names, 2, 1, :discard)
 
       mutated =
         s_network.out_edges
         |> LensX.ensure_map_multipath([names, pulse_type], MapSet.new)
-        |> put_edges_between_cluster_pairs(Enum.chunk_every(names, 2, 1, :discard), pulse_type)
+        |> put_edges_between_cluster_pairs(pairs__from_to, pulse_type)
       %{s_network | out_edges: mutated}
     end
 
