@@ -1,6 +1,18 @@
 alias AppAnimal.System
 
 defmodule System.ActivityLogger do
+  @moduledoc """
+  Record pulses, etc.
+
+  This is super crude right now. Needs a causality trace, grouping of messages when
+  they come from the same cluster, etc.
+
+  Spilling the log to the terminal while the action is ongoing is probably a bad idea.
+  For one thing, it can delay messages so that `assert_receive` fails.
+
+  Someday investigate using `Logger`.
+
+  """
   use AppAnimal
   use AppAnimal.StructServer
   use MoveableAliases
@@ -40,7 +52,6 @@ defmodule System.ActivityLogger do
   # So instead of relying on each ActivityLogger being an independent process,
   # I have to mess around with state. Bah. As a result of its history, this is
   # probably the Wrong Thing.
-
 
   runs_in_sender do
     def start_link(buffer_size \\ 100) do
@@ -91,13 +102,15 @@ defmodule System.ActivityLogger do
       update_in(me.buffer, &(CircularBuffer.insert(&1, entry)))
       |> continue
     end
+  end
 
+  private do
     # This is all awful, but the whole thing needs rework.
 
-    defp maybe_log(false, _) do
+    def maybe_log(false, _) do
     end
 
-    defp maybe_log(true, %ActionReceived{} = entry) do
+    def maybe_log(true, %ActionReceived{} = entry) do
       t =
         if is_atom(entry.action),
            do: entry.action,
@@ -106,7 +119,7 @@ defmodule System.ActivityLogger do
       Logger.info(inspect(t))
     end
 
-    defp maybe_log(true, %PulseSent{} = entry) do
+    def maybe_log(true, %PulseSent{} = entry) do
       t =
         if is_atom(entry.pulse),
            do: entry.pulse,
@@ -114,8 +127,5 @@ defmodule System.ActivityLogger do
 
       Logger.info(inspect(t), pulse_entry: entry)
     end
-
-
-
   end
 end

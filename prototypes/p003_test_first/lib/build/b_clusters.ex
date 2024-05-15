@@ -231,7 +231,7 @@ defmodule AppAnimal.ClusterBuilders do
     end
   end
 
-  section "helper functions for clients" do
+  section "helper functions for writing `calc` functions" do
     def no_result,                       do: :no_result
     # Maybe more clear for circular cluster:
     def pulse_ignored,                   do: :no_result

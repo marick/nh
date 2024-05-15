@@ -1,6 +1,21 @@
 alias AppAnimal.Network
 
 defmodule Network.Timer do
+  @moduledoc """
+  Schedule delayed sending of `AppAnimal.System.Moveable` structures.
+
+  A circular cluster may send a `Delay` message to a `Timer` process,
+  specifying an interval after which an included pulse should be
+  `cast` back at that cluster. As with other pulses, the casting is done via
+  the `AppAnimal.System.Switchboard`.
+
+  Independently, the process casts a `:time_to_throb` message to a
+  single receiving process at given intervals. It's that process's job to fan the
+  message out to all currently active/throbbing circular clusters.
+
+  It seems unlikely this is the right design, or that these two
+  responsibilities should be wrapped up together.
+  """
   use AppAnimal
   use AppAnimal.StructServer
   use KeyConceptAliases
@@ -16,12 +31,11 @@ defmodule Network.Timer do
     field :destination_name, atom
   end
 
-  # It might be better to have separate processes for throbbing and one-shot timed pulses.
+  @no_state :no_state
 
   runs_in_sender do
-    def start_link(_) do
-      GenServer.start_link(__MODULE__, :no_state)
-    end
+    def start_link(_),
+        do: GenServer.start_link(__MODULE__, @no_state)
 
     def begin_throbbing(self, every: millis, notify: p_notify) do
       instructions = %ThrobInstructions{interval: millis, p_notify: p_notify}
@@ -38,36 +52,37 @@ defmodule Network.Timer do
     end
   end
 
-  runs_in_receiver do
-    @impl GenServer
-    def handle_call(%ThrobInstructions{} = instructions, _from, :no_state) do
+  handle_CALL do  # initiate future behavior
+    def handle_call(%ThrobInstructions{} = instructions, _from, @no_state) do
       repeating(instructions)
-      continue(:no_state, returning: :ok)
+      continue(@no_state, returning: :ok)
     end
 
-    def handle_call({%DelayedPulseInstructions{} = instructions, delay}, _from, :no_state) do
+    def handle_call({%DelayedPulseInstructions{} = instructions, delay}, _from, @no_state) do
       Process.send_after(self(), instructions, delay)
-      continue(:no_state, returning: :ok)
+      continue(@no_state, returning: :ok)
     end
+  end
 
-    @impl GenServer
-    def handle_info(%ThrobInstructions{} = instructions, :no_state) do
+  handle_INFO do # Erlan's timer delivers notificiations view info messages
+
+    def handle_info(%ThrobInstructions{} = instructions, @no_state) do
       GenServer.cast(instructions.p_notify, :time_to_throb)
       repeating(instructions)
-      continue(:no_state)
+      continue(@no_state)
     end
 
-    def handle_info(%DelayedPulseInstructions{} = instructions, :no_state) do
+    def handle_info(%DelayedPulseInstructions{} = instructions, @no_state) do
       Switchboard.cast(instructions.p_switchboard, :distribute_pulse,
                        carrying: instructions.pulse,
                        to: [instructions.destination_name])
-      continue(:no_state)
+      continue(@no_state)
     end
+  end
 
-    private do
-      def repeating(%ThrobInstructions{} = instructions) do
-        Process.send_after(self(), instructions, instructions.interval)
-      end
+  private do
+    def repeating(%ThrobInstructions{} = instructions) do
+      Process.send_after(self(), instructions, instructions.interval)
     end
   end
 end

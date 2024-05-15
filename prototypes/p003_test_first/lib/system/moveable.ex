@@ -5,6 +5,7 @@ alias System.Moveable
 
 defprotocol Moveable do
   @spec cast(t, Clusterish.t) :: none
+  @doc "Casts a moveable to an appropriate destination, determined by the moveable's type."
   def cast(moveable, cluster)
 end
 
@@ -37,7 +38,6 @@ defmodule Pulse do
   @doc """
   Return a Pulse argument or convert into a *default* Pulse."
   """
-
   def ensure(data) do
     case data do
       nil ->
@@ -92,18 +92,20 @@ end
 defmodule Affordance do
   @moduledoc """
   Describes how an action turns into a pulse sent to a PerceptionEdge.
+
+  Used for scripting
   """
   use TypedStruct
 
   typedstruct enforce: true do
-    field :downstream, atom
+    field :perception_edge, atom
     field :pulse, Pulse.t
   end
 
-  def new(downstream, %Pulse{} = pulse),
-      do: %__MODULE__{downstream: downstream, pulse: pulse}
-  def new(downstream, data),
-      do: new(downstream, Pulse.new(data))
+  def new(perception_edge, %Pulse{} = pulse),
+      do: %__MODULE__{perception_edge: perception_edge, pulse: pulse}
+  def new(perception_edge, data),
+      do: new(perception_edge, Pulse.new(data))
 end
 
 #######
@@ -135,6 +137,7 @@ end
 ####
 
 defmodule Moveable.Collection do
+  @moduledoc "Collect Moveables together."
   use TypedStruct
 
   typedstruct enforce: true do
