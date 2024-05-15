@@ -20,7 +20,7 @@ defmodule AppAnimal.Builder do
     s = start_processes()
 
     router = Moveable.Router.new(%{
-                 Moveable.Action => s.p_affordances,
+                 Moveable.Action => s.p_affordland,
                  Moveable.Pulse => s.p_switchboard,
                  Moveable.Delay => s.p_timer})
 
@@ -46,13 +46,13 @@ defmodule AppAnimal.Builder do
       p_logger = compatibly_start_link(ActivityLogger, 1000)
       switchboard_struct = struct(Switchboard, p_logger: p_logger)
       p_switchboard = compatibly_start_link(Switchboard, switchboard_struct)
-      p_affordances = compatibly_start_link(AffordanceLand,
+      p_affordland = compatibly_start_link(AffordanceLand,
                                             %{p_switchboard: p_switchboard,
                                               p_logger: p_logger})
       p_timer = compatibly_start_link(Timer, :ok)
 
       struct(AppAnimal.Pids, p_switchboard: p_switchboard,
-                             p_affordances: p_affordances,
+                             p_affordland: p_affordland,
                              p_logger: p_logger,
                              p_timer: p_timer)
     end

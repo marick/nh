@@ -33,18 +33,18 @@ defmodule AppAnimal.TestHelpers.Animal do
   Cause `AffordanceLand` to send a pulse to the given `PerceptionEdge`.
 
   Example:
-      spontaneous_affordance(p_affordances, named: affordance_name, carrying: data)
+      spontaneous_affordance(p_affordland, named: affordance_name, carrying: data)
 
   The affordance will be delivered to the cluster with the same name as the affordance,
   with the given data wrapped in a `Pulse`. The `carrying` argument may be omitted,
   in which case some innocuous, to-be-ignored data is sent.
   """
   def spontaneous_affordance(%AppAnimal.Pids{} = pids, opts),
-      do: spontaneous_affordance(pids.p_affordances, opts)
+      do: spontaneous_affordance(pids.p_affordland, opts)
 
-  def spontaneous_affordance(p_affordances, opts) when is_pid(p_affordances) do
+  def spontaneous_affordance(p_affordland, opts) when is_pid(p_affordland) do
     [name, data] = Opts.parse(opts, [:named, carrying: Pulse.new])
-    AffordanceLand.cast(p_affordances, :pulse_to_cluster,
+    AffordanceLand.cast(p_affordland, :pulse_to_cluster,
                         to_cluster: name,
                         pulse: Pulse.ensure(data))
   end
@@ -53,12 +53,12 @@ defmodule AppAnimal.TestHelpers.Animal do
   ### to different clusters) for a single action.
 
   def respond_to_action(%AppAnimal.Pids{} = pids, action_name, canned_response) do
-    respond_to_action(pids.p_affordances, action_name, canned_response)
+    respond_to_action(pids.p_affordland, action_name, canned_response)
   end
 
-  def respond_to_action(p_affordances, action_name, %Moveable.ScriptedReaction{} = affordance) do
-    GenServer.cast(p_affordances, {:respond_to, action_name, [affordance]})
-    p_affordances
+  def respond_to_action(p_affordland, action_name, %Moveable.ScriptedReaction{} = affordance) do
+    GenServer.cast(p_affordland, {:respond_to, action_name, [affordance]})
+    p_affordland
   end
 
   @doc """
@@ -67,14 +67,14 @@ defmodule AppAnimal.TestHelpers.Animal do
   Behaves the same way as an `action_edge` cluster.
   """
   def take_action(%AppAnimal.Pids{} = animal, action_name) when is_atom(action_name),
-      do: take_action(animal.p_affordances, [{action_name, :no_data}])
+      do: take_action(animal.p_affordland, [{action_name, :no_data}])
 
   def take_action(%AppAnimal.Pids{} = animal, opts),
-      do: take_action(animal.p_affordances, opts)
+      do: take_action(animal.p_affordland, opts)
 
-  def take_action(p_affordances, [{action_name, data}]) do
+  def take_action(p_affordland, [{action_name, data}]) do
     action = Action.new(action_name, data)
-    GenServer.cast(p_affordances, {:take_action, action})
+    GenServer.cast(p_affordland, {:take_action, action})
   end
 
   @doc """
