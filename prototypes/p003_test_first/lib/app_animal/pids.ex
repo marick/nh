@@ -9,7 +9,7 @@ defmodule AppAnimal.Pids do
   """
   use TypedStruct
 
-  typedstruct do
+  typedstruct enforce: true do
     plugin TypedStructLens
 
     field :p_switchboard,       pid
