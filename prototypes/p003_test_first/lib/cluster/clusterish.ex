@@ -13,7 +13,6 @@ end
 
 defimpl Clusterish, for: Any do
   use AppAnimal
-  alias System.Moveable
 
   def name(clusterish), do: clusterish.name
   def pid_for(clusterish, moveable) do

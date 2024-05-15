@@ -11,7 +11,7 @@ defmodule System.AffordanceLand do
   """
   use AppAnimal
   use AppAnimal.StructServer
-  alias System.{ActivityLogger,Switchboard,Affordance,Action}
+  alias System.{ActivityLogger,Switchboard,Action}
 
   typedstruct do
     field :p_switchboard, pid
@@ -34,7 +34,7 @@ defmodule System.AffordanceLand do
            do: IO.puts("==== SAY, there is no affordance for #{action.type}. Test error.")
 
         ActivityLogger.log_action_received(s_affordances.p_logger, action.type, action.data)
-        for %Affordance{} = response <- responses do
+        for %Moveable.ScriptedReaction{} = response <- responses do
           cast_affordance_into_network(s_affordances.p_switchboard,
                                        response.pulse, response.perception_edge)
         end

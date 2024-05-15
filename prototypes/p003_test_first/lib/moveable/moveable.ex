@@ -1,6 +1,6 @@
 alias AppAnimal.{System,Network,Clusterish}
-alias System.{Pulse, Action, Affordance, Delay}
-alias System.Moveable
+alias System.{Pulse, Action, Delay}
+alias AppAnimal.Moveable
 
 
 defprotocol Moveable do
@@ -23,11 +23,11 @@ defmodule Moveable.Router do
   end
 end
 
-defmodule System.MoveableAliases do
+defmodule Moveable.MoveableAliases do
   defmacro __using__(_) do
     quote do
-      alias System.Moveable
-      alias System.{Pulse, Action, Affordance, Delay}
+      alias AppAnimal.Moveable
+      alias AppAnimal.System.{Pulse, Action, Affordance, Delay}
     end
   end
 end
@@ -104,26 +104,6 @@ end
 
 #######
 
-defmodule Affordance do
-  @moduledoc """
-  Describes how an action turns into a pulse sent to a PerceptionEdge.
-
-  Used for scripting.
-
-  Does this belong in this file?
-  """
-  use TypedStruct
-
-  typedstruct enforce: true do
-    field :perception_edge, atom
-    field :pulse, Pulse.t
-  end
-
-  def new(perception_edge, %Pulse{} = pulse),
-      do: %__MODULE__{perception_edge: perception_edge, pulse: pulse}
-  def new(perception_edge, data),
-      do: new(perception_edge, Pulse.new(data))
-end
 
 #######
 

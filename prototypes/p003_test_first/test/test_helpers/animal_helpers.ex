@@ -56,7 +56,7 @@ defmodule AppAnimal.TestHelpers.Animal do
     respond_to_action(pids.p_affordances, action_name, canned_response)
   end
 
-  def respond_to_action(p_affordances, action_name, %Affordance{} = affordance) do
+  def respond_to_action(p_affordances, action_name, %Moveable.ScriptedReaction{} = affordance) do
     GenServer.cast(p_affordances, {:respond_to, action_name, [affordance]})
     p_affordances
   end

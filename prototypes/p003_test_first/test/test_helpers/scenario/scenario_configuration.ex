@@ -5,7 +5,6 @@ defmodule Scenario.Configuration do
   alias AppAnimal.NetworkBuilder, as: NB
   use Extras.TestAwareProcessStarter
   alias TestHelpers.Animal
-  alias System.Affordance
   import Scenario.ProcessKludgery
 
   defmacro configuration(opts \\ [], do: body) do
@@ -58,6 +57,7 @@ defmodule Scenario.Configuration do
     append_affordance_thunk(f)
   end
 
-  def by_sending(data, to: downstream), do: Affordance.new(downstream, data)
+  def by_sending(data, to: perception_edge),
+      do: Moveable.ScriptedReaction.new(perception_edge, data)
 
 end

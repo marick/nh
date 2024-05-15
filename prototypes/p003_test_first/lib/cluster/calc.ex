@@ -62,7 +62,7 @@ defmodule Cluster.Calc do
   """
   use AppAnimal
   use KeyConceptAliases
-  alias System.{Pulse,Moveable}
+  use MoveableAliases
 
   def run(calc, on: %Pulse{} = pulse, with_state: previously) when is_function(calc, 1) do
     pulse_or_pulse_data(pulse)
@@ -136,7 +136,7 @@ defmodule Cluster.Calc do
     end
 
     def ensure_moveable(data) do
-      case System.Moveable.impl_for(data) do
+      case Moveable.impl_for(data) do
         nil -> Pulse.new(data)
         _ -> data
       end

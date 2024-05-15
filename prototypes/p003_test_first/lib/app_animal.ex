@@ -6,8 +6,8 @@ defmodule AppAnimal do
   When `use`d, pre-aliases and imports various universally useful modules.
   """
 
-  alias AppAnimal.{System,Network,Duration,NetworkBuilder}
-  alias System.{Switchboard, AffordanceLand, ActivityLogger, Moveable}
+  alias AppAnimal.{System,Network,Duration,NetworkBuilder,Moveable}
+  alias System.{Switchboard, AffordanceLand, ActivityLogger}
   alias Network.Timer
   alias AppAnimal.Extras.DepthAgnostic, as: A
   use AppAnimal.Extras.TestAwareProcessStarter
@@ -83,7 +83,8 @@ defmodule AppAnimal do
 
       alias AppAnimal.Pretty
       alias AppAnimal.Duration
-      alias AppAnimal.System.MoveableAliases
+      alias AppAnimal.Moveable
+      alias AppAnimal.Moveable.MoveableAliases
       alias AppAnimal.KeyConceptAliases
 
       alias AppAnimal.Extras

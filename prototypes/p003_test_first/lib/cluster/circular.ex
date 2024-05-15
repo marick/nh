@@ -1,4 +1,4 @@
-alias AppAnimal.{Cluster,System}
+alias AppAnimal.Cluster
 
 defmodule Cluster.Circular do
   @moduledoc """
@@ -11,7 +11,7 @@ defmodule Cluster.Circular do
   - f_while_stopping - run a function before the process goes away.
   """
   use AppAnimal
-  use System.MoveableAliases
+  use MoveableAliases
   @derive [AppAnimal.Clusterish]
 
   typedstruct enforce: true do

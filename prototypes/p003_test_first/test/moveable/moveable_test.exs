@@ -3,7 +3,7 @@ AppAnimal.System
 defmodule System.MoveableTest do
   use AppAnimal.Case, async: true
   use MoveableAliases
-  alias System.Moveable, as: UT
+  alias Moveable, as: UT
   alias AppAnimal.Clusterish
 
   describe "system router" do
