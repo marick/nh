@@ -13,12 +13,13 @@ end
 
 defimpl Clusterish, for: Any do
   use AppAnimal
+  alias System.Moveable
 
   def name(clusterish), do: clusterish.name
   def pid_for(clusterish, moveable) do
     clusterish
     |> A.get_only(:router)
-    |> System.Router.pid_for(moveable)
+    |> Moveable.Router.pid_for(moveable)
   end
 end
 
@@ -26,11 +27,13 @@ end
 defmodule Clusterish.Minimal do
   @moduledoc "A clusterish for tests too lazy to construct a cluster"
   use AppAnimal
+  alias System.Moveable
   @derive [Clusterish]
+
   typedstruct enforce: true do
     plugin TypedStructLens
 
-    field :router, System.Router
+    field :router, Moveable.Router
     field :name, atom
   end
 

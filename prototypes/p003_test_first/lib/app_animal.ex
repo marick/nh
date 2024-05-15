@@ -7,7 +7,7 @@ defmodule AppAnimal do
   """
 
   alias AppAnimal.{System,Network,Duration,NetworkBuilder}
-  alias System.{Switchboard, AffordanceLand, ActivityLogger}
+  alias System.{Switchboard, AffordanceLand, ActivityLogger, Moveable}
   alias Network.Timer
   alias AppAnimal.Extras.DepthAgnostic, as: A
   use AppAnimal.Extras.TestAwareProcessStarter
@@ -35,7 +35,7 @@ defmodule AppAnimal do
   def from_network(p_network_builder, opts \\ []) when is_pid(p_network_builder) do
     s = start_processes()
 
-    router = System.Router.new(%{
+    router = Moveable.Router.new(%{
                  System.Action => s.p_affordances,
                  System.Pulse => s.p_switchboard,
                  System.Delay => s.p_timer})

@@ -4,13 +4,12 @@ defmodule System.MoveableTest do
   use AppAnimal.Case, async: true
   use MoveableAliases
   alias System.Moveable, as: UT
-  alias System.Router
   alias AppAnimal.Clusterish
 
   describe "system router" do
     test "sending a pulse FROM" do
       clusterish = Clusterish.Minimal.new(:some_cluster_name,
-                                          Router.new(%{Pulse => self()}))
+                                          UT.Router.new(%{Pulse => self()}))
       pulse = Pulse.new("data")
 
       UT.cast(pulse, clusterish)
@@ -21,7 +20,7 @@ defmodule System.MoveableTest do
 
     test "sending an action" do
       clusterish = Clusterish.Minimal.new(:some_cluster_name,
-                                          Router.new(%{Action =>  self()}))
+                                          UT.Router.new(%{Action =>  self()}))
 
       action = Action.new(:action_name)
       UT.cast(action, clusterish)
@@ -35,7 +34,7 @@ defmodule System.MoveableTest do
       self_acts_as_switchboard = self()
 
       clusterish = Clusterish.Minimal.new(:some_cluster_name,
-                                          Router.new(%{Delay => p_timer,
+                                          UT.Router.new(%{Delay => p_timer,
                                           Pulse => self_acts_as_switchboard}))
 
       delay = Delay.new(3, "some data")
@@ -49,7 +48,7 @@ defmodule System.MoveableTest do
     test "sending a collection of moveables" do
       p_timer = start_link_supervised!(Network.Timer)
       clusterish = Clusterish.Minimal.new(:some_cluster_name,
-                                          Router.new(%{Pulse => self(),
+                                          UT.Router.new(%{Pulse => self(),
                                                        Delay => p_timer}))
       pulse = Pulse.new("data")
       delay_pulse = Pulse.new("delay data")

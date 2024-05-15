@@ -1,9 +1,9 @@
-alias AppAnimal.System
+alias AppAnimal.System.Moveable
 
-defmodule System.RouterTest do
+defmodule Moveable.RouterTest do
   use AppAnimal.Case, async: true
   use MoveableAliases
-  alias System.Router, as: UT
+  alias Moveable.Router, as: UT
 
   test "creation and use" do
     actual = UT.new(%{

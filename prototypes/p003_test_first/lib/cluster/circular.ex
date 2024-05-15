@@ -11,7 +11,7 @@ defmodule Cluster.Circular do
   - f_while_stopping - run a function before the process goes away.
   """
   use AppAnimal
-  alias System.{Moveable, Pulse}
+  use System.MoveableAliases
   @derive [AppAnimal.Clusterish]
 
   typedstruct enforce: true do
@@ -24,7 +24,7 @@ defmodule Cluster.Circular do
     field :name, atom  # This is more convenient than `id`
     field :id, Cluster.Identification.t
     field :calc, fun
-    field :router, System.Router.t
+    field :router, Moveable.Router.t
 
     # Special to `Circular`
     field :previously, any

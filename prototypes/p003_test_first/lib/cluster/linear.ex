@@ -5,6 +5,7 @@ defmodule Cluster.Linear do
   A type of cluster whose `calc` function is run inside a `Task`.
   """
   use AppAnimal
+  use System.MoveableAliases
   @derive [AppAnimal.Clusterish]
 
   typedstruct enforce: true do
@@ -14,6 +15,6 @@ defmodule Cluster.Linear do
     field :name, atom  # This is more convenient than :id.
     field :id, Cluster.Identification.t
     field :calc, fun
-    field :router, System.Router.t
+    field :router, Moveable.Router.t
   end
 end

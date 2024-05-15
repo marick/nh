@@ -5,7 +5,7 @@ defmodule ClusterBuilders.FocusShiftTest do
   use MoveableAliases
 
   def paragraph_focus(router_map \\ %{}) do
-    router = System.Router.new(router_map)
+    router = Moveable.Router.new(router_map)
     C.focus_shift(:my_focus,
                    movement_time: Duration.seconds(0.05),
                    action_type: :perceive_paragraph_shape)
@@ -16,7 +16,7 @@ defmodule ClusterBuilders.FocusShiftTest do
     paragraph_focus()
     |> assert_fields(id: Identification.new(:my_focus, :focus_shift),
                      name: :my_focus,
-                     router: System.Router.new(%{}))
+                     router: Moveable.Router.new(%{}))
   end
 
   @tag :test_uses_sleep

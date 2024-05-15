@@ -10,7 +10,7 @@ defmodule TestHelpers.ConnectTestToAnimal do
 
     # Normally, a pulse is sent *after* calculation. Here, we have the
     # cluster not calculate anything but just send to the test pid.
-    # That's because the `System.Router` only knows how to do GenServer-type
+    # That's because the `Router` only knows how to do GenServer-type
     # casting, which is not compatible with `assert_receive`
     kludge_a_calc = fn arg ->
       send(p_test, [arg, from: name])

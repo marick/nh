@@ -9,6 +9,20 @@ defprotocol Moveable do
   def cast(moveable, cluster)
 end
 
+defmodule Moveable.Router do
+  use AppAnimal
+
+  typedstruct enforce: true do
+    field :map, %{atom => pid}
+  end
+
+  def new(map), do: %__MODULE__{map: map}
+
+  def pid_for(s_router, %_name{} = some_struct) do
+    s_router.map[some_struct.__struct__]
+  end
+end
+
 defmodule System.MoveableAliases do
   defmacro __using__(_) do
     quote do
@@ -17,6 +31,7 @@ defmodule System.MoveableAliases do
     end
   end
 end
+
 
 
 #######
@@ -93,7 +108,9 @@ defmodule Affordance do
   @moduledoc """
   Describes how an action turns into a pulse sent to a PerceptionEdge.
 
-  Used for scripting
+  Used for scripting.
+
+  Does this belong in this file?
   """
   use TypedStruct
 
