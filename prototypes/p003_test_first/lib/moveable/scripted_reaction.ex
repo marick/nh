@@ -2,7 +2,7 @@ alias AppAnimal.Moveable
 
 defmodule Moveable.ScriptedReaction do
   use AppAnimal
-  use Moveable.MoveableAliases
+  use MoveableAliases
   @moduledoc """
   Describes how an action turns into a pulse sent to a PerceptionEdge.
 
