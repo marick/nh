@@ -1,8 +1,6 @@
 alias AppAnimal.Moveable
 
 defmodule Moveable.ScriptedReaction do
-  use AppAnimal
-  use MoveableAliases
   @moduledoc """
   Describes how an action turns into a pulse sent to a PerceptionEdge.
 
@@ -11,6 +9,8 @@ defmodule Moveable.ScriptedReaction do
   Does this belong in this file?
   """
   use TypedStruct
+  use AppAnimal
+  use MoveableAliases
 
   typedstruct enforce: true do
     field :perception_edge, atom
