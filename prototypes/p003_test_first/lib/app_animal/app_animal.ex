@@ -6,8 +6,8 @@ defmodule AppAnimal do
   When `use`d, pre-aliases and imports various universally useful modules.
   """
 
-  alias AppAnimal.{System,Network,Duration,NetworkBuilder,Moveable}
-  alias System.{Switchboard, AffordanceLand, ActivityLogger}
+  alias AppAnimal.{Network,Duration,NetworkBuilder,Moveable}
+  alias AppAnimal.{Switchboard, AffordanceLand, ActivityLogger}
   alias Network.Timer
   alias AppAnimal.Extras.DepthAgnostic, as: A
   use AppAnimal.Extras.TestAwareProcessStarter
@@ -36,9 +36,9 @@ defmodule AppAnimal do
     s = start_processes()
 
     router = Moveable.Router.new(%{
-                 System.Action => s.p_affordances,
-                 System.Pulse => s.p_switchboard,
-                 System.Delay => s.p_timer})
+                 Moveable.Action => s.p_affordances,
+                 Moveable.Pulse => s.p_switchboard,
+                 Moveable.Delay => s.p_timer})
 
 
     NetworkBuilder.install_routers(p_network_builder, router)

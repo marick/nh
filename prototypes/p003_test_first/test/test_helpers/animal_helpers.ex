@@ -73,7 +73,7 @@ defmodule AppAnimal.TestHelpers.Animal do
       do: take_action(animal.p_affordances, opts)
 
   def take_action(p_affordances, [{action_name, data}]) do
-    action = System.Action.new(action_name, data)
+    action = Action.new(action_name, data)
     GenServer.cast(p_affordances, {:take_action, action})
   end
 

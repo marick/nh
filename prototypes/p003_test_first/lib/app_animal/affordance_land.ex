@@ -1,6 +1,4 @@
-alias AppAnimal.System
-
-defmodule System.AffordanceLand do
+defmodule AppAnimal.AffordanceLand do
   @moduledoc """
   Represents the document in a way that produces affordances and
   accepts actions in the form of instructions to create an affordance.
@@ -11,7 +9,8 @@ defmodule System.AffordanceLand do
   """
   use AppAnimal
   use AppAnimal.StructServer
-  alias System.{ActivityLogger,Switchboard,Action}
+  use KeyConceptAliases
+  use Moveable.MoveableAliases
 
   typedstruct do
     field :p_switchboard, pid

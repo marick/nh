@@ -1,8 +1,8 @@
-alias AppAnimal.{System,Scenario}
+alias AppAnimal.Scenario
 
-defmodule System.AffordanceLandTest do
+defmodule AppAnimal.AffordanceLandTest do
   use Scenario.Case, async: true
-  alias System.Pulse
+  alias AppAnimal.Moveable.Pulse
 
   test "a 'self-generated' affordance" do
     provocation spontaneous_affordance(named: :big_paragraph_change, 

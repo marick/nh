@@ -3,7 +3,6 @@ alias AppAnimal.Network
 defmodule Network.CircularSubnetTest do
   use AppAnimal.Case, async: true
   alias Network.CircularSubnet, as: UT
-  alias System.Pulse
 
   describe "construction of a throbber" do
     test "A throbber is initialized with a set of *circular* clusters" do

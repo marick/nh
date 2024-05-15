@@ -1,6 +1,6 @@
-AppAnimal.System
+AppAnimal.Moveable
 
-defmodule System.MoveableTest do
+defmodule MoveableTest do
   use AppAnimal.Case, async: true
   use MoveableAliases
   alias Moveable, as: UT

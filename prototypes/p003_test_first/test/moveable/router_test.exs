@@ -1,4 +1,4 @@
-alias AppAnimal.System.Moveable
+alias AppAnimal.Moveable
 
 defmodule Moveable.RouterTest do
   use AppAnimal.Case, async: true

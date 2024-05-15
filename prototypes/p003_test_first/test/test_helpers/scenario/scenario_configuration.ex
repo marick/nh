@@ -1,7 +1,8 @@
-alias AppAnimal.{Extras,System,Scenario,TestHelpers}
+alias AppAnimal.{Extras,Scenario,TestHelpers}
 
 defmodule Scenario.Configuration do
   use AppAnimal
+  use KeyConceptAliases
   alias AppAnimal.NetworkBuilder, as: NB
   use Extras.TestAwareProcessStarter
   alias TestHelpers.Animal
@@ -16,7 +17,7 @@ defmodule Scenario.Configuration do
       unquote(body)
       animal = AppAnimal.from_network(network_builder(), unquote(opts))
       if unquote(terminal_log?),
-         do: System.ActivityLogger.spill_log_to_terminal(animal.p_logger)
+         do: ActivityLogger.spill_log_to_terminal(animal.p_logger)
       for thunk <- affordance_thunks() do
         thunk.(animal)
       end

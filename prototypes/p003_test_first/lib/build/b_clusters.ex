@@ -98,7 +98,7 @@ defmodule AppAnimal.ClusterBuilders do
       Whatever pulse the cluster receives is wrapped in the action.
       """
     def action_edge(name) do
-      linear(name, & System.Action.new(name, &1),
+      linear(name, & Action.new(name, &1),
              label: :action_edge)
     end
 

@@ -8,7 +8,7 @@ defmodule Cluster.CircularProcess do
   use AppAnimal.StructServer
   use KeyConceptAliases
   alias Cluster.{Calc,Circular}
-  alias System.Pulse
+  alias Moveable.Pulse
 
   runs_in_sender do
     # I still need to experiment with handling different types of

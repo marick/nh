@@ -4,7 +4,7 @@ defmodule Pretty.LogFormat do
   @moduledoc "Used to configure Logger. See root/config/config.exs"
 
   use AppAnimal
-  alias AppAnimal.System.ActivityLogger
+  alias AppAnimal.ActivityLogger
 
   def format(_level, message, _timestamp, metadata) do
     message = format(message, metadata)

@@ -2,12 +2,12 @@ alias AppAnimal.Network
 
 defmodule Network.Timer do
   @moduledoc """
-  Schedule delayed sending of `AppAnimal.System.Moveable` structures.
+  Schedule delayed sending of `AppAnimal.Moveable` structures.
 
   A circular cluster may send a `Delay` message to a `Timer` process,
   specifying an interval after which an included pulse should be
   `cast` back at that cluster. As with other pulses, the casting is done via
-  the `AppAnimal.System.Switchboard`.
+  the `AppAnimal.Switchboard`.
 
   Independently, the process casts a `:time_to_throb` message to a
   single receiving process at given intervals. It's that process's job to fan the

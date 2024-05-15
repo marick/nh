@@ -1,5 +1,3 @@
-alias AppAnimal.System
-
 defmodule AppAnimal.ActivityLogAssertions do
   @moduledoc """
   Some fairly rudimentary assertions against the log. Perhaps more to come.
@@ -9,7 +7,8 @@ defmodule AppAnimal.ActivityLogAssertions do
   use FlowAssertions
   use FlowAssertions.Define
   use Private
-  alias System.{ActivityLogger,Pulse}
+  alias AppAnimal.ActivityLogger
+  alias AppAnimal.Moveable.Pulse
   alias ActivityLogger.{ActionReceived, PulseSent}
 
   @doc "shorthand for an action received"

@@ -1,9 +1,8 @@
-alias AppAnimal.{System,Scenario}
+alias AppAnimal.Scenario
 
-defmodule System.TerminalLoggingTest do
+defmodule AppAnimal.TerminalLoggingTest do
   use Scenario.Case, async: true
-  alias System.ActivityLogger, as: UT
-  alias System.Pulse
+  alias AppAnimal.ActivityLogger, as: UT
 
   test "there is a terminal log option" do
     IO.puts("\n=== #{Pretty.Module.minimal(__MODULE__)} (around line #{__ENV__.line}) " <>

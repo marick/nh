@@ -32,7 +32,7 @@ defmodule Cluster.Calc do
   A one-argument function should return one of these values:
 
   `:no_result`            - there is to be no outgoing pulse or action
-  `System.Moveable.t`     - the result to be sent somewhere. Where depends on
+  `Moveable.t`            - the result to be sent somewhere. Where depends on
                             the particular type implementing the `Moveable` protocol.
 
   As a convenience, any other value is wrapped in a :default Pulse.

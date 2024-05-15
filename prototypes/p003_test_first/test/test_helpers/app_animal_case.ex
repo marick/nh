@@ -4,6 +4,7 @@ defmodule AppAnimal.Case do
       use ExUnit.Case, unquote(opts)
       use AppAnimal
       use AppAnimal.KeyConceptAliases
+      use AppAnimal.Moveable.MoveableAliases
       use FlowAssertions
       import FlowAssertions.TabularA
       import AppAnimal.ActivityLogAssertions

@@ -2,7 +2,7 @@ defmodule ActivityLogAssertionsTest do
   use ExUnit.Case, async: true
   import FlowAssertions.AssertionA
   alias AppAnimal.ActivityLogAssertions, as: UT
-  alias AppAnimal.System.ActivityLogger
+  alias AppAnimal.ActivityLogger
   alias AppAnimal.Cluster
   alias ActivityLogger.{PulseSent, ActionReceived}
   import AppAnimal.ActivityLogAssertions, only: [action_taken: 1]

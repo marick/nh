@@ -2,8 +2,8 @@ alias AppAnimal.Network
 
 defmodule Network.TimerTest do
   use AppAnimal.Case, async: true
+  use MoveableAliases
   alias Network.Timer, as: UT
-  alias System.Pulse
 
   test "repeating" do
     pid = start_link_supervised!(UT)

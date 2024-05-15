@@ -1,9 +1,9 @@
-alias AppAnimal.System
+alias AppAnimal
 
-defmodule System.ActivityLoggerTest do
+defmodule ActivityLoggerTest do
   use AppAnimal.Case, async: true
-  alias System.ActivityLogger, as: UT
-  alias System.Pulse
+  alias AppAnimal.ActivityLogger, as: UT
+  alias AppAnimal.Moveable.Pulse
 
   test "basic operations" do
     pid = start_link_supervised!({UT,100})

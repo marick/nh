@@ -1,12 +1,11 @@
 alias AppAnimal.Clusterish
-alias AppAnimal.System
 
 defprotocol Clusterish do
   @moduledoc "Functions common to linear and circular clusters."
   @spec name(t) :: atom
   def name(clusterish)
 
-  @spec pid_for(t, System.Moveable.t) :: pid
+  @spec pid_for(t, Moveable.t) :: pid
   def pid_for(clusterish, moveable)
 end
 
@@ -26,7 +25,6 @@ end
 defmodule Clusterish.Minimal do
   @moduledoc "A clusterish for tests too lazy to construct a cluster"
   use AppAnimal
-  alias System.Moveable
   @derive [Clusterish]
 
   typedstruct enforce: true do

@@ -1,6 +1,4 @@
-alias AppAnimal.System
-
-defmodule System.ActivityLogger do
+defmodule AppAnimal.ActivityLogger do
   @moduledoc """
   Record pulses, etc.
 

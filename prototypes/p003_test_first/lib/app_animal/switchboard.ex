@@ -1,6 +1,6 @@
-alias AppAnimal.System
+alias AppAnimal
 
-defmodule System.Switchboard do
+defmodule AppAnimal.Switchboard do
   @moduledoc """
   An intermediary between clusters. It receives all sent messages and routes them
   to the downstream clusters.
@@ -11,9 +11,8 @@ defmodule System.Switchboard do
   """
 
   use AppAnimal
+  use KeyConceptAliases
   use AppAnimal.StructServer
-  alias AppAnimal.Network
-  alias System.ActivityLogger
 
   typedstruct enforce: true do
     field :network,         Network.t

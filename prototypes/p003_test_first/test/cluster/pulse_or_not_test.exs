@@ -2,7 +2,7 @@ alias AppAnimal.{Cluster,Scenario}
 
 defmodule Cluster.LinearClusterTest do
   use Scenario.Case, async: true
-  alias System.Pulse
+
 
   test "choosing to pulse" do
     function_that_causes_pulse = & &1+1
