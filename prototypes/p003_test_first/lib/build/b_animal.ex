@@ -1,18 +1,12 @@
-
-defmodule AppAnimal do
+defmodule AppAnimal.Builder do
   @moduledoc """
   Assemble the top-level processes into a single structure.
-
-  When `use`d, pre-aliases and imports various universally useful modules.
   """
-
-  alias AppAnimal.{Network,Duration,NetworkBuilder,Moveable}
-  alias AppAnimal.{Switchboard, AffordanceLand, ActivityLogger}
+  use AppAnimal
+  use KeyConceptAliases
+  alias AppAnimal.NetworkBuilder
   alias Network.Timer
-  alias AppAnimal.Extras.DepthAgnostic, as: A
   use AppAnimal.Extras.TestAwareProcessStarter
-  use TypedStruct
-  use Private
 
   @doc """
   Given a `NetworkBuilder` process, extract the finished network and use it to
@@ -61,25 +55,6 @@ defmodule AppAnimal do
                              p_affordances: p_affordances,
                              p_logger: p_logger,
                              p_timer: p_timer)
-    end
-  end
-
-  defmacro __using__(_) do
-    quote do
-      require Logger
-      use Private
-      use TypedStruct
-      import Lens.Macros
-      import AppAnimal.Extras.{TupleX,KernelX,Nesting}
-
-      alias AppAnimal.{Pretty,Duration,Moveable}
-
-      alias AppAnimal.Moveable.MoveableAliases
-      alias AppAnimal.KeyConceptAliases
-
-      alias AppAnimal.Extras
-      alias Extras.{LensX,Opts}
-      alias Extras.DepthAgnostic, as: A
     end
   end
 end

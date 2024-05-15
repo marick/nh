@@ -15,7 +15,7 @@ defmodule Scenario.Configuration do
       init_network_builder compatibly_start_link(NB, :ok)
       init_affordance_thunks()
       unquote(body)
-      animal = AppAnimal.from_network(network_builder(), unquote(opts))
+      animal = AppAnimal.Builder.from_network(network_builder(), unquote(opts))
       if unquote(terminal_log?),
          do: ActivityLogger.spill_log_to_terminal(animal.p_logger)
       for thunk <- affordance_thunks() do
