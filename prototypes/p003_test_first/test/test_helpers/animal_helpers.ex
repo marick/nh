@@ -18,7 +18,7 @@ defmodule AppAnimal.TestHelpers.Animal do
   Example:
       send_test_pulse(p_switchboard, to: :first, carrying: 1)
   """
-  def send_test_pulse(%AppAnimal{} = pids, to: destination_name, carrying: pulse_data) do
+  def send_test_pulse(%AppAnimal.Pids{} = pids, to: destination_name, carrying: pulse_data) do
     send_test_pulse(pids.p_switchboard, to: destination_name, carrying: pulse_data)
   end
 
@@ -39,7 +39,7 @@ defmodule AppAnimal.TestHelpers.Animal do
   with the given data wrapped in a `Pulse`. The `carrying` argument may be omitted,
   in which case some innocuous, to-be-ignored data is sent.
   """
-  def spontaneous_affordance(%AppAnimal{} = pids, opts),
+  def spontaneous_affordance(%AppAnimal.Pids{} = pids, opts),
       do: spontaneous_affordance(pids.p_affordances, opts)
 
   def spontaneous_affordance(p_affordances, opts) when is_pid(p_affordances) do
@@ -52,7 +52,7 @@ defmodule AppAnimal.TestHelpers.Animal do
   ### Note that this needs only a small tweak to allow multiple canned responses (sending
   ### to different clusters) for a single action.
 
-  def respond_to_action(%AppAnimal{} = pids, action_name, canned_response) do
+  def respond_to_action(%AppAnimal.Pids{} = pids, action_name, canned_response) do
     respond_to_action(pids.p_affordances, action_name, canned_response)
   end
 
@@ -66,10 +66,10 @@ defmodule AppAnimal.TestHelpers.Animal do
 
   Behaves the same way as an `action_edge` cluster.
   """
-  def take_action(%AppAnimal{} = animal, action_name) when is_atom(action_name),
+  def take_action(%AppAnimal.Pids{} = animal, action_name) when is_atom(action_name),
       do: take_action(animal.p_affordances, [{action_name, :no_data}])
 
-  def take_action(%AppAnimal{} = animal, opts),
+  def take_action(%AppAnimal.Pids{} = animal, opts),
       do: take_action(animal.p_affordances, opts)
 
   def take_action(p_affordances, [{action_name, data}]) do
@@ -83,13 +83,13 @@ defmodule AppAnimal.TestHelpers.Animal do
   This applies only to throbbing clusters, since only they have state. Note also that
   the process better be running
   """
-  def peek_at(%AppAnimal{} = animal, internal_state_name, of: cluster_name),
+  def peek_at(%AppAnimal.Pids{} = animal, internal_state_name, of: cluster_name),
       do: GenServer.call(animal.p_circular_clusters,
                          forward: internal_state_name, to: cluster_name)
 
   @doc """
   Instruct all throbbing clusters to take a throb.
   """
-  def throb_all_active(%AppAnimal{} = animal),
+  def throb_all_active(%AppAnimal.Pids{} = animal),
       do: GenServer.cast(animal.p_circular_clusters, :time_to_throb)
 end

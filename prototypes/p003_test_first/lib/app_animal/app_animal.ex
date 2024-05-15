@@ -14,16 +14,6 @@ defmodule AppAnimal do
   use TypedStruct
   use Private
 
-  typedstruct do
-    plugin TypedStructLens
-
-    field :p_switchboard,       pid
-    field :p_affordances,       pid
-    field :p_logger,            pid
-    field :p_circular_clusters, pid
-    field :p_timer,             pid
-  end
-
   @doc """
   Given a `NetworkBuilder` process, extract the finished network and use it to
   start all the top-level processes.
@@ -67,10 +57,10 @@ defmodule AppAnimal do
                                               p_logger: p_logger})
       p_timer = compatibly_start_link(Timer, :ok)
 
-      struct(__MODULE__, p_switchboard: p_switchboard,
-                         p_affordances: p_affordances,
-                         p_logger: p_logger,
-                         p_timer: p_timer)
+      struct(AppAnimal.Pids, p_switchboard: p_switchboard,
+                             p_affordances: p_affordances,
+                             p_logger: p_logger,
+                             p_timer: p_timer)
     end
   end
 
