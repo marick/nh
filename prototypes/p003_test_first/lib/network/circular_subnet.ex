@@ -25,8 +25,17 @@ defmodule Network.CircularSubnet do
     field :name_to_cluster, %{atom => Cluster.Circular.t}
   end
 
-  deflens routers,
-          do: name_to_cluster() |> Lens.map_values() |> Cluster.Circular.router()
+  section "lenses" do
+    deflens routers,
+            do: name_to_cluster() |> Lens.map_values() |> Cluster.Circular.router()
+
+    deflens cluster_for(name),
+            do: name_to_cluster() |> Lens.key(name)
+
+    deflens router_for(name),
+            do: cluster_for(name) |> Cluster.Circular.router()
+  end
+
 
   runs_in_receiver do
     @impl GenServer
@@ -44,8 +53,8 @@ defmodule Network.CircularSubnet do
       def handle_cast({:distribute_pulse, opts}, s_subnet) do
         [pulse, names] = Opts.required!(opts, [:carrying, :to])
         if pulse.type == :default,
-           do:   distribute_then_continue(pulse, names, ensure_started(s_subnet, names)),
-           else: distribute_then_continue(pulse, names,                s_subnet        )
+           do:   distribute_then_continue(pulse, names, ensure_throbbing(s_subnet, names)),
+           else: distribute_then_continue(pulse, names,                  s_subnet        )
       end
 
       def handle_cast(:time_to_throb, s_subnet) do
@@ -69,15 +78,13 @@ defmodule Network.CircularSubnet do
     handle_CALL do
 
       def handle_call({:router_for, name}, _from, s_subnet) do
-        router = s_subnet.name_to_cluster[name] |> A.get_only(:router)
+        router = A.get_only(s_subnet, router_for(name))
         continue(s_subnet, returning: router)
       end
 
       def handle_call({:add_cluster, %Cluster.Circular{} = cluster}, _from, s_subnet) do
-        precondition Map.has_key?(s_subnet, :name_to_cluster)
-
         s_subnet
-        |> A.put(name_to_cluster() |> Lens.key(cluster.name), cluster)
+        |> A.put(cluster_for(cluster.name), cluster)
         |> continue(returning: :ok)
       end
 
@@ -115,7 +122,7 @@ defmodule Network.CircularSubnet do
     end
 
     private do
-      def ensure_started(s_subnet, names) do
+      def ensure_throbbing(s_subnet, cluster_names) do
         reducer = fn name, bimap ->
           if BiMap.has_key?(bimap, name) do
             bimap
@@ -127,18 +134,18 @@ defmodule Network.CircularSubnet do
           end
         end
 
-        new_bimap = Enum.reduce(names, s_subnet.name_to_pid, reducer)
+        new_bimap = Enum.reduce(cluster_names, s_subnet.name_to_pid, reducer)
         %{s_subnet | name_to_pid: new_bimap}
       end
 
-      def distribute_then_continue(pulse, names, s_subnet) do
-        send_to_throbbers(s_subnet.name_to_pid, names, pulse)
+      def distribute_then_continue(pulse, cluster_names, s_subnet) do
+        send_to_throbbers(s_subnet.name_to_pid, cluster_names, pulse)
         continue(s_subnet)
       end
 
-      def send_to_throbbers(name_to_pid, names, pulse) do
+      def send_to_throbbers(name_to_pid, cluster_names, pulse) do
         throbbers =
-          names
+          cluster_names
           |> Enum.map(& BiMap.get(name_to_pid, &1))
           |> Enum.reject(&is_nil/1)
 

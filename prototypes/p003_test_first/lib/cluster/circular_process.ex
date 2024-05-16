@@ -10,7 +10,7 @@ defmodule Cluster.CircularProcess do
   alias Cluster.{Calc,Circular}
   alias Moveable.Pulse
 
-  runs_in_sender do
+  handle_CAST do
     # I still need to experiment with handling different types of
     # pulses. Some should be hardcoded for all circulars (like
     # `:suppress`), but I fear some may need to be handled in the
@@ -36,7 +36,6 @@ defmodule Cluster.CircularProcess do
       |> continue
     end
 
-    @impl GenServer
     def handle_cast([throb: n], s_circular) do
       {action, next_throb} = Throb.throb(s_circular.throb, n)
 
@@ -49,10 +48,10 @@ defmodule Cluster.CircularProcess do
           stop(next_process_state)
       end
     end
+  end
 
+  handle_CALL do
     # Test support
-
-    @impl GenServer
     def handle_call(:current_age, _from, s_circular) do
       lifespan = A.get_only(s_circular, :current_age)
       continue(s_circular, returning: lifespan)

@@ -65,6 +65,7 @@ defmodule Cluster.Throb do
       |> then(& struct(__MODULE__, &1))
     end
 
+    @doc "Throbs have no effect; the cluster never ages out."
     def ignore(), do: counting_up_to(Duration.foreverish)
   end
 

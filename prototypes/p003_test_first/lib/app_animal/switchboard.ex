@@ -19,31 +19,42 @@ defmodule AppAnimal.Switchboard do
     field :p_logger, ActivityLogger.t
   end
 
-  @impl GenServer
-  def handle_call({:accept_network, network}, _from, s_switchboard) do
-    s_switchboard
-    |> Map.put(:network, network)
-    |> continue(returning: :ok)
+
+  handle_CALL do
+    def handle_call({:accept_network, network}, _from, s_switchboard) do
+      s_switchboard
+      |> Map.put(:network, network)
+      |> continue(returning: :ok)
+    end
   end
 
-  @impl GenServer
-  def handle_cast({:distribute_pulse, opts}, s_switchboard) do
-    cond do
-      Keyword.has_key?(opts, :to) ->
-        [pulse, destination_names] = Opts.required!(opts, [:carrying, :to])
-        Network.deliver_pulse(s_switchboard.network, destination_names, pulse)
-        continue(s_switchboard)
 
-      Keyword.has_key?(opts, :from) ->  # recurses to above case
-        [pulse, source_name] = Opts.required!(opts, [:carrying, :from])
+  handle_CAST do
+    def handle_cast({:distribute_pulse, opts}, s_switchboard) do
+      cond do
+        Keyword.has_key?(opts, :to) ->
+          cast_to_N(s_switchboard, opts)
 
-        source = Network.full_identification(s_switchboard.network, source_name)
-        ActivityLogger.log_pulse_sent(s_switchboard.p_logger, source, pulse)
-        destination_names =
-          Network.destination_names(s_switchboard.network, from: source_name, for: pulse)
+        Keyword.has_key?(opts, :from) ->
+          convert_opts_to_use(:to, s_switchboard, opts)
+          |> then(& cast_to_N(s_switchboard, &1))
+      end
+      continue(s_switchboard)
+    end
 
-        handle_cast({:distribute_pulse, carrying: pulse, to: destination_names},
-                    s_switchboard)
+    defp cast_to_N(s_switchboard, opts) do
+      [pulse, destination_names] = Opts.required!(opts, [:carrying, :to])
+      Network.deliver_pulse(s_switchboard.network, destination_names, pulse)
+    end
+
+    defp convert_opts_to_use(:to, s_switchboard, opts) do
+      [pulse, source_name] = Opts.required!(opts, [:carrying, :from])
+
+      source = Network.full_identification(s_switchboard.network, source_name)
+      ActivityLogger.log_pulse_sent(s_switchboard.p_logger, source, pulse)
+      destination_names =
+        Network.destination_names(s_switchboard.network, from: source_name, for: pulse)
+      [carrying: pulse, to: destination_names]
     end
   end
 end

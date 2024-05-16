@@ -6,7 +6,7 @@ defmodule Moveable.ScriptedReaction do
 
   Used for scripting.
 
-  Does this belong in this file?
+  Vaguely related to `Moveable` as it contains one.
   """
   use TypedStruct
   use AppAnimal
