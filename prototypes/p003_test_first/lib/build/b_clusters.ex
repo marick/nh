@@ -227,7 +227,7 @@ defmodule AppAnimal.ClusterBuilders do
             Delay.new(movement_time, Pulse.new(:movement_finished, focus_on))])
       end
 
-      circular(name, calc, label: :focus_shift)
+      circular(name, calc, label: :focus_shift, throb: Throb.ignore)
     end
   end
 

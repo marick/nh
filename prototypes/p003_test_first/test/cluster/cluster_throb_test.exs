@@ -145,4 +145,14 @@ defmodule Cluster.ThrobTest do
       |> assert_field(current_age: 0)
     end
   end
+
+  test "Throb.ignore counts up with an effectively infinite lifetime" do
+    throb = UT.ignore
+    assert_field(throb, current_age: 0,
+                        max_age: Duration.foreverish)
+
+    {:continue, throb} = UT.throb(throb)
+    assert_field(throb, current_age: 1,
+                        max_age: Duration.foreverish)
+  end
 end

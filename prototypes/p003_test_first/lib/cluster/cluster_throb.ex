@@ -64,6 +64,8 @@ defmodule Cluster.Throb do
       |> Opts.rename(:on_pulse, to: :f_note_pulse)
       |> then(& struct(__MODULE__, &1))
     end
+
+    def ignore(), do: counting_up_to(Duration.foreverish)
   end
 
   section "Finer control over handling of 'throb' messages" do

@@ -47,4 +47,18 @@ defmodule ClusterBuilders.FocusShiftTest do
     assert_receive(_)
     |> assert_action_taken(Action.new(:perceive_paragraph_shape, "paragraph id"))
   end
+
+  test "ignores throbbing" do
+    s_cluster = paragraph_focus(%{Action => self()})
+    p_cluster = start_link_supervised!({Cluster.CircularProcess, s_cluster})
+
+    Enum.each(0..10000, fn _ ->
+      GenServer.cast(p_cluster, [throb: 100])
+    end)
+
+    GenServer.cast(p_cluster, [handle_pulse: Pulse.new(:movement_finished, "paragraph id")])
+
+    assert_receive(_)
+    |> assert_action_taken(Action.new(:perceive_paragraph_shape, "paragraph id"))
+  end
 end
