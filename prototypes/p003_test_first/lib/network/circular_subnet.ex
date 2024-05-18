@@ -32,8 +32,23 @@ defmodule Network.CircularSubnet do
     deflens cluster_for(name),
             do: name_to_cluster() |> Lens.key(name)
 
+    deflens clusters(),
+            do: name_to_cluster() |> Lens.map_values()
+
     deflens router_for(name),
             do: cluster_for(name) |> Cluster.Circular.router()
+
+    deflens pids,
+            do: name_to_pid() |> LensX.bimap_all_values()
+
+    deflens pid_for(name),
+            do: name_to_pid() |> LensX.bimap_key(name)
+
+    deflens throbbing_names,
+            do: name_to_pid() |> LensX.bimap_all_keys
+
+    deflens throbbing_pids,
+            do: name_to_pid() |> LensX.bimap_all_values
   end
 
 
@@ -58,7 +73,7 @@ defmodule Network.CircularSubnet do
       end
 
       def handle_cast(:time_to_throb, s_subnet) do
-        throb(BiMap.values(s_subnet.name_to_pid))
+        A.each(s_subnet, :pids, & GenServer.cast(&1, [throb: 1]))
         continue(s_subnet)
       end
     end
@@ -99,43 +114,38 @@ defmodule Network.CircularSubnet do
         @impl GenServer
         def handle_call([forward: getter_name, to: name], _from, s_subnet) do
           result =
-            BiMap.get(s_subnet.name_to_pid, name)
+            A.get_only(s_subnet, pid_for(name))
             |> GenServer.call(getter_name)
           continue(s_subnet, returning: result)
         end
 
         def handle_call(:clusters, _from, s_subnet) do
-          values = Map.values(s_subnet.name_to_cluster)
+          values = A.get_all(s_subnet, :clusters)
           continue(s_subnet, returning: values)
         end
 
         def handle_call(:throbbing_names, _from, s_subnet) do
-          keys = BiMap.keys(s_subnet.name_to_pid)
+          keys = A.get_all(s_subnet, :throbbing_names)
           continue(s_subnet, returning: keys)
         end
 
         def handle_call(:throbbing_pids, _from, s_subnet) do
-          values = BiMap.values(s_subnet.name_to_pid)
-          continue(s_subnet, returning: values)
+          pids = A.get_all(s_subnet, :throbbing_pids)
+          continue(s_subnet, returning: pids)
         end
       end
     end
 
     private do
       def ensure_throbbing(s_subnet, cluster_names) do
-        reducer = fn name, bimap ->
-          if BiMap.has_key?(bimap, name) do
-            bimap
-          else
-            cluster = Map.get(s_subnet.name_to_cluster, name)
-            {:ok, pid} = GenServer.start(Cluster.CircularProcess, cluster)
-            Process.monitor(pid)
-            BiMap.put(bimap, name, pid)
-          end
-        end
+        provide_missing_keys = name_to_pid() |> LensX.bimap_missing_keys(cluster_names)
 
-        new_bimap = Enum.reduce(cluster_names, s_subnet.name_to_pid, reducer)
-        %{s_subnet | name_to_pid: new_bimap}
+        A.map(s_subnet, provide_missing_keys, fn missing_key ->
+          cluster = A.get_only(s_subnet, cluster_for(missing_key))
+          {:ok, pid} = GenServer.start(Cluster.CircularProcess, cluster)
+          Process.monitor(pid)
+          pid
+        end)
       end
 
       def distribute_then_continue(pulse, cluster_names, s_subnet) do
