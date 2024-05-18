@@ -17,7 +17,7 @@ defmodule AppAnimal.Extras.LensX do
 
 
   @doc """
-  Like `Lens.all/0`, but operations more often produces a MapSet.
+  Like `Lens.all/0`, but intended for use with a MapSet.
 
   `mapset_values` is pointless without other lenses appended to look
   deeper into the nested structure.
@@ -126,6 +126,71 @@ defmodule AppAnimal.Extras.LensX do
   #     {res, MapSet.new(changed)}
   #   end
   # end
+
+  @doc """
+  Point at all values of a BiMap.
+
+  Note that `put` is not useful in this case, as BiMaps require all values to be unique.
+  If you do `A.put(data, lens, 1)`, all but one of the keys will disappear from the BiMap.
+  """
+  deflens bimap_all_values() do
+    Lens.into(Lens.all |> Lens.at(1), BiMap.new)
+  end
+
+  @doc """
+  Point at all keys of a BiMap.
+
+  This is useful for descending into complex keys.
+  """
+  deflens bimap_all_keys() do
+    Lens.into(Lens.all |> Lens.at(0), BiMap.new)
+  end
+
+  @doc """
+  Point at the value of a single BiMap key.
+  """
+  deflens_raw bimap_key(key) do
+    fn bimap, f_get_or_update ->
+      {gotten, updated} = f_get_or_update.(BiMap.get(bimap, key))
+      {[gotten], BiMap.put(bimap, key, updated)}
+    end
+  end
+
+  @doc """
+  Point at the values of an `Enumeration` of  BiMap keys.
+  """
+  deflens bimap_keys(keys) do
+    keys |> Enum.map(&bimap_key/1) |> Lens.multiple
+  end
+
+  @doc """
+  Differs from `missing` in that the missing key is passed to a `map` function.
+
+  This is useful when adding keys to a map, where the value somehow depends on the key.
+
+     A.map(bimap, LensX.bimap_keys([:a, :b]), fn missing_key ->
+       // create a process that remembers the `missing_key` and put it into the
+       // BiMap under the `missing_ley`
+     end
+
+  """
+  deflens_raw bimap_missing_keys(list) do
+    fn bimap, f_get_or_update ->
+      reducer =
+        fn key, {gotten_so_far, updated_so_far} ->
+          if BiMap.has_key?(bimap, key) do
+            {gotten_so_far, updated_so_far}
+          else
+            {gotten, updated} = f_get_or_update.(key)
+            {[gotten | gotten_so_far], BiMap.put(updated_so_far, key, updated)}
+          end
+        end
+
+      {gotten_final, updated_final} = Enum.reduce(list, {[], bimap}, reducer)
+      {gotten_final, updated_final}
+    end
+  end
+
 
   @doc """
   Easy construction of a lens to multiple locations deep within a tree of map/structs.

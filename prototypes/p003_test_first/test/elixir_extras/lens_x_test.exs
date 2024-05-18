@@ -195,13 +195,102 @@ defmodule Extras.LensXTest do
       A.get_all(input, lens)
       |> assert_good_enough(in_any_order([0, 1]))
     end
+
+    test "justify the difference between a missing key and one with a nil value" do
+      input = MapSet.new [%{a: 1}, %{a: nil, b: 2}, %{}]
+      lens = UT.mapset_value_identified_by(a: nil)
+
+      assert A.get_only(input, lens) == %{a: nil, b: 2}
+    end
   end
 
-  test "justify the difference between a missing key and one with a nil value" do
-    input = MapSet.new [%{a: 1}, %{a: nil, b: 2}, %{}]
-    lens = UT.mapset_value_identified_by(a: nil)
+  describe "BiMap lenses" do
+    test "bimap_all_values" do
+      input = BiMap.new(%{1 => %{a: 1, b: 2}, 2 => %{a: 11, b: 22}})
 
-    assert A.get_only(input, lens) == %{a: nil, b: 2}
+      lens = LensX.bimap_all_values |> Lens.key(:a)
+
+      assert A.get_all(input, lens) == [1, 11]
+
+      actual = A.put(input, lens, :xyzzy)
+      assert actual == BiMap.new(%{1 => %{a: :xyzzy, b: 2}, 2 => %{a: :xyzzy, b: 22}})
+
+      # Note that `put` is bad when a BiMap is on the end because they can't have
+      # duplicate values, so BiMap.new(a: 5, b: 5) is collapsed into a single value.
+
+      assert A.put(BiMap.new(a: 1, b: 2), LensX.bimap_all_values, 5) |> BiMap.size == 1
+
+      actual = A.map(input, lens, & &1 * 1000)
+      assert actual == BiMap.new(%{1 => %{a: 1000, b: 2}, 2 => %{a: 11_000, b: 22}})
+    end
+
+    test "bimap_keys/1" do
+      # This should work akin to operating on maps, so let's start with this oracle
+      # lens:
+      oracle = Lens.keys([:a, :c]) |> LensX.missing
+      map = %{a: 323, b: 111}
+
+      assert A.get_all(map, oracle) == [nil]
+      assert A.put(map, oracle, :xyzzy) == %{a: 323, b: 111, c: :xyzzy}
+      A.map(map, oracle, fn nil -> :erlang.make_ref end)
+      |> assert_fields(a: 323,
+                       b: 111,
+                       c: &is_reference/1)
+
+
+      lens = LensX.bimap_keys([:a, :c]) |> LensX.missing
+      bimap = BiMap.new(map)
+
+      assert A.get_all(bimap, lens) == [nil]
+      assert A.put(bimap, lens, :xyzzy) == BiMap.new(%{a: 323, b: 111, c: :xyzzy})
+      %BiMap{} = result = A.map(bimap, lens, fn nil -> :erlang.make_ref end)
+
+      assert BiMap.get(result, :a) == 323
+      assert BiMap.get(result, :b) == 111
+      assert BiMap.get(result, :c) |> is_reference
+    end
+
+    test "bimap_missing_keys/1" do
+      lens = Lens.key(:a) |> LensX.bimap_missing_keys([:a, :b, :c])
+      data = %{a: BiMap.new(%{a: 1})}
+
+      A.get_all(data, lens)
+      |> assert_good_enough(in_any_order([:b, :c]))
+
+      %{a: result} = A.put(data, lens, 393)
+      assert BiMap.get(result, :a) == 1 # not set because it's not missing.
+      # Remember that duplicate values are not allowed in BiMaps.
+      assert BiMap.get(result, :b) == 393 || BiMap.get(result, :c) == 393
+
+      %{a: result} = A.map(data, lens, fn key -> {key, :erlang.make_ref} end)
+      assert BiMap.get(result, :a) == 1
+      {:b, b_ref} = BiMap.get(result, :b)
+      assert is_reference(b_ref)
+
+      assert {:c, c_ref} = BiMap.get(result, :c)
+      assert is_reference(c_ref)
+
+      refute b_ref == c_ref
+    end
+
+    test "bimap_key" do
+      bimap = BiMap.new(a: %{aa: 1}, b: %{aa: 2})
+      map = %{          a: %{aa: 1}, b: %{aa: 2}}
+
+      map_lens = Lens.key(:a) |> Lens.key(:aa)
+      bimap_lens = LensX.bimap_key(:a) |> Lens.key(:aa)
+
+      BiMap.put(bimap, :a, %{aa: 100})
+
+      assert A.get_all(map, map_lens) == [1]
+      assert A.get_all(bimap, bimap_lens) == [1]
+
+      assert A.put(map, map_lens, 5) == %{a: %{aa: 5}, b: %{aa: 2}}
+      assert A.put(bimap, bimap_lens, 5) == BiMap.new(a: %{aa: 5}, b: %{aa: 2})
+
+      assert A.map(map, map_lens, & &1 * 100) == %{a: %{aa: 100}, b: %{aa: 2}}
+      assert A.map(bimap, bimap_lens, & &1 * 100) == BiMap.new(a: %{aa: 100}, b: %{aa: 2})
+    end
   end
 
 end
