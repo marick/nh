@@ -16,7 +16,7 @@ defimpl Clusterish, for: Any do
   def name(clusterish), do: clusterish.name
   def pid_for(clusterish, moveable) do
     clusterish
-    |> A.get_only(:router)
+    |> A.one!(:router)
     |> Moveable.Router.pid_for(moveable)
   end
 end

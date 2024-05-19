@@ -119,4 +119,4 @@ it's at the top level.
 
 Lens functions can take arguments, in which case the function is called like this:
 
-    A.get_only(s_network, cluster_named(name))
+    A.one!(s_network, cluster_named(name))

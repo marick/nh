@@ -71,8 +71,8 @@ defmodule NetworkBuilderTest do
       Network.CircularSubnet.call(network.p_circular_clusters, :clusters)
       |> assert_equals([second])
 
-      assert A.get_only(network.linear_clusters,
-                        Network.LinearSubnet.cluster_named(:first)) == first
+      assert A.one!(network.linear_clusters,
+                    Network.LinearSubnet.cluster_named(:first)) == first
 
       assert network.circular_names == MapSet.new([:second])
       assert network.linear_names == MapSet.new([:first])

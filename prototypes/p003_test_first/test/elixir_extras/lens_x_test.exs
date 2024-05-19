@@ -9,7 +9,7 @@ defmodule Extras.LensXTest do
   describe "map_multipath!" do
     test "success cases" do
       produces = run_and_assert(fn [map, route] ->
-        A.get_all(map, UT.map_multipath!(route))
+        A.to_list(map, UT.map_multipath!(route))
       end)
 
       one_branch = %{a: %{b: 3}}
@@ -39,18 +39,18 @@ defmodule Extras.LensXTest do
       m = %{a: %{b: 1}}
 
       assert_raise(KeyError, fn ->
-        A.get_all(m, UT.map_multipath!([:b]))
+        A.to_list(m, UT.map_multipath!([:b]))
       end)
 
       assert_raise(KeyError, fn ->
-        A.get_all(m, UT.map_multipath!([:a, :c]))
+        A.to_list(m, UT.map_multipath!([:a, :c]))
       end)
     end
 
     test "map_path!" do
       m = %{a: 1, b: 2}
 
-      assert A.get_only(m, UT.map_path!([:a])) == 1
+      assert A.one!(m, UT.map_path!([:a])) == 1
       assert A.put(m, UT.map_path!([:b]), 333) == %{a: 1, b: 333}
     end
   end
@@ -98,8 +98,8 @@ defmodule Extras.LensXTest do
       expected = MapSet.new([%{a: 100}, %{a: 200}, %{a: 300}, %{vvvv: "unchanged"}])
       assert A.map(input, lens, & &1*100) == expected
 
-      A.get_all(input, lens) |> assert_good_enough(in_any_order([1, 2, 3]))
-      assert A.get_all(input, lens |> Lens.filter(& &1 < 2)) == [1]
+      A.to_list(input, lens) |> assert_good_enough(in_any_order([1, 2, 3]))
+      assert A.to_list(input, lens |> Lens.filter(& &1 < 2)) == [1]
 
       assert A.put(input, lens, 3) == MapSet.new([%{a: 3}, %{vvvv: "unchanged"}])
                                       # Note that it collapsed the 3 identical maps
@@ -109,7 +109,7 @@ defmodule Extras.LensXTest do
       input = MapSet.new([%{a: 1}, %{a: 2}, %{a: 3}])
 
       input
-      |> A.get_all(UT.mapset_values)
+      |> A.to_list(UT.mapset_values)
       |> assert_good_enough(in_any_order([%{a: 1}, %{a: 2}, %{a: 3}]))
 
       # The other cases blow up in various ways.
@@ -121,7 +121,7 @@ defmodule Extras.LensXTest do
 
       lens = UT.mapset_value_identified_by(a: :X)
 
-      A.get_all(input, lens)
+      A.to_list(input, lens)
       |> assert_good_enough(in_any_order([%{a: :X, b: 1}, %{a: :X}]))
 
       assert A.put(input, lens, 3333) == MapSet.new([3333, %{a: 3}])
@@ -136,7 +136,7 @@ defmodule Extras.LensXTest do
       input = MapSet.new([%{a: :X, b: 1}])
       lens = UT.mapset_value_identified_by(a: :missing)
 
-      assert A.get_all(input, lens) == []
+      assert A.to_list(input, lens) == []
       assert A.put(input, lens, %{a: :missing}) == input
       assert A.map(input, lens, fn map -> %{map | c: 2} end) == input
     end
@@ -147,7 +147,7 @@ defmodule Extras.LensXTest do
 
       lens = UT.mapset_value_identified_by(a: :X) |> Lens.key?(:b)
 
-      A.get_all(input, lens)
+      A.to_list(input, lens)
       |> assert_good_enough(in_any_order([1, 2]))
 
       actual = A.put(input, lens, 3333)
@@ -164,7 +164,7 @@ defmodule Extras.LensXTest do
       input = MapSet.new([%{a: 1, b: 2}, %{a: 3}])
       lens = UT.mapset_value_identified_by(a: :X) |> Lens.key?(:b)
 
-      assert A.get_all(input, lens) == []
+      assert A.to_list(input, lens) == []
 
       assert A.put(input, lens, 3333) == input
 
@@ -192,7 +192,7 @@ defmodule Extras.LensXTest do
       actual = A.map(input, lens, & &1 + 1000)
       assert actual == [Point.new(0, 1000), Point.new(0, 1001), Point.new(1, 10)] |> MapSet.new
 
-      A.get_all(input, lens)
+      A.to_list(input, lens)
       |> assert_good_enough(in_any_order([0, 1]))
     end
 
@@ -200,7 +200,7 @@ defmodule Extras.LensXTest do
       input = MapSet.new [%{a: 1}, %{a: nil, b: 2}, %{}]
       lens = UT.mapset_value_identified_by(a: nil)
 
-      assert A.get_only(input, lens) == %{a: nil, b: 2}
+      assert A.one!(input, lens) == %{a: nil, b: 2}
     end
   end
 
@@ -210,7 +210,7 @@ defmodule Extras.LensXTest do
 
       lens = LensX.bimap_all_values |> Lens.key(:a)
 
-      assert A.get_all(input, lens) == [1, 11]
+      assert A.to_list(input, lens) == [1, 11]
 
       actual = A.put(input, lens, :xyzzy)
       assert actual == BiMap.new(%{1 => %{a: :xyzzy, b: 2}, 2 => %{a: :xyzzy, b: 22}})
@@ -230,7 +230,7 @@ defmodule Extras.LensXTest do
       oracle = Lens.keys([:a, :c]) |> LensX.missing
       map = %{a: 323, b: 111}
 
-      assert A.get_all(map, oracle) == [nil]
+      assert A.to_list(map, oracle) == [nil]
       assert A.put(map, oracle, :xyzzy) == %{a: 323, b: 111, c: :xyzzy}
       A.map(map, oracle, fn nil -> :erlang.make_ref end)
       |> assert_fields(a: 323,
@@ -241,7 +241,7 @@ defmodule Extras.LensXTest do
       lens = LensX.bimap_keys([:a, :c]) |> LensX.missing
       bimap = BiMap.new(map)
 
-      assert A.get_all(bimap, lens) == [nil]
+      assert A.to_list(bimap, lens) == [nil]
       assert A.put(bimap, lens, :xyzzy) == BiMap.new(%{a: 323, b: 111, c: :xyzzy})
       %BiMap{} = result = A.map(bimap, lens, fn nil -> :erlang.make_ref end)
 
@@ -254,7 +254,7 @@ defmodule Extras.LensXTest do
       lens = Lens.key(:a) |> LensX.bimap_missing_keys([:a, :b, :c])
       data = %{a: BiMap.new(%{a: 1})}
 
-      A.get_all(data, lens)
+      A.to_list(data, lens)
       |> assert_good_enough(in_any_order([:b, :c]))
 
       %{a: result} = A.put(data, lens, 393)
@@ -282,8 +282,8 @@ defmodule Extras.LensXTest do
 
       BiMap.put(bimap, :a, %{aa: 100})
 
-      assert A.get_all(map, map_lens) == [1]
-      assert A.get_all(bimap, bimap_lens) == [1]
+      assert A.to_list(map, map_lens) == [1]
+      assert A.to_list(bimap, bimap_lens) == [1]
 
       assert A.put(map, map_lens, 5) == %{a: %{aa: 5}, b: %{aa: 2}}
       assert A.put(bimap, bimap_lens, 5) == BiMap.new(a: %{aa: 5}, b: %{aa: 2})
@@ -297,10 +297,10 @@ defmodule Extras.LensXTest do
       missing_ok =      LensX.bimap_keys ([:a, :b, :c])
       missing_omitted = LensX.bimap_keys?([:a, :b, :c])
 
-      A.get_all(bimap, missing_ok)
+      A.to_list(bimap, missing_ok)
       |> assert_good_enough(in_any_order([1, nil, nil]))
 
-      A.get_all(bimap, missing_omitted)
+      A.to_list(bimap, missing_omitted)
       |> assert_good_enough(in_any_order([1, nil]))
 
       # Usual issue with multi-put

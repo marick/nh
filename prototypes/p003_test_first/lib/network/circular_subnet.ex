@@ -78,7 +78,7 @@ defmodule Network.CircularSubnet do
 
     handle_CALL do
 
-      def_get_only router_for: 1
+      def_one! router_for: 1
 
       def handle_call({:add_cluster, %Cluster.Circular{} = cluster}, _from, s_subnet) do
         s_subnet
@@ -96,12 +96,12 @@ defmodule Network.CircularSubnet do
         # This is used for testing as a way to get internal values of clusters.
         def handle_call([forward: getter_name, to: name], _from, s_subnet) do
           result =
-            A.get_only(s_subnet, pid_for(name))
+            A.one!(s_subnet, pid_for(name))
             |> GenServer.call(getter_name)
           continue(s_subnet, returning: result)
         end
 
-        def_get_all(clusters: 0,
+        def_to_list(clusters: 0,
                     throbbing_names: 0,
                     throbbing_pids: 0)
       end
@@ -112,7 +112,7 @@ defmodule Network.CircularSubnet do
         provide_missing_keys = name_to_pid() |> LensX.bimap_missing_keys(cluster_names)
 
         A.map(s_subnet, provide_missing_keys, fn missing_key ->
-          cluster = A.get_only(s_subnet, cluster_for(missing_key))
+          cluster = A.one!(s_subnet, cluster_for(missing_key))
           {:ok, pid} = GenServer.start(Cluster.CircularProcess, cluster)
           Process.monitor(pid)
           pid

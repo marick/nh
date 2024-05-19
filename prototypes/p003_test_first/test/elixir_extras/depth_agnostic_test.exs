@@ -29,15 +29,15 @@ defmodule Extras.DepthAgnosticTest do
                                                bambam: %{count: "replace"}}}
 
 
-      result = A.get_only(data, by_name(:betty))
+      result = A.one!(data, by_name(:betty))
       assert result == %{count: 1}
 
-      result = A.get_all(data, :count)
+      result = A.to_list(data, :count)
       assert result == [0, 1, 2]
 
 
       A.map(data, :count, & &1*10)
-      |> A.get_all(:count)
+      |> A.to_list(:count)
       |> assert_equals([00, 10, 20])
     end
   end

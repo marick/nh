@@ -112,15 +112,15 @@ defmodule AppAnimal.StructServer do
   @doc """
   Quick definitions of getters based on lenses.
   """
-  defmacro def_get_only(lens_descriptions) do
+  defmacro def_one!(lens_descriptions) do
     for {lens_name, arg_count} <- lens_descriptions do
-      one_getter(:get_only, lens_name, arg_count)
+      one_getter(:one!, lens_name, arg_count)
     end
   end
 
-  defmacro def_get_all(lens_descriptions) do
+  defmacro def_to_list(lens_descriptions) do
     for {lens_name, arg_count} <- lens_descriptions do
-      one_getter(:get_all, lens_name, arg_count)
+      one_getter(:to_list, lens_name, arg_count)
     end
   end
 

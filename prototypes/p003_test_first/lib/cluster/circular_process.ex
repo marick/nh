@@ -53,7 +53,7 @@ defmodule Cluster.CircularProcess do
   handle_CALL do
     # Test support
     def handle_call(:current_age, _from, s_circular) do
-      lifespan = A.get_only(s_circular, :current_age)
+      lifespan = A.one!(s_circular, :current_age)
       continue(s_circular, returning: lifespan)
     end
   end

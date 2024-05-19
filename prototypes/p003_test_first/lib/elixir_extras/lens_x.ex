@@ -52,7 +52,7 @@ defmodule AppAnimal.Extras.LensX do
   As is typical for `Lens`, `get` functions return lists rather than
   the base type:
 
-       A.get_all(input, lens)
+       A.to_list(input, lens)
        > [1, 2, 3]    # MapSet.new([1, 2, 3]) would be better
 
   """

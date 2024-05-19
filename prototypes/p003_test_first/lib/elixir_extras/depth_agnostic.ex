@@ -22,16 +22,15 @@ defmodule AppAnimal.Extras.DepthAgnostic do
 
      You have to use the other form when the lens function takes arguments.
   """
-  use Private
   import AppAnimal.Extras.DefDeeply
 
   defdeeply put(s_struct, lens, value),
             do: Lens.put(lens, s_struct, value)
 
-  defdeeply get_only(s_struct, lens),
+  defdeeply one!(s_struct, lens),
             do: Lens.one!(lens, s_struct)
 
-  defdeeply get_all(s_struct, lens),
+  defdeeply to_list(s_struct, lens),
             do: Lens.to_list(lens, s_struct)
 
   defdeeply map(s_struct, lens, f),
