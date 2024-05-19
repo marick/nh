@@ -88,19 +88,17 @@ defmodule AppAnimal.ClusterBuilders do
       The affordance has the same name as the cluster. The pulse is
       sent on as-is.
       """
-    def perception_edge(name) do
-      linear(name, label: :perception_edge)
-    end
+    def perception_edge(name),
+        do: linear(name, label: :perception_edge)
 
       @doc """
       Send an action into Affordance Land.
 
       Whatever pulse the cluster receives is wrapped in the action.
       """
-    def action_edge(name) do
-      linear(name, & Action.new(name, &1),
-             label: :action_edge)
-    end
+    def action_edge(name),
+        do: linear(name, & Action.new(name, &1),
+                  label: :action_edge)
 
       @doc """
       Apply the given function to the received pulse.
@@ -108,9 +106,8 @@ defmodule AppAnimal.ClusterBuilders do
       This is really no different than a `linear` cluster, but the `:summarizer` label
       might be useful as documentation of purpose.
       """
-    def summarizer(name, calc) do
-      linear(name, calc, label: :summarizer)
-    end
+    def summarizer(name, calc),
+        do: linear(name, calc, label: :summarizer)
 
       @doc """
       Forward data on, but only if the `predicate` is truthy.
