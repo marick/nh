@@ -26,29 +26,17 @@ defmodule Network.CircularSubnet do
   end
 
   section "lenses" do
-    deflens routers,
-            do: name_to_cluster() |> Lens.map_values() |> Cluster.Circular.router()
+    deflens clusters(),        do: name_to_cluster() |> Lens.map_values()
+    deflens cluster_for(name), do: name_to_cluster() |> Lens.key(name)
+    deflens router_for(name), do: cluster_for(name) |> Cluster.Circular.router()
 
-    deflens cluster_for(name),
-            do: name_to_cluster() |> Lens.key(name)
+    deflens routers, do: clusters() |> Cluster.Circular.router()
 
-    deflens clusters(),
-            do: name_to_cluster() |> Lens.map_values()
+    deflens pids,          do: name_to_pid() |> LensX.bimap_all_values()
+    deflens pid_for(name), do: name_to_pid() |> LensX.bimap_key(name)
 
-    deflens router_for(name),
-            do: cluster_for(name) |> Cluster.Circular.router()
-
-    deflens pids,
-            do: name_to_pid() |> LensX.bimap_all_values()
-
-    deflens pid_for(name),
-            do: name_to_pid() |> LensX.bimap_key(name)
-
-    deflens throbbing_names,
-            do: name_to_pid() |> LensX.bimap_all_keys
-
-    deflens throbbing_pids,
-            do: name_to_pid() |> LensX.bimap_all_values
+    deflens throbbing_names, do: name_to_pid() |> LensX.bimap_all_keys
+    deflens throbbing_pids,  do: name_to_pid() |> LensX.bimap_all_values
   end
 
 
@@ -61,7 +49,6 @@ defmodule Network.CircularSubnet do
     end
 
     handle_CAST do
-
       # Eventually, there may be a more sophisticated way of deciding whether a
       # pulse should start the cluster throbbing. For now, it's only done for `:default`
       # pulses.
@@ -80,22 +67,29 @@ defmodule Network.CircularSubnet do
 
 
     handle_INFO do
-
       def handle_info({:DOWN, _, :process, pid, _}, s_subnet) do
-        s_subnet.name_to_pid
-        |> BiMap.delete_value(pid)
-        |> then(& Map.put(s_subnet, :name_to_pid, &1))
+        s_subnet
+        |> A.map(:name_to_pid, & BiMap.delete_value(&1, pid))
         |> continue
+
+
+        # s_subnet.name_to_pid
+        # |> BiMap.delete_value(pid)
+        # |> then(& Map.put(s_subnet, :name_to_pid, &1))
+        # |> continue
       end
     end
 
 
     handle_CALL do
 
-      def handle_call({:router_for, name}, _from, s_subnet) do
-        router = A.get_only(s_subnet, router_for(name))
-        continue(s_subnet, returning: router)
-      end
+      def_get_only router_for: 1
+
+
+      # def handle_call({:router_for, name}, _from, s_subnet) do
+      #   router = A.get_only(s_subnet, router_for(name))
+      #   continue(s_subnet, returning: router)
+      # end
 
       def handle_call({:add_cluster, %Cluster.Circular{} = cluster}, _from, s_subnet) do
         s_subnet
@@ -111,7 +105,6 @@ defmodule Network.CircularSubnet do
 
       section "test helpers" do
         # This is used for testing as a way to get internal values of clusters.
-        @impl GenServer
         def handle_call([forward: getter_name, to: name], _from, s_subnet) do
           result =
             A.get_only(s_subnet, pid_for(name))
@@ -119,20 +112,24 @@ defmodule Network.CircularSubnet do
           continue(s_subnet, returning: result)
         end
 
-        def handle_call(:clusters, _from, s_subnet) do
-          values = A.get_all(s_subnet, :clusters)
-          continue(s_subnet, returning: values)
-        end
+        # def handle_call(:clusters, _from, s_subnet) do
+        #   values = A.get_all(s_subnet, :clusters)
+        #   continue(s_subnet, returning: values)
+        # end
+        def_get_all(clusters: 0)
+        def_get_all(throbbing_names: 0)
 
-        def handle_call(:throbbing_names, _from, s_subnet) do
-          keys = A.get_all(s_subnet, :throbbing_names)
-          continue(s_subnet, returning: keys)
-        end
+        # def handle_call(:throbbing_names, _from, s_subnet) do
+        #   keys = A.get_all(s_subnet, :throbbing_names)
+        #   continue(s_subnet, returning: keys)
+        # end
 
-        def handle_call(:throbbing_pids, _from, s_subnet) do
-          pids = A.get_all(s_subnet, :throbbing_pids)
-          continue(s_subnet, returning: pids)
-        end
+        mexpand(quote do: def_get_all(throbbing_pids: 0))
+        def_get_all(throbbing_pids: 0)
+        # def handle_call(:throbbing_pids, _from, s_subnet) do
+        #   pids = A.get_all(s_subnet, :throbbing_pids)
+        #   continue(s_subnet, returning: pids)
+        # end
       end
     end
 

@@ -99,6 +99,55 @@ defmodule AppAnimal.StructServer do
   end
 
 
+  alias AppAnimal.Extras.DepthAgnostic, as: A
+
+  defmacro def_get_only(lens_descriptions) do
+    for {lens_name, arg_count} <- lens_descriptions do
+      one_getter(:get_only, lens_name, arg_count)
+    end
+  end
+
+  defmacro def_get_all(lens_descriptions) do
+    for {lens_name, arg_count} <- lens_descriptions do
+      one_getter(:get_all, lens_name, arg_count)
+    end
+  end
+
+
+  defp one_getter(getter, lens_name, 0) do
+    quote do
+      def handle_call(unquote(lens_name), _from, s_struct) do
+        retval = A.unquote(getter)(s_struct, unquote(lens_name)())
+        continue(s_struct, returning: retval)
+      end
+    end
+  end
+
+  defp one_getter(getter, lens_name, arg_count) do
+    args = Macro.generate_arguments(arg_count, __MODULE__)
+    quote do
+      def handle_call({unquote(lens_name), unquote_splicing(args)}, _from, s_struct) do
+        retval = A.unquote(getter)(s_struct, unquote(lens_name)(unquote_splicing(args)))
+        continue(s_struct, returning: retval)
+      end
+    end
+  end
+
+
+  # defmacro def_get_all([{lens_name, 0}]) do
+  #   quote do
+  #     def handle_call(unquote(lens_name), _from, s_struct) do
+  #       retval = A.get_all(s_struct, unquote(lens_name))
+  #       continue(s_struct, returning: retval)
+  #     end
+  #   end
+  # end
+
+  def mexpand(ast) do
+    Macro.expand_once(ast, __ENV__) |> Macro.to_string |> IO.puts
+  end
+
+
   # special names for my style of genserver. Allows pipelines.
   def continue(s_state),
       do: {:noreply, s_state}  # for `cast`
