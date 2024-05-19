@@ -148,19 +148,50 @@ defmodule AppAnimal.Extras.LensX do
 
   @doc """
   Point at the value of a single BiMap key.
+
+  Missing keys produce nil.
   """
   deflens_raw bimap_key(key) do
     fn bimap, f_get_or_update ->
-      {gotten, updated} = f_get_or_update.(BiMap.get(bimap, key))
-      {[gotten], BiMap.put(bimap, key, updated)}
+      bimap_key_guts(key, bimap, f_get_or_update)
     end
   end
 
+  defp bimap_key_guts(key, bimap, f_get_or_update) do
+    {gotten, updated} = f_get_or_update.(BiMap.get(bimap, key))
+    {[gotten], BiMap.put(bimap, key, updated)}
+  end
+
   @doc """
-  Point at the values of an `Enumeration` of  BiMap keys.
+  Point at the value of a single BiMap key, ignoring missing keys.
+  """
+  deflens_raw bimap_key?(key) do
+    fn bimap, f_get_or_update ->
+      if BiMap.has_key?(bimap, key) do
+        bimap_key_guts(key, bimap, f_get_or_update)
+        {gotten, updated} = f_get_or_update.(BiMap.get(bimap, key))
+        {[gotten], BiMap.put(bimap, key, updated)}
+      else
+        {[], bimap}
+      end
+    end
+  end
+
+
+
+
+  @doc """
+  Point at the values of an `Enumeration` of BiMap keys.
   """
   deflens bimap_keys(keys) do
     keys |> Enum.map(&bimap_key/1) |> Lens.multiple
+  end
+
+  @doc """
+  Point at the values of an `Enumeration` of BiMap keys, ignoring missing keys.
+  """
+  deflens bimap_keys?(keys) do
+    keys |> Enum.map(&bimap_key?/1) |> Lens.multiple
   end
 
   @doc """

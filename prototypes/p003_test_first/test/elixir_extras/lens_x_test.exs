@@ -291,6 +291,39 @@ defmodule Extras.LensXTest do
       assert A.map(map, map_lens, & &1 * 100) == %{a: %{aa: 100}, b: %{aa: 2}}
       assert A.map(bimap, bimap_lens, & &1 * 100) == BiMap.new(a: %{aa: 100}, b: %{aa: 2})
     end
+
+    test "the difference between bimap_key and bimap_key?" do
+      bimap = BiMap.new(a: 1, b: nil)
+      missing_ok =      LensX.bimap_keys ([:a, :b, :c])
+      missing_omitted = LensX.bimap_keys?([:a, :b, :c])
+
+      A.get_all(bimap, missing_ok)
+      |> assert_good_enough(in_any_order([1, nil, nil]))
+
+      A.get_all(bimap, missing_omitted)
+      |> assert_good_enough(in_any_order([1, nil]))
+
+      # Usual issue with multi-put
+      key = A.put(bimap, missing_ok, 5) |> BiMap.get_key(5)
+      assert key == :c # we happen to know keys are set left to right.
+
+      # Usual issue with multi-put
+      key = A.put(bimap, missing_omitted, 5) |> BiMap.get_key(5)
+      assert key == :b
+
+      make_unique = fn value -> {value, :erlang.make_ref()} end
+
+      actual = A.map(bimap, missing_ok, make_unique)
+      assert BiMap.size(actual) == 3
+      assert {1, _ref} = BiMap.fetch!(actual, :a)
+      assert {nil, _ref} = BiMap.fetch!(actual, :b)
+      assert {nil, _ref} = BiMap.fetch!(actual, :c)
+
+      actual = A.map(bimap, missing_omitted, make_unique)
+      assert BiMap.size(actual) == 2
+      assert {1, _ref} = BiMap.fetch!(actual, :a)
+      assert {nil, _ref} = BiMap.fetch!(actual, :b)
+    end
   end
 
 end
