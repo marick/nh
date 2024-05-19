@@ -77,8 +77,7 @@ defmodule Network.CircularSubnet do
 
 
     handle_CALL do
-
-      def_one! router_for: 1
+      defget :one, router_for: 1
 
       def handle_call({:add_cluster, %Cluster.Circular{} = cluster}, _from, s_subnet) do
         s_subnet
@@ -101,9 +100,9 @@ defmodule Network.CircularSubnet do
           continue(s_subnet, returning: result)
         end
 
-        def_to_list(clusters: 0,
-                    throbbing_names: 0,
-                    throbbing_pids: 0)
+        defget :many, clusters: 0,
+                      throbbing_names: 0,
+                      throbbing_pids: 0
       end
     end
 
