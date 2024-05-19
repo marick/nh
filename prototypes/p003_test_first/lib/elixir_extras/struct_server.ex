@@ -1,5 +1,7 @@
 defmodule AppAnimal.StructServer do
   @moduledoc "might make how a GenServer works more clear to reader"
+  import AppAnimal.Extras.Nesting
+
   defmacro __using__(_opts)  do
     quote do
       use GenServer
@@ -35,66 +37,72 @@ defmodule AppAnimal.StructServer do
     end
   end
 
-  defmacro runs_in_sender(do: block) do
-    quote do
-      unquote(block)
+
+  section "wrappers" do
+    defmacro runs_in_sender(do: block) do
+      quote do
+        unquote(block)
+      end
+    end
+
+    defmacro runs_in_receiver(do: block) do
+      quote do
+        unquote(block)
+      end
+    end
+
+    @doc """
+    handle_CAST and friends wrap groups of handle_cast (etc.) functions.
+
+    They take care of `@impl GenServer` and making slightly nicer error messages when
+    no function matches.
+    """
+    defmacro handle_CAST(do: block) do
+      quote do
+        @impl GenServer
+        unquote(block)
+        def handle_cast(arg, _state), do: oops(arg)
+      end
+    end
+
+    defmacro handle_CALL(do: block) do
+      quote do
+        @impl GenServer
+        unquote(block)
+        def handle_call(arg, _from, _state), do: oops(arg)
+      end
+    end
+
+    defmacro handle_INFO(do: block) do
+      quote do
+        @impl GenServer
+        unquote(block)
+        def handle_info(arg, _state), do: oops(arg)
+      end
     end
   end
 
-  defmacro runs_in_receiver(do: block) do
-    quote do
-      unquote(block)
+
+  section "Nicer reporting of unmatched messages (indicating a coding error)" do
+    def oops(arg) do
+      line = "=========================="
+      msg = "No pattern match"
+      IO.puts(line)
+      dbg {msg, arg}
+      IO.puts(line)
+      raise "%{msg}: %{inspect arg}"
     end
-  end
 
-  def oops(arg) do
-    line = "=========================="
-    msg = "No pattern match"
-    IO.puts(line)
-    dbg {msg, arg}
-    IO.puts(line)
-    raise "%{msg}: %{inspect arg}"
-  end
-
-  defmacro unexpected_call() do
-    quote do
-      def handle_call(arg, _from, _state), do: oops(arg)
+    defmacro unexpected_call() do
+      quote do
+        def handle_call(arg, _from, _state), do: oops(arg)
+      end
     end
-  end
 
-  defmacro unexpected_cast() do
-    quote do
-      def handle_cast(arg, _state), do: oops(arg)
-    end
-  end
-
-  @doc """
-  handle_CAST and friends wrap groups of handle_cast (etc.) functions.
-
-  They take care of `@impl GenServer` and making slightly nicer error messages when
-  no function matches.
-  """
-  defmacro handle_CAST(do: block) do
-    quote do
-      @impl GenServer
-      unquote(block)
-      def handle_cast(arg, _state), do: oops(arg)
-    end
-  end
-
-  defmacro handle_CALL(do: block) do
-    quote do
-      @impl GenServer
-      unquote(block)
-      def handle_call(arg, _from, _state), do: oops(arg)
-    end
-  end
-
-  defmacro handle_INFO(do: block) do
-    quote do
-      @impl GenServer
-      unquote(block)
-      def handle_info(arg, _state), do: oops(arg)
+    defmacro unexpected_cast() do
+      quote do
+        def handle_cast(arg, _state), do: oops(arg)
+      end
     end
   end
 
