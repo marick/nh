@@ -47,12 +47,6 @@ defmodule AppAnimal.StructServer do
     end
   end
 
-  # These provide a more pleasant error. Ideally, they'd be automatically included,
-  # but they have to be positioned after the definitions they're the default for.
-  # So they're manually placed at the end of the module.
-
-
-
   def oops(arg) do
     line = "=========================="
     msg = "No pattern match"
@@ -74,6 +68,12 @@ defmodule AppAnimal.StructServer do
     end
   end
 
+  @doc """
+  handle_CAST and friends wrap groups of handle_cast (etc.) functions.
+
+  They take care of `@impl GenServer` and making slightly nicer error messages when
+  no function matches.
+  """
   defmacro handle_CAST(do: block) do
     quote do
       @impl GenServer
@@ -101,6 +101,9 @@ defmodule AppAnimal.StructServer do
 
   alias AppAnimal.Extras.DepthAgnostic, as: A
 
+  @doc """
+  Quick definitions of getters based on lenses.
+  """
   defmacro def_get_only(lens_descriptions) do
     for {lens_name, arg_count} <- lens_descriptions do
       one_getter(:get_only, lens_name, arg_count)
@@ -134,25 +137,23 @@ defmodule AppAnimal.StructServer do
   end
 
 
-  # defmacro def_get_all([{lens_name, 0}]) do
-  #   quote do
-  #     def handle_call(unquote(lens_name), _from, s_struct) do
-  #       retval = A.get_all(s_struct, unquote(lens_name))
-  #       continue(s_struct, returning: retval)
-  #     end
-  #   end
-  # end
+  @doc """
+  Return successfully from a `handle_cast`,`handle_info`, or `handle_info` function.
 
-  def mexpand(ast) do
-    Macro.expand_once(ast, __ENV__) |> Macro.to_string |> IO.puts
-  end
+  `state |> continue` produces the familiar `{:no_reply, state}` return value.
 
-
-  # special names for my style of genserver. Allows pipelines.
+  `state |> continue(returning: retval)` produces `{:reply, retval, state}`.
+  """
   def continue(s_state),
-      do: {:noreply, s_state}  # for `cast`
+      do: {:noreply, s_state}
   def continue(s_state, returning: retval),
       do: {:reply, retval, s_state}
-  def stop(arg),
-      do: {:stop, :normal, arg}
+
+  @doc """
+  Request a `:normal` stopping of the process.
+
+  `state |> stop` produces `{:stop, :normal, s_state}`
+  """
+  def stop(s_state),
+      do: {:stop, :normal, s_state}
 end
