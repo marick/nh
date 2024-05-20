@@ -50,8 +50,11 @@ defmodule AppAnimal.Switchboard do
     defp convert_opts_to_use(:to, s_switchboard, opts) do
       [pulse, source_name] = Opts.required!(opts, [:carrying, :from])
 
-      source = Network.full_identification(s_switchboard.network, source_name)
-      ActivityLogger.log_pulse_sent(s_switchboard.p_logger, source, pulse)
+      full_id =
+        s_switchboard.network
+        |> A.one!(Network.id_for(source_name))
+
+      ActivityLogger.log_pulse_sent(s_switchboard.p_logger, full_id, pulse)
       destination_names =
         Network.destination_names(s_switchboard.network, from: source_name, for: pulse)
       [carrying: pulse, to: destination_names]

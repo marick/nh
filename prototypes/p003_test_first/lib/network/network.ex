@@ -11,22 +11,28 @@ defmodule Network do
   the calls in a way convenient for writing scenario tests.
   """
 
+
   use AppAnimal
   use MoveableAliases
   alias Network.{LinearSubnet,CircularSubnet}
 
+  # Certain fields cache values that are found in cluster structures. That's to avoid
+  # reaching across process boundaries to get them. Less a matter of efficiency (I expect)
+  # than of fidelity to the model of a real neural cluster.
   typedstruct enforce: true do
     plugin TypedStructLens
 
-    field :name_to_id, %{atom => Cluster.Identification.t}, default: %{}
-    field :out_edges, %{atom => %{atom => MapSet.t(atom)}}, default: %{}
-
-    field :circular_names, MapSet.t(atom),           default: MapSet.new
-    field :linear_names, MapSet.t(atom),             default: MapSet.new
-
     field :p_circular_clusters, pid
     field :linear_clusters, LinearSubnet.t
+    field :out_edges, %{atom => %{atom => MapSet.t(atom)}}, default: %{}
+
+    # Caches
+    field :name_to_id, %{atom => Cluster.Identification.t}, default: %{}
+    field :linear_names, MapSet.t(atom),             default: MapSet.new
+    field :circular_names, MapSet.t(atom),           default: MapSet.new
   end
+
+  deflens id_for(name), do: name_to_id() |> Lens.key!(name)
 
   def empty() do
     {:ok, p_circular_clusters} = CircularSubnet.start_link([])
