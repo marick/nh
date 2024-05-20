@@ -28,16 +28,26 @@ defmodule AppAnimal.Switchboard do
     end
   end
 
-
   handle_CAST do
+
+    def handle_cast({:fan_out_pulse, pulse, from: originating_cluster_name}, s_switchboard) do
+      full_id =
+        s_switchboard.network
+        |> A.one!(Network.id_for(originating_cluster_name))
+
+      ActivityLogger.log_pulse_sent(s_switchboard.p_logger, full_id, pulse)
+      destination_names =
+        Network.destination_names(s_switchboard.network,
+                                  from: originating_cluster_name, for: pulse)
+
+      Network.deliver_pulse(s_switchboard.network, destination_names, pulse)
+      continue(s_switchboard)
+    end
+
     def handle_cast({:distribute_pulse, opts}, s_switchboard) do
       cond do
         Keyword.has_key?(opts, :to) ->
           cast_to_N(s_switchboard, opts)
-
-        Keyword.has_key?(opts, :from) ->
-          convert_opts_to_use(:to, s_switchboard, opts)
-          |> then(& cast_to_N(s_switchboard, &1))
       end
       continue(s_switchboard)
     end
@@ -45,19 +55,6 @@ defmodule AppAnimal.Switchboard do
     defp cast_to_N(s_switchboard, opts) do
       [pulse, destination_names] = Opts.required!(opts, [:carrying, :to])
       Network.deliver_pulse(s_switchboard.network, destination_names, pulse)
-    end
-
-    defp convert_opts_to_use(:to, s_switchboard, opts) do
-      [pulse, source_name] = Opts.required!(opts, [:carrying, :from])
-
-      full_id =
-        s_switchboard.network
-        |> A.one!(Network.id_for(source_name))
-
-      ActivityLogger.log_pulse_sent(s_switchboard.p_logger, full_id, pulse)
-      destination_names =
-        Network.destination_names(s_switchboard.network, from: source_name, for: pulse)
-      [carrying: pulse, to: destination_names]
     end
   end
 end

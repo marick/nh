@@ -17,13 +17,14 @@ defmodule AppAnimal.StructServer do
       the client process.
 
       If you have code implemented as handle_cast({:name, arg}), call it
-      with `Server.call(pid, :name, arg)`. `arg` is frequently a keyword list.
+      with `Server.call(pid, :name, arg)`. You can tack on more arguments.
       """
       def call(pid, name), do: GenServer.call(pid, name)
       def call(pid, name, arg), do: GenServer.call(pid, {name, arg})
 
       def cast(pid, name), do: GenServer.cast(pid, name)
       def cast(pid, name, arg), do: GenServer.cast(pid, {name, arg})
+      def cast(pid, name, arg1, arg2), do: GenServer.cast(pid, {name, arg1, arg2})
 
       @impl GenServer
 

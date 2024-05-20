@@ -21,9 +21,7 @@ defmodule AppAnimal.TestHelpers.MessageHelpers do
   def assert_pulse_TO_switchboard(message, opts) do
     [expected_sender, expected_pulse] = Opts.required!(opts, [:from, :pulse])
 
-    message = ensure_unwrapped(message)
-    assert distribute_pulse_source(message) == expected_sender
-    assert distribute_what_from(message) == expected_pulse
+    assert {:fan_out_pulse, ^expected_pulse, from: ^expected_sender} = ensure_unwrapped(message)
   end
 
   def assert_action_taken({@cast_marker, message}, opts),
@@ -48,5 +46,6 @@ defmodule AppAnimal.TestHelpers.MessageHelpers do
         do: pulse
     def distribute_pulse_source({:distribute_pulse, carrying: _,     from: source}),
         do: source
+
   end
 end
