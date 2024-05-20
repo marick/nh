@@ -10,23 +10,6 @@ defmodule AppAnimal.TestHelpers.MessageHelpers do
     end
   end
 
-  def cast_content({@cast_marker, thing_being_cast}) do
-    thing_being_cast
-  end
-
-  def distribute_what_to(           {:distribute_pulse, carrying: pulse, to: _}),
-      do: pulse
-  def distribute_pulse_destinations({:distribute_pulse, carrying: _,     to: destinations}),
-      do: destinations
-
-
-  def distribute_what_from(   {:distribute_pulse, carrying: pulse, from: _}),
-      do: pulse
-  def distribute_pulse_source({:distribute_pulse, carrying: _,     from: source}),
-      do: source
-
-
-
   def assert_distribute_to({@cast_marker, value}, opts),
       do: assert_distribute_to(value, opts)
 
@@ -60,4 +43,15 @@ defmodule AppAnimal.TestHelpers.MessageHelpers do
     assert actual_action == expected_action
   end
 
+  private do
+    def distribute_what_to(           {:distribute_pulse, carrying: pulse, to: _}),
+        do: pulse
+    def distribute_pulse_destinations({:distribute_pulse, carrying: _,     to: destinations}),
+        do: destinations
+
+    def distribute_what_from(   {:distribute_pulse, carrying: pulse, from: _}),
+        do: pulse
+    def distribute_pulse_source({:distribute_pulse, carrying: _,     from: source}),
+        do: source
+  end
 end

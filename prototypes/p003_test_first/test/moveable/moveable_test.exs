@@ -24,9 +24,7 @@ defmodule MoveableTest do
 
       action = Action.new(:action_name)
       UT.cast(action, clusterish)
-
-      assert_receive(_) |> cast_content
-      |> assert_equal({:take_action, action})
+      assert_receive_cast({:take_action, ^action})
     end
 
     test "sending a delay" do
