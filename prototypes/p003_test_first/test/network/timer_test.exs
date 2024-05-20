@@ -22,7 +22,7 @@ defmodule Network.TimerTest do
     assert :ok == UT.delayed(pid, pulse, after: 10, destination: :name,
                                   via_switchboard: self())
 
-    assert_receive(_) |> assert_distribute_to(pulse: pulse, to: [:name])
+    assert_receive(_) |> assert_pulse_FROM_switchboard(to: [:name], pulse: pulse)
 
     refute_receive(_)
   end

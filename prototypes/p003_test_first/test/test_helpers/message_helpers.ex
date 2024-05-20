@@ -10,40 +10,35 @@ defmodule AppAnimal.TestHelpers.MessageHelpers do
     end
   end
 
-  def assert_distribute_to({@cast_marker, value}, opts),
-      do: assert_distribute_to(value, opts)
+  def assert_pulse_FROM_switchboard(message, opts) do
+    [expected_destination_names, expected_pulse] = Opts.required!(opts, [:to, :pulse])
 
-  def assert_distribute_to(value, opts) do
-    if Keyword.has_key?(opts, :to),
-       do: assert distribute_pulse_destinations(value) == Keyword.fetch!(opts, :to)
-
-    if Keyword.has_key?(opts, :pulse),
-       do: assert distribute_what_to(value) == Keyword.fetch!(opts, :pulse)
+    message = ensure_unwrapped(message)
+    assert distribute_pulse_destinations(message) == expected_destination_names
+    assert distribute_what_to(message) == expected_pulse
   end
 
+  def assert_pulse_TO_switchboard(message, opts) do
+    [expected_sender, expected_pulse] = Opts.required!(opts, [:from, :pulse])
 
-  def assert_distribute_from({@cast_marker, value}, opts),
-      do: assert_distribute_from(value, opts)
-
-  def assert_distribute_from(value, opts) do
-    if Keyword.has_key?(opts, :from),
-       do: assert distribute_pulse_source(value) == Keyword.fetch!(opts, :from)
-
-    if Keyword.has_key?(opts, :pulse),
-       do: assert distribute_what_from(value) == Keyword.fetch!(opts, :pulse)
+    message = ensure_unwrapped(message)
+    assert distribute_pulse_source(message) == expected_sender
+    assert distribute_what_from(message) == expected_pulse
   end
 
+  def assert_action_taken({@cast_marker, message}, opts),
+      do: assert_action_taken(message, opts)
 
-  def assert_action_taken({@cast_marker, value}, opts),
-      do: assert_action_taken(value, opts)
-
-  def assert_action_taken(value, expected_action) do
-    {:take_action, actual_action} = value
+  def assert_action_taken(message, expected_action) do
+    {:take_action, actual_action} = message
 
     assert actual_action == expected_action
   end
 
   private do
+    def ensure_unwrapped({@cast_marker, message}), do: message
+    def ensure_unwrapped(message), do: message
+
     def distribute_what_to(           {:distribute_pulse, carrying: pulse, to: _}),
         do: pulse
     def distribute_pulse_destinations({:distribute_pulse, carrying: _,     to: destinations}),

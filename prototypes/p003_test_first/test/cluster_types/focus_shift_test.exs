@@ -30,13 +30,13 @@ defmodule ClusterBuilders.FocusShiftTest do
     GenServer.cast(p_cluster, [handle_pulse: Pulse.new("paragraph id")])
 
     assert_receive(_)
-    |> assert_distribute_from(from: s_cluster.name, pulse: Pulse.suppress)
+    |> assert_pulse_TO_switchboard(from: s_cluster.name, pulse: Pulse.suppress)
 
     Process.sleep(Duration.seconds(0.05))
 
     assert_receive(_)
-    |> assert_distribute_to(to: [s_cluster.name],
-                            pulse: Pulse.new(:movement_finished, "paragraph id"))
+    |> assert_pulse_FROM_switchboard(to: [s_cluster.name],
+                                       pulse: Pulse.new(:movement_finished, "paragraph id"))
   end
 
   test "sends action when timer finishes" do

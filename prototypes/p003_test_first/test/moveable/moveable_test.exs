@@ -15,7 +15,7 @@ defmodule MoveableTest do
       UT.cast(pulse, clusterish)
 
       assert_receive(_)
-      |> assert_distribute_from(pulse: pulse, from: :some_cluster_name)
+      |> assert_pulse_TO_switchboard(pulse: pulse, from: :some_cluster_name)
     end
 
     test "sending an action" do
@@ -39,7 +39,7 @@ defmodule MoveableTest do
       UT.cast(delay, clusterish)
 
       assert_receive(_)
-      |> assert_distribute_to(pulse: Pulse.new("some data"), to: [:some_cluster_name])
+      |> assert_pulse_FROM_switchboard(to: [:some_cluster_name], pulse: Pulse.new("some data"))
     end
 
     @tag :test_uses_sleep
@@ -56,11 +56,11 @@ defmodule MoveableTest do
       UT.cast(collection, clusterish)
 
       assert_receive(_)
-      |> assert_distribute_from(from: clusterish.name, pulse: pulse)
+      |> assert_pulse_TO_switchboard(from: clusterish.name, pulse: pulse)
 
       Process.sleep(10)
       assert_receive(_)
-      |> assert_distribute_to(to: [clusterish.name], pulse: delay_pulse)
+      |> assert_pulse_FROM_switchboard(to: [clusterish.name], pulse: delay_pulse)
     end
   end
 end
