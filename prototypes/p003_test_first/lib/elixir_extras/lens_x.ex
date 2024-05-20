@@ -177,9 +177,6 @@ defmodule AppAnimal.Extras.LensX do
     end
   end
 
-
-
-
   @doc """
   Point at the values of an `Enumeration` of BiMap keys.
   """
