@@ -43,11 +43,11 @@ defmodule Network.CircularSubnetTest do
     UT.call(p_ut, :add_cluster, unused)
 
 
-    UT.cast(p_ut, :distribute_pulse, carrying: Pulse.new("value"), to: [:original])
+    UT.cast(p_ut, :fan_out, Pulse.new("value"), to: [:original])
     assert {p_cluster, "value"} = assert_receive(_)
 
     # Another pulse goes to the same pid
-    UT.cast(p_ut, :distribute_pulse, carrying: Pulse.new("value"), to: [:original])
+    UT.cast(p_ut, :fan_out, Pulse.new("value"), to: [:original])
     assert {^p_cluster, "value"} = assert_receive(_)
 
     # A dead process removes it from the throbbing list.
@@ -70,7 +70,7 @@ defmodule Network.CircularSubnetTest do
     UT.call(p_ut, :add_cluster, original)
 
 
-    UT.cast(p_ut, :distribute_pulse, carrying: Pulse.new(:oddity, "value"), to: [:original])
+    UT.cast(p_ut, :fan_out, Pulse.new(:oddity, "value"), to: [:original])
     refute_receive(_)
 
     assert [] == UT.call(p_ut, :throbbing_pids)

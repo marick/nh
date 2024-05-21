@@ -26,8 +26,7 @@ defmodule Network.LinearSubnet do
     %__MODULE__{name_to_cluster: cluster_map}
   end
 
-  def distribute_pulse(%__MODULE__{} = s_subnet, opts) do
-    [pulse, names] = Opts.required!(opts, [:carrying, :to])
+  def fan_out(%__MODULE__{} = s_subnet, pulse, to: names) do
     for name <- names do
       s_subnet.name_to_cluster[name]
       |> send_pulse_into_task(pulse)

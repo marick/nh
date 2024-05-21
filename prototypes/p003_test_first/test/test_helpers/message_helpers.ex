@@ -10,15 +10,12 @@ defmodule AppAnimal.TestHelpers.MessageHelpers do
     end
   end
 
-  def assert_pulse_FROM_switchboard(message, opts) do
+  def assert_pulse_FROM_switchboard(message, opts) when is_tuple(message) do
     [expected_downstream, expected_pulse] = Opts.required!(opts, [:to, :pulse])
-
-    message = ensure_unwrapped(message)
-    assert distribute_pulse_destinations(message) == expected_downstream
-    assert distribute_what_to(message) == expected_pulse
+    assert {:fan_out, ^expected_pulse, to: ^expected_downstream} = ensure_unwrapped(message)
   end
 
-  def assert_pulse_TO_switchboard(message, opts) do
+  def assert_pulse_TO_switchboard(message, opts) when is_tuple(message) do
     [expected_sender, expected_pulse] = Opts.required!(opts, [:from, :pulse])
 
     assert {:on_behalf_of, ^expected_sender, deliver: ^expected_pulse} = ensure_unwrapped(message)
@@ -36,16 +33,5 @@ defmodule AppAnimal.TestHelpers.MessageHelpers do
   private do
     def ensure_unwrapped({@cast_marker, message}), do: message
     def ensure_unwrapped(message), do: message
-
-    def distribute_what_to(           {:distribute_pulse, carrying: pulse, to: _}),
-        do: pulse
-    def distribute_pulse_destinations({:distribute_pulse, carrying: _,     to: destinations}),
-        do: destinations
-
-    def distribute_what_from(   {:distribute_pulse, carrying: pulse, from: _}),
-        do: pulse
-    def distribute_pulse_source({:distribute_pulse, carrying: _,     from: source}),
-        do: source
-
   end
 end

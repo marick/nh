@@ -33,14 +33,11 @@ I'd prefer not to use those sender functions.
 The `AppAnimal.StructServer` model supports that. It defines two
 (overridable) functions, `cast` and `call`. A call of this form is:
 
-    Switchboard.cast(p_switchboard, :distribute_pulse,
-                                    carrying: pulse,
-                                    to: [destination_name])
+    Switchboard.cast(p_switchboard, :fan_out, pulse, to: [destination_name])
                                                        
 `cast` converts that to this:
 
-    GenServer.cast(p_switchboard, {:distribute_pulse,
-                                   carrying: pulse, to: [destination_name]})
+    GenServer.cast(p_switchboard, {:fan_out, pulse, to: [destination_name]})
 
 However, certain GenServers that use `call` heavily, like
 `AppAnimal.NetworkBuilder`, are more conventional in style and are

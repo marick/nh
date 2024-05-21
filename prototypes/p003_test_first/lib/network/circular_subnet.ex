@@ -53,8 +53,7 @@ defmodule Network.CircularSubnet do
       # Eventually, there may be a more sophisticated way of deciding whether a
       # pulse should start the cluster throbbing. For now, it's only done for `:default`
       # pulses.
-      def handle_cast({:distribute_pulse, opts}, s_subnet) do
-        [pulse, names] = Opts.required!(opts, [:carrying, :to])
+      def handle_cast({:fan_out, pulse, to: names}, s_subnet) do
         if pulse.type == :default,
            do:   distribute_then_continue(pulse, names, ensure_throbbing(s_subnet, names)),
            else: distribute_then_continue(pulse, names,                  s_subnet        )

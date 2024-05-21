@@ -40,26 +40,13 @@ defmodule AppAnimal.Switchboard do
         s_switchboard.network
         |> A.one!(Network.downstream(from: originating_cluster_name, for: pulse))
 
-      Network.deliver_pulse(s_switchboard.network, downstream, pulse)
+      Network.fan_out(s_switchboard.network, pulse, to: downstream)
       continue(s_switchboard)
     end
 
     def handle_cast({:fan_out, pulse, to: downstream}, s_switchboard) do
-      Network.deliver_pulse(s_switchboard.network, downstream, pulse)
+      Network.fan_out(s_switchboard.network, pulse, to: downstream)
       continue(s_switchboard)
-    end
-
-    def handle_cast({:distribute_pulse, opts}, s_switchboard) do
-      cond do
-        Keyword.has_key?(opts, :to) ->
-          cast_to_N(s_switchboard, opts)
-      end
-      continue(s_switchboard)
-    end
-
-    defp cast_to_N(s_switchboard, opts) do
-      [pulse, downstream] = Opts.required!(opts, [:carrying, :to])
-      Network.deliver_pulse(s_switchboard.network, downstream, pulse)
     end
   end
 end

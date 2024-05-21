@@ -73,9 +73,8 @@ defmodule Network.Timer do
     end
 
     def handle_info(%DelayedPulseInstructions{} = instructions, @no_state) do
-      Switchboard.cast(instructions.p_switchboard, :distribute_pulse,
-                       carrying: instructions.pulse,
-                       to: [instructions.destination_name])
+      Switchboard.cast(instructions.p_switchboard,
+                       :fan_out, instructions.pulse, to: [instructions.destination_name])
       continue(@no_state)
     end
   end

@@ -87,16 +87,14 @@ defmodule Network do
 
   Yeah, this naming is not great.
   """
-  def deliver_pulse(network, names, %Pulse{} = pulse) do
+  def fan_out(network, %Pulse{} = pulse, to: cluster_names) do
     {circular_names, linear_names} =
-      split_targets(network, names)
+      split_targets(network, cluster_names)
 
-    CircularSubnet.cast(network.p_circular_clusters, :distribute_pulse,
-                        carrying: pulse,
-                        to: circular_names)
-    LinearSubnet.distribute_pulse(network.linear_clusters,
-                                  carrying: pulse,
-                                  to: linear_names)
+    CircularSubnet.cast(network.p_circular_clusters,
+                        :fan_out, pulse, to: circular_names)
+    LinearSubnet.fan_out(network.linear_clusters,
+                                  pulse, to: linear_names)
     :no_return_value
   end
 

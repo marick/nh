@@ -57,8 +57,7 @@ defmodule AppAnimal.AffordanceLand do
 
     private do
       def cast_affordance_into_network(p_switchboard, pulse, cluster_name) do
-        Switchboard.cast(p_switchboard, :distribute_pulse,
-                         carrying: pulse, to: [cluster_name])
+        Switchboard.cast(p_switchboard, :fan_out, pulse, to: [cluster_name])
       end
 
       def append_programmed_responses(keywords, new) do
