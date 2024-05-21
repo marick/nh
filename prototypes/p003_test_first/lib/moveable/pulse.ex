@@ -33,6 +33,6 @@ defimpl Moveable, for: Moveable.Pulse do
   def cast(pulse, cluster) do
     pid = Clusterish.pid_for(cluster, pulse)
 
-    AppAnimal.Switchboard.cast(pid, :fan_out_pulse, pulse, from: Clusterish.name(cluster))
+    AppAnimal.Switchboard.cast(pid, :on_behalf_of, Clusterish.name(cluster), deliver: pulse)
   end
 end

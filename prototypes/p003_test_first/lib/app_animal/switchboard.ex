@@ -30,7 +30,7 @@ defmodule AppAnimal.Switchboard do
 
   handle_CAST do
 
-    def handle_cast({:fan_out_pulse, pulse, from: originating_cluster_name}, s_switchboard) do
+    def handle_cast({:on_behalf_of, originating_cluster_name, deliver: pulse}, s_switchboard) do
       full_id =
         s_switchboard.network
         |> A.one!(Network.id_for(originating_cluster_name))
@@ -40,6 +40,11 @@ defmodule AppAnimal.Switchboard do
         Network.destination_names(s_switchboard.network,
                                   from: originating_cluster_name, for: pulse)
 
+      Network.deliver_pulse(s_switchboard.network, destination_names, pulse)
+      continue(s_switchboard)
+    end
+
+    def handle_cast({:fan_out, pulse, to: destination_names}, s_switchboard) do
       Network.deliver_pulse(s_switchboard.network, destination_names, pulse)
       continue(s_switchboard)
     end

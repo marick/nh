@@ -21,7 +21,7 @@ defmodule AppAnimal.TestHelpers.MessageHelpers do
   def assert_pulse_TO_switchboard(message, opts) do
     [expected_sender, expected_pulse] = Opts.required!(opts, [:from, :pulse])
 
-    assert {:fan_out_pulse, ^expected_pulse, from: ^expected_sender} = ensure_unwrapped(message)
+    assert {:on_behalf_of, ^expected_sender, deliver: ^expected_pulse} = ensure_unwrapped(message)
   end
 
   def assert_action_taken({@cast_marker, message}, opts),
