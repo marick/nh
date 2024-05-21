@@ -104,27 +104,19 @@ defmodule AppAnimal.ActivityLogger do
   private do
     # This is all awful, but the whole thing needs rework.
 
-    def maybe_log(true, %Action{} = action) do
-      message =
-        case action.data do
+    def maybe_log(true, %Action{} = action),
+        do: Logger.info(interpreted(action.data), moveable: action)
+
+    def maybe_log(true, %PulseSent{} = entry),
+        do: Logger.info(interpreted(entry.pulse.data), moveable: entry)
+
+    def maybe_log(false, _), do: :ignore
+
+    def interpreted(data) do
+        case data do
           @no_value -> ""
-          data -> inspect(data)
+          _ -> inspect(data)
         end
-
-      Logger.info(message, moveable: action)
-    end
-
-    def maybe_log(true, %PulseSent{} = entry) do
-      message =
-        case entry.pulse.data do
-          @no_value -> ""
-          data -> inspect(data)
-        end
-
-      Logger.info(message, moveable: entry)
-    end
-
-    def maybe_log(false, _) do
     end
   end
 end
