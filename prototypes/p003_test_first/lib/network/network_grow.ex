@@ -144,7 +144,7 @@ defmodule Network.Grow do
           Network.CircularSubnet.call(pid, :add_cluster, cluster)
           s_network
         %Cluster.Linear{} = _ ->
-          lens = Network.linear_clusters() |> Network.LinearSubnet.cluster_named(cluster.name)
+          lens = Network.linear_clusters() |> Network.LinearSubnet.cluster_for(cluster.name)
           A.put(s_network, lens, cluster)
       end
     end

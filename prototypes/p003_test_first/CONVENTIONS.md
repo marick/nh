@@ -98,7 +98,7 @@ have lenses for each field. Generally speaking, I avoid composed
 lenses that "reach into" a nested structure. That is, you won't often see
 a function within a module with a variable defined like this:
 
-    lens = Network.linear_clusters() |> Network.LinearSubnet.cluster_named(cluster.name)
+    lens = Network.linear_clusters() |> Network.LinearSubnet.cluster_for(cluster.name)
 
 Instead, `Network` will have a top-level lens with that definition, so that its internal
 structure can be ignored by its clients. 
@@ -116,4 +116,4 @@ it's at the top level.
 
 Lens functions can take arguments, in which case the function is called like this:
 
-    A.one!(s_network, cluster_named(name))
+    A.one!(s_network, cluster_for(name))

@@ -64,7 +64,7 @@ defmodule Network do
     linear_case =
       if MapSet.member?(network.linear_names, name) do
         network.linear_clusters
-        |> A.one!(LinearSubnet.cluster_named(name))
+        |> A.one!(LinearSubnet.cluster_for(name))
         |> Map.get(:router)
       end
 

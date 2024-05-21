@@ -12,13 +12,15 @@ defmodule Network.LinearSubnet do
   use MoveableAliases
 
   typedstruct enforce: true do
+    plugin TypedStructLens
+
     field :name_to_cluster, %{atom => Cluster.t}
   end
 
   deflens routers,
-          do: Lens.key(:name_to_cluster) |> Lens.map_values() |> Cluster.Linear.router()
-  deflens cluster_named(name),
-          do: Lens.key(:name_to_cluster) |> Lens.key(name)
+          do: name_to_cluster() |> Lens.map_values() |> Cluster.Linear.router()
+  deflens cluster_for(name),
+          do: name_to_cluster() |> Lens.key(name)
 
   def new(clusters) do
     cluster_map =
@@ -39,7 +41,7 @@ defmodule Network.LinearSubnet do
     Task.start(fn ->
       Calc.run(s_cluster.calc, on: pulse)
       |> Calc.cast_useful_result(s_cluster)
-      :there_is_no_return_value
+      @no_value
     end)
   end
 end

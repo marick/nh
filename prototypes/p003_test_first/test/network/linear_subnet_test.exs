@@ -10,6 +10,6 @@ defmodule Network.LinearSubnetTest do
       |> A.put(:routers, "added router")
 
     assert A.to_list(updated, :routers) == ["added router", "added router"]
-    assert A.one!(updated, UT.cluster_named(:first)).router == "added router"
+    assert A.one!(updated, UT.cluster_for(:first)).router == "added router"
   end
 end
