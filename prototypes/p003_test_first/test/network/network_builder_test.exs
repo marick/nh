@@ -53,11 +53,11 @@ defmodule NetworkBuilderTest do
 
       # out-edges
       first_destinations =
-        A.one!(network, Network.downstream(from: :first, for: :default))
+        A.one!(network, Network.downstream(from: :first))
       assert first_destinations == MapSet.new([:second])
 
       second_destinations =
-        A.one!(network, Network.downstream(from: :second, for: :default))
+        A.one!(network, Network.downstream(from: :second))
       assert second_destinations == MapSet.new
     end
 
@@ -83,10 +83,10 @@ defmodule NetworkBuilderTest do
       |> assert_fields(first: first.id, second: second.id)
 
       # out-edges
-      first_destinations = A.one!(network, Network.downstream(from: :first, for: :default))
+      first_destinations = A.one!(network, Network.downstream(from: :first))
       assert first_destinations == MapSet.new([:second])
 
-      second_destinations = A.one!(network, Network.downstream(from: :second, for: :default))
+      second_destinations = A.one!(network, Network.downstream(from: :second))
       assert second_destinations == MapSet.new
     end
   end

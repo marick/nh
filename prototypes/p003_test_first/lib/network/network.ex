@@ -34,9 +34,10 @@ defmodule Network do
 
   deflens id_for(name), do: name_to_id() |> Lens.key!(name)
 
-  deflens downstream(from: source_name, for: pulse_or_type) do
-    two_levels = out_edges() |> Lens.key(source_name)
+  deflens downstream(opts) do
+    [source_name, pulse_or_type] = Opts.parse(opts, [:from, for: :default])
 
+    two_levels = out_edges() |> Lens.key(source_name)
     pulse_level =
       cond do
         is_struct(pulse_or_type, Moveable.Pulse) -> Lens.key!(pulse_or_type.type)
