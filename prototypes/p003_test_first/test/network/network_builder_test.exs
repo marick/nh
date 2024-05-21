@@ -52,10 +52,12 @@ defmodule NetworkBuilderTest do
       assert network.circular_names == MapSet.new([:first, :second])
 
       # out-edges
-      first_destinations = Network.destination_names(network, from: :first, for: :default)
+      first_destinations =
+        A.one!(network, Network.downstream(from: :first, for: :default))
       assert first_destinations == MapSet.new([:second])
 
-      second_destinations = Network.destination_names(network, from: :second, for: :default)
+      second_destinations =
+        A.one!(network, Network.downstream(from: :second, for: :default))
       assert second_destinations == MapSet.new
     end
 
@@ -81,10 +83,10 @@ defmodule NetworkBuilderTest do
       |> assert_fields(first: first.id, second: second.id)
 
       # out-edges
-      first_destinations = Network.destination_names(network, from: :first, for: :default)
+      first_destinations = A.one!(network, Network.downstream(from: :first, for: :default))
       assert first_destinations == MapSet.new([:second])
 
-      second_destinations = Network.destination_names(network, from: :second, for: :default)
+      second_destinations = A.one!(network, Network.downstream(from: :second, for: :default))
       assert second_destinations == MapSet.new
     end
   end

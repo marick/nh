@@ -11,10 +11,10 @@ defmodule AppAnimal.TestHelpers.MessageHelpers do
   end
 
   def assert_pulse_FROM_switchboard(message, opts) do
-    [expected_destination_names, expected_pulse] = Opts.required!(opts, [:to, :pulse])
+    [expected_downstream, expected_pulse] = Opts.required!(opts, [:to, :pulse])
 
     message = ensure_unwrapped(message)
-    assert distribute_pulse_destinations(message) == expected_destination_names
+    assert distribute_pulse_destinations(message) == expected_downstream
     assert distribute_what_to(message) == expected_pulse
   end
 

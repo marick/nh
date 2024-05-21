@@ -176,10 +176,10 @@ defmodule Network.Grow do
     # Network field :out_edges, %{atom => %{atom => MapSet.t(atom)}}, default: %{}
 
     def put_fan_out_edges(s_network, from, destinations, pulse_type) do
-      [from_name | destination_names] = just_names([from | destinations])
+      [from_name | downstream] = just_names([from | destinations])
 
       path = [:out_edges, from_name, pulse_type]
-      put_destinations = &MapSet.union(&1, MapSet.new(destination_names))
+      put_destinations = &MapSet.union(&1, MapSet.new(downstream))
 
       s_network
       |> LensX.ensure_map_path(path, MapSet.new)

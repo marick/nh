@@ -34,23 +34,23 @@ defmodule Network do
 
   deflens id_for(name), do: name_to_id() |> Lens.key!(name)
 
+  deflens downstream(from: source_name, for: pulse_or_type) do
+    two_levels = out_edges() |> Lens.key(source_name)
+
+    pulse_level =
+      cond do
+        is_struct(pulse_or_type, Moveable.Pulse) -> Lens.key!(pulse_or_type.type)
+        is_atom(pulse_or_type) -> Lens.key!(pulse_or_type)
+      end
+
+    Lens.seq(two_levels, pulse_level)
+  end
+
   def empty() do
     {:ok, p_circular_clusters} = CircularSubnet.start_link([])
 
     struct!(__MODULE__, p_circular_clusters: p_circular_clusters,
                         linear_clusters: LinearSubnet.new([]))
-  end
-
-  def full_identification(network, name), do: Map.fetch!(network.name_to_id, name)
-
-  def destination_names(network, from: source_name, for: pulse_type) when is_atom(pulse_type) do
-    network.out_edges
-    |> Map.fetch!(source_name)
-    |> Map.fetch!(pulse_type)
-  end
-
-  def destination_names(network, from: source_name, for: pulse) when is_struct(pulse) do
-    destination_names(network, from: source_name, for: pulse.type)
   end
 
   def router_for(network, name) do
