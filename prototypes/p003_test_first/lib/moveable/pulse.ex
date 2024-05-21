@@ -1,7 +1,7 @@
 alias AppAnimal.{Moveable,Clusterish}
 
 defmodule Moveable.Pulse do
-  use TypedStruct
+  use AppAnimal
 
   typedstruct enforce: true do
     field :type, atom, default: :default
@@ -10,9 +10,9 @@ defmodule Moveable.Pulse do
 
   def new(type, pulse_data), do: %__MODULE__{type: type, data: pulse_data}
   def new(pulse_data), do: %__MODULE__{data: pulse_data}
-  def new, do: new(:no_data)
+  def new, do: new(@no_value)
 
-  def suppress(), do: new(:suppress, :no_data)
+  def suppress(), do: new(:suppress, @no_value)
 
   @doc """
   Return a Pulse argument or convert into a *default* Pulse."

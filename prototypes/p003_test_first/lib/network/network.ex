@@ -96,7 +96,7 @@ defmodule Network do
                         :fan_out, pulse, to: circular_names)
     LinearSubnet.fan_out(network.linear_clusters,
                                   pulse, to: linear_names)
-    :no_return_value
+    @no_value
   end
 
   private do

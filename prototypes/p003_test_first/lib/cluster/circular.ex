@@ -41,12 +41,12 @@ defmodule Cluster.Circular do
 
   section "Control over end-of-life behavior" do
     def stop_silently(_s_circular) do
-      :no_return_value
+      @no_value
     end
 
     def pulse_saved_state(s_circular) do
       Moveable.cast(Pulse.new(s_circular.previously), s_circular)
-      :no_return_value
+      @no_value
     end
 
     @doc "Call this before the owning process stops."

@@ -1,6 +1,8 @@
 defmodule AppAnimal do
   defmacro __using__(_) do
     quote do
+
+      @no_value :"consider this a 'bottom' value (nil is too easy to get by mistake)"
       require Logger
       use Private
       use TypedStruct

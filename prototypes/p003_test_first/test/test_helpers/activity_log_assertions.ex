@@ -12,7 +12,7 @@ defmodule AppAnimal.ActivityLogAssertions do
   alias ActivityLogger.{ActionReceived, PulseSent}
 
   @doc "shorthand for an action received"
-  def action_taken(name, data \\ :no_data), do: ActionReceived.new(name, data)
+  def action_taken(name, data \\ @no_value), do: ActionReceived.new(name, data)
 
 
   @doc """

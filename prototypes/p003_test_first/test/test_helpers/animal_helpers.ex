@@ -66,7 +66,7 @@ defmodule AppAnimal.TestHelpers.Animal do
   Behaves the same way as an `action_edge` cluster.
   """
   def take_action(%AppAnimal.Pids{} = animal, action_name) when is_atom(action_name),
-      do: take_action(animal.p_affordland, [{action_name, :no_data}])
+      do: take_action(animal.p_affordland, [{action_name, @no_value}])
 
   def take_action(%AppAnimal.Pids{} = animal, opts),
       do: take_action(animal.p_affordland, opts)

@@ -31,7 +31,7 @@ defmodule Network.Timer do
     field :destination_name, atom
   end
 
-  @no_state :no_state
+  @no_state @no_value
 
   runs_in_sender do
     def start_link(_),

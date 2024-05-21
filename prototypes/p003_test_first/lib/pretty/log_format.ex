@@ -5,6 +5,7 @@ defmodule Pretty.LogFormat do
 
   use AppAnimal
   alias AppAnimal.ActivityLogger
+  alias AppAnimal.Moveable.Action
 
   def format(_level, message, _timestamp, metadata) do
     message = format(message, metadata)
@@ -27,11 +28,11 @@ defmodule Pretty.LogFormat do
   private do
 
     def format_name(metadata) do
-      case Keyword.get(metadata, :pulse_entry) do
+      case Keyword.get(metadata, :moveable) do
         %ActivityLogger.PulseSent{cluster_id: id} ->
           "#{id.label} #{id.name}"
-        %ActivityLogger.ActionReceived{name: name} ->
-          "#{name}"
+        %Action{type: type} ->
+          "act! #{type}"
         _ ->
           {module, _function, _arity} = Keyword.get(metadata, :mfa)
           module_format(module)

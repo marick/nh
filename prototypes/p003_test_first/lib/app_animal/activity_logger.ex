@@ -69,9 +69,8 @@ defmodule AppAnimal.ActivityLogger do
       GenServer.cast(pid, [log: entry])
     end
 
-    def log_action_received(pid, name, data) do
-      entry = ActionReceived.new(name, data)
-      GenServer.cast(pid, [log: entry])
+    def log_action_received(pid, action) do
+      GenServer.cast(pid, [log: action])
     end
 
     def get_log(pid) do
@@ -105,25 +104,27 @@ defmodule AppAnimal.ActivityLogger do
   private do
     # This is all awful, but the whole thing needs rework.
 
-    def maybe_log(false, _) do
-    end
+    def maybe_log(true, %Action{} = action) do
+      message =
+        case action.data do
+          @no_value -> ""
+          data -> inspect(data)
+        end
 
-    def maybe_log(true, %ActionReceived{} = entry) do
-      t =
-        if is_atom(entry.action),
-           do: entry.action,
-           else: entry.action.data
-
-      Logger.info(inspect(t))
+      Logger.info(message, moveable: action)
     end
 
     def maybe_log(true, %PulseSent{} = entry) do
-      t =
-        if is_atom(entry.pulse),
-           do: entry.pulse,
-           else: entry.pulse.data
+      message =
+        case entry.pulse.data do
+          @no_value -> ""
+          data -> inspect(data)
+        end
 
-      Logger.info(inspect(t), pulse_entry: entry)
+      Logger.info(message, moveable: entry)
+    end
+
+    def maybe_log(false, _) do
     end
   end
 end
