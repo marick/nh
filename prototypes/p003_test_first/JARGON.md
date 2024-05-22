@@ -41,7 +41,7 @@ the app animal to focus on that new paragraph.
 
 #### Age Out
 
-*Circular clusters* have a lifespan. It increases or decreases while
+*Circular clusters* have a strength (or hit points). It increases or decreases while
 the cluster is active. If it drops to zero, the process "ages out" or
 causes itself to exit.
 
@@ -72,7 +72,7 @@ might remember the results of its last calculation and only send a
 
 As clusters throb, they count down to to their death, when they
 exit. (Perhaps later to be reborn/reactivated.) However, incoming
-pulses can increase a cluster's strength or *lifespan*, so some might
+pulses can increase a cluster's strength, so some might
 never end up exiting.
 
 #### Delay 
@@ -110,12 +110,6 @@ A *cluster* is idle if it's consuming no resources but is waiting for
 a *pulse*. In Elixir terms, this means it has no associated running
 process. A synonym for *waiting*.
 
-#### Lifespan
-
-A *circular cluster* is "born" and may eventually die. The cluster
-*throbs* at a certain interval, counting down its lifespan. However,
-*pulses* may increase the cluster's lifespan.
-
 #### Network
 
 A structure of interconnected **clusters** that interact with
@@ -135,6 +129,12 @@ Pulses represent the act of sending an Elixir message
 represents what, in a real brain, is the combined effect of the
 electrical ("action") potentials sent down axons by a number of
 neurons (which neurons I'm lumping together into a "*cluster*").
+
+#### Strength
+
+A *circular cluster* has, at any time, a given strength. The cluster
+*throbs* at a certain interval, counting down its strength. However,
+*pulses* may increase the cluster's strength.
 
 #### Throbbing
 

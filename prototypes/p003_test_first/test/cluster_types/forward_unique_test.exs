@@ -3,7 +3,7 @@ alias AppAnimal.{Cluster,Scenario}
 defmodule Cluster.ForwardUniqueTest do
   use Scenario.Case, async: true
 
-  def current_age(name), do: Animal.peek_at(animal(), :current_age, of: name)
+  def current_strength(name), do: Animal.peek_at(animal(), :current_strength, of: name)
   def pulse(name, data), do: Animal.send_test_pulse(animal(), to: name, carrying: data)
 
 
@@ -40,7 +40,7 @@ defmodule Cluster.ForwardUniqueTest do
     test "a cluster can age out and start over" do
       alias Cluster.Throb
 
-      throb = Throb.counting_down_from(2, on_pulse: &Throb.pulse_increases_lifespan/1)
+      throb = Throb.counting_down_from(2, on_pulse: &Throb.pulse_increases_strength/1)
       first = C.forward_unique(:first, throb: throb)
 
       animal =
@@ -56,11 +56,11 @@ defmodule Cluster.ForwardUniqueTest do
       pulse(:first, "data")
       refute_receive("data")
 
-      assert current_age(:first) == 2
+      assert current_strength(:first) == 2
 
       # a normal, decrementing throb
       Animal.throb_all_active(animal)
-      assert current_age(:first) == 1
+      assert current_strength(:first) == 1
 
       # decrement to zero - should cause exit
       Animal.throb_all_active(animal)
@@ -71,7 +71,7 @@ defmodule Cluster.ForwardUniqueTest do
       # A test pulse recreates the process
       pulse(:first, "data")
       assert_test_receives("data")
-      assert current_age(:first) == 2
+      assert current_strength(:first) == 2
     end
   end
 end

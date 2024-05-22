@@ -107,9 +107,9 @@ Generally, lenses are used like `Map` functions, but with the
 `DepthAgnostic` module (universally aliased to `A`). That looks like
 this:
 
-    A.put(s_circular, :max_age, 12)
+    A.put(s_circular, :max_strength, 12)
     
-Although `:max_age` looks like a field name, it's actually the name of
+Although `:max_strength` looks like a field name, it's actually the name of
 a lens that reaches into a substructure. As far as the client knows,
 it's at the top level.
 

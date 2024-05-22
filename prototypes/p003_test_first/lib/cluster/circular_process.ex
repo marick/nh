@@ -52,9 +52,9 @@ defmodule Cluster.CircularProcess do
 
   handle_CALL do
     # Test support
-    def handle_call(:current_age, _from, s_circular) do
-      lifespan = A.one!(s_circular, :current_age)
-      continue(s_circular, returning: lifespan)
+    def handle_call(:current_strength, _from, s_circular) do
+      strength = A.one!(s_circular, :current_strength)
+      continue(s_circular, returning: strength)
     end
   end
 end

@@ -32,8 +32,8 @@ defmodule Cluster.Circular do
     field :f_while_stopping, (t -> :none)
   end
 
-  deflens current_age(), do: in_throb(:current_age)
-  deflens max_age(), do: in_throb(:max_age)
+  deflens current_strength(), do: in_throb(:current_strength)
+  deflens max_strength(), do: in_throb(:max_strength)
 
   private do
     def in_throb(key), do: throb() |> Lens.key!(key)

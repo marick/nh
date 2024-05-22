@@ -5,11 +5,11 @@ defmodule Cluster.Throb do
   Captures the handling of throbbing by a circular cluster.
 
   Periodic throb messages will either increase or decrease the
-  cluster's lifespan. The process stops when it hits a limit value
-  (`max_age` or zero).
+  cluster's strength. The process stops when it hits a limit value
+  (`max_strength` or zero).
 
   Additionally, each pulse received may affect the
-  lifespan. Typically, receipt of pulses makes the cluster live
+  strength. Typically, receipt of pulses makes the cluster live
   longer.
   """
   use AppAnimal
@@ -21,8 +21,8 @@ defmodule Cluster.Throb do
   typedstruct enforce: true do
     plugin TypedStructLens
 
-    field :current_age,       Duration.t
-    field :max_age,           Duration.t
+    field :current_strength,  Duration.t
+    field :max_strength,      Duration.t
     field :f_throb,           throb_handler
 
     field :f_note_pulse,      pulse_handler,        default: &__MODULE__.pulse_does_nothing/1
@@ -35,20 +35,20 @@ defmodule Cluster.Throb do
       """
     def default() do
       counting_down_from(Duration.frequent_glance,
-                         on_pulse: &Throb.pulse_increases_lifespan/1)
+                         on_pulse: &Throb.pulse_increases_strength/1)
     end
 
       @doc """
-      Create a Throb that counts down from a `max_age` and signals that
+      Create a Throb that counts down from a `max_strength` and signals that
       the process is to stop when it hits zero.
 
       ## Options:
         * `:on_pulse` - a function that takes a `Throb` and the new state of the process and
-          adjusts the `current_age`.
+          adjusts the `current_strength`.
       """
-    def counting_down_from(max_age, opts \\ []) do
+    def counting_down_from(max_strength, opts \\ []) do
       opts
-      |> Opts.put_missing!(current_age: max_age, max_age: max_age, f_throb: &__MODULE__.count_down/2)
+      |> Opts.put_missing!(current_strength: max_strength, max_strength: max_strength, f_throb: &__MODULE__.count_down/2)
       |> Opts.rename(:on_pulse, to: :f_note_pulse)
       |> then(& struct(__MODULE__, &1))
     end
@@ -56,11 +56,11 @@ defmodule Cluster.Throb do
       @doc """
       Same as `counting_down_from/2`, except that it counts up from zero.
 
-      The `before_stopping` function is called when the age hits `max_age`.
+      The `before_stopping` function is called when the strength hits `max_strength`.
       """
-    def counting_up_to(max_age, opts \\ []) do
+    def counting_up_to(max_strength, opts \\ []) do
       opts
-      |> Opts.put_missing!(current_age: 0, max_age: max_age, f_throb: &__MODULE__.count_up/2)
+      |> Opts.put_missing!(current_strength: 0, max_strength: max_strength, f_throb: &__MODULE__.count_up/2)
       |> Opts.rename(:on_pulse, to: :f_note_pulse)
       |> then(& struct(__MODULE__, &1))
     end
@@ -72,15 +72,15 @@ defmodule Cluster.Throb do
   section "Finer control over handling of 'throb' messages" do
 
     def count_down(s_throb, n \\ 1) do
-      mutated = Map.update!(s_throb, :current_age, & &1-n)
-      if mutated.current_age <= 0,
+      mutated = Map.update!(s_throb, :current_strength, & &1-n)
+      if mutated.current_strength <= 0,
          do: {:stop, mutated},
          else: {:continue, mutated}
     end
 
     def count_up(s_throb, n \\ 1) do
-      mutated = Map.update!(s_throb, :current_age, & &1+n)
-      if mutated.current_age >= s_throb.max_age,
+      mutated = Map.update!(s_throb, :current_strength, & &1+n)
+      if mutated.current_strength >= s_throb.max_strength,
          do: {:stop, mutated},
          else: {:continue, mutated}
     end
@@ -91,13 +91,13 @@ defmodule Cluster.Throb do
     def pulse_does_nothing(s_throb),
         do: s_throb
 
-    def pulse_increases_lifespan(s_throb) do
-      next_lifespan = min(s_throb.max_age, s_throb.current_age + 1)
-      Map.put(s_throb, :current_age, next_lifespan)
+    def pulse_increases_strength(s_throb) do
+      next_strength = min(s_throb.max_strength, s_throb.current_strength + 1)
+      Map.put(s_throb, :current_strength, next_strength)
     end
 
-    def pulse_zeroes_lifespan(s_throb) do
-      Map.put(s_throb, :current_age, 0)
+    def pulse_zeroes_strength(s_throb) do
+      Map.put(s_throb, :current_strength, 0)
     end
   end
 

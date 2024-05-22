@@ -133,7 +133,7 @@ defmodule AppAnimal.ClusterBuilders do
       they are separated by enough time (by default,
       `Duration.frequent_glance`).
 
-      Each new pulses will extend the lifespan by one "throb
+      Each new pulse will increase the strength by one "throb
       interval", so frequent enough pulses will keep the cluster alive
       indefinitely.
 
@@ -147,7 +147,7 @@ defmodule AppAnimal.ClusterBuilders do
       effectively_a_uuid = :erlang.make_ref()
 
       throb = Throb.counting_down_from(Duration.frequent_glance,
-                                       on_pulse: &Throb.pulse_increases_lifespan/1)
+                                       on_pulse: &Throb.pulse_increases_strength/1)
 
       updated_opts =
         opts
@@ -175,7 +175,7 @@ defmodule AppAnimal.ClusterBuilders do
       """
     def delay(name, duration) do
       throb = Throb.counting_up_to(duration,
-                                   on_pulse: &Throb.pulse_zeroes_lifespan/1)
+                                   on_pulse: &Throb.pulse_zeroes_strength/1)
 
       f_stash_pulse_data = fn pulse_data, _previously ->
         {:no_result, pulse_data}

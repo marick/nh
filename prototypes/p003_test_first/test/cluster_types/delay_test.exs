@@ -9,7 +9,7 @@ defmodule Cluster.DelayTest do
                      id: Identification.new(:first, :delay),
                      name: :first)
     |> Map.get(:throb)
-    |> assert_fields(max_age: 2, current_age: 0)
+    |> assert_fields(max_strength: 2, current_strength: 0)
   end
 
 
@@ -40,12 +40,12 @@ defmodule Cluster.DelayTest do
 
       Animal.throb_all_active(animal)
       refute_receive(_)
-      assert Animal.peek_at(animal, :current_age, of: :first) == 1
+      assert Animal.peek_at(animal, :current_strength, of: :first) == 1
 
       # pulse cancels out throbbing
       Animal.send_test_pulse(animal, to: :first, carrying: "replacement data")
       refute_receive(_)
-      assert Animal.peek_at(animal, :current_age, of: :first) == 0
+      assert Animal.peek_at(animal, :current_strength, of: :first) == 0
 
       Animal.throb_all_active(animal)
       refute_receive(_)

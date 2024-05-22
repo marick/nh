@@ -5,8 +5,8 @@ defmodule Network.CircularSubnet do
   The portion of a `Network` that changes state as circular clusters
   are started and stop.
 
-  This keeps track of the lifespan of throbbing clusters. It also sends messages
-  to them. This hides knowledge of lifespans inside this module.
+  This keeps track of the strength of throbbing clusters. It also sends messages
+  to them. This hides knowledge of strength inside this module.
 
   This module stores all the circular clusters known in the
   `AppAnimal.Network`, not just the ones that are actively throbbing.
