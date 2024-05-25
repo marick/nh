@@ -109,6 +109,14 @@ A structure of interconnected *clusters* that interact with
 *Affordance Land* by receiving incoming *affordances* and acting
 (on the output side) to produce new affordances.
 
+#### Out edge
+
+An out edge determines where a *pulse* sent from a cluster will
+go. Different types of clusters will be sent along different out
+edges. That is, pulse routing depends on both the originating cluster
+and the pulse type.
+
+
 #### Perception Edge
 
 A type of *cluster* that receives an *affordance* (a *pulse*) from
@@ -123,6 +131,12 @@ Pulses represent the act of sending an Elixir message
 represents what, in a real brain, is the combined effect of the
 electrical ("action") potentials sent down axons by a number of
 neurons (which neurons I'm lumping together into a "*cluster*").
+
+In addition to their content, a pulse has a type, which is just a
+name. Pulses of different types will be routed separately. That way, a
+cluster may send pulses of the `:default` type to one set of
+downstream clusters, but pulses of type `:suppress` to a different
+set.
 
 #### Strength
 
