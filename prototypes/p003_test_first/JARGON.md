@@ -1,11 +1,11 @@
 #### Action
 
-An *action* is a data structure sent from a cluster into *affordance
+An *action* is a data structure sent from a *cluster* into *affordance
 land*. It contains a name and some data.
 
 #### Action Edge
 
-An Action Edge is a cluster that sends an *action* into Affordance Land.
+An Action Edge is a *cluster* that sends an *action* into Affordance Land.
 
 #### Affordance
 
@@ -14,8 +14,8 @@ what the environment offers the individual. Affordances are received from *Affor
 *perception edges*. *Action edges* change Affordance Land to present new affordances to either
 some later perception edge or to the user.
 
-`Affordance` is also a structure that contains the name of the
-destination *perception edge* and the *pulse* to be sent to it.
+`Affordance` also loosely refers to the pulse sent to the 
+perception edge.
 
 #### Affordance Land
 
@@ -28,8 +28,8 @@ suppose that all app animal actions are about creating new
 affordances (perhaps for the app-animal itself, perhaps for the
 user).
 
-In implementation terms, Affordance Land can send affordances into the
-*network* of *clusters* when the app-animal *focuses* on it. These are of two types:
+In implementation terms, Affordance Land can send pulses or  affordances into the
+*network* of *clusters*. These are of two types:
 
 * affordances that are requested: "I am focused on the text of this
 paragraph; please send any relevant affordances into the network."
@@ -49,18 +49,17 @@ causes itself to exit.
 
 A cluster represents a group of neurons that act together to respond
 to a *pulse* by calculating a function and sending the result to
-downstream clusters. In addition to data from the pulse, the cluster
-may use some stored configuration information. All clusters run
+downstream clusters. All clusters run
 asynchronously from other clusters. 
 
 A **linear** cluster represents a plain function: each pulse spawns an
 independent Elixir process, which exits immediately after sending its
 result downstream. As far as anything external to the task can tell,
-the cluster is always *waiting* to be provoked to (instantaneously)
+the cluster is always *waiting* to be provoked to instantaneously
 calculate something.
 
 A **circular** cluster is a cluster that (conceptually) has a circular
-connection of neurons that keeps the cluster active. I whimsically
+connection of neurons that keeps it active. I whimsically
 call this "throbbing", intended to convey the idea that
 self-reinforcing waves of activation flood across the cluster at
 intervals.
@@ -72,13 +71,13 @@ might remember the results of its last calculation and only send a
 
 As clusters throb, they count down to to their death, when they
 exit. (Perhaps later to be reborn/reactivated.) However, incoming
-pulses can increase a cluster's strength, so some might
+pulses can increase a cluster's *strength*, so some might
 never end up exiting.
 
 #### Delay 
 
 A delay contains a duration and a *pulse*. After the duration, the
-timer sends the pulse to the cluster that requested the delay.
+*timer* sends the pulse to the *cluster* that requested the delay.
 
 #### Downstream
 
@@ -104,22 +103,17 @@ Certain *clusters* will at times act to focus on a part of the
 *Affordance Land*. That will cause new, now relevant *affordances* to
 flow into the *network*.
 
-#### Idle
-
-A *cluster* is idle if it's consuming no resources but is waiting for
-a *pulse*. In Elixir terms, this means it has no associated running
-process. A synonym for *waiting*.
-
 #### Network
 
-A structure of interconnected **clusters** that interact with
-**Affordance Land**: by receiving incoming **affordances** and acting
+A structure of interconnected *clusters* that interact with
+*Affordance Land* by receiving incoming *affordances* and acting
 (on the output side) to produce new affordances.
 
 #### Perception Edge
 
-A type of *cluster* that receives an *affordance* (an Elixir message)
-from *Affordance Land*. Typically, it forwards the message to its
+A type of *cluster* that receives an *affordance* (a *pulse*) from
+*Affordance Land*. Each affordance is named by the perception edge
+that receives it. All the perception edge does is fan the pulse out to
 downstream clusters.
 
 #### Pulse
@@ -138,20 +132,28 @@ A *circular cluster* has, at any time, a given strength. The cluster
 
 #### Throbbing
 
-When the process behind a circular cluster is alive, it is referred to
+When the process behind a *circular cluster* is alive, it is referred to
 as "throbbing". This evokes the periodic self-reinforcement of the
 cluster. When a circular cluster hasn't ever been started, or when
-it's died off because of a lack of work to do, it's called *waiting*.
+it's "aged out" because of a lack of work to do, it's called *waiting*.
+
+#### Timer
+
+There is a single timer process that causes *circular clusters* to
+*throb*. Centralizing throbbing makes it easy to speed it up in
+tests. No cluster is can be aware that it's throbbing in rough
+synchrony with other clusters; as far as it can tell, it's marching to
+its own beat.
 
 #### Trace
 
-A linear sequence of _clusters_. The first sends its *pulse* to the
+A linear sequence of _clusters_. The first cluster sends its *pulse* to the
 second, which calculates on it. If it produces a pulse, that pulse is
 sent to the third.
 
 #### Waiting
 
-Thinking of clusters as biological, they can be in two states. They
+Thinking of *clusters* as biological, they can be in two states. They
 can be sitting around, doing the minimal metabolism to keep themselves
 alive, waiting for some *pulse* to arrive and prompt them to start
 expending energy on some calculation that will (usually) provoke an
