@@ -169,8 +169,6 @@ defmodule AppAnimal.Extras.LensX do
     fn bimap, f_get_or_update ->
       if BiMap.has_key?(bimap, key) do
         bimap_key_guts(key, bimap, f_get_or_update)
-        {gotten, updated} = f_get_or_update.(BiMap.get(bimap, key))
-        {[gotten], BiMap.put(bimap, key, updated)}
       else
         {[], bimap}
       end
