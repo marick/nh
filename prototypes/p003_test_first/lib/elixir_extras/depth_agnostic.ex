@@ -8,7 +8,7 @@ defmodule AppAnimal.Extras.DepthAgnostic do
 
   2. Allows the second argument to be a plain atom. When the first argument is a structure,
      it itself is used to look up the module and the lens function. That allows for
-     calls that look a lot like typical `Map` functions that actual use lenses to
+     calls that look a lot like typical `Map` functions that actually use lenses to
      dig deep into a structure.
 
          struct = %MyStruct{...}
