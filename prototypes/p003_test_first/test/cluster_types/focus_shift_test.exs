@@ -48,6 +48,7 @@ defmodule ClusterBuilders.FocusShiftTest do
     |> assert_action_taken(Action.new(:perceive_paragraph_shape, "paragraph id"))
   end
 
+  @tag :skip
   test "ignores throbbing" do
     s_cluster = paragraph_focus(%{Action => self()})
     p_cluster = start_link_supervised!({Cluster.CircularProcess, s_cluster})

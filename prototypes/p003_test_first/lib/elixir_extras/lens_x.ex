@@ -151,16 +151,34 @@ defmodule AppAnimal.Extras.LensX do
 
   Missing keys produce nil.
   """
+
+  deflens_raw bimap_key([{key, default}]) do
+    fn container, f_get_or_update ->
+      if BiMap.has_key?(container, key) do
+        {gotten, updated} = f_get_or_update.(BiMap.get(container, key))
+        {[gotten], BiMap.put(container, key, updated)}
+      else
+        {gotten, updated} = f_get_or_update.(default)
+        {[gotten], BiMap.put(container, key, updated)}
+        # {[], container}
+      end
+    end
+  end
+
   deflens_raw bimap_key(key) do
     fn bimap, f_get_or_update ->
       bimap_key_guts(key, bimap, f_get_or_update)
     end
   end
 
+
+
+
   defp bimap_key_guts(key, bimap, f_get_or_update) do
     {gotten, updated} = f_get_or_update.(BiMap.get(bimap, key))
     {[gotten], BiMap.put(bimap, key, updated)}
   end
+
 
   @doc """
   Point at the value of a single BiMap key, ignoring missing keys.

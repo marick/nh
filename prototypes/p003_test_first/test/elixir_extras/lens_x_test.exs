@@ -324,6 +324,17 @@ defmodule Extras.LensXTest do
       assert {1, _ref} = BiMap.fetch!(actual, :a)
       assert {nil, _ref} = BiMap.fetch!(actual, :b)
     end
-  end
 
+
+    test "bimap_key with two arguments" do
+      bimap = BiMap.new(a: 1, b: nil)
+      missing_omitted = LensX.bimap_key(c: %{}) |> Lens.key(:a)
+
+      # A.to_list(bimap, missing_omitted)
+      # |> assert_good_enough(in_any_order([nil]))
+
+      assert A.put(bimap, missing_omitted, :NEW) == BiMap.put(bimap, :c, %{a: :NEW})
+
+    end
+  end
 end
